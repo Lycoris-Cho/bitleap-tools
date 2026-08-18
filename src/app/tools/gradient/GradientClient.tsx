@@ -1,15 +1,19 @@
 'use client'
 
+
 import { useState, useEffect } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+
 
 type ColorStop = {
   id: string
   value: string
 }
 
+
 type GradientType = 'linear' | 'radial'
 type RadialShape = 'circle' | 'ellipse'
+
 
 const DIRECTIONS = [
   { label: '↑ 向上', angle: 0 },
@@ -18,6 +22,7 @@ const DIRECTIONS = [
   { label: '→ 向右', angle: 90 },
   { label: '↘ 右下', angle: 135 },
 ]
+
 
 const PRESET_GRADIENTS = [
   { name: '星空蓝', colors: ['#0f0c29', '#302b63', '#24243e'] },
@@ -30,9 +35,11 @@ const PRESET_GRADIENTS = [
   { name: '玫瑰金', colors: ['#ffecd2', '#fcb69f'] },
 ]
 
+
 function randomHex(): string {
   return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
 }
+
 
 // ---- 读取 URL + localStorage 的辅助函数 ----
 function getInitialColors(): ColorStop[] {
@@ -56,6 +63,7 @@ function getInitialColors(): ColorStop[] {
   return [{ id: crypto.randomUUID(), value: '#3B82F6' }, { id: crypto.randomUUID(), value: '#8B5CF6' }]
 }
 
+
 function getInitialAngle(): number {
   if (typeof window === 'undefined') return 90
   const params = new URLSearchParams(window.location.search)
@@ -71,6 +79,7 @@ function getInitialAngle(): number {
   return 90
 }
 
+
 function getInitialType(): GradientType {
   if (typeof window === 'undefined') return 'linear'
   const saved = localStorage.getItem('bitleap-gradient')
@@ -83,6 +92,7 @@ function getInitialType(): GradientType {
   return 'linear'
 }
 
+
 function getInitialShape(): RadialShape {
   if (typeof window === 'undefined') return 'circle'
   const saved = localStorage.getItem('bitleap-gradient')
@@ -94,6 +104,7 @@ function getInitialShape(): RadialShape {
   }
   return 'circle'
 }
+
 
 export default function GradientClient() {
   const [colors, setColors] = useState<ColorStop[]>(getInitialColors)
