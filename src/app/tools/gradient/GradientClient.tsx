@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
 
 type ColorStop = {
@@ -35,57 +34,75 @@ function randomHex(): string {
   return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
 }
 
+// ---- 读取 URL + localStorage 的辅助函数 ----
+function getInitialColors(): ColorStop[] {
+  if (typeof window === 'undefined') {
+    return [{ id: crypto.randomUUID(), value: '#3B82F6' }, { id: crypto.randomUUID(), value: '#8B5CF6' }]
+  }
+  const params = new URLSearchParams(window.location.search)
+  const colorsParam = params.get('colors')
+  if (colorsParam) {
+    return decodeURIComponent(colorsParam).split(',').map(c => ({ id: crypto.randomUUID(), value: c }))
+  }
+  const saved = localStorage.getItem('bitleap-gradient')
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved)
+      if (parsed.colors?.length) {
+        return parsed.colors.map((c: string) => ({ id: crypto.randomUUID(), value: c }))
+      }
+    } catch { /* ignore */ }
+  }
+  return [{ id: crypto.randomUUID(), value: '#3B82F6' }, { id: crypto.randomUUID(), value: '#8B5CF6' }]
+}
+
+function getInitialAngle(): number {
+  if (typeof window === 'undefined') return 90
+  const params = new URLSearchParams(window.location.search)
+  const a = params.get('angle')
+  if (a) return Number(a)
+  const saved = localStorage.getItem('bitleap-gradient')
+  if (saved) {
+    try {
+      const p = JSON.parse(saved)
+      if (p.angle !== undefined) return p.angle
+    } catch { /* ignore */ }
+  }
+  return 90
+}
+
+function getInitialType(): GradientType {
+  if (typeof window === 'undefined') return 'linear'
+  const saved = localStorage.getItem('bitleap-gradient')
+  if (saved) {
+    try {
+      const p = JSON.parse(saved)
+      if (p.type === 'linear' || p.type === 'radial') return p.type
+    } catch { /* ignore */ }
+  }
+  return 'linear'
+}
+
+function getInitialShape(): RadialShape {
+  if (typeof window === 'undefined') return 'circle'
+  const saved = localStorage.getItem('bitleap-gradient')
+  if (saved) {
+    try {
+      const p = JSON.parse(saved)
+      if (p.shape === 'circle' || p.shape === 'ellipse') return p.shape
+    } catch { /* ignore */ }
+  }
+  return 'circle'
+}
+
 export default function GradientClient() {
-  const searchParams = useSearchParams()
+  const [colors, setColors] = useState<ColorStop[]>(getInitialColors)
+  const [angle, setAngle] = useState<number>(getInitialAngle)
+  const [type, setType] = useState<GradientType>(getInitialType)
+  const [shape, setShape] = useState<RadialShape>(getInitialShape)
+  const [copied, setCopied] = useState(false)
 
-  const [colors, setColors] = useState<ColorStop[]>([
-    { id: crypto.randomUUID(), value: '#3B82F6' },
-    { id: crypto.randomUUID(), value: '#8B5CF6' },
-  ])
-  const [angle, setAngle] = useState(90)
-  const [type, setType] = useState<GradientType>('linear')
-  const [shape, setShape] = useState<RadialShape>('circle')
-  const [copied, setCopied] = useState(false) // ← 明确 boolean，永远不传 null
-
-  const initialized = useRef(false)
-
-  // URL 参数初始化
-  useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-
-    const colorsParam = searchParams.get('colors')
-    const angleParam = searchParams.get('angle')
-
-    if (colorsParam) {
-      const colorsArray = decodeURIComponent(colorsParam)
-        .split(',')
-        .map((c) => ({ id: crypto.randomUUID(), value: c }))
-      setColors(colorsArray)
-    }
-    if (angleParam) {
-      setAngle(Number(angleParam))
-    }
-     
-  }, [searchParams])
-
-  // localStorage 读取（加 window 守卫）
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const saved = localStorage.getItem('bitleap-gradient')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (parsed.colors) setColors(parsed.colors.map((c: string) => ({ id: crypto.randomUUID(), value: c })))
-        if (parsed.angle !== undefined) setAngle(parsed.angle)
-        if (parsed.type) setType(parsed.type)
-        if (parsed.shape) setShape(parsed.shape)
-      } catch { /* ignore */ }
-    }
-     
-  }, [])
-
-  // localStorage 写入（加 window 守卫）
+  // 唯一保留的 Effect：把最新状态写回 localStorage
   useEffect(() => {
     if (typeof window === 'undefined') return
     localStorage.setItem('bitleap-gradient', JSON.stringify({
@@ -132,7 +149,7 @@ export default function GradientClient() {
   const copy = async () => {
     await navigator.clipboard.writeText(cssCode)
     setCopied(true)
-    setTimeout(() => setCopied(false), 1500) // ← 这里原来是 null，现在改成 false
+    setTimeout(() => setCopied(false), 1500)
   }
 
   return (
