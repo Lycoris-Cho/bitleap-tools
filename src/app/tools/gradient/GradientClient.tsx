@@ -130,7 +130,7 @@ export default function GradientClient() {
   const copy = async () => {
     await navigator.clipboard.writeText(cssCode)
     setCopied(true)
-    setTimeout(() => setCopied(null), 1500)
+    setTimeout(() => setCopied(false), 1500)
   }
 
   return (
