@@ -24,12 +24,13 @@ export default function ImageExifPage() {
     reader.onload = function (event) {
       const imgSrc = event.target?.result as string
       setPreviewSrc(imgSrc)
-
+    
       const img = new Image()
       img.src = imgSrc
       img.onload = () => {
-        EXIF.getData(img as any, function () {
-          const allMeta = EXIF.getAllTags(this)
+        EXIF.getData(img as any, function (this: any) {
+          // 👆 给回调函数加个 this 类型注解，或者直接用 img
+          const allMeta = EXIF.getAllTags(img)  // ← 直接用 img，不用 this
           if (!allMeta || Object.keys(allMeta).length === 0) {
             setError('该图片不包含EXIF元数据')
             return

@@ -94,20 +94,6 @@ export default function ButtonAnimations() {
                         Click Me
                       </button>
                     ) : item.id === 'magnetic' ? (
-                      <button
-                        ref={(el) => {
-                          magneticRefs.current[item.id] = el
-                        }}
-                        className={item.previewClass}
-                        style={magneticMap[item.id] ?? {}}
-                        onMouseMove={(ev) => handleMagneticMove(item.id, ev)}
-                        onMouseLeave={() => handleMagneticLeave(item.id)}
-                        onClick={(ev) => ev.stopPropagation()}
-                      >
-                        Magnetic
-                      </button>
-                    ) : item.useCustomHtml ? (
-                      /* ✅ 自定义 HTML 按钮（text-slide-up 等） */
                       <div
                         onClick={(ev) => ev.stopPropagation()}
                         dangerouslySetInnerHTML={{ __html: item.html }}

@@ -3,6 +3,7 @@
 import { groups as defaultGroups } from './payloads'
 import { useState } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+
 interface CustomField {
   id: string
   name: string
@@ -19,7 +20,7 @@ export default function LoginFuzzer() {
   const [fieldValues, setFieldValues] = useState('')
 
   const isCustom = activeGroup === '__custom__'
-  const currentGroup = isCustom ? null : defaultGroups.find(g => g.label === activeGroup)!
+  const currentGroup = isCustom ? null : defaultGroups.find(g => g.label === activeGroup)
 
   const copy = async (value: string, key: string) => {
     await navigator.clipboard.writeText(value)
@@ -93,10 +94,10 @@ export default function LoginFuzzer() {
         <div className="max-w-2xl mx-auto">
           {/* 标题 */}
           <div className="mb-6">
-          <Breadcrumb />
+            <Breadcrumb />
             {!isCustom ? (
               <>
-                <h1 className="text-2xl font-black text-app-text mb-1">{currentGroup.label}</h1>
+                <h1 className="text-2xl font-black text-app-text mb-1">{currentGroup!.label}</h1>
                 <p className="text-sm text-gray-500">点击复制，粘贴到被测系统的表单中</p>
               </>
             ) : (
@@ -108,7 +109,7 @@ export default function LoginFuzzer() {
           </div>
 
           {/* 预设分类内容 */}
-          {!isCustom && (
+          {!isCustom && currentGroup && (
             <>
               <div className="bg-app-bg/80 backdrop-blur-xl border border-app-border/60 rounded-2xl overflow-hidden">
                 {currentGroup.items.map((item, i) => {
