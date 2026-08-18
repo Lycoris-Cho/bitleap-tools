@@ -6,7 +6,7 @@ export default function CssUnitConvertPage() {
   const [pxVal, setPxVal] = useState<number>('' as any)
 
   const result = useMemo(() => {
-    if(isNaN(Number(pxVal)) || pxVal === '') return null
+    if (isNaN(Number(pxVal)) || String(pxVal) === '') return null
     const px = Number(pxVal)
     const rem = px / baseFontSize
     const em = px / baseFontSize

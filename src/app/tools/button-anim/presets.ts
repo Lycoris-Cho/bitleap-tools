@@ -393,47 +393,6 @@ export const buttonPresets: ButtonPreset[] = [
     transition: transform 0.15s ease-out;
   }`,
   },
-  // ==========【新增效果开始，直接粘贴到你数组末尾】==========
-  {
-    id: 'text-slide-up',
-    name: 'Text Slide Up',
-    category: '填充',
-    useCustomHtml: true,
-    description: 'hover 内部文字向上滑出，替换新文字',
-    previewClass: 'btn-text-slide-up',
-    html: `<button class="btn-text-slide-up"><span class="text-origin">Hover Me</span><span class="text-hover">Ready!</span></button>`,
-    css: `.btn-text-slide-up {
-      position: relative;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #fff;
-      background: #4f46e5;
-      border: none;
-      border-radius: 0.75rem;
-      cursor: pointer;
-      overflow: hidden;
-    }
-    .btn-text-slide-up span {
-      display: block;
-      transition: transform 0.3s ease;
-    }
-    .btn-text-slide-up .text-origin {
-      transform: translateY(0);
-    }
-    .btn-text-slide-up .text-hover {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, 100%);
-    }
-    .btn-text-slide-up:hover .text-origin {
-      transform: translateY(-200%);
-    }
-    .btn-text-slide-up:hover .text-hover {
-      transform: translate(-50%, -50%);
-    }`,
-  },
 
   {
     id: 'border-shrink',
