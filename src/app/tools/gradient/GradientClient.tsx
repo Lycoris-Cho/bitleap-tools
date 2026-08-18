@@ -45,7 +45,7 @@ export default function GradientClient() {
   const [angle, setAngle] = useState(90)
   const [type, setType] = useState<GradientType>('linear')
   const [shape, setShape] = useState<RadialShape>('circle')
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<boolean | null>(false)
 
   const initialized = useRef(false)
 
