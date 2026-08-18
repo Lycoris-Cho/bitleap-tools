@@ -45,7 +45,7 @@ export default function GradientClient() {
   const [angle, setAngle] = useState(90)
   const [type, setType] = useState<GradientType>('linear')
   const [shape, setShape] = useState<RadialShape>('circle')
-  const [copied, setCopied] = useState<boolean | null>(false)
+  const [copied, setCopied] = useState(false) // ← 明确 boolean，永远不传 null
 
   const initialized = useRef(false)
 
@@ -66,6 +66,7 @@ export default function GradientClient() {
     if (angleParam) {
       setAngle(Number(angleParam))
     }
+     
   }, [searchParams])
 
   // localStorage 读取（加 window 守卫）
@@ -81,6 +82,7 @@ export default function GradientClient() {
         if (parsed.shape) setShape(parsed.shape)
       } catch { /* ignore */ }
     }
+     
   }, [])
 
   // localStorage 写入（加 window 守卫）
@@ -130,7 +132,7 @@ export default function GradientClient() {
   const copy = async () => {
     await navigator.clipboard.writeText(cssCode)
     setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    setTimeout(() => setCopied(false), 1500) // ← 这里原来是 null，现在改成 false
   }
 
   return (
