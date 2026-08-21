@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function FishScreenPage() {
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -148,6 +150,7 @@ export default function FishScreenPage() {
         <p>· 进度与日志均为随机模拟</p>
         <p>· 适合“老板来了”场景（你懂的）</p>
       </div>
+      <FooterNote />
     </div>
   )
 }

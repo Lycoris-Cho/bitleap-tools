@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 const GRID = 20
 const CELL = 20
-const SPEED = 120 // ms
+const SPEED = 120
 
 type Vec = { x: number; y: number }
 
@@ -17,6 +18,10 @@ export default function SnakePage() {
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(0)
   const [status, setStatus] = useState<'idle' | 'playing' | 'over'>('idle')
+
+  // ✅ 用 ref 跟踪最新分数，避免 useEffect 依赖变化导致 loop 重启
+  const scoreRef = useRef(0)
+  const bestRef = useRef(0)
 
   const snakeRef = useRef<Vec[]>([{ x: 10, y: 10 }])
   const dirRef = useRef<Vec>({ x: 1, y: 0 })
@@ -36,15 +41,22 @@ export default function SnakePage() {
   const reset = () => {
     snakeRef.current = [{ x: 10, y: 10 }]
     dirRef.current = { x: 1, y: 0 }
-    randomFood()
+    scoreRef.current = 0
     setScore(0)
+    randomFood()
     setStatus('playing')
   }
 
+  // 同步 best 到 ref
   useEffect(() => {
     const b = Number(localStorage.getItem('bitleap:snake:best') || 0)
     setBest(b)
+    bestRef.current = b
   }, [])
+
+  useEffect(() => {
+    bestRef.current = best
+  }, [best])
 
   useEffect(() => {
     if (status !== 'playing') return
@@ -68,10 +80,10 @@ export default function SnakePage() {
         y: (snake[0].y + dir.y + GRID) % GRID,
       }
 
-      // 撞自己
+      // 撞自己 → 游戏结束
       if (snake.some(s => s.x === head.x && s.y === head.y)) {
         setStatus('over')
-        const nextBest = Math.max(score, best)
+        const nextBest = Math.max(scoreRef.current, bestRef.current)
         setBest(nextBest)
         localStorage.setItem('bitleap:snake:best', String(nextBest))
         return
@@ -81,13 +93,14 @@ export default function SnakePage() {
 
       // 吃食物
       if (head.x === foodRef.current.x && head.y === foodRef.current.y) {
-        setScore(s => s + 1)
+        scoreRef.current += 1
+        setScore(scoreRef.current)
         randomFood()
       } else {
         snake.pop()
       }
 
-      // 绘制
+      // 绘制背景
       ctx.fillStyle = '#f8fafc'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -128,7 +141,7 @@ export default function SnakePage() {
 
     reqRef.current = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(reqRef.current)
-  }, [status, score, best])
+  }, [status]) // ✅ 依赖只剩 status，loop 不再反复重启
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -158,19 +171,19 @@ export default function SnakePage() {
   }, [status])
 
   return (
-    <div className="max-w-xl mx-auto py-16 px-6">
+    <div className="max-w-xl mx-auto py-12 px-4 sm:px-6 lg:px-10">
       <Breadcrumb />
-      <h1 className="text-3xl font-bold mt-6 mb-2">贪吃蛇</h1>
-      <p className="text-app-muted mb-6">
-        方向键 / WASD 控制，纯前端运行，最高分本地保存。
-      </p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">贪吃蛇</h1>
+        <p className="text-app-muted text-sm">方向键 / WASD 控制，纯前端运行，最高分本地保存</p>
+      </div>
 
       <div className="flex items-center justify-between mb-4">
-        <div className="text-sm">
-          当前：<span className="font-semibold">{score}</span>
+        <div className="text-sm text-gray-700">
+          当前：<span className="font-semibold text-violet-600">{score}</span>
         </div>
         <div className="text-sm text-gray-500">
-          最高：<span className="font-semibold">{best}</span>
+          最高：<span className="font-semibold text-violet-600">{best}</span>
         </div>
       </div>
 
@@ -178,13 +191,13 @@ export default function SnakePage() {
         ref={canvasRef}
         width={GRID * CELL}
         height={GRID * CELL}
-        className="border border-app-border rounded-xl bg-slate-50 mx-auto block"
+        className="border border-app-border rounded-xl bg-slate-50 mx-auto block shadow-sm"
       />
 
       {status === 'idle' && (
         <button
           onClick={reset}
-          className="mt-6 w-full py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition"
+          className="mt-6 w-full py-3 bg-violet-500 text-white rounded-xl hover:bg-violet-600 active:scale-95 transition-all font-medium shadow-sm shadow-violet-500/20"
         >
           开始游戏
         </button>
@@ -192,24 +205,28 @@ export default function SnakePage() {
 
       {status === 'over' && (
         <div className="mt-6 space-y-3">
-          <div className="text-center text-lg font-semibold">
-            游戏结束
-          </div>
+          <div className="text-center text-lg font-semibold text-gray-800">游戏结束</div>
           <button
             onClick={reset}
-            className="w-full py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition"
+            className="w-full py-3 bg-violet-500 text-white rounded-xl hover:bg-violet-600 active:scale-95 transition-all font-medium shadow-sm shadow-violet-500/20"
           >
             再来一局
           </button>
         </div>
       )}
 
-      <div className="mt-10 text-xs text-app-muted leading-relaxed">
-        <p>· 纯 Canvas 渲染，60fps 稳定帧率</p>
-        <p>· 穿墙模式（从边缘穿越）</p>
-        <p>· 最高分保存在本地浏览器</p>
-        <p>· 无任何网络请求</p>
+      {/* 说明卡片 */}
+      <div className="mt-10 p-4 bg-gray-50 border border-app-border rounded-xl">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">游戏说明</h3>
+        <ul className="text-xs text-app-muted space-y-1.5 leading-relaxed">
+          <li>• 纯 Canvas 渲染，稳定帧率</li>
+          <li>• 穿墙模式（从边缘穿越到对面）</li>
+          <li>• 最高分保存在本地浏览器，刷新不丢失</li>
+          <li>• 支持方向键或 WASD 控制蛇的移动方向</li>
+        </ul>
       </div>
+
+      <FooterNote />
     </div>
   )
 }

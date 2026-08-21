@@ -1,6 +1,8 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function ImageCrop() {
   const [imgSrc, setImgSrc] = useState<string | null>(null)
   const [originalSize, setOriginalSize] = useState({ w: 0, h: 0 })
@@ -132,6 +134,7 @@ export default function ImageCrop() {
           </div>
         </div>
       )}
+      <FooterNote />
     </div>
   )
 }

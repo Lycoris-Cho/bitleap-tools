@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { clipPresets, generateClipPath, type Point } from './presets'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function ClipPathGenerator() {
   const [activeId, setActiveId] = useState('triangle')
   const [points, setPoints] = useState<Point[]>(() =>
@@ -289,9 +291,7 @@ export default function ClipPathGenerator() {
             </div>
           </div>
 
-          <p className="text-center text-xs text-app-muted mt-6">
-            BitLeap · 本地计算 · 隐私优先
-          </p>
+          <FooterNote />
         </div>
       </div>
     </div>

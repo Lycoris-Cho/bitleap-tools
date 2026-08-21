@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 type KeyInfo = {
   key: string
   code: string
@@ -154,7 +156,7 @@ export default function KeyboardTester() {
         </div>
       )}
 
-      <p className="text-center text-xs text-app-muted mt-12">BitLeap · 纯前端 · 按键数据不上传</p>
+<FooterNote />
     </div>
   )
 }

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 // WebCrypto 只支持 SHA 系列；MD5 需要简易纯前端实现
 async function shaHash(text: string, algo: "SHA-1" | "SHA-256" | "SHA-384" | "SHA-512") {
   const encoder = new TextEncoder();
@@ -186,7 +188,7 @@ export default function HashPage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Breadcrumb />
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">🔐 Hash 哈希工具</h1>
+        <h1 className="text-2xl font-bold">Hash 哈希工具</h1>
         <p className="text-sm text-app-muted mt-1">本地计算 MD5 / SHA1 / SHA256 / SHA384 / SHA512，数据不会上传服务器</p>
       </div>
 
@@ -234,6 +236,7 @@ export default function HashPage() {
           </div>
         )}
       </div>
+      <FooterNote />
     </div>
   );
 }

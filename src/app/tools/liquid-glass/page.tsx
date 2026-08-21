@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function LiquidGlassPage() {
     const [blur, setBlur] = useState(18)
     const [sat, setSat] = useState(180)
@@ -77,8 +78,7 @@ export default function LiquidGlassPage() {
     const cssOutput = `.liquid-glass {
   background: ${dark
             ? 'color-mix(in oklab, white 8%, transparent)'
-            : 'color-mix(in oklab, white 22%, transparent)'
-        };
+            : 'color-mix(in oklab, white 22%, transparent)'};
   backdrop-filter: blur(${blur}px) saturate(${sat}%);
   -webkit-backdrop-filter: blur(${blur}px) saturate(${sat}%);
   border: 1px solid rgba(255,255,255,${borderAlpha});
@@ -97,16 +97,16 @@ export default function LiquidGlassPage() {
 }`
 
     return (
-        <div className="max-w-4xl mx-auto py-16 px-6">
+        <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-10">
             <Breadcrumb />
-            <h1 className="text-3xl font-bold mt-6 mb-2">Liquid Glass 卡片实验室</h1>
-            <p className="text-app-muted mb-8">
-                iOS 26 毛玻璃效果编辑器
-            </p>
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold tracking-tight mb-2">Liquid Glass 卡片实验室</h1>
+                <p className="text-app-muted text-sm">iOS 26 毛玻璃效果编辑器</p>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 {/* 控制区 */}
-                <div className="space-y-6">
+                <div className="space-y-5">
                     {[
                         { label: '模糊 Blur', value: blur, setter: setBlur, min: 0, max: 40, step: 1, unit: 'px' },
                         { label: '饱和度 Saturate', value: sat, setter: setSat, min: 100, max: 300, step: 5, unit: '%' },
@@ -114,9 +114,9 @@ export default function LiquidGlassPage() {
                         { label: '玻璃厚度 Thickness', value: thickness, setter: setThickness, min: 0, max: 1, step: 0.05, unit: '' },
                     ].map((s) => (
                         <div key={s.label}>
-                            <div className="flex justify-between text-sm text-app-muted mb-2">
-                                <span>{s.label}</span>
-                                <span>{s.value}{s.unit}</span>
+                            <div className="flex justify-between text-sm mb-2">
+                                <span className="text-gray-700 font-medium">{s.label}</span>
+                                <span className="font-mono text-violet-600 font-semibold">{s.value}{s.unit}</span>
                             </div>
                             <input
                                 type="range"
@@ -125,22 +125,25 @@ export default function LiquidGlassPage() {
                                 step={s.step}
                                 value={s.value}
                                 onChange={(e) => s.setter(Number(e.target.value))}
-                                className="w-full"
+                                className="w-full accent-violet-500"
                             />
                         </div>
                     ))}
 
-                    <label className="flex items-center gap-3 text-sm text-app-muted">
-                        <input type="checkbox" checked={dark} onChange={(e) => setDark(e.target.checked)} />
+                    <label className="flex items-center gap-3 text-sm text-app-muted cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={dark}
+                            onChange={(e) => setDark(e.target.checked)}
+                            className="w-4 h-4 accent-violet-500"
+                        />
                         暗色背景模式
                     </label>
                 </div>
 
                 {/* 预览区 */}
                 <div className="flex flex-col items-center justify-center">
-                    {/* 给 glass-stage 内部加一层包裹，设置 padding，让卡片四周留出空隙 */}
                     <div className="glass-stage w-full h-72 rounded-3xl flex items-center justify-center p-8">
-                        {/* 新增外层容器，上下左右留出安全边距，防止圆角重叠 */}
                         <div className="w-full h-full flex items-center justify-center px-4 py-6">
                             <div className={glassClass}>
                                 <div className="text-sm opacity-70">Liquid Glass</div>
@@ -152,34 +155,40 @@ export default function LiquidGlassPage() {
                         </div>
                     </div>
                 </div>
-
             </div>
 
             {/* 输出 */}
-            <div className="mt-10">
-                <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">CSS 输出</span>
+            <div className="mt-10 space-y-3">
+                <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">CSS 输出</span>
                     <button
                         onClick={() => {
                             navigator.clipboard.writeText(cssOutput)
                             setCopied(true)
                             setTimeout(() => setCopied(false), 1500)
                         }}
-                        className="text-sm px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+                        className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 active:scale-95 transition-all"
                     >
-                        {copied ? '已复制' : '复制'}
+                        {copied ? '✓ 已复制' : '📋 复制'}
                     </button>
                 </div>
-                <pre className="bg-gray-900 text-gray-100 text-sm rounded-xl p-4 overflow-x-auto">
+                <pre className="bg-gray-900 text-emerald-300 text-sm rounded-xl p-4 overflow-x-auto border border-app-border">
                     <code>{cssOutput}</code>
                 </pre>
             </div>
 
-            <div className="mt-8 text-xs text-app-muted leading-relaxed">
-                <p>· 使用 backdrop-filter + color-mix(in oklab)</p>
-                <p>· 含 prefers-reduced-transparency 降级</p>
-                <p>· 所有参数在客户端计算，无 SSR 冲突</p>
+            {/* 说明卡片 */}
+            <div className="mt-10 p-4 bg-gray-50 border border-app-border rounded-xl">
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">使用说明</h3>
+                <ul className="text-xs text-app-muted space-y-1.5 leading-relaxed">
+                    <li>• 使用 <code className="font-mono bg-white px-1 rounded">backdrop-filter</code> + <code className="font-mono bg-white px-1 rounded">color-mix(in oklab)</code> 实现液态玻璃</li>
+                    <li>• 含 <code className="font-mono bg-white px-1 rounded">prefers-reduced-transparency</code> 无障碍降级</li>
+                    <li>• 所有参数在客户端计算，无 SSR 冲突</li>
+                    <li>• 复制 CSS 后直接粘贴到项目中，给容器添加 <code className="font-mono bg-white px-1 rounded">.liquid-glass</code> 类名即可</li>
+                </ul>
             </div>
+
+            <FooterNote />
         </div>
     )
 }

@@ -1,28 +1,25 @@
 'use client'
 
-
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Breadcrumb } from '@/components/breadcrumb'
-
+import FooterNote from '@/components/FooterNote'
 
 type ColorStop = {
   id: string
   value: string
 }
 
-
 type GradientType = 'linear' | 'radial'
 type RadialShape = 'circle' | 'ellipse'
-
 
 const DIRECTIONS = [
   { label: '↑ 向上', angle: 0 },
   { label: '↓ 向下', angle: 180 },
-  { label: '← 向左', angle: 270 },
+  { label:'← 向左', angle: 270 },
   { label: '→ 向右', angle: 90 },
   { label: '↘ 右下', angle: 135 },
 ]
-
 
 const PRESET_GRADIENTS = [
   { name: '星空蓝', colors: ['#0f0c29', '#302b63', '#24243e'] },
@@ -35,94 +32,69 @@ const PRESET_GRADIENTS = [
   { name: '玫瑰金', colors: ['#ffecd2', '#fcb69f'] },
 ]
 
-
 function randomHex(): string {
   return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
 }
 
-
-// ---- 读取 URL + localStorage 的辅助函数 ----
-function getInitialColors(): ColorStop[] {
-  if (typeof window === 'undefined') {
-    return [{ id: crypto.randomUUID(), value: '#3B82F6' }, { id: crypto.randomUUID(), value: '#8B5CF6' }]
-  }
-  const params = new URLSearchParams(window.location.search)
-  const colorsParam = params.get('colors')
-  if (colorsParam) {
-    return decodeURIComponent(colorsParam).split(',').map(c => ({ id: crypto.randomUUID(), value: c }))
-  }
-  const saved = localStorage.getItem('bitleap-gradient')
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved)
-      if (parsed.colors?.length) {
-        return parsed.colors.map((c: string) => ({ id: crypto.randomUUID(), value: c }))
-      }
-    } catch { /* ignore */ }
-  }
-  return [{ id: crypto.randomUUID(), value: '#3B82F6' }, { id: crypto.randomUUID(), value: '#8B5CF6' }]
-}
-
-
-function getInitialAngle(): number {
-  if (typeof window === 'undefined') return 90
-  const params = new URLSearchParams(window.location.search)
-  const a = params.get('angle')
-  if (a) return Number(a)
-  const saved = localStorage.getItem('bitleap-gradient')
-  if (saved) {
-    try {
-      const p = JSON.parse(saved)
-      if (p.angle !== undefined) return p.angle
-    } catch { /* ignore */ }
-  }
-  return 90
-}
-
-
-function getInitialType(): GradientType {
-  if (typeof window === 'undefined') return 'linear'
-  const saved = localStorage.getItem('bitleap-gradient')
-  if (saved) {
-    try {
-      const p = JSON.parse(saved)
-      if (p.type === 'linear' || p.type === 'radial') return p.type
-    } catch { /* ignore */ }
-  }
-  return 'linear'
-}
-
-
-function getInitialShape(): RadialShape {
-  if (typeof window === 'undefined') return 'circle'
-  const saved = localStorage.getItem('bitleap-gradient')
-  if (saved) {
-    try {
-      const p = JSON.parse(saved)
-      if (p.shape === 'circle' || p.shape === 'ellipse') return p.shape
-    } catch { /* ignore */ }
-  }
-  return 'circle'
-}
-
-
 export default function GradientClient() {
-  const [colors, setColors] = useState<ColorStop[]>(getInitialColors)
-  const [angle, setAngle] = useState<number>(getInitialAngle)
-  const [type, setType] = useState<GradientType>(getInitialType)
-  const [shape, setShape] = useState<RadialShape>(getInitialShape)
+  const [colors, setColors] = useState<ColorStop[]>([
+    { id: 'default-1', value: '#3B82F6' },
+    { id: 'default-2', value: '#8B5CF6' },
+  ])
+  const [angle, setAngle] = useState<number>(90)
+  const [type, setType] = useState<GradientType>('linear')
+  const [shape, setShape] = useState<RadialShape>('circle')
   const [copied, setCopied] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
 
-  // 唯一保留的 Effect：把最新状态写回 localStorage
+  const searchParams = useSearchParams()
+
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    const colorsParam = searchParams.get('colors')
+    let restoredColors: ColorStop[] | null = null
+    let restoredAngle: number | null = null
+    let restoredType: GradientType | null = null
+    let restoredShape: RadialShape | null = null
+
+    if (colorsParam) {
+      restoredColors = decodeURIComponent(colorsParam)
+        .split(',')
+        .map(c => ({ id: crypto.randomUUID(), value: c }))
+      const a = searchParams.get('angle')
+      if (a) restoredAngle = Number(a)
+    }
+
+    if (!restoredColors) {
+      const saved = localStorage.getItem('bitleap-gradient')
+      if (saved) {
+        try {
+          const p = JSON.parse(saved)
+          if (p.colors?.length) {
+            restoredColors = p.colors.map((c: string) => ({ id: crypto.randomUUID(), value: c }))
+          }
+          if (p.angle !== undefined) restoredAngle = p.angle
+          if (p.type === 'linear' || p.type === 'radial') restoredType = p.type
+          if (p.shape === 'circle' || p.shape === 'ellipse') restoredShape = p.shape
+        } catch { /* ignore */ }
+      }
+    }
+
+    setColors(prev => restoredColors ?? prev)
+    setAngle(prev => restoredAngle ?? prev)
+    setType(prev => restoredType ?? prev)
+    setShape(prev => restoredShape ?? prev)
+    setHydrated(true)
+  }, [searchParams])
+
+  useEffect(() => {
+    if (!hydrated) return
     localStorage.setItem('bitleap-gradient', JSON.stringify({
       colors: colors.map(c => c.value),
       angle,
       type,
       shape,
     }))
-  }, [colors, angle, type, shape])
+  }, [colors, angle, type, shape, hydrated])
 
   function addColor() {
     setColors([...colors, { id: crypto.randomUUID(), value: randomHex() }])
@@ -171,11 +143,13 @@ export default function GradientClient() {
         <p className="text-app-muted">多色渐变生成，支持线性渐变与中心渐变 · 数据自动保存到本地</p>
       </div>
 
+      {/* 预览区 */}
       <div
         className="w-full h-48 rounded-2xl border border-app-border mb-8 shadow-sm"
         style={{ background: previewStyle }}
       />
 
+      {/* 快速预设 */}
       <div className="mb-8">
         <label className="block text-sm font-medium mb-3 text-gray-700">快速预设</label>
         <div className="flex flex-wrap gap-2">
@@ -201,6 +175,7 @@ export default function GradientClient() {
         </div>
       </div>
 
+      {/* 渐变类型 */}
       <div className="mb-8">
         <label className="block text-sm font-medium mb-2 text-gray-700">渐变类型</label>
         <div className="flex gap-4">
@@ -208,7 +183,7 @@ export default function GradientClient() {
             onClick={() => setType('linear')}
             className={`px-5 py-3 rounded-xl border text-sm font-medium transition ${
               type === 'linear'
-                ? 'bg-black text-white border-black'
+                ? 'bg-violet-500 text-white border-violet-500'
                 : 'bg-app-bg text-gray-800 border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -218,7 +193,7 @@ export default function GradientClient() {
             onClick={() => setType('radial')}
             className={`px-5 py-3 rounded-xl border text-sm font-medium transition ${
               type === 'radial'
-                ? 'bg-black text-white border-black'
+                ? 'bg-violet-500 text-white border-violet-500'
                 : 'bg-app-bg text-gray-800 border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -227,6 +202,7 @@ export default function GradientClient() {
         </div>
       </div>
 
+      {/* 角度（线性） */}
       {type === 'linear' && (
         <div className="mb-8">
           <label className="block text-sm font-medium mb-2 text-gray-700">角度：{angle}°</label>
@@ -236,7 +212,7 @@ export default function GradientClient() {
             max={360}
             value={angle}
             onChange={(e) => setAngle(Number(e.target.value))}
-            className="w-full accent-gray-900"
+            className="w-full accent-violet-500"
           />
           <div className="flex flex-wrap gap-3 mt-4">
             {DIRECTIONS.map((d) => (
@@ -245,7 +221,7 @@ export default function GradientClient() {
                 onClick={() => setAngle(d.angle)}
                 className={`px-5 py-3 rounded-xl border text-sm font-medium transition ${
                   angle === d.angle
-                    ? 'bg-black text-white border-black'
+                    ? 'bg-violet-500 text-white border-violet-500'
                     : 'bg-app-bg text-gray-800 border-gray-300 hover:bg-gray-50'
                 }`}
               >
@@ -256,6 +232,7 @@ export default function GradientClient() {
         </div>
       )}
 
+      {/* 形状（径向） */}
       {type === 'radial' && (
         <div className="mb-8">
           <label className="block text-sm font-medium mb-2 text-gray-700">形状</label>
@@ -266,7 +243,7 @@ export default function GradientClient() {
                 onClick={() => setShape(s)}
                 className={`px-5 py-3 rounded-xl border text-sm font-medium transition ${
                   shape === s
-                    ? 'bg-black text-white border-black'
+                    ? 'bg-violet-500 text-white border-violet-500'
                     : 'bg-app-bg text-gray-800 border-gray-300 hover:bg-gray-50'
                 }`}
               >
@@ -277,6 +254,7 @@ export default function GradientClient() {
         </div>
       )}
 
+      {/* 颜色节点 */}
       <div className="space-y-3 mb-8">
         <label className="block text-sm font-medium text-gray-700">颜色节点</label>
         {colors.map((color, i) => (
@@ -291,7 +269,7 @@ export default function GradientClient() {
             <input
               value={color.value}
               onChange={(e) => updateColor(color.id, e.target.value)}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
             />
             <button
               onClick={() => removeColor(color.id)}
@@ -310,6 +288,7 @@ export default function GradientClient() {
         </button>
       </div>
 
+      {/* CSS 输出 */}
       <div className="space-y-4">
         <label className="block text-sm font-medium text-gray-700">CSS 代码</label>
         <div className="p-5 bg-gray-900 rounded-xl overflow-x-auto">
@@ -317,29 +296,17 @@ export default function GradientClient() {
 {`  ${cssCode}`}
           </pre>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <button
             onClick={copy}
-            className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 active:scale-95 transition-all font-medium text-sm"
+            className="px-6 py-3 bg-violet-500 text-white rounded-xl hover:bg-violet-600 active:scale-95 transition-all font-medium text-sm"
           >
             {copied ? '✓ 已复制到剪贴板' : '复制 CSS'}
-          </button>
-          <button
-            onClick={() => {
-              const url = `${window.location.origin}${window.location.pathname}?colors=${encodeURIComponent(colors.map(c => c.value).join(','))}&angle=${angle}`
-              navigator.clipboard.writeText(url)
-              alert('分享链接已复制！')
-            }}
-            className="px-6 py-3 bg-app-bg text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 active:scale-95 transition-all font-medium text-sm"
-          >
-            复制分享链接
           </button>
         </div>
       </div>
 
-      <p className="text-center text-xs text-app-muted mt-10">
-        BitLeap · 本地计算 · 隐私优先
-      </p>
+      <FooterNote />
     </div>
   )
 }

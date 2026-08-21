@@ -10,15 +10,19 @@ export default function CopyToast() {
     let timer: ReturnType<typeof setTimeout>
 
     const show = () => {
-      // 如果已经存在就重置计时
+      // 已经存在 → 重置计时，不重复创建
       if (toastEl) {
         clearTimeout(timer)
         timer = setTimeout(hide, 2000)
         return
       }
 
+      // 创建元素
       toastEl = document.createElement('div')
-      toastEl.className = 'fixed top-20 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300'
+      toastEl.className = 'fixed top-20 left-1/2 z-[100] transition-all duration-300'
+      toastEl.style.opacity = '0'
+      toastEl.style.transform = 'translate(-50%, -12px)'
+
       toastEl.innerHTML = `
         <div style="
           display: flex;
@@ -36,9 +40,13 @@ export default function CopyToast() {
           <span style="font-size:14px;font-weight:500;color:#047857">复制成功</span>
         </div>
       `
+
       document.body.appendChild(toastEl)
 
-      // 入场动画
+      // 强制回流，确保初始状态（opacity:0 + translateY:-12px）先渲染
+      toastEl.getBoundingClientRect()
+
+      // 入场动画：淡入 + 从上方落到位
       requestAnimationFrame(() => {
         toastEl!.style.opacity = '1'
         toastEl!.style.transform = 'translate(-50%, 0)'
@@ -60,7 +68,7 @@ export default function CopyToast() {
     // 保存原始方法
     const originalWriteText = navigator.clipboard.writeText.bind(navigator.clipboard)
 
-    // 重写
+    // 重写：复制成功后自动弹 toast
     navigator.clipboard.writeText = async (...args) => {
       const result = await originalWriteText(...args)
       show()
@@ -68,7 +76,6 @@ export default function CopyToast() {
     }
 
     return () => {
-      // 还原（虽然 SPA 里基本不会触发）
       navigator.clipboard.writeText = originalWriteText
       clearTimeout(timer)
       toastEl?.remove()

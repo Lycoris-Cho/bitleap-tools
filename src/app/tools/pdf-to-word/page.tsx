@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function PdfToWordPage() {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [pageCount, setPageCount] = useState(0)
   const [textLength, setTextLength] = useState(0)
-
-  // ✅ 生成的 Word 下载地址（内存里）
   const [blobUrl, setBlobUrl] = useState<string | null>(null)
   const [wordName, setWordName] = useState('')
 
@@ -94,114 +94,102 @@ export default function PdfToWordPage() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-10">
       <Breadcrumb />
-      {/* 标题 */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">
-          📄 PDF 转 Word
-        </h1>
-        <p className="text-app-muted">
-          提取 PDF 文本内容，生成可编辑的 Word 文档（纯前端处理）
-        </p>
-      </div>
-
-      {/* 上传 */}
       <div className="mb-8">
-        <label className="block w-full border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center cursor-pointer hover:bg-gray-50 transition">
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={onFileChange}
-            className="hidden"
-          />
-          <div className="text-app-muted">
-            点击上传或拖拽 PDF 文件到此处
-          </div>
-          <div className="text-sm text-app-muted mt-2">
-            仅支持文本型 PDF，不支持扫描件
-          </div>
-        </label>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">PDF 转 Word</h1>
+        <p className="text-app-muted text-sm">提取 PDF 文本内容，生成可编辑的 Word 文档（纯前端处理）</p>
       </div>
 
-      {/* 文件信息 */}
+      {/* 上传区 */}
+      <label className="block w-full border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/30 transition-all mb-6">
+        <input
+          type="file"
+          accept="application/pdf"
+          onChange={onFileChange}
+          className="hidden"
+        />
+        <div className="text-gray-600 font-medium text-lg mb-1">点击上传或拖拽 PDF 文件到此处</div>
+        <div className="text-xs text-app-muted">仅支持文本型 PDF，不支持扫描件</div>
+      </label>
+
+      {/* 文件信息卡片 */}
       {file && (
-        <div className="mb-8 space-y-2 text-sm">
-          <div>
-            <span className="text-gray-500">文件名：</span>
-            {file.name}
-          </div>
-          <div>
-            <span className="text-gray-500">大小：</span>
-            {formatSize(file.size)}
-          </div>
-          {pageCount > 0 && (
+        <div className="mb-6 p-4 bg-app-bg border border-app-border rounded-xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">页数：</span>
-              {pageCount}
+              <span className="text-xs text-gray-500 block mb-0.5">文件名</span>
+              <span className="font-medium text-gray-800 truncate block" title={file.name}>{file.name}</span>
             </div>
-          )}
-          {textLength > 0 && (
             <div>
-              <span className="text-gray-500">提取字数：</span>
-              {textLength}
+              <span className="text-xs text-gray-500 block mb-0.5">大小</span>
+              <span className="font-medium text-gray-800">{formatSize(file.size)}</span>
             </div>
-          )}
+            {pageCount > 0 && (
+              <div>
+                <span className="text-xs text-gray-500 block mb-0.5">页数</span>
+                <span className="font-medium text-gray-800">{pageCount}</span>
+              </div>
+            )}
+            {textLength > 0 && (
+              <div>
+                <span className="text-xs text-gray-500 block mb-0.5">提取字数</span>
+                <span className="font-medium text-gray-800">{textLength.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* 生成按钮 */}
       {file && !blobUrl && (
-        <div className="mb-10">
+        <div className="mb-8">
           <button
             onClick={generateWord}
             disabled={loading}
-            className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium disabled:opacity-50"
+            className="px-6 py-3 bg-violet-500 text-white rounded-xl text-sm font-medium hover:bg-violet-600 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 shadow-sm shadow-violet-500/20"
           >
-            {loading ? '生成中…' : '生成 Word 文档'}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                生成中…
+              </span>
+            ) : (
+              '🔧 生成 Word 文档'
+            )}
           </button>
         </div>
       )}
 
-      {/* ✅ 生成成功后的下载区域 */}
+      {/* 生成成功 */}
       {blobUrl && (
-        <div className="mb-10 rounded-2xl border border-app-border bg-gray-50 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-8 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex items-center justify-between mb-2">
             <div>
-              <div className="font-medium">✅ Word 文档已生成</div>
-              <div className="text-sm text-gray-500 mt-1">
-                {wordName}
-              </div>
+              <div className="font-semibold text-emerald-800">✅ Word 文档已生成</div>
+              <div className="text-sm text-emerald-600 mt-0.5">{wordName}</div>
             </div>
             <button
               onClick={download}
-              className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium"
+              className="px-6 py-2.5 bg-violet-500 text-white rounded-xl text-sm font-medium hover:bg-violet-600 active:scale-95 transition-all shadow-sm shadow-violet-500/20"
             >
-              下载 Word
+              📥 下载 Word
             </button>
           </div>
-          <p className="text-sm text-gray-500">
-            文档已准备好，可多次下载。重新上传 PDF 会清空当前结果。
-          </p>
+          <p className="text-xs text-emerald-600">文档已准备好，可多次下载。重新上传 PDF 会清空当前结果。</p>
         </div>
       )}
 
-      {/* 使用说明 */}
-      <div className="text-sm text-gray-500 leading-relaxed border-t pt-6">
-        <p className="mb-2 font-medium text-gray-700">⚠️ 使用说明</p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>
-            本工具仅提取 PDF 中的文字内容，无法还原原始排版、表格、图片位置。
-          </li>
-          <li>
-            适合论文、文档、电子书等以文字为主的 PDF。
-          </li>
-          <li>
-            不支持扫描版 PDF（图片型），此类文件需要 OCR 识别。
-          </li>
-          <li>
-            所有处理均在浏览器本地完成，文件不会上传到服务器。
-          </li>
+      {/* 说明卡片 */}
+      <div className="mt-10 p-4 bg-gray-50 border border-app-border rounded-xl">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">⚠️ 使用说明</h3>
+        <ul className="text-xs text-app-muted space-y-1.5 leading-relaxed">
+          <li>• 本工具仅提取 PDF 中的文字内容，无法还原原始排版、表格、图片位置</li>
+          <li>• 适合论文、文档、电子书等以文字为主的文本型 PDF</li>
+          <li>• 不支持扫描版 PDF（图片型），此类文件需要 OCR 识别</li>
+          <li>• 所有处理均在浏览器本地完成，文件不会上传到服务器</li>
         </ul>
       </div>
+
+      <FooterNote />
     </div>
   )
 }

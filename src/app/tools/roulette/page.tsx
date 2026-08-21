@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 type Option = { id: string; text: string; color: string }
 
 const PALETTE = [
@@ -241,8 +243,7 @@ export default function Roulette() {
           )}
         </div>
       </div>
-
-      <p className="text-center text-xs text-app-muted mt-12">BitLeap · 纯前端 · 命运由你决定</p>
+      <FooterNote />
     </div>
   )
 }

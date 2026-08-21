@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function ImgToBase64() {
   const [preview, setPreview] = useState<string | null>(null)
   const [base64, setBase64] = useState('')
@@ -154,7 +156,7 @@ export default function ImgToBase64() {
         </div>
       )}
 
-      <p className="text-center text-xs text-app-muted mt-12">BitLeap · 纯前端 · 图片不上传服务器</p>
+<FooterNote />
     </div>
   )
 }

@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react'
 import { buttonPresets, type ButtonPreset } from './presets'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function ButtonAnimations() {
   const [selected, setSelected] = useState<ButtonPreset | null>(null)
   const [copied, setCopied] = useState(false)
@@ -172,7 +174,7 @@ export default function ButtonAnimations() {
           </div>
         )}
 
-        <p className="text-center text-xs text-app-muted mt-10">BitLeap · 本地计算 · 隐私优先</p>
+<FooterNote />
       </div>
     </div>
   )

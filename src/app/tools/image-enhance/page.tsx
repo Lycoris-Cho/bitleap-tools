@@ -1,6 +1,8 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function ImageEnhance() {
   const [src, setSrc] = useState<string | null>(null)
   const [scale, setScale] = useState(1)
@@ -151,6 +153,7 @@ export default function ImageEnhance() {
           </div>
         </>
       )}
+       <FooterNote />
     </div>
   )
 }

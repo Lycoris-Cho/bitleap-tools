@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 type Palette = {
   name: string
   colors: string[]
@@ -57,6 +59,46 @@ const PALETTES: Palette[] = [
     name: 'WeChat',
     colors: ['#07C160', '#10D16B', '#6FEA9E', '#D4FBE8'],
   },
+  {
+    name: 'Netflix',
+    colors: ['#E50914', '#B81D24', '#F40612', '#831010'],
+  },
+  {
+    name: 'Spotify',
+    colors: ['#1DB954', '#1ED760', '#2EBD59', '#169C46'],
+  },
+  {
+    name: 'Discord',
+    colors: ['#5865F2', '#7289DA', '#99AAB5', '#2C2F33'],
+  },
+  {
+    name: 'Figma',
+    colors: ['#F24E1E', '#FF7262', '#A259FF', '#1ABCFE'],
+  },
+  {
+    name: 'YouTube',
+    colors: ['#FF0000', '#CC0000', '#FF4D4D', '#282828'],
+  },
+  {
+    name: 'TikTok',
+    colors: ['#000000', '#00F2EA', '#FF0050', '#FFFFFF'],
+  },
+  {
+    name: 'Airbnb',
+    colors: ['#FF5A5F', '#FC642D', '#484848', '#767676'],
+  },
+  {
+    name: 'Uber',
+    colors: ['#000000', '#FFFFFF', '#C4C4C4', '#F3F3F3'],
+  },
+  {
+    name: 'Instagram',
+    colors: ['#F58529', '#DD2A7B', '#8134AF', '#515BD4'],
+  },
+  {
+    name: 'Framer',
+    colors: ['#0055FF', '#1479FF', '#4D9FFF', '#E8F0FF'],
+  },
 ]
 
 /* =======================
@@ -81,6 +123,18 @@ const GRADIENTS: Gradient[] = [
   { name: '彩虹渐变', colors: ['#FF0000','#FF7F00','#FFFF00','#00FF00','#0000FF','#4B0082','#9400D3'], angle: 90 },
   { name: '糖果', colors: ['#FF9A9E', '#FAD0C4', '#A1C4FD'], angle: 120 },
   { name: '金属', colors: ['#8E9EAB', '#EEF2F3'], angle: 45 },
+  { name: '玫瑰金', colors: ['#FFECF2', '#FCB9AA', '#F78CA0'], angle: 135 },
+  { name: '极简灰', colors: ['#F5F7FA', '#C3CFE2'], angle: 90 },
+  { name: '琥珀', colors: ['#FFB75E', '#ED8F03'], angle: 45 },
+  { name: '孔雀', colors: ['#0BA360', '#3CD3AD'], angle: 120 },
+  { name: '暗夜紫', colors: ['#1A0033', '#4B0082', '#8A2BE2'], angle: 160 },
+  { name: '冰河', colors: ['#E0EAFC', '#CFDEF3'], angle: 90 },
+  { name: '番茄', colors: ['#FF416C', '#FF4B2B'], angle: 60 },
+  { name: '森林', colors: ['#134E5E', '#71B280'], angle: 135 },
+  { name: '紫霞', colors: ['#667EEA', '#764BA2'], angle: 90 },
+  { name: '蜜桃', colors: ['#FFD194', '#70E1F5'], angle: 110 },
+  { name: '火山', colors: ['#F12711', '#F5AF19'], angle: 45 },
+  { name: '银河', colors: ['#0F0C29', '#302B63', '#24243E'], angle: 180 },
 ]
 
 export default function ColorPalettePage() {
@@ -196,6 +250,7 @@ export default function ColorPalettePage() {
           <li>• 所有配色均为 Web 安全色，可直接用于生产</li>
         </ul>
       </section>
+      <FooterNote />
     </div>
   )
 }

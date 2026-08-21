@@ -2,12 +2,15 @@
 
 import { useState, useMemo } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
-export default function ColorPage() {
-  const [hex, setHex] = useState('#3B82F6') // 默认蓝色
+import FooterNote from '@/components/FooterNote'
 
-  // 解析 HEX → RGB
+export default function ColorPage() {
+  const [hex, setHex] = useState('#3B82F6')
+  const [copied, setCopied] = useState<string | null>(null)
+
   function hexToRgb(hex: string) {
     const h = hex.replace('#', '')
+    if (h.length !== 6) return { r: 0, g: 0, b: 0 }
     const n = parseInt(h, 16)
     return {
       r: (n >> 16) & 255,
@@ -16,7 +19,6 @@ export default function ColorPage() {
     }
   }
 
-  // RGB → HEX
   function rgbToHex(r: number, g: number, b: number) {
     return (
       '#' +
@@ -27,35 +29,22 @@ export default function ColorPage() {
     )
   }
 
-  // RGB → HSL
   function rgbToHsl(r: number, g: number, b: number) {
-    r /= 255
-    g /= 255
-    b /= 255
-
+    r /= 255; g /= 255; b /= 255
     const max = Math.max(r, g, b)
     const min = Math.min(r, g, b)
-    let h = 0
-    let s = 0
+    let h = 0, s = 0
     const l = (max + min) / 2
-
     if (max !== min) {
       const d = max - min
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
       switch (max) {
-        case r:
-          h = (g - b) / d + (g < b ? 6 : 0)
-          break
-        case g:
-          h = (b - r) / d + 2
-          break
-        case b:
-          h = (r - g) / d + 4
-          break
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break
+        case g: h = (b - r) / d + 2; break
+        case b: h = (r - g) / d + 4; break
       }
       h /= 6
     }
-
     return {
       h: Math.round(h * 360),
       s: Math.round(s * 100),
@@ -66,79 +55,99 @@ export default function ColorPage() {
   const rgb = useMemo(() => hexToRgb(hex), [hex])
   const hsl = useMemo(() => rgbToHsl(rgb.r, rgb.g, rgb.b), [rgb])
 
+  const rgbStr = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+  const hslStr = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
+
+  const copy = async (text: string, key: string) => {
+    await navigator.clipboard.writeText(text)
+    setCopied(key)
+    setTimeout(() => setCopied(null), 1500)
+  }
+
+  const reset = () => {
+    setHex('#3B82F6')
+    setCopied(null)
+  }
+
+  const resultRows = [
+    { label: 'HEX', value: hex, copyKey: 'hex' },
+    { label: 'RGB', value: rgbStr, copyKey: 'rgb' },
+    { label: 'HSL', value: hslStr, copyKey: 'hsl' },
+  ]
+
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-10">
       <Breadcrumb />
-      {/* 标题 */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">
-          颜色转换
-        </h1>
-        <p className="text-app-muted">
-          HEX、RGB、HSL 颜色互转，支持颜色选择器
-        </p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">颜色转换</h1>
+        <p className="text-app-muted text-sm">HEX、RGB、HSL 颜色互转，支持颜色选择器</p>
       </div>
 
       {/* 颜色预览 */}
       <div
-        className="w-full h-32 rounded-2xl border border-app-border mb-8"
+        className="w-full h-32 rounded-2xl border border-app-border mb-6 shadow-sm"
         style={{ backgroundColor: hex }}
       />
 
-      {/* 颜色选择器 */}
-      <div className="flex items-center gap-6 mb-8">
-        <input
-          type="color"
-          value={hex}
-          onChange={(e) => setHex(e.target.value)}
-          className="w-16 h-16 p-0 border-0 bg-transparent cursor-pointer"
-        />
-        <div className="text-sm text-gray-500">
-          点击色块选择颜色
-        </div>
-      </div>
-
-      {/* 颜色值展示 */}
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">HEX</label>
+      {/* 颜色选择器 + 重置并排 */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
           <input
+            type="color"
             value={hex}
             onChange={(e) => setHex(e.target.value)}
-            placeholder="#3B82F6"
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            className="w-14 h-14 p-0 border-0 bg-transparent cursor-pointer rounded-lg shrink-0"
           />
+          <span className="text-sm text-app-muted">点击色块选择颜色</span>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">RGB</label>
-          <input
-            value={`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`}
-            readOnly
-            className="w-full px-4 py-3 bg-gray-50 border border-app-border rounded-xl font-mono text-sm"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">HSL</label>
-          <input
-            value={`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`}
-            readOnly
-            className="w-full px-4 py-3 bg-gray-50 border border-app-border rounded-xl font-mono text-sm"
-          />
-        </div>
+        <button
+          onClick={reset}
+          className="px-5 py-2.5 bg-orange-50 text-orange-600 border border-orange-200 rounded-xl text-sm font-medium hover:bg-orange-100 active:scale-95 transition-all"
+        >
+          重置
+        </button>
       </div>
 
-      {/* SEO 文案 */}
-      <section className="mt-16 pt-10 border-t border-app-border">
-        <h2 className="text-lg font-semibold mb-3">使用说明</h2>
-        <ul className="text-sm text-app-muted space-y-2 leading-relaxed">
-          <li>• 支持 HEX、RGB、HSL 三种颜色格式互转</li>
-          <li>• 可直接使用颜色选择器，或手动输入 HEX 值</li>
-          <li>• 适用于前端开发、UI 设计、配色参考</li>
+      {/* 三行统一卡片 */}
+      <div className="space-y-3">
+        {resultRows.map((row) => (
+          <div
+            key={row.copyKey}
+            className="flex items-center gap-3 px-4 py-3 bg-app-bg border border-app-border rounded-xl hover:border-violet-200 transition-all"
+          >
+            {/* 标签 */}
+            <span className="text-sm font-semibold text-gray-500 w-10 shrink-0">
+              {row.label}
+            </span>
+
+            {/* 值（纯文本，非输入框） */}
+            <span className="flex-1 font-mono text-sm text-gray-800 break-all select-all">
+              {row.value}
+            </span>
+
+            {/* 复制按钮 — 固定位置 */}
+            <button
+              onClick={() => copy(row.value, row.copyKey)}
+              className="shrink-0 px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 active:scale-95 transition-all"
+            >
+              {copied === row.copyKey ? '✓ 已复制' : '📋 复制'}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* 说明卡片 */}
+      <div className="mt-10 p-4 bg-gray-50 border border-app-border rounded-xl">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">使用说明</h3>
+        <ul className="text-xs text-app-muted space-y-1.5 leading-relaxed">
+          <li>• 支持 HEX、RGB、HSL 三种颜色格式实时互转</li>
+          <li>• 点击左侧色块可打开系统颜色选择器</li>
           <li>• 所有计算均在浏览器本地完成</li>
+          <li>• 点击每行右侧按钮可复制对应颜色值</li>
         </ul>
-      </section>
+      </div>
+
+      <FooterNote />
     </div>
   )
 }

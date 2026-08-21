@@ -1,6 +1,8 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function EasingGenerator() {
   const [p1x, setP1X] = useState(0.42)
   const [p1y, setP1Y] = useState(0)
@@ -324,7 +326,7 @@ export default function EasingGenerator() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-app-muted mt-12">BitLeap · 纯前端 · 所见即所得</p>
+      <FooterNote />
     </div>
   )
 }

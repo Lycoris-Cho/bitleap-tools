@@ -3,6 +3,7 @@
 import { groups as defaultGroups } from './payloads'
 import { useState } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
 
 interface CustomField {
   id: string
@@ -58,11 +59,10 @@ export default function LoginFuzzer() {
           <button
             key={g.label}
             onClick={() => setActiveGroup(g.label)}
-            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-              activeGroup === g.label
+            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${activeGroup === g.label
                 ? 'bg-gray-900 text-white shadow-md'
                 : 'text-app-muted hover:bg-gray-100'
-            }`}
+              }`}
           >
             <span className="truncate block">{g.label}</span>
             <span className={`text-xs ${activeGroup === g.label ? 'text-gray-300' : 'text-app-muted'}`}>
@@ -75,11 +75,10 @@ export default function LoginFuzzer() {
         <div className="border-t border-app-border/60 mt-3 pt-3">
           <button
             onClick={() => setActiveGroup('__custom__')}
-            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-              isCustom
+            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isCustom
                 ? 'bg-gray-900 text-white shadow-md'
                 : 'text-app-muted hover:bg-gray-100'
-            }`}
+              }`}
           >
             <span className="truncate block">＋ 自定义字段</span>
             <span className={`text-xs ${isCustom ? 'text-gray-300' : 'text-app-muted'}`}>
@@ -117,9 +116,8 @@ export default function LoginFuzzer() {
                   return (
                     <div
                       key={key}
-                      className={`flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition ${
-                        i !== currentGroup.items.length - 1 ? 'border-b border-gray-100' : ''
-                      }`}
+                      className={`flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition ${i !== currentGroup.items.length - 1 ? 'border-b border-gray-100' : ''
+                        }`}
                     >
                       <code className="flex-1 text-sm text-gray-800 font-mono bg-gray-50 px-3 py-2 rounded-lg truncate">
                         {item.value || '(空字符串)'}
@@ -216,10 +214,7 @@ export default function LoginFuzzer() {
             </div>
           )}
 
-          {/* 底部 */}
-          <p className="text-center text-xs text-app-muted mt-10">
-            BitLeap · 本地计算 · 隐私优先
-          </p>
+          <FooterNote />
         </div>
       </div>
     </div>

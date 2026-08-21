@@ -15,29 +15,36 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body className="min-h-screen flex flex-col bg-app-bg text-app-text antialiased">
-          <CopyToast />
-          <div className="flex-1 flex flex-col">
-            <header className="font-['myFont',sans-serif] fixed top-0 left-0 right-0 h-16 border-b border-app-border bg-app-bg/90 backdrop-blur-sm flex items-center px-4 sm:px-6 lg:px-10 z-50">
-              <div className="w-full flex justify-between items-center">
-                <div className="font-bold text-2xl flex items-center gap-3 text-app-text">
+        <CopyToast />
+        <div className="flex-1 flex flex-col">
+          <header className="font-['myFont',sans-serif] fixed top-0 left-0 right-0 h-16 border-b border-app-border bg-app-bg/90 backdrop-blur-sm flex items-center px-4 sm:px-6 lg:px-10 z-50">
+            <div className="w-full flex justify-between items-center">
+              {/* 左侧 Logo */}
+              <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+                <span className="font-bold text-xl sm:text-2xl text-app-text group-hover:opacity-80 transition">
                   BitLeap
-                  <span className="font-light text-2xl">- Tiny tools, Big leap</span>
-                </div>
-                <nav className="flex items-center gap-4 sm:gap-6 text-sm">
-                  <Link href="/" className="text-app-muted hover:text-app-text transition">
-                    首页
-                  </Link>
-                  <Link href="/about" className="text-app-muted hover:text-app-text transition">
-                    关于
-                  </Link>
-                </nav>
-              </div>
-            </header>
+                </span>
+                <span className="hidden sm:inline font-light text-sm sm:text-lg text-app-muted">
+                  - Tiny tools, Big leap
+                </span>
+              </Link>
 
-            <main className="flex-1 pt-16 bg-app-bg">
-              {children}
-            </main>
-          </div>
+              {/* 右侧导航 */}
+              <nav className="flex items-center gap-4 sm:gap-6 text-sm">
+                <Link href="/" className="text-app-muted hover:text-app-text transition">
+                  首页
+                </Link>
+                <Link href="/about" className="text-app-muted hover:text-app-text transition">
+                  关于
+                </Link>
+              </nav>
+            </div>
+          </header>
+
+          <main className="flex-1 pt-16 bg-app-bg">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   )

@@ -1,5 +1,6 @@
 import { inspoList, type InspoSite } from '../data'
 import { notFound } from 'next/navigation'
+import FooterNote from '@/components/FooterNote'
 
 // ✅ 和 InspoCard 完全一致的配色映射
 const tagStyles: Record<string, string> = {
@@ -135,6 +136,7 @@ export default async function InspoDetailPage({
       <div className="text-sm text-gray-500 border-t pt-6">
         所有站点版权归原作者所有，仅作前端学习参考。
       </div>
+      <FooterNote />
     </div>
   )
 }

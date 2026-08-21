@@ -1,5 +1,6 @@
 import { apiList } from '../data'
 import { notFound } from 'next/navigation'
+import FooterNote from '@/components/FooterNote'
 
 /** 和 ApiCard 一致的标签颜色映射 */
 const tagStyles: Record<string, string> = {
@@ -138,6 +139,7 @@ export default async function ApiDetailPage({
       <div className="text-sm text-gray-500 border-t pt-6">
         所有使用限制请以原提供方 Terms of Service 为准。
       </div>
+      <FooterNote/>
     </div>
   )
 }

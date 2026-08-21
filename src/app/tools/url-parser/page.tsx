@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { statusCodes, suspiciousParams } from './data'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function UrlParser() {
   const [activeTab, setActiveTab] = useState('parse')
   const [statusFilter, setStatusFilter] = useState('全部')
@@ -271,10 +273,7 @@ export default function UrlParser() {
             </div>
           )}
 
-          {/* 底部 */}
-          <p className="text-center text-xs text-app-muted mt-10">
-            BitLeap · 本地计算 · 隐私优先
-          </p>
+<FooterNote />
         </div>
       </div>
     </div>

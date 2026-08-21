@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 const FONT_SIZE = 16
 const FADE = 0.08
 
@@ -176,6 +178,7 @@ export default function CodeRainPage() {
           停止
         </button>
       )}
+      <FooterNote />
     </div>
   )
 }

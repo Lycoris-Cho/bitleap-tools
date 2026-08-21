@@ -2,6 +2,8 @@
 import { useState, useMemo } from 'react'
 import { pinyin } from 'pinyin-pro'
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
+
 export default function PinyinPage(){
   const [input,setInput]=useState('你好世界')
   const [mode,setMode]=useState<'tone'|'noTone'|'first'>('tone')
@@ -41,6 +43,7 @@ export default function PinyinPage(){
         </div>
         <button onClick={copy} className="px-4 py-2 bg-violet-500 text-white rounded-xl text-sm">复制结果</button>
       </div>
+      <FooterNote />
     </div>
   )
 }

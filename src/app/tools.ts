@@ -537,6 +537,14 @@ export const tools: Tool[] = [
         href: "/tools/cssback",
         icon: "🧩",
         category: "前端实验",
+      },
+      {
+        id: "Echarts",
+        title: "ECharts 图表生成",
+        description: "粘贴 CSV/JSON 数据，可视化配置图表，导出 PNG 与配置",
+        href: "/tools/data-visualizer",
+        icon: "📊",
+        category: "前端实验",
       }
       
 ]
