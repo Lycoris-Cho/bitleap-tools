@@ -1,15 +1,16 @@
-'use client'
+"use client"
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { tools } from './tools'
 import ExternalLinkModal from '@/components/ExternalLinkModal'
+
+/* 热门搜索标签 */
+const HOT_TAGS = ['CSS', '图片压缩', '配色', '解码', 'JSON', '二维码']
 
 export default function HomePage() {
   const [searchKeyword, setSearchKeyword] = useState('')
   const [booted, setBooted] = useState(false)
   const [pendingLink, setPendingLink] = useState<{ href: string; title: string } | null>(null)
-  const [activeCategory, setActiveCategory] = useState<string>('')
-  const mainRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     setBooted(true)
@@ -43,69 +44,6 @@ export default function HomePage() {
     return Array.from(new Set(filteredTools.map((tool) => tool.category)))
   }, [filteredTools])
 
-  // ===== 滚动监听：IntersectionObserver + scroll 兜底 + 底部检测 =====
-  useEffect(() => {
-    if (categories.length === 0) return
-
-    const container = mainRef.current
-    const offset = 140
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-        if (visible.length > 0) {
-          setActiveCategory(visible[0].target.id)
-        }
-      },
-      {
-        root: container,
-        rootMargin: `-${offset}px 0px -80% 0px`,
-        threshold: [0, 0.1, 0.25, 0.5, 1],
-      }
-    )
-
-    const elements = categories
-      .map(id => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[]
-
-    elements.forEach(el => observer.observe(el))
-
-    // 兜底：scroll 事件 + 底部检测
-    const handleScroll = () => {
-      const scrollTop = container?.scrollTop ?? 0
-      const scrollHeight = container?.scrollHeight ?? 0
-      const clientHeight = container?.clientHeight ?? 0
-
-      // ★ 滚到最底部 → 强制高亮最后一个分类
-      if (scrollTop + clientHeight >= scrollHeight - 10) {
-        setActiveCategory(categories[categories.length - 1])
-        return
-      }
-
-      for (const id of categories) {
-        const el = document.getElementById(id)
-        if (!el) continue
-        const top = el.offsetTop - offset
-        const bottom = top + el.offsetHeight
-        if (scrollTop >= top && scrollTop < bottom) {
-          setActiveCategory(id)
-          break
-        }
-      }
-    }
-
-    const scrollTarget = container || window
-    scrollTarget.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // 初始化
-
-    return () => {
-      observer.disconnect()
-      scrollTarget.removeEventListener('scroll', handleScroll)
-    }
-  }, [categories])
-
   const handleExternalClick = (tool: (typeof tools)[0]) => {
     setPendingLink({ href: tool.href, title: tool.title })
   }
@@ -115,6 +53,18 @@ export default function HomePage() {
       window.open(pendingLink.href, '_blank', 'noopener,noreferrer')
       setPendingLink(null)
     }
+  }
+
+  /* 点击热门标签填入搜索 */
+  const handleTagClick = (tag: string) => {
+    setSearchKeyword(tag)
+    document.getElementById('search-input')?.focus()
+  }
+
+  /* 滚动到工具列表 */
+  const scrollToTools = () => {
+    const el = document.getElementById('tools-start')
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -131,9 +81,10 @@ export default function HomePage() {
           className="px-5 py-4 mx-4 mt-3 bg-app-bg backdrop-blur-xl border border-white/60 rounded-[100px] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]"
         >
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-bold tracking-tight text-app-text">BitLeap</h1>
+            <h1 className="text-lg font-bold tracking-tight text-app-text">工具目录</h1>
             <svg
-              className={`w-8 h-8 text-app-text fill-app-text transition-all duration-500 ${booted ? 'animate-[spin_3s_linear_infinite]' : 'animate-[spin_0.6s_ease-out]'}`}
+              className={`w-8 h-8 text-app-text fill-app-text transition-all duration-500 ${booted ? 'animate-[spin_3s_linear_infinite]' : 'animate-[spin_0.6s_ease-out]'
+                }`}
               viewBox="0 0 24 24"
             >
               <path fillRule="evenodd" clipRule="evenodd" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -143,29 +94,22 @@ export default function HomePage() {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-3 space-y-1">
-          {categories.map((category, index) => {
-            const isActive = activeCategory === category
-            return (
-              <a
-                key={category}
-                href={`#${category}`}
-                style={{
-                  animationName: booted ? 'fadeInLeft' : undefined,
-                  animationDuration: booted ? '0.35s' : undefined,
-                  animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
-                  animationFillMode: booted ? 'backwards' : undefined,
-                  animationDelay: booted ? `${120 + index * 25}ms` : undefined,
-                }}
-                className={`block px-3 py-2 rounded-xl text-sm transition ${
-                  isActive
-                    ? 'bg-violet-50 text-violet-600 font-semibold shadow-sm'
-                    : 'text-gray-700 hover:bg-app-bg hover:shadow-sm'
-                }`}
-              >
-                {category}
-              </a>
-            )
-          })}
+          {categories.map((category, index) => (
+            <a
+              key={category}
+              href={`#${category}`}
+              style={{
+                animationName: booted ? 'fadeInLeft' : undefined,
+                animationDuration: booted ? '0.35s' : undefined,
+                animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
+                animationFillMode: booted ? 'backwards' : undefined,
+                animationDelay: booted ? `${120 + index * 25}ms` : undefined,
+              }}
+              className="block px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-app-bg hover:shadow-sm transition"
+            >
+              {category}
+            </a>
+          ))}
         </nav>
 
         <div className="px-6 py-4 border-t border-app-border text-xs text-app-muted">
@@ -174,119 +118,162 @@ export default function HomePage() {
       </aside>
 
       {/* ===== 右侧内容区 ===== */}
-      <main ref={mainRef} className="fixed top-16 left-56 right-0 h-[calc(100vh-4rem)] overflow-y-auto hidden md:block">
+      <main className="fixed top-16 left-56 right-0 h-[calc(100vh-4rem)] overflow-y-auto hidden md:block">
         <div className="w-full px-6 py-8">
-          {/* ===== Hero + 搜索 ===== */}
-          <div
+
+          {/* ============ Hero 区 ============ */}
+          <section
             style={{
               animationName: booted ? 'fadeInUp' : undefined,
-              animationDuration: booted ? '0.5s' : undefined,
+              animationDuration: booted ? '0.6s' : undefined,
               animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
               animationFillMode: booted ? 'backwards' : undefined,
             }}
-            className="mb-8"
+            className="relative overflow-hidden rounded-3xl border border-app-border bg-app-bg mb-10"
           >
-            <div className="mb-5">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-app-text mb-1.5">
-                <span className="bg-gradient-to-r from-violet-500 to-sky-400 bg-clip-text text-transparent">
-                  Bit工具箱
+            {/* 背景渐变光斑 */}
+            <div className="pointer-events-none absolute -top-20 -left-10 w-72 h-72 rounded-full bg-violet-300/30 blur-3xl animate-pulse" />
+            <div className="pointer-events-none absolute top-10 right-0 w-64 h-64 rounded-full bg-sky-300/25 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="pointer-events-none absolute -bottom-16 left-1/3 w-56 h-56 rounded-full bg-pink-300/20 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+
+            {/* 网格底纹 */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.04]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)',
+                backgroundSize: '32px 32px',
+              }}
+            />
+
+            <div className="relative px-10 py-14">
+              {/* 大标题 */}
+              <h1 className="text-5xl font-extrabold tracking-tight mb-3">
+                <span className="bg-gradient-to-r from-violet-600 via-sky-500 to-cyan-400 bg-clip-text text-transparent">
+                  BitLeap
                 </span>
-                ，一键直达
-              </h2>
-              <p className="text-sm text-gray-500">
-                {tools.length}+ 款纯前端工具 · 零上传 · 本地运行 · 开箱即用
+              </h1>
+              <p className="text-xl font-medium text-app-text/80 mb-2">
+                Tiny tools, big leap.
               </p>
-              <p className="text-xs text-gray-300">
-                本站收录部分外部工具链接，跳转后请注意甄别，谨慎提交敏感信息
+              {/* 副标题 */}
+              <p className="text-sm text-app-muted mb-8 max-w-md">
+                精选小工具集合，所有计算均在浏览器本地完成，开箱即用，安全高效。
               </p>
-            </div>
 
-            <div className="relative max-w-xl">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                id="search-input"
-                type="text"
-                placeholder="搜索工具… 名称 / 描述 / 分类"
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-app-border bg-app-bg focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400 transition shadow-sm"
-              />
-              {searchKeyword && (
-                <button onClick={() => setSearchKeyword('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  ✕
+              {/* 搜索框 + 按钮 */}
+              <div className="flex items-center gap-3 max-w-2xl mb-5">
+                <div className="relative flex-1">
+                  <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    id="search-input"
+                    type="text"
+                    placeholder="搜索工具… 名称 / 描述 / 分类"
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                    className="w-full pl-4 pr-4 py-3 rounded-xl border border-app-border bg-white/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400 transition text-sm"
+                  />
+                  {searchKeyword && (
+                    <button onClick={() => setSearchKeyword('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={scrollToTools}
+                  className="shrink-0 px-6 py-3 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800 active:scale-[0.98] transition-all shadow-lg shadow-black/10"
+                >
+                  全部工具
                 </button>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {filteredTools.length === 0 ? (
-            <div className="py-20 text-center text-app-muted">
-              <div className="text-4xl mb-3">🔍</div>
-              <p className="text-lg">没有找到匹配的工具</p>
-              <p className="text-sm mt-1">试试其他关键词</p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {categories.map((category, catIndex) => (
-                <section key={category} id={category}>
-                  <h2
-                    style={{
-                      animationName: booted ? 'fadeInLeft' : undefined,
-                      animationDuration: booted ? '0.4s' : undefined,
-                      animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
-                      animationFillMode: booted ? 'backwards' : undefined,
-                      animationDelay: booted ? `${catIndex * 60}ms` : undefined,
-                    }}
-                    className="text-xl font-semibold tracking-tight mb-4 pb-2 border-b border-app-border"
+              {/* 热门标签 */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-app-muted">热门：</span>
+                {HOT_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => handleTagClick(tag)}
+                    className="px-3 py-1 rounded-full text-xs border border-app-border bg-white/50 hover:bg-violet-50 hover:border-violet-200 hover:text-violet-600 transition-colors"
                   >
-                    {category}
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-                    {filteredTools
-                      .filter((tool) => tool.category === category)
-                      .map((tool, index) => {
-                        const isExternal = (tool as any).target === '_blank'
-                        return isExternal ? (
-                          <button
-                            key={tool.id}
-                            onClick={() => handleExternalClick(tool)}
-                            style={{
-                              animationName: booted ? 'fadeInUp' : undefined,
-                              animationDuration: booted ? '0.45s' : undefined,
-                              animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
-                              animationFillMode: booted ? 'backwards' : undefined,
-                              animationDelay: booted ? `${catIndex * 60 + index * 35 + 80}ms` : undefined,
-                            }}
-                            className="group relative block w-full text-left p-4 bg-app-bg border border-app-border/80 rounded-2xl hover:border-violet-200 hover:shadow-[0_4px_24px_rgba(139,92,246,0.08)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden cursor-pointer"
-                          >
-                            <ExternalBadge />
-                            <CardInner tool={tool} />
-                          </button>
-                        ) : (
-                          <a
-                            key={tool.id}
-                            href={tool.href}
-                            style={{
-                              animationName: booted ? 'fadeInUp' : undefined,
-                              animationDuration: booted ? '0.45s' : undefined,
-                              animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
-                              animationFillMode: booted ? 'backwards' : undefined,
-                              animationDelay: booted ? `${catIndex * 60 + index * 35 + 80}ms` : undefined,
-                            }}
-                            className="group relative block p-4 bg-app-bg border border-app-border/80 rounded-2xl hover:border-violet-200 hover:shadow-[0_4px_24px_rgba(139,92,246,0.08)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
-                          >
-                            <CardInner tool={tool} />
-                          </a>
-                        )
-                      })}
-                  </div>
-                </section>
-              ))}
+                    {tag}
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
+          </section>
+
+          {/* ============ 工具列表 ============ */}
+          <div id="tools-start">
+            {filteredTools.length === 0 ? (
+              <div className="py-20 text-center text-app-muted">
+                <div className="text-4xl mb-3">🔍</div>
+                <p className="text-lg">没有找到匹配的工具</p>
+                <p className="text-sm mt-1">试试其他关键词</p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {categories.map((category, catIndex) => (
+                  <section key={category} id={category}>
+                    <h2
+                      style={{
+                        animationName: booted ? 'fadeInLeft' : undefined,
+                        animationDuration: booted ? '0.4s' : undefined,
+                        animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
+                        animationFillMode: booted ? 'backwards' : undefined,
+                        animationDelay: booted ? `${catIndex * 60}ms` : undefined,
+                      }}
+                      className="text-xl font-semibold tracking-tight mb-4 pb-2 border-b border-app-border"
+                    >
+                      {category}
+                    </h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                      {filteredTools
+                        .filter((tool) => tool.category === category)
+                        .map((tool, index) => {
+                          const isExternal = (tool as any).target === '_blank'
+                          return isExternal ? (
+                            <button
+                              key={tool.id}
+                              onClick={() => handleExternalClick(tool)}
+                              style={{
+                                animationName: booted ? 'fadeInUp' : undefined,
+                                animationDuration: booted ? '0.45s' : undefined,
+                                animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
+                                animationFillMode: booted ? 'backwards' : undefined,
+                                animationDelay: booted ? `${catIndex * 60 + index * 35 + 80}ms` : undefined,
+                              }}
+                              className="group relative block w-full text-left p-4 bg-app-bg border border-app-border/80 rounded-2xl hover:border-violet-200 hover:shadow-[0_4px_24px_rgba(139,92,246,0.08)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden cursor-pointer"
+                            >
+                              <ExternalBadge />
+                              <CardInner tool={tool} />
+                            </button>
+                          ) : (
+                            <a
+                              key={tool.id}
+                              href={tool.href}
+                              style={{
+                                animationName: booted ? 'fadeInUp' : undefined,
+                                animationDuration: booted ? '0.45s' : undefined,
+                                animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
+                                animationFillMode: booted ? 'backwards' : undefined,
+                                animationDelay: booted ? `${catIndex * 60 + index * 35 + 80}ms` : undefined,
+                              }}
+                              className="group relative block p-4 bg-app-bg border border-app-border/80 rounded-2xl hover:border-violet-200 hover:shadow-[0_4px_24px_rgba(139,92,246,0.08)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+                            >
+                              <CardInner tool={tool} />
+                            </a>
+                          )
+                        })}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className="mt-16 text-center text-sm text-app-muted space-y-2">
             {searchKeyword.trim() ? (
@@ -301,48 +288,65 @@ export default function HomePage() {
 
       {/* ===== 移动端 ===== */}
       <div className="md:hidden px-4 py-16">
-        <div
+
+        {/* ============ 移动端 Hero ============ */}
+        <section
           style={{
             animationName: booted ? 'fadeInUp' : undefined,
             animationDuration: booted ? '0.5s' : undefined,
             animationTimingFunction: booted ? 'cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
             animationFillMode: booted ? 'backwards' : undefined,
           }}
-          className="mb-10"
+          className="relative overflow-hidden rounded-2xl border border-app-border bg-app-bg mb-8"
         >
-          <div className="mb-4">
-            <h2 className="text-xl font-bold tracking-tight text-app-text mb-1">
-              <span className="bg-gradient-to-r from-violet-500 to-sky-400 bg-clip-text text-transparent">
-                Bit工具箱
+          <div className="pointer-events-none absolute -top-10 -left-10 w-40 h-40 rounded-full bg-violet-300/30 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-8 right-0 w-36 h-36 rounded-full bg-sky-300/25 blur-3xl" />
+
+          <div className="relative px-6 py-10 text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+              <span className="bg-gradient-to-r from-violet-600 via-sky-500 to-cyan-400 bg-clip-text text-transparent">
+                BitLeap
               </span>
-            </h2>
-            <p className="text-xs text-gray-500">
-              {tools.length}+ 款纯前端工具 · 零上传 · 本地运行
-            </p>
-            <p className="text-xs text-gray-300">
-              本站收录部分外部工具链接，跳转后请注意甄别，谨慎提交敏感信息
-            </p>
-          </div>
+            </h1>
+            <p className="text-base font-medium text-app-text/80 mb-1">Tiny tools, big leap.</p>
+            <p className="text-xs text-app-muted mb-6">精选小工具，本地运行，安全高效</p>
 
-          <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="搜索工具"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-app-border bg-app-bg focus:outline-none focus:ring-2 focus:ring-violet-200"
-            />
-            {searchKeyword && (
-              <button onClick={() => setSearchKeyword('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                ✕
-              </button>
-            )}
-          </div>
-        </div>
+            {/* 搜索框 */}
+            <div className="relative mb-4">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                id="search-input-mobile"
+                type="text"
+                placeholder="搜索工具"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-app-border bg-white/70 focus:outline-none focus:ring-2 focus:ring-violet-200 text-sm"
+              />
+              {searchKeyword && (
+                <button onClick={() => setSearchKeyword('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  ✕
+                </button>
+              )}
+            </div>
 
+            {/* 热门标签 */}
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {HOT_TAGS.slice(0, 4).map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => handleTagClick(tag)}
+                  className="px-2.5 py-1 rounded-full text-xs border border-app-border bg-white/50 hover:bg-violet-50 hover:text-violet-600 transition-colors"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ============ 移动端工具列表 ============ */}
         {filteredTools.length === 0 ? (
           <div className="py-16 text-center text-app-muted">
             <p>没有找到匹配工具</p>
@@ -441,7 +445,6 @@ export default function HomePage() {
   )
 }
 
-/* 卡片内部 JSX */
 function CardInner({ tool }: { tool: (typeof tools)[0] }) {
   return (
     <>
@@ -463,10 +466,9 @@ function CardInner({ tool }: { tool: (typeof tools)[0] }) {
   )
 }
 
-/* 外链角标 */
 function ExternalBadge() {
   return (
-    <span className="absolute top-2.5 right-2.5 z-10 text-[10px] px-1.5 py-0.5 rounded-md bg-violet-50 text-violet-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+    <span className="absolute top-2.5 right-2.5 z-10 text-[10px] px-1.5 py-0.5 rounded-md bg-violet-50 text-violet-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
       外链 ↗
     </span>
   )

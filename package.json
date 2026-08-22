@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@heyputer/puter.js": "^2.6.1",
     "@types/exif-js": "^2.3.1",
     "docx": "^9.7.1",
     "dompurify": "^3.4.14",

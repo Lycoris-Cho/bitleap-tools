@@ -642,5 +642,29 @@ export const tools: Tool[] = [
     icon: "🪶",
     category: "媒体工具",
     target: "_blank"
+  },
+  {
+    id: 'har-viewer',
+    title: 'HAR抓包解析器',
+    description: '上传HAR抓包文件，解析查看请求、响应头、耗时与大小，支持URL过滤',
+    category: '测试工具',
+    icon: "📡",
+    href: '/tools/har-viewer',
+  },
+  {
+    id: "daily-quote",
+    title: "今日文案",
+    description: "随机文案 · 每日温暖 · 来自一言 API",
+    href: "/tools/daily-quote",
+    icon: "💬",
+    category: "日常工具", 
+  },
+  {
+    id: "answer-book",
+    title: "答案之书",
+    description: "默念一个问题，翻开一页神秘答案",
+    href: "/tools/answer-book",
+    icon: "📖",
+    category: "日常工具",
   }
 ]
