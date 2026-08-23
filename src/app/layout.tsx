@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Link from 'next/link'
 import CopyToast from '@/components/CopyToast'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: "BitLeap – Tiny tools",
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           <main className="flex-1 pt-16 bg-app-bg">
             {children}
+            <Analytics /> 
           </main>
         </div>
       </body>
