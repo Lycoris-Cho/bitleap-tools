@@ -2,10 +2,50 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { tools } from './tools'
+import { icons } from 'lucide-react'
 import ExternalLinkModal from '@/components/ExternalLinkModal'
 
 /* 热门搜索标签 */
 const HOT_TAGS = ['CSS', '图片压缩', '配色', '解码', 'JSON', '二维码']
+
+/* 分类 emoji */
+const CATEGORY_EMOJI: Record<string, string> = {
+  '文本工具': '📝',
+  '开发辅助': '🛠️',
+  'CSS 工具': '🎨',
+  '媒体工具': '🖼️',
+  '测试工具': '🧪',
+  '灵感与API': '💡',
+  '趣味工具': '🎮',
+  '前端实验': '🔬',
+  '日常工具': '📅',
+  '资源导航': '🗂️',
+}
+
+/* 随机色板池 */
+const ICON_COLORS = [
+  { bg: 'bg-emerald-50', text: 'text-emerald-500' },
+  { bg: 'bg-violet-50',  text: 'text-violet-500' },
+  { bg: 'bg-pink-50',    text: 'text-pink-500' },
+  { bg: 'bg-sky-50',     text: 'text-sky-500' },
+  { bg: 'bg-orange-50',  text: 'text-orange-500' },
+  { bg: 'bg-rose-50',    text: 'text-rose-500' },
+  { bg: 'bg-cyan-50',    text: 'text-cyan-500' },
+  { bg: 'bg-teal-50',    text: 'text-teal-500' },
+  { bg: 'bg-indigo-50',  text: 'text-indigo-500' },
+  { bg: 'bg-amber-50',   text: 'text-amber-500' },
+  { bg: 'bg-lime-50',    text: 'text-lime-500' },
+  { bg: 'bg-fuchsia-50', text: 'text-fuchsia-500' },
+]
+
+/* 用 id 做 seed 取稳定随机色 */
+function getColorFromId(id: string) {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return ICON_COLORS[Math.abs(hash) % ICON_COLORS.length]
+}
 
 export default function HomePage() {
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -55,13 +95,11 @@ export default function HomePage() {
     }
   }
 
-  /* 点击热门标签填入搜索 */
   const handleTagClick = (tag: string) => {
     setSearchKeyword(tag)
     document.getElementById('search-input')?.focus()
   }
 
-  /* 滚动到工具列表 */
   const scrollToTools = () => {
     const el = document.getElementById('tools-start')
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -83,8 +121,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-bold tracking-tight text-app-text">工具目录</h1>
             <svg
-              className={`w-8 h-8 text-app-text fill-app-text transition-all duration-500 ${booted ? 'animate-[spin_3s_linear_infinite]' : 'animate-[spin_0.6s_ease-out]'
-                }`}
+              className={`w-8 h-8 text-app-text fill-app-text transition-all duration-500 ${booted ? 'animate-[spin_3s_linear_infinite]' : 'animate-[spin_0.6s_ease-out]'}`}
               viewBox="0 0 24 24"
             >
               <path fillRule="evenodd" clipRule="evenodd" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -107,7 +144,7 @@ export default function HomePage() {
               }}
               className="block px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-app-bg hover:shadow-sm transition"
             >
-              {category}
+              {CATEGORY_EMOJI[category] ?? '🔧'} {category}
             </a>
           ))}
         </nav>
@@ -131,12 +168,10 @@ export default function HomePage() {
             }}
             className="relative overflow-hidden rounded-3xl border border-app-border bg-app-bg mb-10"
           >
-            {/* 背景渐变光斑 */}
             <div className="pointer-events-none absolute -top-20 -left-10 w-72 h-72 rounded-full bg-violet-300/30 blur-3xl animate-pulse" />
             <div className="pointer-events-none absolute top-10 right-0 w-64 h-64 rounded-full bg-sky-300/25 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
             <div className="pointer-events-none absolute -bottom-16 left-1/3 w-56 h-56 rounded-full bg-pink-300/20 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
 
-            {/* 网格底纹 */}
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.04]"
               style={{
@@ -147,7 +182,6 @@ export default function HomePage() {
             />
 
             <div className="relative px-10 py-14">
-              {/* 大标题 */}
               <h1 className="text-5xl font-extrabold tracking-tight mb-3">
                 <span className="bg-gradient-to-r from-violet-600 via-sky-500 to-cyan-400 bg-clip-text text-transparent">
                   BitLeap
@@ -156,12 +190,10 @@ export default function HomePage() {
               <p className="text-xl font-medium text-app-text/80 mb-2">
                 Tiny tools, big leap.
               </p>
-              {/* 副标题 */}
               <p className="text-sm text-app-muted mb-8 max-w-md">
                 精选小工具集合，所有计算均在浏览器本地完成，开箱即用，安全高效。
               </p>
 
-              {/* 搜索框 + 按钮 */}
               <div className="flex items-center gap-3 max-w-2xl mb-5">
                 <div className="relative flex-1">
                   <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +221,6 @@ export default function HomePage() {
                 </button>
               </div>
 
-              {/* 热门标签 */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-app-muted">热门：</span>
                 {HOT_TAGS.map((tag) => (
@@ -227,7 +258,7 @@ export default function HomePage() {
                       }}
                       className="text-xl font-semibold tracking-tight mb-4 pb-2 border-b border-app-border"
                     >
-                      {category}
+                      {CATEGORY_EMOJI[category] ?? '🔧'} {category}
                     </h2>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
@@ -288,8 +319,6 @@ export default function HomePage() {
 
       {/* ===== 移动端 ===== */}
       <div className="md:hidden px-4 py-16">
-
-        {/* ============ 移动端 Hero ============ */}
         <section
           style={{
             animationName: booted ? 'fadeInUp' : undefined,
@@ -311,7 +340,6 @@ export default function HomePage() {
             <p className="text-base font-medium text-app-text/80 mb-1">Tiny tools, big leap.</p>
             <p className="text-xs text-app-muted mb-6">精选小工具，本地运行，安全高效</p>
 
-            {/* 搜索框 */}
             <div className="relative mb-4">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -331,7 +359,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* 热门标签 */}
             <div className="flex items-center justify-center gap-2 flex-wrap">
               {HOT_TAGS.slice(0, 4).map((tag) => (
                 <button
@@ -346,7 +373,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ============ 移动端工具列表 ============ */}
         {filteredTools.length === 0 ? (
           <div className="py-16 text-center text-app-muted">
             <p>没有找到匹配工具</p>
@@ -365,13 +391,16 @@ export default function HomePage() {
                   }}
                   className="text-xl font-semibold tracking-tight mb-4 pb-2 border-b border-app-border"
                 >
-                  {category}
+                  {CATEGORY_EMOJI[category] ?? '🔧'} {category}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {filteredTools
                     .filter((tool) => tool.category === category)
                     .map((tool, index) => {
                       const isExternal = (tool as any).target === '_blank'
+                      const colors = getColorFromId(tool.id)
+                      const Icon = icons[tool.icon as keyof typeof icons]
+
                       return isExternal ? (
                         <button
                           key={tool.id}
@@ -385,7 +414,11 @@ export default function HomePage() {
                           }}
                           className="group w-full text-left block p-2.5 bg-app-bg border border-app-border rounded-xl hover:border-gray-300 hover:shadow-sm transition"
                         >
-                          <div className="text-xl mb-2">{tool.icon}</div>
+                          <div className="mb-2">
+                            <div className={`w-9 h-9 rounded-lg ${colors.bg} flex items-center justify-center`}>
+                              {Icon && <Icon className={`w-5 h-5 ${colors.text}`} />}
+                            </div>
+                          </div>
                           <h3 className="font-semibold text-base mb-1 group-hover:text-black">
                             {tool.title}
                           </h3>
@@ -406,7 +439,11 @@ export default function HomePage() {
                           }}
                           className="group block p-2.5 bg-app-bg border border-app-border rounded-xl hover:border-gray-300 hover:shadow-sm transition"
                         >
-                          <div className="text-xl mb-2">{tool.icon}</div>
+                          <div className="mb-2">
+                            <div className={`w-9 h-9 rounded-lg ${colors.bg} flex items-center justify-center`}>
+                              {Icon && <Icon className={`w-5 h-5 ${colors.text}`} />}
+                            </div>
+                          </div>
                           <h3 className="font-semibold text-base mb-1 group-hover:text-black">
                             {tool.title}
                           </h3>
@@ -432,7 +469,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Modal */}
       {pendingLink && (
         <ExternalLinkModal
           href={pendingLink.href}
@@ -445,14 +481,22 @@ export default function HomePage() {
   )
 }
 
+/* ===== 卡片内部 ===== */
 function CardInner({ tool }: { tool: (typeof tools)[0] }) {
+  const Icon = icons[tool.icon as keyof typeof icons]
+  const colors = getColorFromId(tool.id)
+
+  if (!Icon) return null
+
   return (
     <>
-      <div className="absolute -top-8 -left-8 w-24 h-24 rounded-full bg-violet-100/50 blur-2xl group-hover:bg-violet-200/60 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
-      <div className="absolute -bottom-8 -right-8 w-20 h-20 rounded-full bg-sky-50/60 blur-2xl group-hover:bg-sky-100/70 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
+      <div className={`absolute -top-8 -left-8 w-24 h-24 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500 pointer-events-none opacity-50 group-hover:opacity-60 ${colors.bg}`} />
+      <div className={`absolute -bottom-8 -right-8 w-20 h-20 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500 pointer-events-none opacity-50 group-hover:opacity-60 ${colors.bg}`} />
       <span className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-violet-500 group-hover:w-12 transition-all duration-300 rounded-full" />
-      <div className="relative text-2xl mb-2.5 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-1 origin-left">
-        {tool.icon}
+      <div className="relative mb-2.5 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-1 origin-left">
+        <div className={`w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center`}>
+          <Icon className={`w-5 h-5 ${colors.text}`} />
+        </div>
       </div>
       <h3 className="relative font-semibold text-sm text-app-text mb-1.5 inline-block">
         <span className="bg-[length:0%_1px] bg-no-repeat bg-left-bottom bg-gradient-to-r from-violet-500 to-violet-500 group-hover:bg-[length:100%_1px] transition-all duration-300">
