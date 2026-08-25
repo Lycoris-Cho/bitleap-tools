@@ -109,15 +109,22 @@ body {
 /* 滚动条 */
 * {
   scrollbar-width: thin;
+  /* 第二个参数是轨道颜色，设为 transparent 即无背景 */
   scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
 }
 
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 关键：轨道分段也透明，彻底消除背景 */
+::-webkit-scrollbar-track-piece {
   background: transparent;
 }
 

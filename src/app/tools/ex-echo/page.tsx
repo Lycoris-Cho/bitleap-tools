@@ -19,7 +19,7 @@ export default function ExEchoPage() {
   const [distillStep, setDistillStep] = useState('')
   const [error, setError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
-  const [showInfo, setShowInfo] = useState(false)       // 👈 弹窗状态
+  const [showInfo, setShowInfo] = useState(false)
   const [mounted, setMounted] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
@@ -191,7 +191,7 @@ ${profile.persona || ''}
     setShowPreview(false)
   }
 
-  // ========= 配色｜暖米基底 + 冷灰蓝网格 + 莫兰迪暖棕 =========
+  // ========= 配色 =========
   const accentMain = '#a1887f'
   const accentSoft = '#efe6dd'
   const bgBase = '#f7f4f0'
@@ -235,9 +235,8 @@ ${profile.persona || ''}
             ← {step === 'chat' ? '新建回声' : '返回工具站'}
           </button>
           <div className="flex items-center gap-3">
-            {/* 👇 使用说明按钮 */}
             <button onClick={() => setShowInfo(true)} className="text-xs px-3 py-1.5 rounded-full border bg-white/30 backdrop-blur-md transition-all hover:bg-white/60" style={{ borderColor: borderSoft, color: textSecondary }}>
-              ? 使用说明
+              使用说明
             </button>
             {step === 'chat' && (
               <button onClick={handleExport} className="text-xs px-4 py-2 rounded-full border bg-white/40 backdrop-blur-md transition-all hover:bg-white/60" style={{ borderColor: borderSoft, color: textSecondary }}>
@@ -258,7 +257,6 @@ ${profile.persona || ''}
           </p>
         </div>
 
-        {/* 错误 */}
         {error && (
           <div className="mb-6 p-4 bg-rose-50/70 border border-rose-100 rounded-2xl text-sm text-rose-500 max-w-2xl mx-auto backdrop-blur-sm">
             {error}
@@ -331,7 +329,6 @@ ${profile.persona || ''}
               </div>
             </div>
 
-            {/* 聊天容器 */}
             <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl p-6 h-[55vh] overflow-y-auto space-y-4 custom-scrollbar" style={{ boxShadow: '0 8px 32px rgba(161, 136, 127, 0.06), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
               {chatHistory.length === 0 && (
                 <div className="h-full flex items-center justify-center">
@@ -353,7 +350,6 @@ ${profile.persona || ''}
               <div ref={chatEndRef} />
             </div>
 
-            {/* 输入 */}
             <div className="flex gap-3">
               <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void handleSend() } }} placeholder="轻声说点什么…" className="flex-1 px-5 py-3.5 bg-white/60 backdrop-blur-md border rounded-2xl outline-none transition-all text-sm font-light" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
               <button onClick={handleSend} disabled={streaming} className="px-7 py-3.5 rounded-2xl text-sm font-light text-white disabled:opacity-40 hover:opacity-90 active:scale-95 transition-all" style={{ background: `linear-gradient(135deg, ${accentMain}, #b8a094)`, boxShadow: `0 4px 14px ${accentMain}20` }}>发送</button>
@@ -373,66 +369,100 @@ ${profile.persona || ''}
         </div>
       </div>
 
-      {/* 👇 ===== 使用说明弹窗 ===== */}
+      {/* ===== 使用说明弹窗（带动画）===== */}
       {showInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          {/* 遮罩 */}
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setShowInfo(false)} />
+        <>
+          {/* 遮罩 - 淡入 */}
+          <div
+            className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm animate-modal-mask"
+            onClick={() => setShowInfo(false)}
+          />
 
-          {/* 弹窗主体 */}
-          <div className="relative bg-[#faf8f6] border border-white/80 rounded-3xl p-8 max-w-md w-full shadow-2xl" style={{ boxShadow: '0 20px 60px rgba(74, 68, 64, 0.15)' }}>
-            {/* 关闭按钮 */}
-            <button onClick={() => setShowInfo(false)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5" style={{ color: textSecondary }}>
-              ✕
-            </button>
+          {/* 弹窗主体 - 从下往上弹入 + 弹性缓动 */}
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none"
+          >
+            <div
+              className="relative bg-[#faf8f6] border border-white/80 rounded-3xl p-8 max-w-md w-full shadow-2xl pointer-events-auto animate-modal-body"
+              style={{ boxShadow: '0 20px 60px rgba(74, 68, 64, 0.15)' }}
+            >
+              {/* 关闭按钮 */}
+              <button
+                onClick={() => setShowInfo(false)}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5"
+                style={{ color: textSecondary }}
+              >
+                ✕
+              </button>
 
-            <h3 className="text-lg font-light mb-4" style={{ color: textPrimary }}>关于「回声」</h3>
+              <h3 className="text-lg font-light mb-4" style={{ color: textPrimary }}>关于「回声」</h3>
 
-            <div className="space-y-3 text-sm font-light leading-relaxed" style={{ color: textSecondary }}>
-              <p>
-                回声是一个免费工具，由作者独立开发和维护。蒸馏和对话调用的是 DeepSeek 的 AI 接口，费用由作者承担。
-              </p>
-              <p>
-                为了保证服务不被滥用、同时控制成本，我做了以下限制：
-              </p>
+              <div className="space-y-3 text-sm font-light leading-relaxed" style={{ color: textSecondary }}>
+                <p>
+                  回声是一个免费工具，由作者独立开发和维护。蒸馏和对话调用的是 DeepSeek 的 AI 接口，费用由作者承担。
+                </p>
+                <p>
+                  为了保证服务不被滥用、同时控制成本，我做了以下限制：
+                </p>
 
-              <div className="bg-white/60 rounded-2xl p-4 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span>每 IP 每天蒸馏次数</span>
-                  <span style={{ color: accentMain }}>3 次</span>
+                <div className="bg-white/60 rounded-2xl p-4 space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span>每 IP 每天蒸馏次数</span>
+                    <span style={{ color: accentMain }}>3 次</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>每 IP 每天对话条数</span>
+                    <span style={{ color: accentMain }}>50 条</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>聊天记录输入上限</span>
+                    <span style={{ color: accentMain }}>100,000 字符</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>每 IP 每天对话条数</span>
-                  <span style={{ color: accentMain }}>50 条</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>聊天记录输入上限</span>
-                  <span style={{ color: accentMain }}>100,000 字符</span>
-                </div>
+
+                <p>
+                  这些限制足够覆盖正常的使用场景，同时防止接口被恶意刷量。如果你有特殊需求（比如聊天记录特别长），可以导出 SKILL.md 后在本地使用。
+                </p>
+
+                <p style={{ color: accentMain }}>
+                  谢谢你的理解，希望回声能帮你温柔地记住那些重要的回忆 ✦
+                </p>
               </div>
 
-              <p>
-                这些限制足够覆盖正常的使用场景，同时防止接口被恶意刷量。如果你有特殊需求（比如聊天记录特别长），可以导出 SKILL.md 后在本地使用。
-              </p>
-
-              <p style={{ color: accentMain }}>
-                谢谢你的理解，希望回声能帮你温柔地记住那些重要的回忆 ✦
-              </p>
+              <button
+                onClick={() => setShowInfo(false)}
+                className="mt-6 w-full py-3 rounded-2xl text-sm font-light text-white transition-all hover:opacity-90 active:scale-95"
+                style={{ background: `linear-gradient(135deg, ${accentMain}, #b8a094)` }}
+              >
+                知道了
+              </button>
             </div>
-
-            <button onClick={() => setShowInfo(false)} className="mt-6 w-full py-3 rounded-2xl text-sm font-light text-white transition-all hover:opacity-90" style={{ background: `linear-gradient(135deg, ${accentMain}, #b8a094)` }}>
-              知道了
-            </button>
           </div>
-        </div>
+        </>
       )}
 
-      {/* 自定义滚动条 */}
+      {/* 自定义滚动条 + 弹窗动画关键帧 */}
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: ${borderSoft}; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${accentMain}50; }
+
+        /* ===== 弹窗动画 ===== */
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(24px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-modal-mask {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+        .animate-modal-body {
+          animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
       `}</style>
     </div>
   )
