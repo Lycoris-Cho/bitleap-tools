@@ -1,10 +1,8 @@
 'use client'
 
-
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
 import FooterNote from '@/components/FooterNote'
-
 
 type Task = {
   id: string
@@ -13,9 +11,7 @@ type Task = {
   poms: number
 }
 
-
 type Mode = 'focus' | 'short' | 'long'
-
 
 const MODE_CONFIG: Record<Mode, { label: string; minutes: number; color: string }> = {
   focus: { label: '专注', minutes: 25, color: '#22c55e' },
@@ -23,9 +19,7 @@ const MODE_CONFIG: Record<Mode, { label: string; minutes: number; color: string 
   long:  { label: '长休息', minutes: 15, color: '#22c55e' },
 }
 
-
 const STORAGE_KEY = 'bitleap-pomodoro'
-
 
 export default function PomodoroPage() {
   const [focusMin, setFocusMin] = useState(25)
@@ -33,26 +27,21 @@ export default function PomodoroPage() {
   const [longMin, setLongMin] = useState(15)
   const [autoStart, setAutoStart] = useState(false)
 
-
   const [mode, setMode] = useState<Mode>('focus')
   const [secondsLeft, setSecondsLeft] = useState(25 * 60)
   const [running, setRunning] = useState(false)
   const [completedPoms, setCompletedPoms] = useState(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  // 标记是否已经触发过计时结束，防止重复执行
   const timerEndFiredRef = useRef(false)
-
 
   const [tasks, setTasks] = useState<Task[]>([])
   const [input, setInput] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
 
-
   const [streak, setStreak] = useState(0)
   const [todayPoms, setTodayPoms] = useState(0)
   const [error, setError] = useState('')
-
 
   // ========== 持久化加载 ==========
   useEffect(() => {
@@ -73,7 +62,6 @@ export default function PomodoroPage() {
     }
   }, [])
 
-
   // ========== 持久化保存 ==========
   useEffect(() => {
     try {
@@ -85,29 +73,30 @@ export default function PomodoroPage() {
     }
   }, [tasks, completedPoms, todayPoms, streak, focusMin, shortMin, longMin, autoStart])
 
-
-  // ========== 铃声 ==========
+  // ========== 铃声 + 移动端音频解锁 ==========
   useEffect(() => {
     audioRef.current = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAzMzP/AA==')
   }, [])
 
+  // 安全判断：是否支持 Notification
+  const hasNotification = typeof window !== 'undefined' && 'Notification' in window
 
   const playSound = useCallback((isFocusEnd: boolean) => {
     audioRef.current?.play().catch(() => {})
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('BitLeap 番茄钟', {
-        body: isFocusEnd ? '专注结束！休息一下吧 ☕' : '休息结束！开始专注吧 🚀',
-        icon: '/favicon.ico',
-      })
+    if (hasNotification && Notification.permission === 'granted') {
+      try {
+        new Notification('BitLeap 番茄钟', {
+          body: isFocusEnd ? '专注结束！休息一下吧 ☕' : '休息结束！开始专注吧 🚀',
+          icon: '/favicon.ico',
+        })
+      } catch {}
     }
-  }, [])
-
+  }, [hasNotification])
 
   const getTotalSeconds = useCallback((m: Mode) => {
     const map: Record<Mode, number> = { focus: focusMin, short: shortMin, long: longMin }
     return map[m] * 60
   }, [focusMin, shortMin, longMin])
-
 
   useEffect(() => {
     if (!running) {
@@ -116,7 +105,6 @@ export default function PomodoroPage() {
     }
   }, [focusMin, shortMin, longMin, mode, running, getTotalSeconds])
 
-
   const switchMode = useCallback((m: Mode) => {
     setMode(m)
     setSecondsLeft(getTotalSeconds(m))
@@ -124,8 +112,7 @@ export default function PomodoroPage() {
     timerEndFiredRef.current = false
   }, [getTotalSeconds])
 
-
-  // tick：只做倒计时递减，**不做任何副作用**
+  // tick：只做倒计时递减
   const tick = useCallback(() => {
     setSecondsLeft(prev => {
       if (prev <= 1) {
@@ -135,8 +122,7 @@ export default function PomodoroPage() {
     })
   }, [])
 
-
-  // ✅ 计时结束逻辑移到外部 effect，secondsLeft 变为0触发，加ref防重复执行
+  // 计时结束逻辑
   useEffect(() => {
     if (secondsLeft !== 0 || !running) {
       timerEndFiredRef.current = false
@@ -168,7 +154,6 @@ export default function PomodoroPage() {
     }
   }, [secondsLeft, running, mode, completedPoms, autoStart, switchMode, playSound])
 
-
   useEffect(() => {
     if (running) {
       intervalRef.current = setInterval(tick, 1000)
@@ -178,14 +163,23 @@ export default function PomodoroPage() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
   }, [running, tick])
 
-
+  // ✅ 修复：核心点击函数，增加 Notification 安全判断，避免移动端报错中断
   const toggleTimer = () => {
-    if (!running && Notification.permission === 'default') {
-      Notification.requestPermission()
+    // 第一次点击：同时解锁移动端音频（必须在用户交互同步上下文）
+    if (!running) {
+      audioRef.current?.play().then(() => {
+        audioRef.current?.pause()
+        audioRef.current && (audioRef.current.currentTime = 0)
+      }).catch(() => {})
+
+      // 安全请求通知权限
+      if (hasNotification && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {})
+      }
     }
+
     setRunning(r => !r)
   }
-
 
   const skip = () => {
     setRunning(false)
@@ -199,13 +193,11 @@ export default function PomodoroPage() {
     }
   }
 
-
   const reset = () => {
     setRunning(false)
     timerEndFiredRef.current = false
     setSecondsLeft(getTotalSeconds(mode))
   }
-
 
   const addTask = () => {
     const t = input.trim()
@@ -218,21 +210,17 @@ export default function PomodoroPage() {
     setInput('')
   }
 
-
   const toggleTask = (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t))
   }
-
 
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id))
   }
 
-
   const addPomToTask = (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, poms: t.poms + 1 } : t))
   }
-
 
   const [dragId, setDragId] = useState<string | null>(null)
   const onDragStart = (e: React.DragEvent, id: string) => {
@@ -255,27 +243,22 @@ export default function PomodoroPage() {
     setDragId(null)
   }
 
-
   const timeDisplay = useMemo(() => {
     const mm = String(Math.floor(secondsLeft / 60)).padStart(2, '0')
     const ss = String(secondsLeft % 60).padStart(2, '0')
     return `${mm}:${ss}`
   }, [secondsLeft])
 
-
   const progress = useMemo(() => {
     const total = getTotalSeconds(mode)
     return 1 - secondsLeft / total
   }, [secondsLeft, mode, getTotalSeconds])
 
-
   const circumference = 2 * Math.PI * 120
   const strokeDashoffset = circumference * (1 - progress)
 
-
   const activeTasks = tasks.filter(t => !t.done)
   const doneTasks = tasks.filter(t => t.done)
-
 
   const copy = async (text: string, key: string) => {
     try {
@@ -287,17 +270,14 @@ export default function PomodoroPage() {
     }
   }
 
-
   return (
-    <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-10">
+    <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-10 touch-manipulation">
       <Breadcrumb />
-
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">番茄时钟 & 任务看板</h1>
         <p className="text-app-muted text-sm">番茄计时 + 任务管理 + 统计打卡，纯本地运行，数据不丢失</p>
       </div>
-
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-mono">
@@ -305,9 +285,7 @@ export default function PomodoroPage() {
         </div>
       )}
 
-
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
-
 
         {/* ===== 左侧：计时器 ===== */}
         <div className="space-y-4">
@@ -316,17 +294,16 @@ export default function PomodoroPage() {
               <button
                 key={key}
                 onClick={() => { setRunning(false); switchMode(key) }}
-                className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${
+                className={`flex-1 py-2.5 text-xs font-medium rounded-lg transition-all ${
                   mode === key
-                    ? 'bg-white  shadow-sm text-emerald-600 '
-                    : 'text-gray-500 '
+                    ? 'bg-white shadow-sm text-emerald-600'
+                    : 'text-gray-500'
                 }`}
               >
                 {cfg.label}
               </button>
             ))}
           </div>
-
 
           <div className="flex flex-col items-center py-6">
             <div className="relative w-[260px] h-[260px]">
@@ -346,20 +323,28 @@ export default function PomodoroPage() {
               </div>
             </div>
 
-
+            {/* ✅ 修复：加大按钮高度，保证移动端点击热区 ≥ 44px */}
             <div className="flex gap-3 mt-6">
-              <button onClick={toggleTimer} className="px-6 py-2.5 bg-violet-500 text-white text-sm font-medium rounded-xl hover:bg-violet-600 active:scale-95 transition-all shadow-lg shadow-violet-500/25">
+              <button
+                onClick={toggleTimer}
+                className="px-6 py-3 bg-violet-500 text-white text-sm font-medium rounded-xl hover:bg-violet-600 active:scale-95 transition-all shadow-lg shadow-violet-500/25 min-h-[44px]"
+              >
                 {running ? '暂停' : '开始'}
               </button>
-              <button onClick={skip} className="px-4 py-2.5 text-sm border border-app-border rounded-xl text-gray-800 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={skip}
+                className="px-4 py-3 text-sm border border-app-border rounded-xl text-gray-800 hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
                 ⏭ 跳过
               </button>
-              <button onClick={reset} className="px-4 py-2.5 text-sm border border-app-border rounded-xl text-gray-800 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={reset}
+                className="px-4 py-3 text-sm border border-app-border rounded-xl text-gray-800 hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
                 ↺ 重置
               </button>
             </div>
           </div>
-
 
           <div className="grid grid-cols-3 gap-3">
             {[
@@ -375,9 +360,8 @@ export default function PomodoroPage() {
             ))}
           </div>
 
-
           <details className="p-3 bg-white rounded-xl border border-app-border">
-            <summary className="text-xs font-medium text-gray-700 cursor-pointer">⚙️ 设置</summary>
+            <summary className="text-xs font-medium text-gray-700 cursor-pointer py-1">⚙️ 设置</summary>
             <div className="mt-3 space-y-2">
               {([
                 ['专注', focusMin, setFocusMin],
@@ -386,17 +370,28 @@ export default function PomodoroPage() {
               ] as [string, number, (n: number) => void][]).map(([label, val, setter]) => (
                 <div key={label} className="flex items-center justify-between">
                   <span className="text-xs text-gray-600">{label}（分钟）</span>
-                  <input type="number" min={1} max={60} value={val} onChange={e => setter(Number(e.target.value))} className="w-16 px-2 py-1 text-xs border border-app-border rounded-lg bg-white text-gray-900" />
+                  <input
+                    type="number"
+                    min={1}
+                    max={60}
+                    value={val}
+                    onChange={e => setter(Number(e.target.value))}
+                    className="w-16 px-2 py-1.5 text-xs border border-app-border rounded-lg bg-white text-gray-900"
+                  />
                 </div>
               ))}
-              <label className="flex items-center justify-between cursor-pointer">
+              <label className="flex items-center justify-between cursor-pointer py-1">
                 <span className="text-xs text-gray-600">休息结束自动开始专注</span>
-                <input type="checkbox" checked={autoStart} onChange={e => setAutoStart(e.target.checked)} className="rounded" />
+                <input
+                  type="checkbox"
+                  checked={autoStart}
+                  onChange={e => setAutoStart(e.target.checked)}
+                  className="rounded w-4 h-4"
+                />
               </label>
             </div>
           </details>
         </div>
-
 
         {/* ===== 右侧：任务 ===== */}
         <div className="space-y-4">
@@ -406,13 +401,15 @@ export default function PomodoroPage() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addTask()}
               placeholder="添加新任务，回车确认..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-900 bg-white placeholder-gray-400"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-900 bg-white placeholder-gray-400 min-h-[44px]"
             />
-            <button onClick={addTask} className="px-4 py-2.5 bg-violet-500 text-white text-sm font-medium rounded-xl hover:bg-violet-600 transition-colors">
+            <button
+              onClick={addTask}
+              className="px-4 py-3 bg-violet-500 text-white text-sm font-medium rounded-xl hover:bg-violet-600 transition-colors min-h-[44px]"
+            >
               添加
             </button>
           </div>
-
 
           <div>
             <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">进行中 ({activeTasks.length})</h3>
@@ -427,16 +424,34 @@ export default function PomodoroPage() {
                   className="flex items-center justify-between p-4 bg-white border border-app-border rounded-xl hover:border-emerald-200 transition-all group"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <input type="checkbox" checked={t.done} onChange={() => toggleTask(t.id)} className="rounded flex-shrink-0" />
+                    <input
+                      type="checkbox"
+                      checked={t.done}
+                      onChange={() => toggleTask(t.id)}
+                      className="rounded flex-shrink-0 w-4 h-4"
+                    />
                     <span className="text-sm text-gray-900 truncate">{t.title}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     <span className="text-xs text-emerald-600 font-medium">🍅 {t.poms}</span>
-                    <button onClick={() => addPomToTask(t.id)} className="text-xs px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">+1</button>
-                    <button onClick={() => copy(t.title, t.id)} className="text-xs px-2 py-1 bg-blue-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      onClick={() => addPomToTask(t.id)}
+                      className="text-xs px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      +1
+                    </button>
+                    <button
+                      onClick={() => copy(t.title, t.id)}
+                      className="text-xs px-2 py-1 bg-blue-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                    >
                       {copied === t.id ? '✓' : '📋'}
                     </button>
-                    <button onClick={() => deleteTask(t.id)} className="text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                    <button
+                      onClick={() => deleteTask(t.id)}
+                      className="text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
               ))}
@@ -446,23 +461,38 @@ export default function PomodoroPage() {
             </div>
           </div>
 
-
           {doneTasks.length > 0 && (
             <div>
               <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">已完成 ({doneTasks.length})</h3>
               <div className="space-y-2">
                 {doneTasks.map(t => (
-                  <div key={t.id} className="flex items-center justify-between p-4 bg-gray-100  border border-gray-200 rounded-xl">
+                  <div
+                    key={t.id}
+                    className="flex items-center justify-between p-4 bg-gray-100 border border-gray-200 rounded-xl"
+                  >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <input type="checkbox" checked={t.done} onChange={() => toggleTask(t.id)} className="rounded flex-shrink-0" />
+                      <input
+                        type="checkbox"
+                        checked={t.done}
+                        onChange={() => toggleTask(t.id)}
+                        className="rounded flex-shrink-0 w-4 h-4"
+                      />
                       <span className="text-sm line-through text-gray-500 truncate">{t.title}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-4">
                       <span className="text-xs text-emerald-500 font-medium">🍅 {t.poms}</span>
-                      <button onClick={() => copy(t.title, `done-${t.id}`)} className="text-xs px-2 py-1 bg-blue-500 text-white rounded-lg">
+                      <button
+                        onClick={() => copy(t.title, `done-${t.id}`)}
+                        className="text-xs px-2 py-1 bg-blue-500 text-white rounded-lg"
+                      >
                         {copied === `done-${t.id}` ? '✓' : '📋'}
                       </button>
-                      <button onClick={() => deleteTask(t.id)} className="text-xs text-gray-400 hover:text-red-500">✕</button>
+                      <button
+                        onClick={() => deleteTask(t.id)}
+                        className="text-xs text-gray-400 hover:text-red-500"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -471,7 +501,6 @@ export default function PomodoroPage() {
           )}
         </div>
       </div>
-
 
       <div className="mt-10 p-4 bg-gray-50 border border-app-border rounded-xl">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">使用说明</h3>
@@ -483,7 +512,6 @@ export default function PomodoroPage() {
           <li>• 首次点击开始时浏览器会请求通知权限，用于计时结束提醒</li>
         </ul>
       </div>
-
 
       <FooterNote />
     </div>

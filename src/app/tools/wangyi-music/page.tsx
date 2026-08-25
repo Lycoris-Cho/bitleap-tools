@@ -92,8 +92,8 @@ async function extractDominantColors(imgUrl: string): Promise<[string, string]> 
 
 export default function WangyiMusicPage() {
     const [musicId, setMusicId] = useState('')
-    const [randomLoading, setRandomLoading] = useState(false)     // 修复每日推荐
-    const [coverLoading, setCoverLoading] = useState(false)       // 修复切换歌曲封面延时问题
+    const [randomLoading, setRandomLoading] = useState(false)
+    const [coverLoading, setCoverLoading] = useState(false)
     const [playlist, setPlaylist] = useState<MusicResult[]>([])
     const [currentIndex, setCurrentIndex] = useState(-1)
     const [loading, setLoading] = useState(false)
@@ -170,12 +170,11 @@ export default function WangyiMusicPage() {
         if (currentSong) setCoverLoading(true)
     }, [currentSong?.id])
 
-
     useEffect(() => {
         if (currentSong) loadSong(currentSong)
     }, [currentSong, loadSong])
 
-    /* ---------- 歌词自动滚动 ---------- */
+    /* ---------- 歌词自动滚动（修复首尾截断，当前行停留在视口偏上位置） ---------- */
     useEffect(() => {
         if (currentLyricIndex < 0 || !lyricContainerRef.current) return
         const container = lyricContainerRef.current
@@ -183,11 +182,11 @@ export default function WangyiMusicPage() {
         if (line) {
             const containerRect = container.getBoundingClientRect()
             const lineRect = line.getBoundingClientRect()
-            const offset = lineRect.top - containerRect.top - containerRect.height / 2 + lineRect.height / 2
+            // 调整偏移比例，配合上下内边距，确保首尾歌词完整显示
+            const offset = lineRect.top - containerRect.top - containerRect.height * 0.28 + lineRect.height / 2
             container.scrollBy({ top: offset, behavior: 'smooth' })
         }
     }, [currentLyricIndex])
-
 
     /* ---------- 全局清理 ---------- */
     useEffect(() => {
@@ -268,7 +267,6 @@ export default function WangyiMusicPage() {
             setRandomLoading(false)
         }
     }
-
 
     /* ---------- 上一首 / 下一首 ---------- */
     const playPrev = () => {
@@ -372,7 +370,7 @@ export default function WangyiMusicPage() {
                         : 'linear-gradient(135deg, #1a1a2e, #0f0f1a)'
                 }}
             />
-            <div className="absolute inset-0 bg-black/35" />
+            <div className="absolute inset-0 bg-black/25" />
 
             <div className="relative z-10 flex flex-col min-h-screen">
                 {/* 顶部栏 */}
@@ -400,7 +398,6 @@ export default function WangyiMusicPage() {
                                     <circle cx="12" cy="12" r="10" strokeWidth={3} strokeOpacity={0.25} />
                                     <path strokeLinecap="round" strokeWidth={3} d="M12 2a10 10 0 0 1 10 10" />
                                 </svg>
-
                             ) : (
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -425,7 +422,6 @@ export default function WangyiMusicPage() {
                             )}
                             每日推荐
                         </button>
-
                     </div>
                     {error && (
                         <div className="max-w-3xl mx-auto mt-3 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-red-200 text-sm font-mono backdrop-blur-md">
@@ -437,13 +433,14 @@ export default function WangyiMusicPage() {
                 {/* 中间播放器主体 */}
                 <div className="flex-1 flex items-center justify-center px-6 py-6">
                     {currentSong ? (
-                        <div className="w-full max-w-5xl flex flex-col md:flex-row gap-8 md:gap-12 items-center">
-                            {/* 左侧：黑胶唱片 */}
-                            <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 shrink-0">
+                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-10 md:gap-20 items-start">
+                            {/* 左侧：黑胶唱片（已移除唱针） */}
+                            <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-96 md:h-96 shrink-0 mx-auto md:mx-0">
+                                {/* 唱片外圈阴影 */}
                                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gray-800 to-black shadow-2xl shadow-black/60" />
                                 <div
                                     ref={vinylRef}
-                                    className="absolute inset-8 rounded-full overflow-hidden shadow-inner"
+                                    className="absolute inset-10 rounded-full overflow-hidden shadow-inner"
                                     style={{ transform: 'rotate(0deg)' }}
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -453,44 +450,44 @@ export default function WangyiMusicPage() {
                                         onLoad={() => setCoverLoading(false)}
                                         className={`w-full h-full object-cover transition-opacity duration-500 ${coverLoading ? 'opacity-0' : 'opacity-100'}`}
                                     />
-
-                                </div>
-                                {/* 唱针 */}
-                                <div className={`absolute -top-3 right-1 w-16 h-16 origin-top-right transition-transform duration-500 ${isPlaying ? 'rotate-0' : '-rotate-40'}`}>
-                                    <div className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full bg-gray-300 shadow-lg" />
-                                    <div className="absolute top-1.5 right-1 w-1.5 h-14 bg-gradient-to-b from-gray-300 to-gray-500 rounded-full origin-top rotate-45" />
                                 </div>
                             </div>
 
                             {/* 右侧：歌曲信息 + 歌词 */}
-                            <div className="flex-1 w-full min-w-0">
-                                <h1 className="text-2xl sm:text-3xl font-bold mb-1 truncate">{currentSong.name}</h1>
-                                <p className="text-white/60 text-sm mb-4">{currentSong.artist} · {currentSong.album}</p>
+                            <div className="flex-1 w-full min-w-0 pt-2">
+                                {/* 歌曲标题 */}
+                                <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-left">{currentSong.name}</h1>
+                                {/* 专辑/歌手信息 */}
+                                <p className="text-white/60 text-sm mb-6 text-left">
+                                    专辑：{currentSong.album} &nbsp;&nbsp; 歌手：{currentSong.artist}
+                                </p>
 
-                                {/* 歌词滚动区 */}
+                                {/* 歌词滚动区（增加上下内边距，修复首尾截断） */}
                                 <div
                                     ref={lyricContainerRef}
-                                    className="h-56 md:h-64 overflow-y-auto scroll-smooth"
+                                    className="h-72 md:h-80 overflow-y-auto scroll-smooth pr-2"
                                     style={{ scrollbarWidth: 'none' }}
                                 >
                                     <style>{`.scroll-smooth::-webkit-scrollbar{display:none}`}</style>
-                                    <div className="py-20">
+                                    {/* 上下内边距设为容器高度的一半，确保首尾歌词都能完整滚动到可视区 */}
+                                    <div className="py-32">
                                         {lyrics.length > 0 ? (
                                             lyrics.map((line, i) => (
                                                 <p
                                                     key={i}
                                                     data-lyric-index={i}
-                                                    className={`text-center py-2 transition-all duration-300 ${i === currentLyricIndex
-                                                        ? 'text-white text-lg font-bold scale-110'
-                                                        : 'text-white/35 text-sm'
-                                                        }`}
-                                                    style={i === currentLyricIndex ? { textShadow: '0 0 18px rgba(255,255,255,0.7), 0 0 36px rgba(255,255,255,0.35)' } : undefined}
+                                                    className={`text-left py-2.5 transition-all duration-300 ${
+                                                        i === currentLyricIndex
+                                                            ? 'text-white text-base font-semibold'
+                                                            : 'text-white/35 text-sm'
+                                                    }`}
+                                                    style={i === currentLyricIndex ? { textShadow: '0 0 12px rgba(255,255,255,0.5)' } : undefined}
                                                 >
                                                     {line.text}
                                                 </p>
                                             ))
                                         ) : (
-                                            <p className="text-center text-white/30 text-sm py-20">暂无歌词</p>
+                                            <p className="text-left text-white/30 text-sm">暂无歌词</p>
                                         )}
                                     </div>
                                 </div>
@@ -580,7 +577,6 @@ export default function WangyiMusicPage() {
                                     </button>
                                 </div>
                             </div>
-
                         </div>
 
                         {/* 隐藏的原生audio */}

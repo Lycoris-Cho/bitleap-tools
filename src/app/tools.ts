@@ -90,4 +90,5 @@ export const tools: Tool[] = [
   { id: 'daily-quote', title: '今日文案', description: '随机文案 · 每日温暖', href: '/tools/daily-quote', icon: 'Quote', category: '日常工具' },
   { id: 'answer-book', title: '答案之书', description: '默念一个问题，翻开一页神秘答案', href: '/tools/answer-book', icon: 'BookOpen', category: '日常工具' },
   { id: 'wangyi-music', title: '网易云音乐解析', description: '音乐链接解析，在线播放，每日推荐', href: '/tools/wangyi-music', icon: 'Music3', category: '日常工具' },
+  { id: 'ex-echo', title: '回声', description: '我会为了你一万次回到那个夏天', href: '/tools/ex-echo', icon: 'MessagesSquare', category: '日常工具' },
 ]
