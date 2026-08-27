@@ -192,13 +192,14 @@ ${profile.persona || ''}
   }
 
   // ========= 配色 =========
-  const accentMain = '#a1887f'
-  const accentSoft = '#efe6dd'
-  const bgBase = '#f7f4f0'
-  const gridColor = 'rgba(142, 158, 173, 0.08)'
-  const textPrimary = '#4a4440'
-  const textSecondary = '#8b8178'
-  const borderSoft = '#e5ddd5'
+  const accentMain = '#8f7468'
+  const accentDeep = '#745b51'
+  const accentSoft = '#eee7e2'
+  const bgBase = '#f7f6f3'
+  const gridColor = 'rgba(93, 106, 118, 0.055)'
+  const textPrimary = '#302c29'
+  const textSecondary = '#7f7670'
+  const borderSoft = '#e7e1dc'
 
   if (!mounted) {
     return <div className="min-h-screen" style={{ backgroundColor: bgBase }} />
@@ -213,7 +214,7 @@ ${profile.persona || ''}
         style={{
           backgroundColor: bgBase,
           backgroundImage: `linear-gradient(${gridColor} 1px, transparent 1px), linear-gradient(90deg, ${gridColor} 1px, transparent 1px)`,
-          backgroundSize: '28px 28px',
+          backgroundSize: '32px 32px',
           backgroundRepeat: 'repeat',
           backgroundPosition: '0 0',
         }}
@@ -221,25 +222,26 @@ ${profile.persona || ''}
 
       {/* 双色柔和光晕 */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-32 w-[32rem] h-[32rem] rounded-full opacity-[0.15] blur-[120px] animate-pulse" style={{ background: '#d7c4b0' }} />
-        <div className="absolute top-1/4 -right-28 w-[26rem] h-[26rem] rounded-full opacity-[0.12] blur-[100px] animate-pulse" style={{ background: '#9eaebd', animationDelay: '3s' }} />
-        <div className="absolute -bottom-40 left-1/3 w-[30rem] h-[30rem] rounded-full opacity-[0.10] blur-[120px] animate-pulse" style={{ background: '#c9b8a8', animationDelay: '6s' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% -10%, rgba(255,255,255,.92), transparent 42%), linear-gradient(to bottom, rgba(255,255,255,.28), transparent 34%)' }} />
+        <div className="absolute -top-56 -left-44 w-[34rem] h-[34rem] rounded-full opacity-[0.11] blur-[140px]" style={{ background: '#d4c3b9' }} />
+        <div className="absolute top-[22%] -right-40 w-[30rem] h-[30rem] rounded-full opacity-[0.08] blur-[130px]" style={{ background: '#aeb9c1' }} />
+        <div className="absolute -bottom-52 left-[28%] w-[34rem] h-[34rem] rounded-full opacity-[0.08] blur-[140px]" style={{ background: '#cbbcaf' }} />
       </div>
 
       {/* 主内容 */}
-      <div className="relative z-10 w-full px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-48 py-10">
+      <div className="relative z-10 w-full px-5 md:px-10 lg:px-14 py-8 md:py-10">
 
         {/* 顶部导航 */}
-        <div className="flex items-center justify-between mb-12">
-          <button onClick={step === 'chat' ? resetAll : () => history.back()} className="text-sm transition-colors hover:opacity-80" style={{ color: textSecondary }}>
+        <div className="flex items-center justify-between mb-14 max-w-5xl mx-auto">
+          <button onClick={step === 'chat' ? resetAll : () => history.back()} className="text-sm transition-all hover:-translate-x-0.5 hover:opacity-80" style={{ color: textSecondary }}>
             ← {step === 'chat' ? '新建回声' : '返回工具站'}
           </button>
           <div className="flex items-center gap-3">
-            <button onClick={() => setShowInfo(true)} className="text-xs px-3 py-1.5 rounded-full border bg-white/30 backdrop-blur-md transition-all hover:bg-white/60" style={{ borderColor: borderSoft, color: textSecondary }}>
+            <button onClick={() => setShowInfo(true)} className="text-xs px-3.5 py-2 rounded-full border bg-white/55 backdrop-blur-xl transition-all hover:bg-white/85 hover:-translate-y-0.5" style={{ borderColor: borderSoft, color: textSecondary }}>
               使用说明
             </button>
             {step === 'chat' && (
-              <button onClick={handleExport} className="text-xs px-4 py-2 rounded-full border bg-white/40 backdrop-blur-md transition-all hover:bg-white/60" style={{ borderColor: borderSoft, color: textSecondary }}>
+              <button onClick={handleExport} className="text-xs px-4 py-2 rounded-full border bg-white/60 backdrop-blur-xl transition-all hover:bg-white/90 hover:-translate-y-0.5" style={{ borderColor: borderSoft, color: textSecondary }}>
                 导出 SKILL.md
               </button>
             )}
@@ -247,9 +249,9 @@ ${profile.persona || ''}
         </div>
 
         {/* 标题区 */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-extralight tracking-[0.15em] mb-4" style={{ color: textPrimary }}>回声</h1>
-          <p className=" text-xl font-light leading-relaxed max-w-md mx-auto" style={{ color: textSecondary }}>
+        <div className="text-center mb-14 md:mb-16">
+          <h1 className="text-4xl md:text-5xl font-extralight tracking-[0.18em] mb-5" style={{ color: textPrimary }}>回声</h1>
+          <p className="text-base md:text-lg font-light leading-8 max-w-md mx-auto" style={{ color: textSecondary }}>
             将回忆蒸馏成 Skill<br />
             <span className="relative inline-block mt-1">
               <span className="relative z-10 font-normal" style={{ color: accentMain }}>不是为了挽回，而是为了记住</span>
@@ -265,16 +267,16 @@ ${profile.persona || ''}
 
         {/* ===== 录入页 ===== */}
         {step === 'intake' && (
-          <div className="max-w-2xl mx-auto space-y-6">
-            <div className="bg-white/50 backdrop-blur-xl border border-white/70 rounded-3xl p-8 space-y-6" style={{ boxShadow: '0 8px 32px rgba(161, 136, 127, 0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+          <div className="max-w-2xl mx-auto space-y-5">
+            <div className="bg-white/68 backdrop-blur-2xl border rounded-[28px] p-6 md:p-8 space-y-6" style={{ borderColor: 'rgba(255,255,255,.82)', boxShadow: '0 24px 70px rgba(66,54,48,.08), 0 2px 10px rgba(66,54,48,.04), inset 0 1px 0 rgba(255,255,255,.95)' }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="text-sm font-light" style={{ color: textSecondary }}>TA 的昵称 *</label>
-                  <input value={theirName} onChange={e => setTheirName(e.target.value)} placeholder="比如 小A" className="w-full mt-2 px-4 py-3 bg-white/70 border rounded-2xl outline-none transition-all text-sm" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
+                  <input value={theirName} onChange={e => setTheirName(e.target.value)} placeholder="比如 小A" className="w-full mt-2 px-4 py-3.5 bg-white/78 border rounded-[14px] outline-none transition-all text-sm placeholder:text-[#aaa09a]" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
                 </div>
                 <div>
                   <label className="text-sm font-light" style={{ color: textSecondary }}>回声名称</label>
-                  <input value={echoName} onChange={e => setEchoName(e.target.value)} placeholder="自动生成" className="w-full mt-2 px-4 py-3 bg-white/70 border rounded-2xl outline-none transition-all text-sm" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
+                  <input value={echoName} onChange={e => setEchoName(e.target.value)} placeholder="自动生成" className="w-full mt-2 px-4 py-3.5 bg-white/78 border rounded-[14px] outline-none transition-all text-sm placeholder:text-[#aaa09a]" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
                 </div>
               </div>
               <div>
@@ -283,10 +285,10 @@ ${profile.persona || ''}
                   <FormatTab active={fileType === 'txt'} onClick={() => setFileType('txt')} accent={accentMain}>TXT</FormatTab>
                   <FormatTab active={fileType === 'csv'} onClick={() => setFileType('csv')} accent={accentMain}>CSV</FormatTab>
                 </div>
-                <textarea value={rawText} onChange={e => setRawText(e.target.value)} placeholder="从留痕 / WeChatMsg 导出后，粘贴到这里…" rows={14} className="w-full px-4 py-4 bg-white/70 border rounded-2xl outline-none transition-all text-sm font-mono leading-relaxed resize-none" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
+                <textarea value={rawText} onChange={e => setRawText(e.target.value)} placeholder="从留痕 / WeChatMsg 导出后，粘贴到这里…" rows={14} className="w-full px-4 py-4 bg-white/78 border rounded-[16px] outline-none transition-all text-sm font-mono leading-7 resize-none placeholder:text-[#aaa09a]" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
                 <p className="text-xs mt-2 font-light" style={{ color: textSecondary }}>支持留痕导出的 TXT（带时间戳格式）或 CSV</p>
               </div>
-              <button onClick={handleDistill} className="w-full py-4 rounded-2xl text-sm font-light tracking-wider text-white hover:opacity-90 active:scale-[0.985] transition-all" style={{ background: `linear-gradient(135deg, ${accentMain} 0%, #b8a094 100%)`, boxShadow: `0 6px 20px ${accentMain}25` }}>
+              <button onClick={handleDistill} className="w-full py-4 rounded-[15px] text-sm font-medium tracking-[0.08em] text-white hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all" style={{ background: `linear-gradient(135deg, ${accentDeep} 0%, ${accentMain} 100%)`, boxShadow: `0 12px 30px ${accentMain}26, inset 0 1px 0 rgba(255,255,255,.16)` }}>
                 开始蒸馏 ✦
               </button>
             </div>
@@ -297,7 +299,7 @@ ${profile.persona || ''}
         {/* ===== 蒸馏中 ===== */}
         {step === 'distilling' && (
           <div className="max-w-md mx-auto">
-            <div className="bg-white/50 backdrop-blur-xl border border-white/70 rounded-3xl p-16 text-center" style={{ boxShadow: '0 8px 32px rgba(161, 136, 127, 0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+            <div className="bg-white/68 backdrop-blur-2xl border rounded-[28px] p-14 md:p-16 text-center" style={{ borderColor: 'rgba(255,255,255,.82)', boxShadow: '0 24px 70px rgba(66,54,48,.08), inset 0 1px 0 rgba(255,255,255,.95)' }}>
               <div className="text-5xl mb-5 animate-pulse opacity-80">✦</div>
               <p className="text-base font-light mb-2" style={{ color: textPrimary }}>正在蒸馏</p>
               <p className="text-sm font-light mb-8" style={{ color: textSecondary }}>{distillStep}</p>
@@ -318,18 +320,18 @@ ${profile.persona || ''}
 
             <div className="overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ maxHeight: showPreview ? '320px' : '0px', opacity: showPreview ? 1 : 0, transform: showPreview ? 'translateY(0)' : 'translateY(8px)', pointerEvents: showPreview ? 'auto' : 'none' }}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
-                <div className="bg-white/50 backdrop-blur-xl border border-white/70 rounded-2xl p-5" style={{ boxShadow: '0 4px 20px rgba(161, 136, 127, 0.06), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                <div className="bg-white/65 backdrop-blur-xl border rounded-[20px] p-5" style={{ borderColor: 'rgba(255,255,255,.82)', boxShadow: '0 12px 36px rgba(66,54,48,.055), inset 0 1px 0 rgba(255,255,255,.92)' }}>
                   <p className="text-sm font-light mb-2" style={{ color: textSecondary }}>Persona 人格设定</p>
                   <pre className="text-xs whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto pr-2 custom-scrollbar" style={{ color: textPrimary }}>{persona.slice(0, 700)}…</pre>
                 </div>
-                <div className="bg-white/50 backdrop-blur-xl border border-white/70 rounded-2xl p-5" style={{ boxShadow: '0 4px 20px rgba(161, 136, 127, 0.06), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                <div className="bg-white/65 backdrop-blur-xl border rounded-[20px] p-5" style={{ borderColor: 'rgba(255,255,255,.82)', boxShadow: '0 12px 36px rgba(66,54,48,.055), inset 0 1px 0 rgba(255,255,255,.92)' }}>
                   <p className="text-sm font-light mb-2" style={{ color: textSecondary }}>Memories 共同记忆</p>
                   <pre className="text-xs whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto pr-2 custom-scrollbar" style={{ color: textPrimary }}>{memories.slice(0, 700)}…</pre>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl p-6 h-[55vh] overflow-y-auto space-y-4 custom-scrollbar" style={{ boxShadow: '0 8px 32px rgba(161, 136, 127, 0.06), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+            <div className="bg-white/58 backdrop-blur-2xl border rounded-[28px] p-5 md:p-6 h-[55vh] overflow-y-auto space-y-4 custom-scrollbar" style={{ borderColor: 'rgba(255,255,255,.82)', boxShadow: '0 24px 70px rgba(66,54,48,.07), inset 0 1px 0 rgba(255,255,255,.92)' }}>
               {chatHistory.length === 0 && (
                 <div className="h-full flex items-center justify-center">
                   <p className="text-base font-light text-center" style={{ color: textSecondary }}>回声已就绪<br />说点什么吧…</p>
@@ -337,7 +339,7 @@ ${profile.persona || ''}
               )}
               {chatHistory.map((m, i) => (
                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[68%] px-5 py-3 rounded-3xl text-sm font-light leading-relaxed ${m.role === 'user' ? 'text-white rounded-br-md' : 'bg-white/85 border border-white/90 rounded-bl-md'}`} style={m.role === 'user' ? { background: `linear-gradient(135deg, ${accentMain}, #b8a094)`, boxShadow: `0 4px 14px ${accentMain}20` } : { color: textPrimary, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div className={`max-w-[68%] px-5 py-3 rounded-3xl text-sm font-light leading-relaxed ${m.role === 'user' ? 'text-white rounded-br-[8px]' : 'bg-white/88 border border-white rounded-bl-[8px]'}`} style={m.role === 'user' ? { background: `linear-gradient(135deg, ${accentDeep}, ${accentMain})`, boxShadow: `0 8px 22px ${accentMain}20` } : { color: textPrimary, boxShadow: '0 5px 18px rgba(45,38,34,.045)' }}>
                     {m.content}
                   </div>
                 </div>
@@ -351,8 +353,8 @@ ${profile.persona || ''}
             </div>
 
             <div className="flex gap-3">
-              <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void handleSend() } }} placeholder="轻声说点什么…" className="flex-1 px-5 py-3.5 bg-white/60 backdrop-blur-md border rounded-2xl outline-none transition-all text-sm font-light" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
-              <button onClick={handleSend} disabled={streaming} className="px-7 py-3.5 rounded-2xl text-sm font-light text-white disabled:opacity-40 hover:opacity-90 active:scale-95 transition-all" style={{ background: `linear-gradient(135deg, ${accentMain}, #b8a094)`, boxShadow: `0 4px 14px ${accentMain}20` }}>发送</button>
+              <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void handleSend() } }} placeholder="轻声说点什么…" className="flex-1 px-5 py-3.5 bg-white/72 backdrop-blur-xl border rounded-[15px] outline-none transition-all text-sm font-light placeholder:text-[#aaa09a]" style={{ borderColor: borderSoft, color: textPrimary, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.03)' }} onFocus={(e) => { e.target.style.borderColor = accentMain; e.target.style.boxShadow = `0 0 0 4px ${accentMain}15, inset 0 1px 3px rgba(0,0,0,0.03)` }} onBlur={(e) => { e.target.style.borderColor = borderSoft; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.03)' }} />
+              <button onClick={handleSend} disabled={streaming} className="px-7 py-3.5 rounded-[15px] text-sm font-medium text-white disabled:opacity-40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all" style={{ background: `linear-gradient(135deg, ${accentDeep}, ${accentMain})`, boxShadow: `0 10px 24px ${accentMain}22` }}>发送</button>
             </div>
 
             <p className="text-center text-xs font-light" style={{ color: textSecondary }}>{echoName || theirName} · 回声模式</p>
@@ -383,8 +385,8 @@ ${profile.persona || ''}
             className="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none"
           >
             <div
-              className="relative bg-[#faf8f6] border border-white/80 rounded-3xl p-8 max-w-md w-full shadow-2xl pointer-events-auto animate-modal-body"
-              style={{ boxShadow: '0 20px 60px rgba(74, 68, 64, 0.15)' }}
+              className="relative bg-[#fbfaf8]/95 backdrop-blur-2xl border border-white/90 rounded-[28px] p-7 md:p-8 max-w-md w-full pointer-events-auto animate-modal-body"
+              style={{ boxShadow: '0 30px 90px rgba(58,48,43,.18), inset 0 1px 0 rgba(255,255,255,.96)' }}
             >
               {/* 关闭按钮 */}
               <button
@@ -431,8 +433,8 @@ ${profile.persona || ''}
 
               <button
                 onClick={() => setShowInfo(false)}
-                className="mt-6 w-full py-3 rounded-2xl text-sm font-light text-white transition-all hover:opacity-90 active:scale-95"
-                style={{ background: `linear-gradient(135deg, ${accentMain}, #b8a094)` }}
+                className="mt-6 w-full py-3.5 rounded-[15px] text-sm font-medium text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]"
+                style={{ background: `linear-gradient(135deg, ${accentDeep}, ${accentMain})`, boxShadow: `0 10px 24px ${accentMain}22` }}
               >
                 知道了
               </button>
@@ -463,6 +465,23 @@ ${profile.persona || ''}
         .animate-modal-body {
           animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
+
+        input::placeholder, textarea::placeholder {
+          color: #aaa09a;
+        }
+
+        input, textarea, button {
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            scroll-behavior: auto !important;
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+          }
+        }
       `}</style>
     </div>
   )
@@ -470,7 +489,7 @@ ${profile.persona || ''}
 
 function FormatTab({ active, onClick, children, accent }: { active: boolean; onClick: () => void; children: React.ReactNode; accent: string }) {
   return (
-    <div className={`px-4 py-2 rounded-xl text-sm font-light transition-all duration-200 ${active ? 'text-white' : 'bg-white/50 hover:bg-white/70'}`} style={active ? { background: `linear-gradient(135deg, ${accent}, #b8a094)`, boxShadow: `0 3px 10px ${accent}20` } : { color: '#8b8178' }}>
+    <div className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-all duration-200 cursor-pointer ${active ? 'text-white -translate-y-px' : 'bg-white/58 hover:bg-white/88'}`} style={active ? { background: `linear-gradient(135deg, #745b51, ${accent})`, boxShadow: `0 6px 16px ${accent}22` } : { color: '#7f7670', border: '1px solid rgba(231,225,220,.9)' }}>
       {children}
     </div>
   )

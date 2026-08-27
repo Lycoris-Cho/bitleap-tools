@@ -20,6 +20,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
   '前端实验': '🔬',
   '日常工具': '📅',
   '资源导航': '🗂️',
+  '心迹':'♥️'
 }
 
 /* 随机色板池 */
