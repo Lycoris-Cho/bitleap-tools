@@ -271,33 +271,34 @@ export default function PomodoroPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-10 touch-manipulation">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/70 text-slate-900 touch-manipulation">
+      <div className="max-w-6xl mx-auto py-10 sm:py-14 px-4 sm:px-6 lg:px-10">
       <Breadcrumb />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">番茄时钟 & 任务看板</h1>
-        <p className="text-app-muted text-sm">番茄计时 + 任务管理 + 统计打卡，纯本地运行，数据不丢失</p>
+      <div className="mb-10 rounded-3xl border border-white/70 bg-white/80 p-6 sm:p-8 shadow-[0_20px_70px_-30px_rgba(76,29,149,0.28)] backdrop-blur-xl">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-2 bg-gradient-to-r from-slate-900 via-violet-700 to-fuchsia-600 bg-clip-text text-transparent">番茄时钟 & 任务看板</h1>
+        <p className="text-slate-500 text-sm sm:text-base leading-relaxed">番茄计时 + 任务管理 + 统计打卡，纯本地运行，数据不丢失</p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-mono">
+        <div className="mb-6 p-4 bg-red-50/90 border border-red-200/80 rounded-2xl text-red-600 text-sm font-mono shadow-sm">
           ❌ {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[390px_1fr] gap-6 lg:gap-8">
 
         {/* ===== 左侧：计时器 ===== */}
-        <div className="space-y-4">
-          <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
+        <div className="space-y-5">
+          <div className="flex gap-1.5 p-1.5 bg-white/80 border border-slate-200/80 rounded-2xl shadow-sm backdrop-blur">
             {(Object.entries(MODE_CONFIG) as [Mode, typeof MODE_CONFIG[Mode]][]).map(([key, cfg]) => (
               <button
                 key={key}
                 onClick={() => { setRunning(false); switchMode(key) }}
-                className={`flex-1 py-2.5 text-xs font-medium rounded-lg transition-all ${
+                className={`flex-1 py-2.5 text-xs font-semibold rounded-xl transition-all duration-200 ${
                   mode === key
-                    ? 'bg-white shadow-sm text-emerald-600'
-                    : 'text-gray-500'
+                    ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-md shadow-violet-500/20'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
                 }`}
               >
                 {cfg.label}
@@ -305,41 +306,41 @@ export default function PomodoroPage() {
             ))}
           </div>
 
-          <div className="flex flex-col items-center py-6">
-            <div className="relative w-[260px] h-[260px]">
+          <div className="flex flex-col items-center py-7 sm:py-8 rounded-3xl border border-white/80 bg-white/85 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+            <div className="relative w-[260px] h-[260px] drop-shadow-[0_20px_28px_rgba(124,58,237,0.12)]">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 260 260">
-                <circle cx="130" cy="130" r="120" fill="none" stroke="#e5e7eb" strokeWidth="8" />
+                <circle cx="130" cy="130" r="120" fill="none" stroke="#eef2ff" strokeWidth="10" />
                 <circle
                   cx="130" cy="130" r="120" fill="none"
                   stroke={MODE_CONFIG[mode].color}
-                  strokeWidth="8" strokeLinecap="round"
+                  strokeWidth="10" strokeLinecap="round"
                   strokeDasharray={circumference}
                   strokeDashoffset={strokeDashoffset}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-5xl font-bold tabular-nums text-gray-900">{timeDisplay}</span>
-                <span className="text-xs text-gray-500 mt-2">{MODE_CONFIG[mode].label}</span>
+                <span className="text-5xl sm:text-6xl font-black tracking-tight tabular-nums text-slate-900">{timeDisplay}</span>
+                <span className="text-xs font-semibold tracking-[0.18em] uppercase text-violet-500 mt-3">{MODE_CONFIG[mode].label}</span>
               </div>
             </div>
 
             {/* ✅ 修复：加大按钮高度，保证移动端点击热区 ≥ 44px */}
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-wrap justify-center gap-3 mt-7">
               <button
                 onClick={toggleTimer}
-                className="px-6 py-3 bg-violet-500 text-white text-sm font-medium rounded-xl hover:bg-violet-600 active:scale-95 transition-all shadow-lg shadow-violet-500/25 min-h-[44px]"
+                className="px-7 py-3.5 bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white text-sm font-semibold rounded-2xl hover:from-violet-700 hover:to-fuchsia-600 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-violet-500/25 min-h-[46px]"
               >
                 {running ? '暂停' : '开始'}
               </button>
               <button
                 onClick={skip}
-                className="px-4 py-3 text-sm border border-app-border rounded-xl text-gray-800 hover:bg-gray-50 transition-colors min-h-[44px]"
+                className="px-4 py-3 text-sm font-medium border border-slate-200 rounded-2xl text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all min-h-[46px] shadow-sm"
               >
                 ⏭ 跳过
               </button>
               <button
                 onClick={reset}
-                className="px-4 py-3 text-sm border border-app-border rounded-xl text-gray-800 hover:bg-gray-50 transition-colors min-h-[44px]"
+                className="px-4 py-3 text-sm font-medium border border-slate-200 rounded-2xl text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all min-h-[46px] shadow-sm"
               >
                 ↺ 重置
               </button>
@@ -352,16 +353,16 @@ export default function PomodoroPage() {
               { icon: '🔥', value: streak, label: '连续天数' },
               { icon: '✨', value: completedPoms, label: '累计番茄' },
             ].map((item, i) => (
-              <div key={i} className="p-3 bg-white rounded-xl border border-app-border text-center">
-                <div className="text-xl">{item.icon}</div>
-                <div className="text-lg font-bold text-gray-900">{item.value}</div>
-                <div className="text-[10px] text-gray-400">{item.label}</div>
+              <div key={i} className="p-4 bg-white/90 rounded-2xl border border-slate-200/80 text-center shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+                <div className="text-2xl mb-1">{item.icon}</div>
+                <div className="text-xl font-black text-slate-900">{item.value}</div>
+                <div className="text-[10px] font-medium text-slate-400 tracking-wide">{item.label}</div>
               </div>
             ))}
           </div>
 
-          <details className="p-3 bg-white rounded-xl border border-app-border">
-            <summary className="text-xs font-medium text-gray-700 cursor-pointer py-1">⚙️ 设置</summary>
+          <details className="p-4 bg-white/90 rounded-2xl border border-slate-200/80 shadow-sm open:shadow-md transition-shadow">
+            <summary className="text-xs font-semibold text-slate-700 cursor-pointer py-1 select-none">⚙️ 设置</summary>
             <div className="mt-3 space-y-2">
               {([
                 ['专注', focusMin, setFocusMin],
@@ -369,19 +370,19 @@ export default function PomodoroPage() {
                 ['长休', longMin, setLongMin],
               ] as [string, number, (n: number) => void][]).map(([label, val, setter]) => (
                 <div key={label} className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600">{label}（分钟）</span>
+                  <span className="text-xs text-slate-600">{label}（分钟）</span>
                   <input
                     type="number"
                     min={1}
                     max={60}
                     value={val}
                     onChange={e => setter(Number(e.target.value))}
-                    className="w-16 px-2 py-1.5 text-xs border border-app-border rounded-lg bg-white text-gray-900"
+                    className="w-16 px-2.5 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-400"
                   />
                 </div>
               ))}
               <label className="flex items-center justify-between cursor-pointer py-1">
-                <span className="text-xs text-gray-600">休息结束自动开始专注</span>
+                <span className="text-xs text-slate-600">休息结束自动开始专注</span>
                 <input
                   type="checkbox"
                   checked={autoStart}
@@ -394,25 +395,25 @@ export default function PomodoroPage() {
         </div>
 
         {/* ===== 右侧：任务 ===== */}
-        <div className="space-y-4">
-          <div className="flex gap-2">
+        <div className="space-y-5">
+          <div className="flex gap-2 rounded-2xl bg-white/90 border border-slate-200/80 p-2 shadow-sm">
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addTask()}
               placeholder="添加新任务，回车确认..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-900 bg-white placeholder-gray-400 min-h-[44px]"
+              className="flex-1 px-4 py-3 border-0 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-violet-400/40 text-slate-900 bg-slate-50 placeholder-slate-400 min-h-[44px]"
             />
             <button
               onClick={addTask}
-              className="px-4 py-3 bg-violet-500 text-white text-sm font-medium rounded-xl hover:bg-violet-600 transition-colors min-h-[44px]"
+              className="px-5 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white text-sm font-semibold rounded-xl hover:from-violet-700 hover:to-fuchsia-600 transition-all shadow-md shadow-violet-500/20 min-h-[44px]"
             >
               添加
             </button>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">进行中 ({activeTasks.length})</h3>
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-[0.16em] mb-3">进行中 ({activeTasks.length})</h3>
             <div className="space-y-2">
               {activeTasks.map(t => (
                 <div
@@ -421,7 +422,7 @@ export default function PomodoroPage() {
                   onDragStart={e => onDragStart(e, t.id)}
                   onDragOver={onDragOver}
                   onDrop={e => onDrop(e, t.id)}
-                  className="flex items-center justify-between p-4 bg-white border border-app-border rounded-xl hover:border-emerald-200 transition-all group"
+                  className="flex items-center justify-between p-4 bg-white/90 border border-slate-200/80 rounded-2xl hover:border-violet-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group cursor-grab active:cursor-grabbing"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <input
@@ -430,25 +431,25 @@ export default function PomodoroPage() {
                       onChange={() => toggleTask(t.id)}
                       className="rounded flex-shrink-0 w-4 h-4"
                     />
-                    <span className="text-sm text-gray-900 truncate">{t.title}</span>
+                    <span className="text-sm font-medium text-slate-800 truncate">{t.title}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
-                    <span className="text-xs text-emerald-600 font-medium">🍅 {t.poms}</span>
+                    <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-1 rounded-lg">🍅 {t.poms}</span>
                     <button
                       onClick={() => addPomToTask(t.id)}
-                      className="text-xs px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="text-xs px-2.5 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-100"
                     >
                       +1
                     </button>
                     <button
                       onClick={() => copy(t.title, t.id)}
-                      className="text-xs px-2 py-1 bg-blue-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                      className="text-xs px-2.5 py-1.5 bg-sky-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-sky-600"
                     >
                       {copied === t.id ? '✓' : '📋'}
                     </button>
                     <button
                       onClick={() => deleteTask(t.id)}
-                      className="text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="text-xs text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all px-2 py-1.5 rounded-lg hover:bg-red-50"
                     >
                       ✕
                     </button>
@@ -456,19 +457,19 @@ export default function PomodoroPage() {
                 </div>
               ))}
               {activeTasks.length === 0 && (
-                <p className="text-xs text-gray-400 text-center py-4">暂无任务，添加一个开始专注吧</p>
+                <p className="text-xs text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-2xl bg-white/60">暂无任务，添加一个开始专注吧</p>
               )}
             </div>
           </div>
 
           {doneTasks.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">已完成 ({doneTasks.length})</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-[0.16em] mb-3">已完成 ({doneTasks.length})</h3>
               <div className="space-y-2">
                 {doneTasks.map(t => (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between p-4 bg-gray-100 border border-gray-200 rounded-xl"
+                    className="flex items-center justify-between p-4 bg-slate-50/90 border border-slate-200 rounded-2xl"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <input
@@ -477,19 +478,19 @@ export default function PomodoroPage() {
                         onChange={() => toggleTask(t.id)}
                         className="rounded flex-shrink-0 w-4 h-4"
                       />
-                      <span className="text-sm line-through text-gray-500 truncate">{t.title}</span>
+                      <span className="text-sm line-through text-slate-400 truncate">{t.title}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-4">
                       <span className="text-xs text-emerald-500 font-medium">🍅 {t.poms}</span>
                       <button
                         onClick={() => copy(t.title, `done-${t.id}`)}
-                        className="text-xs px-2 py-1 bg-blue-500 text-white rounded-lg"
+                        className="text-xs px-2.5 py-1.5 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
                       >
                         {copied === `done-${t.id}` ? '✓' : '📋'}
                       </button>
                       <button
                         onClick={() => deleteTask(t.id)}
-                        className="text-xs text-gray-400 hover:text-red-500"
+                        className="text-xs text-slate-400 hover:text-red-500 px-2 py-1.5 rounded-lg hover:bg-red-50 transition-all"
                       >
                         ✕
                       </button>
@@ -502,9 +503,9 @@ export default function PomodoroPage() {
         </div>
       </div>
 
-      <div className="mt-10 p-4 bg-gray-50 border border-app-border rounded-xl">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">使用说明</h3>
-        <ul className="text-xs text-app-muted space-y-1.5 leading-relaxed">
+      <div className="mt-10 p-5 sm:p-6 bg-white/75 border border-white/80 rounded-3xl shadow-sm backdrop-blur-xl">
+        <h3 className="text-sm font-bold text-slate-700 mb-3">使用说明</h3>
+        <ul className="text-xs text-slate-500 space-y-2 leading-relaxed">
           <li>• 点击模式切换「专注 / 短休息 / 长休息」，时间自动重置</li>
           <li>• 每完成 4 个番茄自动进入长休息，其余进入短休息</li>
           <li>• 任务支持拖拽排序，点击 +1 为该任务绑定一个番茄</li>
@@ -514,6 +515,7 @@ export default function PomodoroPage() {
       </div>
 
       <FooterNote />
+      </div>
     </div>
   )
 }
