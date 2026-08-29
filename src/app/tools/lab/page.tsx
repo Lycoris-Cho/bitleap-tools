@@ -64,7 +64,7 @@ export default function LabPage() {
       <Breadcrumb />
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-1">🔬 前端实验工作台</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-1">前端实验工作台</h1>
           <p className="text-sm text-app-muted">全部运行在浏览器本地，无后端</p>
         </div>
         <div className="flex gap-2 flex-wrap">

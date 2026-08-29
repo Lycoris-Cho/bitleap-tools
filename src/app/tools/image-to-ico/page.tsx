@@ -50,7 +50,7 @@ export default function ImageToIcoPage() {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-8">
-      <Breadcrumb items={[{ label: '工具', href: '/tools' }, { label: '图片转 ICO' }]} />
+      <Breadcrumb />
 
       <h1 className="text-2xl font-bold mt-4 mb-2">图片转 ICO 图标</h1>
       <p className="text-gray-500 mb-6">上传 PNG 或 JPG 图片，转换为指定尺寸的 ICO 格式（适用于 favicon）</p>

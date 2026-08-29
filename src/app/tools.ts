@@ -96,6 +96,20 @@ export const tools: Tool[] = [
   { id: 'morphicons', title: 'Morphicons', description: '任意描边图标间弹簧形变动画，支持 Lucide/Tabler/Heroicons', href: 'https://www.morphicons.com', icon: 'Shapes', category: 'CSS 工具', target: '_blank' },
   { id: 'screenshot-beautifier', title: '截图美化', description: '粘贴截图，一键生成适合分享的精美图片', href: '/tools/screenshot-beautifier', icon: 'Image', category: '媒体工具' },
   { id: 'image-to-ico', title: '图片转 ICO', description: '将 PNG/JPG 图片转换为 32×32 的 ICO 图标，适合做网站 favicon', href: '/tools/image-to-ico', icon: 'ImageDown', category: '媒体工具'},
-  { id: 'image-to-ico', title: '图片转 ICO', description: '将 PNG/JPG 图片转换为 32×32 的 ICO 图标，适合做网站 favicon', href: '/tools/image-to-ico', icon: 'ImageDown', category: '媒体工具'},
-  { id: 'image-to-ico', title: '图片转 ICO', description: '将 PNG/JPG 图片转换为 32×32 的 ICO 图标，适合做网站 favicon', href: '/tools/page-builder', icon: 'ImageDown', category: '前端实验室'}
+  { 
+    id: 'page-builder', 
+    title: '前端页面生成器', 
+    description: '拖拽式页面生成器，可导出 HTML / React 代码', 
+    href: '/tools/page-builder', 
+    icon: 'LayoutDashboard',
+    category: '前端实验' 
+  },
+  {
+    id: 'data-analytics',
+    title: '数据分析模板',
+    description: '通用数据看板：KPI 卡片、趋势图、分类对比、占比、明细表',
+    href: '/tools/data-analytics',
+    icon: 'ChartLine',
+    category: '前端实验'
+  }
 ]
