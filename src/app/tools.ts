@@ -111,5 +111,13 @@ export const tools: Tool[] = [
     href: '/tools/data-analytics',
     icon: 'ChartLine',
     category: '前端实验'
-  }
+  },
+  {
+    id: "gsap",
+    title: "GSAP 动画实验室",
+    description: "GSAP 动画介绍、基础用法、配置与交互式 Playground",
+    href: "/tools/gsap",
+    icon: "WandSparkles",
+    category: "前端实验",
+  },
 ]

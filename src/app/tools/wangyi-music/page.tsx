@@ -53,8 +53,30 @@ function parseLRC(lrc: string): LyricLine[] {
     return result.sort((a, b) => a.time - b.time)
 }
 
+/** 二分查找当前歌词，避免每次 timeupdate 都从头扫描 */
+function findLyricIndex(lyrics: LyricLine[], time: number) {
+    let left = 0
+    let right = lyrics.length - 1
+    let answer = -1
+    while (left <= right) {
+        const mid = (left + right) >> 1
+        if (lyrics[mid].time <= time) {
+            answer = mid
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    return answer
+}
+
+const colorCache = new Map<string, [string, string]>()
+
 /** 从专辑封面提取两种主色 */
 async function extractDominantColors(imgUrl: string): Promise<[string, string]> {
+    const cached = colorCache.get(imgUrl)
+    if (cached) return cached
+
     return new Promise((resolve) => {
         const img = new Image()
         img.crossOrigin = 'anonymous'
@@ -80,7 +102,11 @@ async function extractDominantColors(imgUrl: string): Promise<[string, string]> 
                     const [r, g, b] = k.split(',').map(Number)
                     return `rgb(${r},${g},${b})`
                 })
-                resolve(top.length >= 2 ? [top[0], top[1]] : [top[0] || '#1a1a2e', '#0f0f1a'])
+                const colors: [string, string] = top.length >= 2
+                    ? [top[0], top[1]]
+                    : [top[0] || '#1a1a2e', '#0f0f1a']
+                colorCache.set(imgUrl, colors)
+                resolve(colors)
             } catch {
                 resolve(['#1a1a2e', '#0f0f1a'])
             }
@@ -108,63 +134,52 @@ export default function WangyiMusicPage() {
 
     const abortControllerRef = useRef<AbortController | null>(null)
     const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const vinylRef = useRef<HTMLDivElement>(null)
     const audioRef = useRef<HTMLAudioElement>(null)
     const progressRef = useRef<HTMLDivElement>(null)
     const lyricContainerRef = useRef<HTMLDivElement>(null)
-    const animationRef = useRef<number | null>(null)
-    const angleRef = useRef(0)
+    const lyricAbortRef = useRef<AbortController | null>(null)
+    const loadVersionRef = useRef(0)
+    const nextLoadingRef = useRef(false)
     const shouldAutoPlayRef = useRef(false)
 
     const currentSong = currentIndex >= 0 ? playlist[currentIndex] : null
     const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
 
-    /* ---------- 唱片旋转 ---------- */
-    const startRotation = useCallback(() => {
-        if (!vinylRef.current || animationRef.current) return
-        const rotate = () => {
-            angleRef.current = (angleRef.current + 0.15) % 360
-            if (vinylRef.current) vinylRef.current.style.transform = `rotate(${angleRef.current}deg)`
-            animationRef.current = requestAnimationFrame(rotate)
-        }
-        rotate()
-    }, [])
-
-    const stopRotation = useCallback(() => {
-        if (animationRef.current) {
-            cancelAnimationFrame(animationRef.current)
-            animationRef.current = null
-        }
-    }, [])
-
-    const resetVinyl = useCallback(() => {
-        stopRotation()
-        angleRef.current = 0
-        if (vinylRef.current) vinylRef.current.style.transform = 'rotate(0deg)'
-    }, [stopRotation])
-
-    /* ---------- 加载歌曲（歌词+颜色） ---------- */
+    /* ---------- 加载歌曲（歌词 + 颜色并行，且避免旧请求覆盖新歌曲） ---------- */
     const loadSong = useCallback(async (song: MusicResult) => {
+        const version = ++loadVersionRef.current
+        lyricAbortRef.current?.abort()
+        const lyricController = new AbortController()
+        lyricAbortRef.current = lyricController
+
         setCurrentTime(0)
         setDuration(0)
         setLyrics([])
         setCurrentLyricIndex(-1)
-        setBgColors(null)
-        resetVinyl()
 
-        try {
-            const res = await fetch(`/api/wangyi-lyrics?id=${encodeURIComponent(song.id)}`)
-            const data = await res.json()
-            if (data.code === 200 && data.data?.lyric) {
-                setLyrics(parseLRC(data.data.lyric))
-            }
-        } catch { /* 歌词失败不影响播放 */ }
+        const lyricTask = fetch(`/api/wangyi-lyrics?id=${encodeURIComponent(song.id)}`, {
+            signal: lyricController.signal,
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`)
+                return res.json()
+            })
+            .then(data => data.code === 200 && data.data?.lyric ? parseLRC(data.data.lyric) : [])
+            .catch(err => {
+                if (err instanceof DOMException && err.name === 'AbortError') return []
+                return []
+            })
 
-        if (song.cover) {
-            const colors = await extractDominantColors(song.cover)
-            setBgColors(colors)
-        }
-    }, [resetVinyl])
+        const colorTask = song.cover
+            ? extractDominantColors(song.cover)
+            : Promise.resolve<[string, string]>(['#171717', '#090909'])
+
+        const [nextLyrics, nextColors] = await Promise.all([lyricTask, colorTask])
+        if (version !== loadVersionRef.current) return
+
+        setLyrics(nextLyrics)
+        setBgColors(nextColors)
+    }, [])
 
     useEffect(() => {
         if (currentSong) setCoverLoading(true)
@@ -192,8 +207,8 @@ export default function WangyiMusicPage() {
     useEffect(() => {
         return () => {
             abortControllerRef.current?.abort()
+            lyricAbortRef.current?.abort()
             if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
-            if (animationRef.current) cancelAnimationFrame(animationRef.current)
         }
     }, [])
 
@@ -277,13 +292,16 @@ export default function WangyiMusicPage() {
     }
 
     const playNext = async () => {
+        if (nextLoadingRef.current) return
         setCoverLoading(true)
         if (currentIndex < playlist.length - 1) {
             shouldAutoPlayRef.current = true
             setCurrentIndex(currentIndex + 1)
         } else {
+            nextLoadingRef.current = true
             try {
                 const res = await fetch('/api/wangyi-random')
+                if (!res.ok) throw new Error(`HTTP ${res.status}`)
                 const data = await res.json()
                 if (data.code === 200 && data.data) {
                     const d = data.data
@@ -297,7 +315,11 @@ export default function WangyiMusicPage() {
                         return next
                     })
                 }
-            } catch { /* 静默 */ }
+            } catch {
+                setError('自动获取下一首失败，请手动重试')
+            } finally {
+                nextLoadingRef.current = false
+            }
         }
     }
 
@@ -313,12 +335,8 @@ export default function WangyiMusicPage() {
         const t = e.currentTarget.currentTime
         setCurrentTime(t)
         if (lyrics.length > 0) {
-            let idx = -1
-            for (let i = 0; i < lyrics.length; i++) {
-                if (lyrics[i].time <= t) idx = i
-                else break
-            }
-            if (idx !== currentLyricIndex) setCurrentLyricIndex(idx)
+            const idx = findLyricIndex(lyrics, t)
+            setCurrentLyricIndex(prev => prev === idx ? prev : idx)
         }
     }
 
@@ -335,7 +353,6 @@ export default function WangyiMusicPage() {
 
     const handleEnded = () => {
         setIsPlaying(false)
-        stopRotation()
         playNext()
     }
 
@@ -360,17 +377,18 @@ export default function WangyiMusicPage() {
     }
 
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-black text-white">
+        <div className="relative min-h-screen w-full overflow-hidden bg-[#090909] text-white">
             {/* 双色渐变背景 */}
             <div
                 className="absolute inset-0 transition-all duration-1000"
                 style={{
                     background: bgColors
                         ? `linear-gradient(135deg, ${bgColors[0]}, ${bgColors[1]})`
-                        : 'linear-gradient(135deg, #1a1a2e, #0f0f1a)'
+                        : 'linear-gradient(145deg, #321313 0%, #171717 38%, #090909 100%)'
                 }}
             />
-            <div className="absolute inset-0 bg-black/25" />
+            <div className="absolute inset-0 bg-black/45" />
+            <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[#ec4141]/10 to-transparent pointer-events-none" />
 
             <div className="relative z-10 flex flex-col min-h-screen">
                 {/* 顶部栏 */}
@@ -380,18 +398,18 @@ export default function WangyiMusicPage() {
 
                 {/* 输入区 */}
                 <div className="px-6 py-4">
-                    <div className="max-w-3xl mx-auto flex gap-3">
+                    <div className="max-w-3xl mx-auto flex flex-col sm:flex-row gap-3">
                         <input
                             value={musicId}
                             onChange={(e) => setMusicId(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && !loading && fetchMusic()}
                             placeholder="粘贴网易云歌曲链接或 ID"
-                            className="flex-1 px-4 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-sm font-mono text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/40"
+                            className="flex-1 px-4 py-3 rounded-xl bg-black/35 border border-white/10 text-sm text-white placeholder-white/35 outline-none transition focus:border-[#ec4141]/70 focus:ring-2 focus:ring-[#ec4141]/20"
                         />
                         <button
                             onClick={fetchMusic}
                             disabled={loading}
-                            className="px-5 py-3 rounded-2xl bg-white/20 hover:bg-white/30 text-white text-sm font-medium active:scale-95 transition-all disabled:opacity-40 flex items-center gap-2 backdrop-blur-md"
+                            className="px-5 py-3 rounded-xl bg-[#ec4141] hover:bg-[#d73535] text-white text-sm font-medium active:scale-[.98] transition disabled:opacity-40 flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -408,7 +426,7 @@ export default function WangyiMusicPage() {
                         <button
                             onClick={fetchRandom}
                             disabled={randomLoading}
-                            className="px-5 py-3 rounded-2xl bg-white/20 hover:bg-white/30 text-white text-sm font-medium active:scale-95 transition-all disabled:opacity-40 backdrop-blur-md flex items-center gap-2"
+                            className="px-5 py-3 rounded-xl bg-white/8 hover:bg-white/12 border border-white/10 text-white text-sm font-medium active:scale-[.98] transition disabled:opacity-40 flex items-center justify-center gap-2"
                         >
                             {randomLoading ? (
                                 <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,20 +451,20 @@ export default function WangyiMusicPage() {
                 {/* 中间播放器主体 */}
                 <div className="flex-1 flex items-center justify-center px-6 py-6">
                     {currentSong ? (
-                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-10 md:gap-20 items-start">
+                        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-10 md:gap-16 items-start rounded-3xl border border-white/8 bg-black/20 p-5 sm:p-8 shadow-2xl shadow-black/30">
                             {/* 左侧：黑胶唱片（已移除唱针） */}
                             <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-96 md:h-96 shrink-0 mx-auto md:mx-0">
                                 {/* 唱片外圈阴影 */}
                                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gray-800 to-black shadow-2xl shadow-black/60" />
                                 <div
-                                    ref={vinylRef}
-                                    className="absolute inset-10 rounded-full overflow-hidden shadow-inner"
-                                    style={{ transform: 'rotate(0deg)' }}
+                                    className={`absolute inset-10 rounded-full overflow-hidden shadow-inner will-change-transform ${isPlaying ? 'animate-[spin_18s_linear_infinite]' : ''}`}
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={currentSong.cover}
-                                        alt="歌曲封面"
+                                        alt={`${currentSong.name} - ${currentSong.artist} 专辑封面`}
+                                        draggable={false}
+                                        decoding="async"
                                         onLoad={() => setCoverLoading(false)}
                                         className={`w-full h-full object-cover transition-opacity duration-500 ${coverLoading ? 'opacity-0' : 'opacity-100'}`}
                                     />
@@ -455,6 +473,7 @@ export default function WangyiMusicPage() {
 
                             {/* 右侧：歌曲信息 + 歌词 */}
                             <div className="flex-1 w-full min-w-0 pt-2">
+                                <div className="mb-3 text-xs font-medium tracking-[0.18em] text-[#ec4141]">NOW PLAYING</div>
                                 {/* 歌曲标题 */}
                                 <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-left">{currentSong.name}</h1>
                                 {/* 专辑/歌手信息 */}
@@ -478,10 +497,10 @@ export default function WangyiMusicPage() {
                                                     data-lyric-index={i}
                                                     className={`text-left py-2.5 transition-all duration-300 ${
                                                         i === currentLyricIndex
-                                                            ? 'text-white text-base font-semibold'
+                                                            ? 'text-white text-lg font-semibold translate-x-1'
                                                             : 'text-white/35 text-sm'
                                                     }`}
-                                                    style={i === currentLyricIndex ? { textShadow: '0 0 12px rgba(255,255,255,0.5)' } : undefined}
+                                                    aria-current={i === currentLyricIndex ? 'true' : undefined}
                                                 >
                                                     {line.text}
                                                 </p>
@@ -517,10 +536,15 @@ export default function WangyiMusicPage() {
                                 <div
                                     ref={progressRef}
                                     onClick={handleSeek}
-                                    className="flex-1 h-1.5 bg-white/20 rounded-full cursor-pointer group relative"
+                                    role="slider"
+                                    aria-label="播放进度"
+                                    aria-valuemin={0}
+                                    aria-valuemax={Math.round(duration)}
+                                    aria-valuenow={Math.round(currentTime)}
+                                    className="flex-1 h-1.5 bg-white/15 rounded-full cursor-pointer group relative"
                                 >
-                                    <div className="h-full bg-white rounded-full relative" style={{ width: `${progressPercent}%` }}>
-                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow" />
+                                    <div className="h-full bg-[#ec4141] rounded-full relative transition-[width] duration-100" style={{ width: `${progressPercent}%` }}>
+                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-[#ec4141] ring-2 ring-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow" />
                                     </div>
                                 </div>
                                 <span className="text-xs text-white/60 font-mono w-10 shrink-0">
@@ -533,6 +557,7 @@ export default function WangyiMusicPage() {
                                 <div className="flex items-center gap-4">
                                     <button
                                         onClick={playPrev}
+                                        aria-label="上一首"
                                         disabled={currentIndex <= 0}
                                         className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-95 disabled:opacity-30"
                                     >
@@ -542,7 +567,8 @@ export default function WangyiMusicPage() {
                                     </button>
                                     <button
                                         onClick={togglePlay}
-                                        className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg"
+                                        aria-label={isPlaying ? '暂停' : '播放'}
+                                        className="w-12 h-12 rounded-full bg-[#ec4141] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-black/30"
                                     >
                                         {isPlaying ? (
                                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -556,6 +582,7 @@ export default function WangyiMusicPage() {
                                     </button>
                                     <button
                                         onClick={playNext}
+                                        aria-label="下一首"
                                         className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all active:scale-95"
                                     >
                                         <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -583,12 +610,13 @@ export default function WangyiMusicPage() {
                         <audio
                             ref={audioRef}
                             src={currentSong.url}
-                            onPlay={() => { setIsPlaying(true); startRotation() }}
-                            onPause={() => { setIsPlaying(false); stopRotation() }}
+                            onPlay={() => setIsPlaying(true)}
+                            onPause={() => setIsPlaying(false)}
                             onEnded={handleEnded}
                             onTimeUpdate={handleTimeUpdate}
                             onLoadedMetadata={handleLoadedMetadata}
                             onCanPlay={handleCanPlay}
+                            preload="metadata"
                             className="hidden"
                         />
                     </div>

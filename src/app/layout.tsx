@@ -33,10 +33,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* 右侧导航 */}
               <nav className="flex items-center gap-4 sm:gap-6 text-sm">
                 <Link href="/" className="text-app-muted hover:text-app-text transition">
-                  首页
+                  工具站
+                </Link>
+                <Link href="/community" className="text-app-muted hover:text-app-text transition">
+                  BL社区
                 </Link>
                 <Link href="/about" className="text-app-muted hover:text-app-text transition">
-                  关于
+                  关于我
                 </Link>
               </nav>
             </div>

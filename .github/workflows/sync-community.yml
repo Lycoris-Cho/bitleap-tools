@@ -1,0 +1,233 @@
+name: Sync Community Discussions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  discussions: read
+
+jobs:
+  sync-community:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch approved discussions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p public/data
+
+          gh api graphql \
+            -f query='
+              query {
+                repository(owner: "Lycoris-Cho", name: "bitleap-tools") {
+                  discussions(
+                    first: 100
+                    orderBy: {field: CREATED_AT, direction: DESC}
+                  ) {
+                    nodes {
+                      id
+                      number
+                      title
+                      body
+                      url
+                      createdAt
+                      updatedAt
+                      upvoteCount
+
+                      category {
+                        name
+                      }
+
+                      author {
+                        login
+                        avatarUrl
+                        url
+                      }
+
+                      labels(first: 20) {
+                        nodes {
+                          name
+                        }
+                      }
+
+                      comments {
+                        totalCount
+                      }
+                    }
+                  }
+                }
+              }
+            ' > discussions.json
+
+      - name: Build community.json
+        run: |
+          node <<'EOF'
+          const fs = require("fs");
+
+          const raw = JSON.parse(
+            fs.readFileSync("discussions.json", "utf8")
+          );
+
+          const discussions =
+            raw.data?.repository?.discussions?.nodes || [];
+
+          const allowedCategories = [
+            "Frontend Showcase",
+            "Experience Sharing",
+            "Small Tools",
+            "Resource Sharing",
+          ];
+
+          function extractField(body, names) {
+            if (!body) return "";
+
+            for (const name of names) {
+              const escaped = name.replace(
+                /[.*+?^${}()|[\]\\]/g,
+                "\\$&"
+              );
+
+              const regex = new RegExp(
+                `###\\s*${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n###\\s|$)`,
+                "i"
+              );
+
+              const match = body.match(regex);
+
+              if (match?.[1]) {
+                const value = match[1]
+                  .trim()
+                  .replace(/^_No response_$/i, "")
+                  .replace(/^No response$/i, "")
+                  .trim();
+
+                if (value) {
+                  return value;
+                }
+              }
+            }
+
+            return "";
+          }
+
+          function stripMarkdown(text) {
+            return (text || "")
+              .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
+              .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+              .replace(/[`*_>#~-]/g, "")
+              .replace(/\n+/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+          }
+
+          function createExcerpt(text, maxLength = 180) {
+            const clean = stripMarkdown(text);
+
+            if (clean.length <= maxLength) {
+              return clean;
+            }
+
+            return clean.slice(0, maxLength).trim() + "…";
+          }
+
+          const posts = discussions
+            .filter((discussion) => {
+              const labels =
+                discussion.labels?.nodes?.map(
+                  (label) => label.name.toLowerCase()
+                ) || [];
+
+              return (
+                labels.includes("approved") &&
+                allowedCategories.includes(
+                  discussion.category?.name
+                )
+              );
+            })
+            .map((discussion) => {
+              const body = discussion.body || "";
+
+              const realTitle =
+                extractField(body, [
+                  "作品名称",
+                  "分享主题",
+                  "工具名称",
+                  "资源名称",
+                ]) ||
+                discussion.title
+                  .replace(/^\[[^\]]+\]\s*/g, "")
+                  .trim();
+
+              const description =
+                extractField(body, [
+                  "作品介绍",
+                  "背景",
+                  "工具介绍",
+                  "推荐理由",
+                ]) || body;
+
+              const demoUrl = extractField(body, [
+                "在线体验地址",
+                "在线使用地址",
+                "资源地址",
+              ]);
+
+              const githubUrl = extractField(body, [
+                "GitHub 地址",
+              ]);
+
+              const tech = extractField(body, [
+                "技术栈",
+                "相关技术",
+              ]);
+
+              return {
+                id: discussion.id,
+                number: discussion.number,
+                title: realTitle,
+                excerpt: createExcerpt(description),
+                body,
+                category: discussion.category?.name || "",
+                author: discussion.author?.login || "GitHub User",
+                avatar: discussion.author?.avatarUrl || "",
+                authorUrl: discussion.author?.url || "",
+                createdAt: discussion.createdAt,
+                updatedAt: discussion.updatedAt,
+                comments: discussion.comments?.totalCount || 0,
+                upvotes: discussion.upvoteCount || 0,
+                url: discussion.url,
+                demoUrl,
+                githubUrl,
+                tech,
+              };
+            });
+
+          fs.writeFileSync(
+            "public/data/community.json",
+            JSON.stringify(posts, null, 2)
+          );
+
+          console.log(
+            `Generated community.json with ${posts.length} approved post(s).`
+          );
+          EOF
+
+      - name: Commit community data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add public/data/community.json
+
+          if git diff --cached --quiet; then
+            echo "No community changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: sync community discussions"
+          git push
