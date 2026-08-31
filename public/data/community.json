@@ -1,5 +1,24 @@
 [
   {
+    "id": "D_kwDOT8mrp84Ao53o",
+    "number": 4,
+    "title": "BitLeap Community Redesign",
+    "excerpt": "重新设计了社区首页，把原来普通的内容列表改成更偏编辑设计和作品展示的形式。 包括大字号 Hero、渐变标题、分类筛选、搜索、排序、GSAP 滚动动画以及 GitHub Discussions 内容同步。",
+    "body": "### 作品名称\n\nBitLeap Community Redesign\n\n### 作品介绍\n\n重新设计了社区首页，把原来普通的内容列表改成更偏编辑设计和作品展示的形式。\r\n\r\n包括大字号 Hero、渐变标题、分类筛选、搜索、排序、GSAP 滚动动画以及 GitHub Discussions 内容同步。\n\n### 在线体验地址\n\n_No response_\n\n### GitHub 地址\n\nhttps://github.com/Lycoris-Cho/bitleap-tools\n\n### 技术栈\n\nNext.js, TypeScript, Tailwind CSS, GSAP, GitHub Discussions\n\n### 项目截图\n\n_No response_",
+    "category": "Frontend Showcase",
+    "author": "Lycoris-Cho",
+    "avatar": "https://avatars.githubusercontent.com/u/179846799?u=724d92fce55e4bbad3e3c0d14a30fbb9762777c0&v=4",
+    "authorUrl": "https://github.com/Lycoris-Cho",
+    "createdAt": "2026-08-31T20:06:51Z",
+    "updatedAt": "2026-08-31T20:06:51Z",
+    "comments": 0,
+    "upvotes": 1,
+    "url": "https://github.com/Lycoris-Cho/bitleap-tools/discussions/4",
+    "demoUrl": "",
+    "githubUrl": "https://github.com/Lycoris-Cho/bitleap-tools",
+    "tech": "Next.js, TypeScript, Tailwind CSS, GSAP, GitHub Discussions"
+  },
+  {
     "id": "D_kwDOT8mrp84Ao51W",
     "number": 3,
     "title": "做个人工具站之后，我开始重新理解“功能越少越好”",
