@@ -1,0 +1,21 @@
+[
+  {
+    "id": "D_kwDOT8mrp84Ao5xS",
+    "number": 2,
+    "title": "我是怎么给纯前端工具站加上评论和社区的",
+    "excerpt": "最近给自己的工具站加了一个社区功能。 一开始不太想为了评论系统单独做后端、数据库和账号体系，所以最后选择了 GitHub Discussions + giscus。 目前的方案是： GitHub Discussions 负责内容和用户 giscus 负责页面评论 网站本身继续保持纯前端 对个人项目来说，这样维护成本会低很多。 后面准备继续把 Discussi…",
+    "body": "### 作品名称\n\n我是怎么给纯前端工具站加上评论和社区的\n\n### 作品介绍\n\n最近给自己的工具站加了一个社区功能。\r\n\r\n一开始不太想为了评论系统单独做后端、数据库和账号体系，所以最后选择了 GitHub Discussions + giscus。\r\n\r\n目前的方案是：\r\n\r\nGitHub Discussions 负责内容和用户\r\ngiscus 负责页面评论\r\n网站本身继续保持纯前端\r\n\r\n对个人项目来说，这样维护成本会低很多。\r\n\r\n后面准备继续把 Discussions 里的内容同步到网站自己的社区页面里。\n\n### 在线体验地址\n\n_No response_\n\n### GitHub 地址\n\n_No response_\n\n### 技术栈\n\n_No response_\n\n### 项目截图\n\n_No response_",
+    "category": "Frontend Showcase",
+    "author": "Lycoris-Cho",
+    "avatar": "https://avatars.githubusercontent.com/u/179846799?u=724d92fce55e4bbad3e3c0d14a30fbb9762777c0&v=4",
+    "authorUrl": "https://github.com/Lycoris-Cho",
+    "createdAt": "2026-08-31T18:33:15Z",
+    "updatedAt": "2026-08-31T18:33:15Z",
+    "comments": 0,
+    "upvotes": 1,
+    "url": "https://github.com/Lycoris-Cho/bitleap-tools/discussions/2",
+    "demoUrl": "",
+    "githubUrl": "",
+    "tech": ""
+  }
+]
