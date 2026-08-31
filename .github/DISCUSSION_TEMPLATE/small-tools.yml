@@ -1,1 +1,81 @@
+title: "[工具] "
 
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🛠️ 分享你的小工具
+
+        不管是完整项目，还是解决一个小问题的小页面，都欢迎分享。
+
+  - type: input
+    id: tool_name
+    attributes:
+      label: 工具名称
+      description: 你的工具叫什么？
+      placeholder: 例如：JSON Diff Viewer
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 工具介绍
+      description: 它主要解决什么问题？
+      placeholder: |
+        这个工具主要用于……
+        它可以帮助用户……
+    validations:
+      required: true
+
+  - type: input
+    id: demo
+    attributes:
+      label: 在线使用地址
+      placeholder: https://example.com
+    validations:
+      required: false
+
+  - type: input
+    id: github
+    attributes:
+      label: GitHub 地址
+      placeholder: https://github.com/username/repository
+    validations:
+      required: false
+
+  - type: input
+    id: stack
+    attributes:
+      label: 技术栈
+      placeholder: React, Vue, Next.js, JavaScript...
+    validations:
+      required: false
+
+  - type: textarea
+    id: usage
+    attributes:
+      label: 使用说明
+      description: 简单说一下怎么使用
+      placeholder: |
+        1. 打开页面
+        2. 输入……
+        3. 点击……
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 项目截图
+      description: 可以直接粘贴或拖拽图片到这里
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 发布确认
+      options:
+        - label: 我确认该工具是本人作品或拥有分享权限
+          required: true
