@@ -1,1 +1,67 @@
+title: "[资源] "
 
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📚 推荐一个好资源
+
+        可以分享开源项目、开发工具、设计资源、学习资料、网站和其他值得收藏的内容。
+
+  - type: input
+    id: resource_name
+    attributes:
+      label: 资源名称
+      placeholder: 例如：Lucide Icons
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: 资源地址
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: resource_type
+    attributes:
+      label: 资源类型
+      options:
+        - 开源项目
+        - 开发工具
+        - UI / 设计资源
+        - 图标资源
+        - 学习资料
+        - API / 数据服务
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 推荐理由
+      description: 为什么值得推荐？
+      placeholder: |
+        这个资源主要用于……
+        我觉得它比较好的地方是……
+    validations:
+      required: true
+
+  - type: textarea
+    id: usage
+    attributes:
+      label: 使用建议
+      description: 有什么使用技巧或需要注意的地方？
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 发布确认
+      options:
+        - label: 我确认该内容不是恶意广告、诈骗或侵权资源
+          required: true
