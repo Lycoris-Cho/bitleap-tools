@@ -1,5 +1,24 @@
 [
   {
+    "id": "D_kwDOT8mrp84Ao51W",
+    "number": 3,
+    "title": "做个人工具站之后，我开始重新理解“功能越少越好”",
+    "excerpt": "最近一直在迭代自己的工具站。一开始我总觉得功能越多越完整，所以不断往里面加页面、入口和交互。 但做了一段时间以后，我发现真正影响体验的，往往不是“还缺什么功能”，而是“有没有多余的东西”。",
+    "body": "### 分享主题\n\n做个人工具站之后，我开始重新理解“功能越少越好”\n\n### 背景\n\n最近一直在迭代自己的工具站。一开始我总觉得功能越多越完整，所以不断往里面加页面、入口和交互。\r\n\r\n但做了一段时间以后，我发现真正影响体验的，往往不是“还缺什么功能”，而是“有没有多余的东西”。\n\n### 经验与过程\n\n我开始重新检查每个页面：\r\n\r\n哪些按钮是真的常用？\r\n哪些信息只是为了看起来丰富？\r\n哪些动画其实会干扰阅读？\r\n哪些功能维护成本很高，但几乎没人使用？\r\n\r\n后来我慢慢把重点从“增加功能”改成“减少干扰”。\r\n\r\n包括减少不必要的弹窗、缩短操作路径、统一页面结构，以及尽量让工具打开后就能直接使用。\n\n### 总结\n\n现在我更愿意把一个工具做得简单、稳定、打开就能用，而不是追求功能数量。\r\n\r\n对个人项目来说，维护成本本身也是产品体验的一部分。\n\n### 相关技术\n\nNext.js, TypeScript, Tailwind CSS, GSAP\n\n### 相关链接\n\n_No response_\n\n### 发布确认\n\n- [X] 我确认分享内容不包含明显广告、恶意或侵权内容",
+    "category": "Experience Sharing",
+    "author": "Lycoris-Cho",
+    "avatar": "https://avatars.githubusercontent.com/u/179846799?u=724d92fce55e4bbad3e3c0d14a30fbb9762777c0&v=4",
+    "authorUrl": "https://github.com/Lycoris-Cho",
+    "createdAt": "2026-08-31T19:27:16Z",
+    "updatedAt": "2026-08-31T19:27:16Z",
+    "comments": 0,
+    "upvotes": 1,
+    "url": "https://github.com/Lycoris-Cho/bitleap-tools/discussions/3",
+    "demoUrl": "",
+    "githubUrl": "",
+    "tech": "Next.js, TypeScript, Tailwind CSS, GSAP"
+  },
+  {
     "id": "D_kwDOT8mrp84Ao5xS",
     "number": 2,
     "title": "我是怎么给纯前端工具站加上评论和社区的",
