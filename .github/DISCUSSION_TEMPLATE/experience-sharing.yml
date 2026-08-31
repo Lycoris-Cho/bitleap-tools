@@ -1,1 +1,75 @@
+title: "[经验] "
 
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 💡 分享你的经验
+
+        可以分享技术实践、踩坑经历、开发心得、产品思考或学习总结。
+
+  - type: input
+    id: topic
+    attributes:
+      label: 分享主题
+      description: 这次主要想分享什么？
+      placeholder: 例如：做个人工具站一年后，我学到的几件事
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景
+      description: 事情的背景是什么？为什么会研究这个问题？
+      placeholder: |
+        我当时在做……
+        遇到了……
+    validations:
+      required: true
+
+  - type: textarea
+    id: experience
+    attributes:
+      label: 经验与过程
+      description: 分享你的实践过程、思考以及踩过的坑
+      placeholder: |
+        我尝试过……
+        后来发现……
+        最终选择……
+    validations:
+      required: true
+
+  - type: textarea
+    id: conclusion
+    attributes:
+      label: 总结
+      description: 最终得出了什么结论？有哪些建议？
+    validations:
+      required: false
+
+  - type: input
+    id: tech
+    attributes:
+      label: 相关技术
+      placeholder: React, Next.js, TypeScript
+    validations:
+      required: false
+
+  - type: textarea
+    id: links
+    attributes:
+      label: 相关链接
+      description: 可以填写项目、文章或参考资料
+      placeholder: |
+        https://...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: 发布确认
+      options:
+        - label: 我确认分享内容不包含明显广告、恶意或侵权内容
+          required: true
