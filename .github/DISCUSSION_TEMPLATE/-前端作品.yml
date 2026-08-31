@@ -1,0 +1,56 @@
+title: "[作品] "
+
+body:
+  - type: input
+    id: project_name
+    attributes:
+      label: 作品名称
+      description: 你的项目或作品叫什么？
+      placeholder: 例如：Music Glass
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 作品介绍
+      description: 简单介绍一下这个作品做了什么
+      placeholder: |
+        这个项目主要用于……
+        我制作它是因为……
+    validations:
+      required: true
+
+  - type: input
+    id: demo_url
+    attributes:
+      label: 在线体验地址
+      description: 如果已经部署，可以填写在线地址
+      placeholder: https://example.com
+    validations:
+      required: false
+
+  - type: input
+    id: github_url
+    attributes:
+      label: GitHub 地址
+      description: 如果项目开源，可以填写仓库地址
+      placeholder: https://github.com/username/repository
+    validations:
+      required: false
+
+  - type: input
+    id: tech_stack
+    attributes:
+      label: 技术栈
+      placeholder: Next.js, React, Tailwind CSS, TypeScript
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 项目截图
+      description: 可以直接粘贴或拖拽图片
+    validations:
+      required: false
