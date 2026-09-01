@@ -1,5 +1,24 @@
 [
   {
+    "id": "D_kwDOT8mrp84Ao6Sy",
+    "number": 6,
+    "title": "验证 GitHub Discussions 审核后的自动同步流程",
+    "excerpt": "社区功能已经正式上线。 这次发布主要用于测试自动化流程，确认新的 Discussion 在审核通过并添加 approved 标签之后，GitHub Actions 是否会自动运行，并把内容同步到网站社区页面。",
+    "body": "### 分享主题\n\n验证 GitHub Discussions 审核后的自动同步流程\n\n### 背景\n\n社区功能已经正式上线。\r\n\r\n这次发布主要用于测试自动化流程，确认新的 Discussion 在审核通过并添加 approved 标签之后，GitHub Actions 是否会自动运行，并把内容同步到网站社区页面。\n\n### 经验与过程\n\n当前社区的数据来源是 GitHub Discussions。\r\n\r\n发布内容之后，由管理员进行审核。\r\n\r\n审核通过后添加 approved 标签，GitHub Actions 会读取所有已经 approved 的 Discussion，重新生成 public/data/community.json，并提交到仓库。\r\n\r\n这次测试不会手动点击 Run workflow，希望确认整个流程可以自动完成。\n\n### 总结\n\n如果这篇内容能够在不手动运行 GitHub Actions 的情况下自动出现在社区页面，就说明发布、审核、同步和部署这条链路已经完整跑通。\n\n### 相关技术\n\nNext.js, TypeScript, GitHub Discussions, GitHub Actions, Vercel\n\n### 相关链接\n\n_No response_\n\n### 发布确认\n\n- [X] 我确认分享内容不包含明显广告、恶意或侵权内容",
+    "category": "Experience Sharing",
+    "author": "Lycoris-Cho",
+    "avatar": "https://avatars.githubusercontent.com/u/179846799?u=724d92fce55e4bbad3e3c0d14a30fbb9762777c0&v=4",
+    "authorUrl": "https://github.com/Lycoris-Cho",
+    "createdAt": "2026-09-01T03:52:21Z",
+    "updatedAt": "2026-09-01T03:52:21Z",
+    "comments": 0,
+    "upvotes": 1,
+    "url": "https://github.com/Lycoris-Cho/bitleap-tools/discussions/6",
+    "demoUrl": "",
+    "githubUrl": "",
+    "tech": "Next.js, TypeScript, GitHub Discussions, GitHub Actions, Vercel"
+  },
+  {
     "id": "D_kwDOT8mrp84Ao53_",
     "number": 5,
     "title": "Markdown Preview 在线预览工具",
