@@ -3,6 +3,12 @@ name: Sync Community Discussions
 on:
   workflow_dispatch:
 
+  discussion:
+    types:
+      - labeled
+      - unlabeled
+      - edited
+
 permissions:
   contents: write
   discussions: read
