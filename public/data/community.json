@@ -1,5 +1,24 @@
 [
   {
+    "id": "D_kwDOT8mrp84Ao80H",
+    "number": 7,
+    "title": "心迹-从未寄出的信",
+    "excerpt": "使用纯前端，制作的网上虚拟信封，用户在本地编辑好信件以后点击装入信封，生成html文件，点击后打开即可看见信纸和信的内容。",
+    "body": "### 作品名称\n\n心迹-从未寄出的信\n\n### 作品介绍\n\n使用纯前端，制作的网上虚拟信封，用户在本地编辑好信件以后点击装入信封，生成html文件，点击后打开即可看见信纸和信的内容。\n\n### 在线体验地址\n\n_No response_\n\n### GitHub 地址\n\n_No response_\n\n### 技术栈\n\nNext.js, TypeScript, Tailwind CSS, HTML\n\n### 项目截图\n\n<img width=\"1647\" height=\"1172\" alt=\"屏幕截图 2026-09-02 211731\" src=\"https://github.com/user-attachments/assets/0307b807-33c0-4fcc-9d8a-efe7cec8a86f\" />\r\n",
+    "category": "Frontend Showcase",
+    "author": "Lycoris-Cho",
+    "avatar": "https://avatars.githubusercontent.com/u/179846799?u=724d92fce55e4bbad3e3c0d14a30fbb9762777c0&v=4",
+    "authorUrl": "https://github.com/Lycoris-Cho",
+    "createdAt": "2026-09-02T13:18:32Z",
+    "updatedAt": "2026-09-02T13:18:32Z",
+    "comments": 0,
+    "upvotes": 1,
+    "url": "https://github.com/Lycoris-Cho/bitleap-tools/discussions/7",
+    "demoUrl": "",
+    "githubUrl": "",
+    "tech": "Next.js, TypeScript, Tailwind CSS, HTML"
+  },
+  {
     "id": "D_kwDOT8mrp84Ao6Sy",
     "number": 6,
     "title": "验证 GitHub Discussions 审核后的自动同步流程",
