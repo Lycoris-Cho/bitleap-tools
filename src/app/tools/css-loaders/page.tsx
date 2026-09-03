@@ -1,6 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import {
+  Check,
+  Code2,
+  Copy,
+  Moon,
+  Search,
+  Sparkles,
+  Sun,
+  WandSparkles,
+} from 'lucide-react'
 import { Breadcrumb } from '@/components/breadcrumb'
 import FooterNote from '@/components/FooterNote'
 
@@ -11,8 +23,9 @@ type Loader = {
   css: string
 }
 
+type PreviewTheme = 'light' | 'dark'
+
 const LOADERS: Loader[] = [
-  // ===== 原有 12 个 =====
   {
     id: 'ring',
     name: '经典圆环',
@@ -85,8 +98,6 @@ const LOADERS: Loader[] = [
     group: '特殊',
     css: `.bl-skeleton{width:120px;height:14px;border-radius:7px;background:#e5e7eb;position:relative;overflow:hidden}.bl-skeleton::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:bl-shimmer 1.4s infinite}@keyframes bl-shimmer{100%{transform:translateX(100%)}}`,
   },
-
-  // ===== 原有新增 12 个 =====
   {
     id: 'wave-dots',
     name: '点阵波浪',
@@ -159,8 +170,6 @@ const LOADERS: Loader[] = [
     group: '圆环',
     css: `.bl-dash{width:38px;height:38px;border-radius:50%;border:3px dashed #8b5cf6;animation:bl-spin 1.5s linear infinite}@keyframes bl-spin{to{transform:rotate(360deg)}}`,
   },
-
-  // ===== 之前新增 8 个 =====
   {
     id: 'spiral-orbit',
     name: '螺旋穿梭',
@@ -209,8 +218,6 @@ const LOADERS: Loader[] = [
     group: '特殊',
     css: `.bl-gear{width:36px;height:36px;background:#8b5cf6;clip-path:polygon(50% 0,61% 38%,100% 38%,68% 62%,79% 100%,50% 76%,21% 100%,32% 62%,0 38%,39% 38%);animation:bl-spin 2s linear infinite}@keyframes bl-spin{to{transform:rotate(360deg)}}`,
   },
-
-  // ===== 你贴的 5 个新 loader（本次加入）=====
   {
     id: 'l10-slice',
     name: '切片旋转环',
@@ -239,126 +246,354 @@ const LOADERS: Loader[] = [
 
 const GROUPS = ['全部', '圆环', '点阵', '条形', '特殊'] as const
 
-function Preview({ loader }: { loader: Loader }) {
-  const html: Record<string, string> = {
-    ring: '<div class="bl-ring"></div>',
-    'dual-ring': '<div class="bl-dual"></div>',
-    conic: '<div class="bl-conic"></div>',
-    dots: '<div class="bl-dots"><i></i><i></i><i></i></div>',
-    'bounce-chain': '<div class="bl-chain"><i></i><i></i><i></i><i></i></div>',
-    signal: '<div class="bl-bars"><i></i><i></i><i></i><i></i><i></i></div>',
-    orbit: '<div class="bl-orbit"><i></i><i></i></div>',
-    blob: '<div class="bl-blob"></div>',
-    dna: '<div class="bl-dna"><i></i><i></i><i></i><i></i><i></i></div>',
-    hourglass: '<div class="bl-hour"></div>',
-    ellipsis: '<div class="bl-elli"><i></i><i></i><i></i></div>',
-    shimmer: '<div class="bl-skeleton"></div>',
-    'wave-dots': '<div class="bl-wave"><i></i><i></i><i></i><i></i><i></i></div>',
-    breathe: '<div class="bl-bre"></div>',
-    chase: '<div class="bl-chase"><i></i><i></i></div>',
-    progress: '<div class="bl-prog"><i></i></div>',
-    stripe: '<div class="bl-str"></div>',
-    ripple: '<div class="bl-rip"><i></i><i></i><i></i></div>',
-    'cross-spin': '<div class="bl-crs"></div>',
-    'flip-card': '<div class="bl-flip"></div>',
-    heartbeat: '<div class="bl-hb"></div>',
-    triangle: '<div class="bl-tri"></div>',
-    'spin-square': '<div class="bl-sq"></div>',
-    'dashed-ring': '<div class="bl-dash"></div>',
-    'spiral-orbit': '<div class="bl-spiral"><i></i><i></i><i></i></div>',
-    clock: '<div class="bl-clock"></div>',
-    'radar-scan': '<div class="bl-radar"></div>',
-    'elastic-ring': '<div class="bl-elastic-ring"></div>',
-    'particle-burst': '<div class="bl-particle"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>',
-    'slide-square': '<div class="bl-slide-sq"><i></i><i></i><i></i></div>',
-    'pulse-ring-layer': '<div class="bl-pulse-layer"><i></i><i></i><i></i></div>',
-    gear: '<div class="bl-gear"></div>',
-    'l10-slice': '<div class="bl-l10"></div>',
-    'l22-quad': '<div class="bl-l22"></div>',
-    'l30-dot-ring': '<div class="bl-l30"></div>',
-    'l19-cross': '<div class="bl-l19"></div>',
-  }
+const PREVIEW_HTML: Record<string, string> = {
+  ring: '<div class="bl-ring"></div>',
+  'dual-ring': '<div class="bl-dual"></div>',
+  conic: '<div class="bl-conic"></div>',
+  dots: '<div class="bl-dots"><i></i><i></i><i></i></div>',
+  'bounce-chain': '<div class="bl-chain"><i></i><i></i><i></i><i></i></div>',
+  signal: '<div class="bl-bars"><i></i><i></i><i></i><i></i><i></i></div>',
+  orbit: '<div class="bl-orbit"><i></i><i></i></div>',
+  blob: '<div class="bl-blob"></div>',
+  dna: '<div class="bl-dna"><i></i><i></i><i></i><i></i><i></i></div>',
+  hourglass: '<div class="bl-hour"></div>',
+  ellipsis: '<div class="bl-elli"><i></i><i></i><i></i></div>',
+  shimmer: '<div class="bl-skeleton"></div>',
+  'wave-dots': '<div class="bl-wave"><i></i><i></i><i></i><i></i><i></i></div>',
+  breathe: '<div class="bl-bre"></div>',
+  chase: '<div class="bl-chase"><i></i><i></i></div>',
+  progress: '<div class="bl-prog"><i></i></div>',
+  stripe: '<div class="bl-str"></div>',
+  ripple: '<div class="bl-rip"><i></i><i></i><i></i></div>',
+  'cross-spin': '<div class="bl-crs"></div>',
+  'flip-card': '<div class="bl-flip"></div>',
+  heartbeat: '<div class="bl-hb"></div>',
+  triangle: '<div class="bl-tri"></div>',
+  'spin-square': '<div class="bl-sq"></div>',
+  'dashed-ring': '<div class="bl-dash"></div>',
+  'spiral-orbit': '<div class="bl-spiral"><i></i><i></i><i></i></div>',
+  clock: '<div class="bl-clock"></div>',
+  'radar-scan': '<div class="bl-radar"></div>',
+  'elastic-ring': '<div class="bl-elastic-ring"></div>',
+  'particle-burst': '<div class="bl-particle"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>',
+  'slide-square': '<div class="bl-slide-sq"><i></i><i></i><i></i></div>',
+  'pulse-ring-layer': '<div class="bl-pulse-layer"><i></i><i></i><i></i></div>',
+  gear: '<div class="bl-gear"></div>',
+  'l10-slice': '<div class="bl-l10"></div>',
+  'l22-quad': '<div class="bl-l22"></div>',
+  'l30-dot-ring': '<div class="bl-l30"></div>',
+  'l19-cross': '<div class="bl-l19"></div>',
+}
+
+function Preview({
+  loader,
+  theme,
+}: {
+  loader: Loader
+  theme: PreviewTheme
+}) {
   return (
-    <div className="flex items-center justify-center h-20">
+    <div
+      className={`relative flex h-32 items-center justify-center overflow-hidden rounded-[18px] border transition ${
+        theme === 'dark'
+          ? 'border-white/[0.06] bg-[#111113]'
+          : 'border-black/[0.055] bg-[#f8f8fa]'
+      }`}
+    >
+      <div
+        className={`pointer-events-none absolute inset-0 opacity-[0.055] ${
+          theme === 'dark' ? 'invert' : ''
+        }`}
+        style={{
+          backgroundImage:
+            'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }}
+      />
       <style>{loader.css}</style>
-      <div dangerouslySetInnerHTML={{ __html: html[loader.id] || '' }} />
+      <div
+        className="relative z-10"
+        dangerouslySetInnerHTML={{ __html: PREVIEW_HTML[loader.id] || '' }}
+      />
     </div>
   )
 }
 
 export default function CssLoaders() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const [group, setGroup] = useState<(typeof GROUPS)[number]>('全部')
+  const [query, setQuery] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [previewTheme, setPreviewTheme] = useState<PreviewTheme>('light')
 
-  const list = LOADERS.filter((l) => group === '全部' || l.group === group)
+  const list = useMemo(() => {
+    const keyword = query.trim().toLowerCase()
 
-  const copy = async (css: string, id: string) => {
-    await navigator.clipboard.writeText(css)
-    setCopied(id)
-    setTimeout(() => setCopied(null), 1500)
+    return LOADERS.filter((loader) => {
+      const matchesGroup = group === '全部' || loader.group === group
+      const matchesQuery =
+        !keyword ||
+        loader.name.toLowerCase().includes(keyword) ||
+        loader.id.toLowerCase().includes(keyword) ||
+        loader.group.toLowerCase().includes(keyword)
+
+      return matchesGroup && matchesQuery
+    })
+  }, [group, query])
+
+  const counts = useMemo(() => {
+    return GROUPS.reduce<Record<string, number>>((acc, current) => {
+      acc[current] =
+        current === '全部'
+          ? LOADERS.length
+          : LOADERS.filter((loader) => loader.group === current).length
+      return acc
+    }, {})
+  }, [])
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger)
+
+    if (!rootRef.current) return
+
+    const ctx = gsap.context(() => {
+      gsap.timeline({ defaults: { ease: 'power4.out' } })
+        .from('.loader-kicker', { y: 16, opacity: 0, duration: 0.42 })
+        .from('.loader-title', { y: 44, opacity: 0, duration: 0.7 }, '-=0.18')
+        .from('.loader-copy', { y: 22, opacity: 0, duration: 0.5 }, '-=0.32')
+        .from('.loader-toolbar', { y: 18, opacity: 0, duration: 0.48 }, '-=0.3')
+        .from('.loader-hero-art', { scale: 0.9, rotate: 4, opacity: 0, duration: 0.8 }, '-=0.62')
+
+      gsap.to('.loader-ring-a', {
+        rotate: 360,
+        repeat: -1,
+        duration: 16,
+        ease: 'none',
+      })
+
+      gsap.to('.loader-ring-b', {
+        rotate: -360,
+        repeat: -1,
+        duration: 22,
+        ease: 'none',
+      })
+    }, rootRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  useEffect(() => {
+    const cards = gsap.utils.toArray<HTMLElement>('.loader-card')
+
+    gsap.killTweensOf(cards)
+    gsap.set(cards, { autoAlpha: 1, y: 0, scale: 1, clearProps: 'transform' })
+
+    gsap.fromTo(
+      cards,
+      { y: 38, autoAlpha: 0, scale: 0.965 },
+      {
+        y: 0,
+        autoAlpha: 1,
+        scale: 1,
+        duration: 0.5,
+        stagger: 0.035,
+        ease: 'power3.out',
+        clearProps: 'transform',
+      },
+    )
+  }, [group, query])
+
+  async function copyText(value: string, key: string) {
+    await navigator.clipboard.writeText(value)
+    setCopied(key)
+    window.setTimeout(() => setCopied(null), 1500)
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-12">
-      <Breadcrumb />
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">CSS 加载动画库</h1>
-        <p className="text-app-muted text-sm">37 个纯 CSS Loader，零 JS、零图片，点击复制完整 CSS 粘到项目即用。</p>
-      </div>
+    <div ref={rootRef} className="relative min-h-screen overflow-hidden bg-[#f7f7fa] text-zinc-950">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_4%,rgba(237,233,254,.72),transparent_26%),radial-gradient(circle_at_92%_9%,rgba(224,242,254,.68),transparent_28%),radial-gradient(circle_at_52%_78%,rgba(253,242,248,.50),transparent_34%)]" />
 
-      {/* 分组筛选 */}
-      <div className="flex gap-2 flex-wrap mb-8">
-        {GROUPS.map((g) => (
-          <button
-            key={g}
-            onClick={() => setGroup(g)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
-              group === g
-                ? 'bg-violet-500 text-white border-violet-500 shadow-sm shadow-violet-500/20'
-                : 'bg-app-bg border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            {g}
-          </button>
-        ))}
-      </div>
+      <div className="relative mx-auto w-full max-w-[1540px] px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+        <Breadcrumb />
 
-      {/* 卡片网格 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {list.map((loader) => (
-          <div
-            key={loader.id}
-            className="group relative bg-app-bg border border-app-border rounded-2xl p-5 overflow-hidden hover:border-violet-300 hover:shadow-sm transition-all duration-300"
-          >
-            <div className="relative">
-              <span className="text-[11px] uppercase tracking-wider text-app-muted font-medium">{loader.group}</span>
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">{loader.name}</h3>
+        <section className="mt-5 grid min-h-[340px] items-center gap-8 rounded-[30px] border border-black/[0.055] bg-white/72 px-5 py-8 shadow-[0_30px_90px_-68px_rgba(67,56,202,.24)] backdrop-blur-xl md:px-8 lg:grid-cols-[1.08fr_.92fr] lg:px-10">
+          <div>
+            <div className="loader-kicker inline-flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-violet-600">
+              <Sparkles className="h-3.5 w-3.5" />
+              CSS Motion Library
+            </div>
 
-              <Preview loader={loader} />
+            <h1 className="loader-title mt-4 text-4xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
+              找一个好看的
+              <br />
+              <span className="text-violet-500">加载动画。</span>
+            </h1>
+
+            <p className="loader-copy mt-5 max-w-xl text-sm leading-7 text-zinc-500">
+              纯 CSS、零依赖、实时预览。筛选喜欢的 Loader，复制 HTML + CSS 就能直接放进项目。
+            </p>
+
+            <div className="loader-toolbar mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="搜索加载动画…"
+                  className="h-11 w-full rounded-full border border-black/[0.06] bg-white/80 pl-10 pr-4 text-sm text-zinc-700 outline-none transition placeholder:text-zinc-300 focus:border-violet-200 focus:ring-4 focus:ring-violet-100/65"
+                />
+              </div>
 
               <button
-                onClick={() => copy(loader.css, loader.id)}
-                className="mt-4 w-full py-2.5 rounded-xl text-sm font-medium bg-black text-white hover:bg-violet-600 active:scale-95 transition-all shadow-sm shadow-violet-500/20"
+                type="button"
+                onClick={() => setPreviewTheme((current) => (current === 'light' ? 'dark' : 'light'))}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-black/[0.06] bg-white/80 px-4 text-[11px] font-medium text-zinc-600 transition hover:bg-white"
               >
-                {copied === loader.id ? '✓ 已复制 CSS' : '📋 复制 CSS'}
+                {previewTheme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                {previewTheme === 'light' ? '深色预览' : '浅色预览'}
               </button>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* 说明卡片 */}
-      <div className="mt-10 p-4 bg-gray-50 border border-app-border rounded-xl">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">使用说明</h3>
-        <ul className="text-xs text-app-muted space-y-1.5 leading-relaxed">
-          <li>• 所有动画均为纯 CSS 实现，无需 JavaScript 或外部图片</li>
-          <li>• 点击「复制 CSS」按钮即可获取完整样式代码，粘贴到项目 CSS 文件中直接使用</li>
-          <li>• 部分动画使用了硬编码颜色值（如 <code className="font-mono bg-white px-1 rounded">#8b5cf6</code>），可根据项目主题色自行替换</li>
-          <li>• HTML 结构已内置于复制的 CSS 注释中，按需使用对应的 DOM 结构即可</li>
-        </ul>
-      </div>
+          <div className="loader-hero-art relative mx-auto h-[260px] w-full max-w-[460px]">
+            <div className="absolute left-[10%] top-[10%] h-[70%] w-[70%] rotate-6 rounded-[38%_62%_56%_44%/48%_36%_64%_52%] bg-[#d9c8ff]" />
+            <div className="absolute bottom-[7%] left-[0%] h-[55%] w-[68%] -rotate-12 rounded-[58%_42%_36%_64%/58%_40%_60%_42%] bg-[#a8efff] mix-blend-multiply" />
+            <div className="absolute right-[2%] top-[18%] h-[55%] w-[56%] rotate-12 rounded-[38%_62%_70%_30%/61%_34%_66%_39%] bg-[#dfff91] mix-blend-multiply" />
 
-      <FooterNote />
+            <div className="loader-ring-a absolute left-1/2 top-1/2 h-[76%] w-[76%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/12">
+              <span className="absolute left-1/2 top-[-5px] h-2.5 w-2.5 rounded-full bg-zinc-950" />
+            </div>
+
+            <div className="loader-ring-b absolute left-1/2 top-1/2 h-[52%] w-[52%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-black/12">
+              <span className="absolute bottom-[9%] right-[5%] h-2 w-2 rounded-full bg-violet-500" />
+            </div>
+
+            <div className="absolute left-1/2 top-1/2 flex h-[118px] w-[118px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[34px] bg-zinc-950 text-white shadow-[0_30px_70px_-28px_rgba(0,0,0,.45)]">
+              <WandSparkles className="h-6 w-6 text-[#dfff91]" />
+              <span className="mt-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/45">37 presets</span>
+              <span className="mt-0.5 text-lg font-semibold">Loader Lab</span>
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap gap-2">
+            {GROUPS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setGroup(item)}
+                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-medium transition ${
+                  group === item
+                    ? 'border-zinc-950 bg-zinc-950 text-white'
+                    : 'border-black/[0.06] bg-white/76 text-zinc-500 hover:border-violet-200 hover:text-violet-600'
+                }`}
+              >
+                {item}
+                <span
+                  className={`font-mono text-[9px] ${
+                    group === item ? 'text-white/45' : 'text-zinc-300'
+                  }`}
+                >
+                  {counts[item]}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="text-[10px] text-zinc-400">
+            当前显示 <span className="font-mono text-zinc-600">{list.length}</span> 个 Loader
+          </div>
+        </div>
+
+        {list.length > 0 ? (
+          <section className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {list.map((loader) => {
+              const html = PREVIEW_HTML[loader.id] || ''
+
+              return (
+                <article
+                  key={loader.id}
+                  className="loader-card group rounded-[24px] border border-black/[0.055] bg-white/86 p-4 shadow-[0_20px_60px_-48px_rgba(24,24,27,.22)] backdrop-blur-xl transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1.5 hover:border-violet-200/70 hover:shadow-[0_30px_80px_-46px_rgba(109,40,217,.24)]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[9px] uppercase tracking-[0.16em] text-zinc-300">{loader.group}</div>
+                      <h3 className="mt-1 text-sm font-semibold text-zinc-800">{loader.name}</h3>
+                    </div>
+
+                    <span className="rounded-full bg-zinc-50 px-2 py-1 font-mono text-[8px] uppercase tracking-[0.12em] text-zinc-300">
+                      CSS
+                    </span>
+                  </div>
+
+                  <div className="mt-4">
+                    <Preview loader={loader} theme={previewTheme} />
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => copyText(loader.css, `css-${loader.id}`)}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-zinc-950 text-[10px] font-semibold text-white transition hover:bg-violet-600"
+                    >
+                      {copied === `css-${loader.id}` ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      {copied === `css-${loader.id}` ? '已复制' : '复制 CSS'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => copyText(html, `html-${loader.id}`)}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-black/[0.06] bg-zinc-50 text-[10px] font-semibold text-zinc-500 transition hover:bg-violet-50 hover:text-violet-600"
+                    >
+                      {copied === `html-${loader.id}` ? <Check className="h-3.5 w-3.5" /> : <Code2 className="h-3.5 w-3.5" />}
+                      {copied === `html-${loader.id}` ? '已复制' : '复制 HTML'}
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
+          </section>
+        ) : (
+          <div className="mt-6 rounded-[24px] border border-dashed border-black/[0.08] bg-white/60 px-6 py-16 text-center backdrop-blur">
+            <div className="text-sm font-medium text-zinc-500">没有找到匹配的 Loader</div>
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('')
+                setGroup('全部')
+              }}
+              className="mt-3 text-xs font-medium text-violet-600 hover:text-violet-800"
+            >
+              清空筛选
+            </button>
+          </div>
+        )}
+
+        <section className="mt-12 grid gap-3 md:grid-cols-3">
+          <div className="rounded-[20px] border border-black/[0.055] bg-white/68 p-4 backdrop-blur">
+            <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-300">Pure CSS</div>
+            <div className="mt-2 text-sm font-semibold text-zinc-700">零依赖</div>
+            <p className="mt-1 text-[11px] leading-5 text-zinc-400">无需 JavaScript、图片或第三方动画库。</p>
+          </div>
+
+          <div className="rounded-[20px] border border-black/[0.055] bg-white/68 p-4 backdrop-blur">
+            <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-300">Preview</div>
+            <div className="mt-2 text-sm font-semibold text-zinc-700">实时预览</div>
+            <p className="mt-1 text-[11px] leading-5 text-zinc-400">支持浅色 / 深色背景快速检查动画效果。</p>
+          </div>
+
+          <div className="rounded-[20px] border border-black/[0.055] bg-white/68 p-4 backdrop-blur">
+            <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-300">Copy</div>
+            <div className="mt-2 text-sm font-semibold text-zinc-700">CSS + HTML</div>
+            <p className="mt-1 text-[11px] leading-5 text-zinc-400">结构和样式分开复制，更适合直接接入项目。</p>
+          </div>
+        </section>
+
+        <div className="mt-8">
+          <FooterNote />
+        </div>
+      </div>
     </div>
   )
 }

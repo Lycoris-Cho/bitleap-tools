@@ -8,6 +8,8 @@ import {
     type MouseEvent,
 } from 'react'
 
+import Link from 'next/link'
+
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -412,17 +414,17 @@ export default function CommunityPage() {
             intro
                 .from('.hero-kicker', {
                     opacity: 0,
-                    y: 14,
-                    duration: 0.5,
+                    y: 12,
+                    duration: 0.45,
                 })
                 .from(
                     '.hero-line',
                     {
-                        yPercent: 108,
+                        y: 54,
                         opacity: 0,
-                        rotate: 2,
-                        duration: 0.95,
-                        stagger: 0.09,
+                        rotate: 1.4,
+                        duration: 0.82,
+                        stagger: 0.08,
                     },
                     '-=0.18',
                 )
@@ -431,9 +433,9 @@ export default function CommunityPage() {
                     {
                         opacity: 0,
                         y: 18,
-                        duration: 0.6,
+                        duration: 0.52,
                     },
-                    '-=0.48',
+                    '-=0.4',
                 )
                 .from(
                     '.hero-action',
@@ -441,25 +443,24 @@ export default function CommunityPage() {
                         opacity: 0,
                         y: 16,
                         scale: 0.97,
-                        duration: 0.55,
+                        duration: 0.5,
                     },
-                    '-=0.4',
+                    '-=0.34',
                 )
                 .from(
                     '.hero-category',
                     {
                         opacity: 0,
                         y: 18,
-                        rotate: 2,
-                        duration: 0.6,
-                        stagger: 0.05,
+                        rotate: 1.2,
+                        duration: 0.54,
                     },
-                    '-=0.4',
+                    '-=0.34',
                 )
 
             gsap.to('.orb-a', {
-                x: 55,
-                y: 35,
+                x: 48,
+                y: 30,
                 duration: 14,
                 repeat: -1,
                 yoyo: true,
@@ -467,8 +468,8 @@ export default function CommunityPage() {
             })
 
             gsap.to('.orb-b', {
-                x: -50,
-                y: 70,
+                x: -44,
+                y: 58,
                 duration: 18,
                 repeat: -1,
                 yoyo: true,
@@ -476,8 +477,8 @@ export default function CommunityPage() {
             })
 
             gsap.to('.orb-c', {
-                x: 36,
-                y: -45,
+                x: 30,
+                y: -38,
                 duration: 21,
                 repeat: -1,
                 yoyo: true,
@@ -497,48 +498,308 @@ export default function CommunityPage() {
                 repeat: -1,
                 ease: 'none',
             })
+        }, rootRef)
 
+        requestAnimationFrame(() => {
+            ScrollTrigger.refresh()
+        })
+
+        return () => ctx.revert()
+    }, [])
+
+    // 控制栏 / Discover / 空状态：独立滚动动画，支持往上滚时 reverse。
+    useEffect(() => {
+        gsap.registerPlugin(ScrollTrigger)
+
+        const reduceMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+        ).matches
+
+        if (reduceMotion || !rootRef.current) return
+
+        const ctx = gsap.context(() => {
             gsap.utils
                 .toArray<HTMLElement>('.reveal')
                 .forEach((element) => {
-                    gsap.from(element, {
-                        y: 34,
-                        duration: 0.8,
-                        ease: 'power3.out',
-                        scrollTrigger: {
-                            trigger: element,
-                            start: 'top 90%',
-                            once: true,
+                    const tween = gsap.fromTo(
+                        element,
+                        {
+                            y: 44,
+                            opacity: 0,
                         },
+                        {
+                            y: 0,
+                            opacity: 1,
+                            duration: 0.72,
+                            ease: 'power4.out',
+                            paused: true,
+                        },
+                    )
+
+                    ScrollTrigger.create({
+                        trigger: element,
+                        start: 'top 94%',
+                        animation: tween,
+                        toggleActions: 'play none none reverse',
                     })
                 })
+        }, rootRef)
 
-            // 帖子卡片只做位移动画，不再用 opacity: 0。
-            // 即使 ScrollTrigger 尚未刷新，卡片也始终是完整可见的。
-            gsap.utils
-                .toArray<HTMLElement>('.post-card')
-                .forEach((card, index) => {
-                    gsap.from(card, {
-                        y: 30,
-                        rotate:
-                            index % 2 === 0 ? -0.6 : 0.6,
-                        duration: 0.75,
-                        ease: 'power3.out',
-                        scrollTrigger: {
-                            trigger: card,
-                            start: 'top 94%',
-                            once: true,
+        requestAnimationFrame(() => {
+            ScrollTrigger.refresh()
+        })
+
+        return () => ctx.revert()
+    }, [loading, filteredPosts.length === 0])
+
+    // 帖子卡片：
+    // - 首次滚动：进入视口出现，向上离开时 reverse。
+    // - 搜索 / 分类 / 排序：当前视口里的卡片只做极轻的淡入，
+    //   不再先归零再弹出，避免看起来像“页面刷新”或整体跳动。
+    useEffect(() => {
+        gsap.registerPlugin(ScrollTrigger)
+
+        const reduceMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+        ).matches
+
+        if (reduceMotion || !rootRef.current || loading) return
+
+        const ctx = gsap.context(() => {
+            const cards = gsap.utils.toArray<HTMLElement>('.post-card-motion')
+            const isFiltering =
+                Boolean(search.trim()) ||
+                activeCategory !== '全部' ||
+                sort !== 'recommended'
+
+            cards.forEach((shell, index) => {
+                const direction = index % 2 === 0 ? -1 : 1
+
+                const hiddenState = isFiltering
+                    ? {
+                          y: 34,
+                          x: direction * 10,
+                          rotate: direction * 0.6,
+                          scale: 0.97,
+                          opacity: 0,
+                      }
+                    : {
+                          y: 92,
+                          x: direction * 28,
+                          rotate: direction * 2.4,
+                          scale: 0.93,
+                          opacity: 0,
+                      }
+
+                const visibleState = {
+                    y: 0,
+                    x: 0,
+                    rotate: 0,
+                    scale: 1,
+                    opacity: 1,
+                }
+
+                const rect = shell.getBoundingClientRect()
+                const currentlyVisible =
+                    rect.top < window.innerHeight * 0.96 &&
+                    rect.bottom > 0
+
+                // 当前已经在屏幕里的筛选结果不要突然被拉走。
+                if (isFiltering && currentlyVisible) {
+                    gsap.set(shell, visibleState)
+
+                    gsap.fromTo(
+                        shell,
+                        {
+                            y: 8,
+                            scale: 0.992,
+                            opacity: 0.82,
                         },
-                    })
-                })
+                        {
+                            ...visibleState,
+                            duration: 0.28,
+                            ease: 'power2.out',
+                            overwrite: 'auto',
+                        },
+                    )
+                } else {
+                    gsap.set(shell, hiddenState)
+                }
 
-            requestAnimationFrame(() => {
-                ScrollTrigger.refresh()
+                const showCard = () => {
+                    gsap.to(shell, {
+                        ...visibleState,
+                        duration: isFiltering ? 0.48 : 0.82,
+                        ease: isFiltering ? 'power3.out' : 'power4.out',
+                        overwrite: 'auto',
+                    })
+                }
+
+                const hideCard = () => {
+                    gsap.to(shell, {
+                        ...hiddenState,
+                        duration: isFiltering ? 0.34 : 0.58,
+                        ease: 'power3.inOut',
+                        overwrite: 'auto',
+                    })
+                }
+
+                ScrollTrigger.create({
+                    trigger: shell,
+                    start: 'top 94%',
+                    onEnter: showCard,
+                    onEnterBack: showCard,
+                    onLeaveBack: hideCard,
+                })
             })
         }, rootRef)
 
+        requestAnimationFrame(() => {
+            ScrollTrigger.refresh()
+        })
+
         return () => ctx.revert()
-    }, [filteredPosts.length])
+    }, [
+        loading,
+        filteredPosts.length,
+        search,
+        activeCategory,
+        sort,
+    ])
+
+    // PRINCIPLES 三张卡片：左右/下方错位进入，向上滚动时反向退场。
+    useEffect(() => {
+        gsap.registerPlugin(ScrollTrigger)
+
+        const reduceMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+        ).matches
+
+        if (reduceMotion || !rootRef.current) return
+
+        const ctx = gsap.context(() => {
+            gsap.utils
+                .toArray<HTMLElement>('.principle-card')
+                .forEach((card, index) => {
+                    const fromX =
+                        index === 0 ? -64 : index === 2 ? 64 : 0
+                    const fromY = index === 1 ? 78 : 56
+
+                    const tween = gsap.fromTo(
+                        card,
+                        {
+                            x: fromX,
+                            y: fromY,
+                            rotate:
+                                index === 0 ? -2.6 : index === 2 ? 2.6 : 1.2,
+                            scale: 0.94,
+                            opacity: 0,
+                        },
+                        {
+                            x: 0,
+                            y: 0,
+                            rotate: 0,
+                            scale: 1,
+                            opacity: 1,
+                            duration: 0.9,
+                            ease: 'power4.out',
+                            paused: true,
+                        },
+                    )
+
+                    ScrollTrigger.create({
+                        trigger: card,
+                        start: 'top 92%',
+                        animation: tween,
+                        toggleActions: 'play none none reverse',
+                    })
+                })
+
+            const cta = rootRef.current?.querySelector<HTMLElement>(
+                '.community-cta',
+            )
+
+            if (cta) {
+                const timeline = gsap.timeline({
+                    paused: true,
+                    defaults: {
+                        ease: 'power4.out',
+                    },
+                })
+
+                timeline
+                    .fromTo(
+                        cta,
+                        {
+                            y: 88,
+                            scale: 0.96,
+                            opacity: 0.3,
+                            rotateX: 4,
+                            transformPerspective: 1400,
+                            transformOrigin: '50% 100%',
+                        },
+                        {
+                            y: 0,
+                            scale: 1,
+                            opacity: 1,
+                            rotateX: 0,
+                            duration: 0.95,
+                        },
+                    )
+                    .from(
+                        '.cta-kicker',
+                        {
+                            y: 18,
+                            opacity: 0,
+                            duration: 0.42,
+                        },
+                        '-=0.56',
+                    )
+                    .from(
+                        '.cta-title',
+                        {
+                            y: 40,
+                            opacity: 0,
+                            duration: 0.62,
+                        },
+                        '-=0.38',
+                    )
+                    .from(
+                        '.cta-copy',
+                        {
+                            y: 22,
+                            opacity: 0,
+                            duration: 0.46,
+                        },
+                        '-=0.42',
+                    )
+                    .from(
+                        '.cta-action',
+                        {
+                            x: 36,
+                            y: 12,
+                            scale: 0.94,
+                            opacity: 0,
+                            duration: 0.5,
+                        },
+                        '-=0.36',
+                    )
+
+                ScrollTrigger.create({
+                    trigger: cta,
+                    start: 'top 90%',
+                    animation: timeline,
+                    toggleActions: 'play none none reverse',
+                })
+            }
+        }, rootRef)
+
+        requestAnimationFrame(() => {
+            ScrollTrigger.refresh()
+        })
+
+        return () => ctx.revert()
+    }, [])
 
     useEffect(() => {
         if (!publishOpen) return
@@ -634,8 +895,8 @@ export default function CommunityPage() {
 
             <main className="relative z-10">
                 {/* HERO */}
-                <section className="mx-auto max-w-[1600px] px-4 pb-12 pt-5 sm:px-6 lg:px-8 lg:pb-16">
-                    <div className="relative min-h-[620px] overflow-hidden rounded-[42px_18px_42px_42px] border border-black/[0.06] bg-white px-6 py-7 shadow-[0_36px_110px_-70px_rgba(20,20,30,.24)] sm:px-9 sm:py-8 lg:min-h-[680px] lg:px-12 lg:py-9">
+                <section className="mx-auto w-full px-4 pb-8 pt-2 sm:px-5 lg:px-6 xl:px-8 lg:pb-10">
+                    <div className="relative overflow-hidden rounded-[32px] border border-black/[0.06] bg-white px-5 py-5 shadow-[0_30px_90px_-68px_rgba(20,20,30,.24)] sm:px-7 sm:py-6 lg:px-9 lg:py-6">
                         <div className="pointer-events-none absolute inset-0 overflow-hidden">
                             <div className="absolute -right-32 -top-40 h-[34rem] w-[34rem] rounded-full bg-violet-100 blur-[95px]" />
                             <div className="absolute -bottom-48 left-[18%] h-[30rem] w-[30rem] rounded-full bg-sky-100/80 blur-[100px]" />
@@ -650,7 +911,7 @@ export default function CommunityPage() {
                             </div>
                         </div>
 
-                        <div className="relative flex h-full min-h-[560px] flex-col lg:min-h-[600px]">
+                        <div className="relative flex flex-col">
                             <div className="hero-kicker flex items-center justify-between">
                                 <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.27em] text-zinc-400">
                                     <span className="relative flex h-2 w-2">
@@ -666,19 +927,19 @@ export default function CommunityPage() {
                                 </div>
                             </div>
 
-                            <div className="mt-12 lg:mt-14">
+                            <div className="mt-7 lg:mt-8">
                                 {/* Share：大、稳、靠左 */}
                                 <div className="overflow-visible">
-                                    <h1 className="hero-line text-[clamp(3.8rem,8.8vw,8.8rem)] font-medium leading-[0.84] tracking-[-0.08em] text-zinc-950">
+                                    <h1 className="hero-line text-[clamp(3.2rem,7vw,7rem)] font-medium leading-[0.95] tracking-[-0.08em] text-zinc-950">
                                         Share
                                     </h1>
                                 </div>
 
                                 {/* 你的：缩小，像一句插入语 */}
-                                <div className="hero-line mt-4 flex items-center gap-4 pl-[10%]">
+                                <div className="hero-line mt-2 flex items-center gap-3 pl-[8%]">
                                     <span className="h-px w-10 bg-zinc-300 sm:w-16" />
 
-                                    <span className="text-[clamp(1.8rem,4vw,3.8rem)] font-medium leading-none tracking-[-0.04em] text-zinc-900">
+                                    <span className="text-[clamp(1.5rem,3vw,2.8rem)] font-medium leading-[1.08] tracking-[-0.04em] text-zinc-900">
                                         你的
                                     </span>
 
@@ -688,10 +949,10 @@ export default function CommunityPage() {
                                 </div>
 
                                 {/* 创意：真正的主视觉 */}
-                                <div className="relative mt-3 overflow-visible pl-[2%]">
+                                <div className="relative mt-1 overflow-visible pb-2 pl-[2%]">
                                     <div className="pointer-events-none absolute left-[2%] top-1/2 h-[38%] w-[45%] -translate-y-1/2 rounded-full bg-violet-200/30 blur-[55px]" />
 
-                                    <div className="hero-line relative inline-block bg-gradient-to-r from-violet-500 to-sky-400 bg-clip-text text-[clamp(4.2rem,9.6vw,9.6rem)] font-medium leading-[1] tracking-[-0.075em] text-transparent">
+                                    <div className="hero-line relative inline-block bg-gradient-to-r from-violet-500 to-sky-400 bg-clip-text text-[clamp(3.6rem,8vw,7.8rem)] font-medium leading-[1.08] tracking-[-0.075em] text-transparent">
                                         创意
                                     </div>
 
@@ -701,10 +962,10 @@ export default function CommunityPage() {
                                 </div>
                             </div>
 
-                            <div className="mt-auto grid gap-10 pt-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+                            <div className="mt-8 grid gap-8 pt-4 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-end">
                                 {/* 左侧：说明 + 主发布入口 */}
                                 <div className="max-w-xl">
-                                    <p className="hero-copy text-sm leading-7 text-zinc-500 sm:text-[15px]">
+                                    <p className="hero-copy text-[13px] leading-6 text-zinc-500 sm:text-sm">
                                         分享作品、实践、小工具和真正值得收藏的资源。
                                         <br />
                                         不需要写得很长，有价值的东西本身就值得被看见。
@@ -713,7 +974,7 @@ export default function CommunityPage() {
                                     <button
                                         type="button"
                                         onClick={() => setPublishOpen(true)}
-                                        className="hero-action group mt-7 flex h-13 items-center gap-6 rounded-full bg-[#171717] py-2 pl-5 pr-2 text-sm font-medium text-white shadow-[0_18px_40px_-20px_rgba(0,0,0,.6)] transition duration-300 hover:scale-[1.025]"
+                                        className="hero-action group mt-5 flex h-11 items-center gap-6 rounded-full bg-[#171717] py-2 pl-5 pr-2 text-sm font-medium text-white shadow-[0_18px_40px_-20px_rgba(0,0,0,.6)] transition duration-300 hover:scale-[1.025]"
                                     >
                                         发布内容
                                         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition-transform duration-300 group-hover:translate-x-1">
@@ -741,7 +1002,7 @@ export default function CommunityPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setPublishOpen(true)}
-                                                className="group flex h-12 shrink-0 items-center gap-3 rounded-full bg-[#171717] py-2 pl-5 pr-2 text-sm font-medium text-white shadow-[0_16px_35px_-20px_rgba(0,0,0,.55)] transition duration-300 hover:-translate-y-0.5"
+                                                className="group flex h-11 shrink-0 items-center gap-3 rounded-full bg-[#171717] py-2 pl-5 pr-2 text-sm font-medium text-white shadow-[0_16px_35px_-20px_rgba(0,0,0,.55)] transition duration-300 hover:-translate-y-0.5"
                                             >
                                                 分享
                                                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
@@ -803,9 +1064,9 @@ export default function CommunityPage() {
                 </section>
 
                 {/* CONTENT */}
-                <section className="mx-auto max-w-[1500px] px-4 pb-24 sm:px-6 lg:px-8">
+                <section className="mx-auto w-full px-4 pb-20 sm:px-5 lg:px-6 xl:px-8">
                     {/* 控制栏 */}
-                    <div className="reveal relative z-20 rounded-[28px_10px_28px_28px] border border-black/[0.06] bg-white px-4 py-4 shadow-[0_22px_65px_-50px_rgba(0,0,0,.25)] sm:px-5">
+                    <div className="reveal relative z-20 rounded-[24px] border border-black/[0.06] bg-white px-4 py-4 shadow-[0_22px_65px_-50px_rgba(0,0,0,.25)] sm:px-5">
                         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                             <div className="flex flex-wrap items-center gap-2">
                                 {categories.map((category) => {
@@ -888,7 +1149,7 @@ export default function CommunityPage() {
                         </div>
                     </div>
 
-                    <div className="reveal mt-20 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="reveal mt-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div>
                             <div className="text-[10px] uppercase tracking-[0.25em] text-zinc-400">
                                 Discover / Community
@@ -911,14 +1172,14 @@ export default function CommunityPage() {
 
                     {/* 加载状态 */}
                     {loading ? (
-                        <div className="mt-12 rounded-[36px_14px_36px_36px] border border-black/[0.06] bg-white p-8 shadow-[0_25px_80px_-65px_rgba(0,0,0,.3)]">
+                        <div className="mt-12 rounded-[28px] border border-black/[0.06] bg-white p-8 shadow-[0_25px_80px_-65px_rgba(0,0,0,.3)]">
                             <div className="flex items-center gap-3 text-sm text-zinc-400">
                                 <span className="h-2 w-2 animate-pulse rounded-full bg-violet-500" />
                                 正在读取社区内容...
                             </div>
                         </div>
                     ) : filteredPosts.length > 0 ? (
-                        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12">
+                        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
                             {filteredPosts.map((post, index) => {
                                 if (!isGitHubCategory(post.category)) {
                                     return null
@@ -930,28 +1191,29 @@ export default function CommunityPage() {
 
                                 const layout =
                                     index % 5 === 0
-                                        ? 'lg:col-span-8 min-h-[430px]'
+                                        ? 'lg:col-span-8 min-h-[320px]'
                                         : index % 5 === 1
-                                            ? 'lg:col-span-4 min-h-[430px]'
+                                            ? 'lg:col-span-4 min-h-[320px]'
                                             : index % 5 === 2
-                                                ? 'lg:col-span-5 min-h-[340px]'
+                                                ? 'lg:col-span-5 min-h-[270px]'
                                                 : index % 5 === 3
-                                                    ? 'lg:col-span-7 min-h-[340px]'
-                                                    : 'lg:col-span-12 min-h-[300px]'
+                                                    ? 'lg:col-span-7 min-h-[270px]'
+                                                    : 'lg:col-span-12 min-h-[230px]'
 
                                 return (
-                                    <a
+                                    <div
                                         key={post.id}
-                                        href={post.url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        onMouseMove={handleCardMove}
-                                        onMouseLeave={handleCardLeave}
-                                        className={`post-card group relative flex flex-col overflow-hidden rounded-[34px_12px_34px_34px] border border-black/[0.08] bg-white p-6 text-inherit shadow-[0_28px_75px_-52px_rgba(15,23,42,.30)] ring-1 ring-black/[0.02] transition-shadow duration-300 hover:shadow-[0_34px_90px_-48px_rgba(15,23,42,.38)] ${layout} sm:p-7`}
-                                        style={{
-                                            transformStyle: 'preserve-3d',
-                                        }}
+                                        className={`post-card-motion flex ${layout}`}
                                     >
+                                        <Link
+                                            href={`/community/${post.number}`}
+                                            onMouseMove={handleCardMove}
+                                            onMouseLeave={handleCardLeave}
+                                            className="post-card group relative flex flex-1 flex-col overflow-hidden rounded-[26px] border border-black/[0.08] bg-white p-5 text-inherit shadow-[0_28px_75px_-52px_rgba(15,23,42,.30)] ring-1 ring-black/[0.02] transition-shadow duration-300 hover:shadow-[0_34px_90px_-48px_rgba(15,23,42,.38)] sm:p-6"
+                                            style={{
+                                                transformStyle: 'preserve-3d',
+                                            }}
+                                        >
                                         {/* 卡片底层：保持不透明 */}
                                         <div
                                             className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${accent.gradient} opacity-70`}
@@ -980,17 +1242,17 @@ export default function CommunityPage() {
                                             </span>
                                         </div>
 
-                                        <div className="relative mt-auto pt-20">
-                                            <h3 className="max-w-2xl text-2xl font-semibold leading-[1.08] tracking-[-0.04em] text-zinc-900 sm:text-3xl">
+                                        <div className="relative mt-auto pt-8 sm:pt-10">
+                                            <h3 className="max-w-2xl text-xl font-semibold leading-[1.12] tracking-[-0.035em] text-zinc-900 sm:text-2xl">
                                                 {post.title}
                                             </h3>
 
-                                            <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-600">
+                                            <p className="mt-3 max-w-2xl text-[13px] leading-6 text-zinc-600">
                                                 {post.excerpt}
                                             </p>
 
                                             {tags.length > 0 && (
-                                                <div className="mt-6 flex flex-wrap gap-2">
+                                                <div className="mt-4 flex flex-wrap gap-2">
                                                     {tags.map((tag) => (
                                                         <span
                                                             key={tag}
@@ -1002,7 +1264,7 @@ export default function CommunityPage() {
                                                 </div>
                                             )}
 
-                                            <div className="mt-7 flex items-end justify-between gap-4 border-t border-black/[0.07] pt-4">
+                                            <div className="mt-5 flex items-end justify-between gap-4 border-t border-black/[0.07] pt-3">
                                                 <div className="flex min-w-0 items-center gap-3">
                                                     {post.avatar ? (
                                                         <img
@@ -1041,12 +1303,13 @@ export default function CommunityPage() {
                                                 </div>
                                             </div>
                                         </div>
-                                    </a>
+                                        </Link>
+                                    </div>
                                 )
                             })}
                         </div>
                     ) : (
-                        <div className="reveal relative mt-12 overflow-hidden rounded-[44px_16px_44px_44px] border border-black/[0.06] bg-white px-7 py-10 shadow-[0_32px_95px_-68px_rgba(20,20,20,.28)] sm:px-10 sm:py-12 lg:min-h-[500px] lg:px-14 lg:py-14">
+                        <div className="reveal relative mt-12 overflow-hidden rounded-[28px] border border-black/[0.06] bg-white px-7 py-10 shadow-[0_32px_95px_-68px_rgba(20,20,20,.28)] sm:px-10 sm:py-12 lg:min-h-[500px] lg:px-14 lg:py-14">
                             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                                 <div className="absolute -right-28 -top-32 h-[26rem] w-[26rem] rounded-full bg-violet-100 blur-[85px]" />
                                 <div className="absolute -bottom-32 left-[12%] h-[24rem] w-[24rem] rounded-full bg-sky-100/80 blur-[85px]" />
@@ -1105,9 +1368,9 @@ export default function CommunityPage() {
                     )}
 
                     {/* PRINCIPLES */}
-                    <div className="reveal mt-28">
+                    <div className="mt-20">
                         <div className="grid gap-5 lg:grid-cols-3">
-                            <div className="relative min-h-[300px] overflow-hidden rounded-[38px_14px_38px_38px] border border-violet-200 bg-gradient-to-br from-violet-50 via-white to-white p-7">
+                            <div className="principle-card relative min-h-[230px] overflow-hidden rounded-[28px] border border-violet-200 bg-gradient-to-br from-violet-50 via-white to-white p-7">
                                 <div className="absolute -right-14 -top-16 h-44 w-44 rounded-full bg-violet-200/45 blur-[55px]" />
                                 <div className="relative flex h-full flex-col justify-between">
                                     <span className="text-[9px] uppercase tracking-[0.22em] text-violet-500">
@@ -1125,7 +1388,7 @@ export default function CommunityPage() {
                                 </div>
                             </div>
 
-                            <div className="relative min-h-[300px] overflow-hidden rounded-[14px_38px_38px_38px] border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-white p-7 lg:translate-y-10">
+                            <div className="principle-card relative min-h-[230px] overflow-hidden rounded-[28px] border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-white p-7 lg:translate-y-10">
                                 <div className="absolute -right-14 -top-16 h-44 w-44 rounded-full bg-sky-200/45 blur-[55px]" />
                                 <div className="relative flex h-full flex-col justify-between">
                                     <span className="text-[9px] uppercase tracking-[0.22em] text-sky-500">
@@ -1143,7 +1406,7 @@ export default function CommunityPage() {
                                 </div>
                             </div>
 
-                            <div className="relative min-h-[300px] overflow-hidden rounded-[38px_38px_14px_38px] border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-white p-7">
+                            <div className="principle-card relative min-h-[230px] overflow-hidden rounded-[28px] border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-white p-7">
                                 <div className="absolute -right-14 -top-16 h-44 w-44 rounded-full bg-orange-200/45 blur-[55px]" />
                                 <div className="relative flex h-full flex-col justify-between">
                                     <span className="text-[9px] uppercase tracking-[0.22em] text-orange-500">
@@ -1164,7 +1427,7 @@ export default function CommunityPage() {
                     </div>
 
                     {/* CTA */}
-                    <div className="reveal relative mb-10 mt-36 overflow-hidden rounded-[48px_18px_48px_48px] bg-[#171717] px-7 py-12 text-white sm:px-10 sm:py-16 lg:px-14 lg:py-20">
+                    <div className="community-cta relative mb-8 mt-24 overflow-hidden rounded-[28px] bg-[#171717] px-7 py-12 text-white sm:px-10 sm:py-16 lg:px-14 lg:py-20">
                         <div className="pointer-events-none absolute inset-0">
                             <div className="absolute -right-28 -top-28 h-96 w-96 rounded-full bg-violet-500/20 blur-[90px]" />
                             <div className="absolute bottom-[-150px] left-[20%] h-80 w-80 rounded-full bg-sky-500/10 blur-[95px]" />
@@ -1172,19 +1435,19 @@ export default function CommunityPage() {
                         </div>
 
                         <div className="relative">
-                            <div className="text-[9px] uppercase tracking-[0.28em] text-zinc-600">
+                            <div className="cta-kicker text-[9px] uppercase tracking-[0.28em] text-zinc-600">
                                 Open Community / GitHub Powered
                             </div>
 
-                            <div className="mt-16 flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
+                            <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
                                 <div>
-                                    <h2 className="max-w-3xl text-4xl font-medium leading-[0.96] tracking-[-0.06em] sm:text-6xl lg:text-7xl">
+                                    <h2 className="cta-title max-w-3xl text-3xl font-medium leading-[0.96] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
                                         Made something
                                         <br />
                                         worth sharing?
                                     </h2>
 
-                                    <p className="mt-7 max-w-xl text-sm leading-7 text-zinc-500">
+                                    <p className="cta-copy mt-5 max-w-xl text-sm leading-7 text-zinc-500">
                                         不需要等到“完成”。过程、想法、作品和经验，
                                         本身就可以成为一篇值得留下的内容。
                                     </p>
@@ -1195,7 +1458,7 @@ export default function CommunityPage() {
                                     onClick={() =>
                                         setPublishOpen(true)
                                     }
-                                    className="group flex h-13 w-fit items-center gap-7 rounded-full bg-white py-2 pl-5 pr-2 text-sm font-medium text-black"
+                                    className="cta-action group flex h-13 w-fit items-center gap-7 rounded-full bg-white py-2 pl-5 pr-2 text-sm font-medium text-black"
                                 >
                                     开始分享
                                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white transition-transform duration-300 group-hover:translate-x-1">
@@ -1233,7 +1496,7 @@ export default function CommunityPage() {
                         }
                     }}
                 >
-                    <div className="relative w-full max-w-2xl overflow-hidden rounded-[38px_16px_38px_38px] border border-white/70 bg-white shadow-[0_40px_120px_-30px_rgba(0,0,0,.35)]">
+                    <div className="relative w-full max-w-2xl overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_40px_120px_-30px_rgba(0,0,0,.35)]">
                         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-violet-200/40 blur-[70px]" />
 
                         <div className="relative flex items-start justify-between px-7 pb-7 pt-8 sm:px-9">
@@ -1274,7 +1537,7 @@ export default function CommunityPage() {
                                             href={item.href}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className={`group relative min-h-[190px] overflow-hidden p-7 transition duration-300 hover:bg-zinc-50 sm:p-8 ${index % 2 === 0
+                                            className={`group relative min-h-[165px] overflow-hidden p-7 transition duration-300 hover:bg-zinc-50 sm:p-8 ${index % 2 === 0
                                                 ? 'sm:border-r sm:border-black/[0.06]'
                                                 : ''
                                                 } ${index < 2
@@ -1299,7 +1562,7 @@ export default function CommunityPage() {
                                                     </span>
                                                 </div>
 
-                                                <h3 className="mt-7 text-lg font-medium tracking-tight">
+                                                <h3 className="mt-5 text-lg font-medium tracking-tight">
                                                     {item.title}
                                                 </h3>
 

@@ -22,7 +22,7 @@ export const tools: Tool[] = [
   { id: 'box-shadow', title: 'Box Shadow 生成器', description: '可视化生成 CSS 盒阴影，支持多层阴影与内阴影', href: '/tools/box-shadow', icon: 'Box', category: 'CSS 工具' },
   { id: 'glow-background', title: '渐变光晕背景', description: '生成带光晕效果的渐变背景，适合卡片与 Banner', href: '/tools/glow-background', icon: 'Sparkles', category: 'CSS 工具' },
   { id: 'flex-grid', title: 'Flex/Grid 布局', description: 'Flex/Grid 布局可视化生成器', href: '/tools/flex-grid', icon: 'LayoutGrid', category: 'CSS 工具' },
-  { id: 'uuid', title: 'UUID 生成器', description: '在线生成UUID', href: '/tools/uuid', icon: 'Hash', category: '文本工具' },  
+  { id: 'uuid', title: 'UUID 生成器', description: '在线生成UUID', href: '/tools/uuid', icon: 'Hash', category: '文本工具' },
   { id: 'cron', title: 'Cron 表达式生成器', description: '可视化生成定时任务表达式', href: '/tools/cron', icon: 'Timer', category: '开发辅助' },
   { id: 'image-compress', title: '图片压缩', description: '在浏览器中压缩 JPG / PNG / WebP', href: '/tools/image-compress', icon: 'ImageDown', category: '媒体工具' },
   { id: 'regex', title: '正则表达式生成器', description: '通过可视化配置生成常用正则表达式', href: '/tools/regex', icon: 'Regex', category: '开发辅助' },
@@ -92,17 +92,17 @@ export const tools: Tool[] = [
   { id: 'wangyi-music', title: '网易云音乐解析', description: '音乐链接解析，在线播放，每日推荐', href: '/tools/wangyi-music', icon: 'Music3', category: '日常工具' },
   { id: 'ex-echo', title: '回声', description: '我会为了你一万次回到那个夏天', href: '/tools/ex-echo', icon: 'MessagesSquare', category: '心迹' },
   { id: 'impress-playground', title: '3D 画布演示', description: '基于 CSS3 transform 的无限 3D 演示框架', href: 'https://impress.js.org', icon: 'Presentation', category: 'CSS 工具', target: '_blank' },
-  { id: 'letter-workshop', title: '信笺', description: '写下无法送达的文字，封入一封虚拟信件',  href: '/tools/letter-workshop', icon: 'Mail', category: '心迹'},
+  { id: 'letter-workshop', title: '信笺', description: '写下无法送达的文字，封入一封虚拟信件', href: '/tools/letter-workshop', icon: 'Mail', category: '心迹' },
   { id: 'morphicons', title: 'Morphicons', description: '任意描边图标间弹簧形变动画，支持 Lucide/Tabler/Heroicons', href: 'https://www.morphicons.com', icon: 'Shapes', category: 'CSS 工具', target: '_blank' },
   { id: 'screenshot-beautifier', title: '截图美化', description: '粘贴截图，一键生成适合分享的精美图片', href: '/tools/screenshot-beautifier', icon: 'Image', category: '媒体工具' },
-  { id: 'image-to-ico', title: '图片转 ICO', description: '将 PNG/JPG 图片转换为 32×32 的 ICO 图标，适合做网站 favicon', href: '/tools/image-to-ico', icon: 'ImageDown', category: '媒体工具'},
-  { 
-    id: 'page-builder', 
-    title: '前端页面生成器', 
-    description: '拖拽式页面生成器，可导出 HTML / React 代码', 
-    href: '/tools/page-builder', 
+  { id: 'image-to-ico', title: '图片转 ICO', description: '将 PNG/JPG 图片转换为 32×32 的 ICO 图标，适合做网站 favicon', href: '/tools/image-to-ico', icon: 'ImageDown', category: '媒体工具' },
+  {
+    id: 'page-builder',
+    title: '前端页面生成器',
+    description: '拖拽式页面生成器，可导出 HTML / React 代码',
+    href: '/tools/page-builder',
     icon: 'LayoutDashboard',
-    category: '前端实验' 
+    category: '前端实验'
   },
   {
     id: 'data-analytics',
@@ -119,5 +119,21 @@ export const tools: Tool[] = [
     href: "/tools/gsap",
     icon: "WandSparkles",
     category: "前端实验",
+  },
+  {
+    id: 'memory-path',
+    title: '沿途',
+    description: '把照片、日期与文字连成一条回忆轨迹',
+    href: '/tools/memory-path',
+    icon: 'Route',
+    category: '心迹',
+  },
+  {
+    id: 'love-cards',
+    title: '小情话卡片',
+    description: '把日常碎碎念变成从四方聚拢的小卡片',
+    href: '/tools/love-cards',
+    icon: 'MessagesSquare',
+    category: '心迹',
   },
 ]

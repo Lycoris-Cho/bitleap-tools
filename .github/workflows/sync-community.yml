@@ -13,6 +13,10 @@ permissions:
   contents: write
   discussions: read
 
+concurrency:
+  group: sync-community
+  cancel-in-progress: false
+
 jobs:
   sync-community:
     runs-on: ubuntu-latest
@@ -20,19 +24,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: master
 
-      - name: Fetch approved discussions
+      - name: Fetch all approved discussions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p public/data
 
           gh api graphql \
+            --paginate \
+            --slurp \
             -f query='
-              query {
+              query($endCursor: String) {
                 repository(owner: "Lycoris-Cho", name: "bitleap-tools") {
                   discussions(
                     first: 100
+                    after: $endCursor
                     orderBy: {field: CREATED_AT, direction: DESC}
                   ) {
                     nodes {
@@ -65,6 +74,11 @@ jobs:
                         totalCount
                       }
                     }
+
+                    pageInfo {
+                      hasNextPage
+                      endCursor
+                    }
                   }
                 }
               }
@@ -79,8 +93,12 @@ jobs:
             fs.readFileSync("discussions.json", "utf8")
           );
 
-          const discussions =
-            raw.data?.repository?.discussions?.nodes || [];
+          const pages = Array.isArray(raw) ? raw : [raw];
+
+          const discussions = pages.flatMap(
+            (page) =>
+              page.data?.repository?.discussions?.nodes || []
+          );
 
           const allowedCategories = [
             "Frontend Showcase",
@@ -219,6 +237,10 @@ jobs:
           );
 
           console.log(
+            `Fetched ${discussions.length} discussion(s) across ${pages.length} page(s).`
+          );
+
+          console.log(
             `Generated community.json with ${posts.length} approved post(s).`
           );
           EOF
@@ -236,4 +258,4 @@ jobs:
           fi
 
           git commit -m "chore: sync community discussions"
-          git push
+          git push origin master
