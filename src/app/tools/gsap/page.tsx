@@ -193,6 +193,9 @@ export default function GSAPToolPage() {
         const reduceMotion = window.matchMedia(
             "(prefers-reduced-motion: reduce)"
         ).matches;
+        const isMobile = window.matchMedia("(max-width: 767px)").matches;
+        const isTablet = window.matchMedia("(max-width: 1023px)").matches;
+        const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
         const ctx = gsap.context(() => {
             if (reduceMotion) return;
@@ -231,10 +234,10 @@ export default function GSAPToolPage() {
                 .from(
                     ".hero-title-word",
                     {
-                        y: 80,
+                        y: isMobile ? 34 : 80,
                         opacity: 0,
-                        rotate: 2,
-                        duration: 0.85,
+                        rotate: isMobile ? 0 : 2,
+                        duration: isMobile ? 0.62 : 0.85,
                         stagger: 0.08,
                     },
                     "-=0.12"
@@ -242,10 +245,10 @@ export default function GSAPToolPage() {
                 .from(
                     ".hero-copy",
                     {
-                        y: 28,
+                        y: isMobile ? 16 : 28,
                         opacity: 0,
-                        filter: "blur(8px)",
-                        duration: 0.6,
+                        filter: isMobile ? "blur(0px)" : "blur(8px)",
+                        duration: isMobile ? 0.46 : 0.6,
                     },
                     "-=0.36"
                 )
@@ -263,20 +266,20 @@ export default function GSAPToolPage() {
                 .from(
                     ".hero-stage",
                     {
-                        scale: 0.86,
+                        scale: isMobile ? 0.96 : 0.86,
                         opacity: 0,
-                        rotate: 4,
-                        duration: 1,
+                        rotate: isMobile ? 0 : 4,
+                        duration: isMobile ? 0.62 : 1,
                     },
                     "-=0.8"
                 )
                 .from(
                     ".hero-float",
                     {
-                        y: 30,
+                        y: isMobile ? 14 : 30,
                         opacity: 0,
-                        scale: 0.88,
-                        duration: 0.5,
+                        scale: isMobile ? 0.96 : 0.88,
+                        duration: isMobile ? 0.4 : 0.5,
                         stagger: 0.08,
                     },
                     "-=0.6"
@@ -296,18 +299,20 @@ export default function GSAPToolPage() {
                 ease: "none",
             });
 
-            gsap.to(".hero-core", {
-                scale: 1.04,
-                rotate: 5,
-                repeat: -1,
-                yoyo: true,
-                duration: 2.5,
-                ease: "sine.inOut",
-            });
+            if (!isMobile) {
+                gsap.to(".hero-core", {
+                    scale: 1.04,
+                    rotate: 5,
+                    repeat: -1,
+                    yoyo: true,
+                    duration: 2.5,
+                    ease: "sine.inOut",
+                });
+            }
 
             gsap.to(".hero-float-a", {
-                y: -16,
-                rotate: -3,
+                y: isMobile ? -6 : -16,
+                rotate: isMobile ? 0 : -3,
                 repeat: -1,
                 yoyo: true,
                 duration: 2.8,
@@ -315,9 +320,9 @@ export default function GSAPToolPage() {
             });
 
             gsap.to(".hero-float-b", {
-                y: 13,
-                x: 7,
-                rotate: 2,
+                y: isMobile ? 5 : 13,
+                x: isMobile ? 2 : 7,
+                rotate: isMobile ? 0 : 2,
                 repeat: -1,
                 yoyo: true,
                 duration: 3.2,
@@ -325,8 +330,8 @@ export default function GSAPToolPage() {
             });
 
             gsap.to(".hero-float-c", {
-                y: -10,
-                x: -6,
+                y: isMobile ? -4 : -10,
+                x: isMobile ? -2 : -6,
                 repeat: -1,
                 yoyo: true,
                 duration: 2.4,
@@ -336,70 +341,74 @@ export default function GSAPToolPage() {
             if (heroRef.current) {
                 const hero = heroRef.current;
 
-                const moveA = gsap.quickTo(".hero-depth-a", "x", {
-                    duration: 0.8,
-                    ease: "power3.out",
-                });
-                const moveAY = gsap.quickTo(".hero-depth-a", "y", {
-                    duration: 0.8,
-                    ease: "power3.out",
-                });
-                const moveB = gsap.quickTo(".hero-depth-b", "x", {
-                    duration: 1,
-                    ease: "power3.out",
-                });
-                const moveBY = gsap.quickTo(".hero-depth-b", "y", {
-                    duration: 1,
-                    ease: "power3.out",
-                });
+                if (!isCoarsePointer && !isTablet) {
+                    const moveA = gsap.quickTo(".hero-depth-a", "x", {
+                        duration: 0.8,
+                        ease: "power3.out",
+                    });
+                    const moveAY = gsap.quickTo(".hero-depth-a", "y", {
+                        duration: 0.8,
+                        ease: "power3.out",
+                    });
+                    const moveB = gsap.quickTo(".hero-depth-b", "x", {
+                        duration: 1,
+                        ease: "power3.out",
+                    });
+                    const moveBY = gsap.quickTo(".hero-depth-b", "y", {
+                        duration: 1,
+                        ease: "power3.out",
+                    });
 
-                const pointer = (event: PointerEvent) => {
-                    const rect = hero.getBoundingClientRect();
-                    const px = (event.clientX - rect.left) / rect.width - 0.5;
-                    const py = (event.clientY - rect.top) / rect.height - 0.5;
+                    const pointer = (event: PointerEvent) => {
+                        const rect = hero.getBoundingClientRect();
+                        const px = (event.clientX - rect.left) / rect.width - 0.5;
+                        const py = (event.clientY - rect.top) / rect.height - 0.5;
 
-                    moveA(px * 32);
-                    moveAY(py * 24);
-                    moveB(px * -20);
-                    moveBY(py * -16);
-                };
+                        moveA(px * 32);
+                        moveAY(py * 24);
+                        moveB(px * -20);
+                        moveBY(py * -16);
+                    };
 
-                hero.addEventListener("pointermove", pointer);
+                    hero.addEventListener("pointermove", pointer);
 
-                (hero as HTMLElement & { __cleanup?: () => void }).__cleanup =
-                    () => hero.removeEventListener("pointermove", pointer);
+                    (hero as HTMLElement & { __cleanup?: () => void }).__cleanup =
+                        () => hero.removeEventListener("pointermove", pointer);
+                }
 
-                gsap.to(".hero-content", {
-                    yPercent: 12,
-                    opacity: 0.15,
-                    filter: "blur(8px)",
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: hero,
-                        start: "top top",
-                        end: "bottom 18%",
-                        scrub: 0.7,
-                    },
-                });
+                if (!isMobile) {
+                    gsap.to(".hero-content", {
+                        yPercent: 12,
+                        opacity: 0.15,
+                        filter: "blur(8px)",
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: hero,
+                            start: "top top",
+                            end: "bottom 18%",
+                            scrub: 0.7,
+                        },
+                    });
 
-                gsap.to(".hero-stage", {
-                    yPercent: 10,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: hero,
-                        start: "top top",
-                        end: "bottom top",
-                        scrub: 1,
-                        invalidateOnRefresh: true,
-                    },
-                });
+                    gsap.to(".hero-stage", {
+                        yPercent: 10,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: hero,
+                            start: "top top",
+                            end: "bottom top",
+                            scrub: 1,
+                            invalidateOnRefresh: true,
+                        },
+                    });
+                }
             }
 
             /**
              * MARQUEE
              */
             gsap.to(".marquee-track", {
-                xPercent: -28,
+                xPercent: isMobile ? -12 : -28,
                 ease: "none",
                 scrollTrigger: {
                     trigger: ".marquee-section",
@@ -420,9 +429,15 @@ export default function GSAPToolPage() {
                     gsap.fromTo(
                         word,
                         {
-                            xPercent: index % 2 === 0 ? -35 : 35,
-                            opacity: 0.08,
-                            rotate: index % 2 === 0 ? -2 : 2,
+                            xPercent: isMobile
+                                ? index % 2 === 0
+                                    ? -10
+                                    : 10
+                                : index % 2 === 0
+                                  ? -35
+                                  : 35,
+                            opacity: isMobile ? 0.22 : 0.08,
+                            rotate: isMobile ? 0 : index % 2 === 0 ? -2 : 2,
                         },
                         {
                             xPercent: 0,
@@ -440,8 +455,8 @@ export default function GSAPToolPage() {
                 });
 
                 gsap.to(".manifesto-orbit", {
-                    rotate: 220,
-                    scale: 1.15,
+                    rotate: isMobile ? 80 : 220,
+                    scale: isMobile ? 1.04 : 1.15,
                     ease: "none",
                     scrollTrigger: {
                         trigger: manifestoRef.current,
@@ -462,9 +477,9 @@ export default function GSAPToolPage() {
                         .querySelectorAll<HTMLElement>(".motion-label")
                         .forEach((element) => {
                             gsap.from(element, {
-                                x: -28,
+                                x: isMobile ? -12 : -28,
                                 opacity: 0,
-                                letterSpacing: "0.32em",
+                                letterSpacing: isMobile ? "0.2em" : "0.32em",
                                 duration: 0.62,
                                 ease: "power3.out",
                                 scrollTrigger: {
@@ -480,11 +495,11 @@ export default function GSAPToolPage() {
                         .querySelectorAll<HTMLElement>(".motion-title")
                         .forEach((element) => {
                             gsap.from(element, {
-                                y: 54,
+                                y: isMobile ? 28 : 54,
                                 opacity: 0,
-                                rotate: 1.5,
-                                filter: "blur(8px)",
-                                duration: 0.8,
+                                rotate: isMobile ? 0 : 1.5,
+                                filter: isMobile ? "blur(0px)" : "blur(8px)",
+                                duration: isMobile ? 0.58 : 0.8,
                                 ease: "power4.out",
                                 scrollTrigger: {
                                     trigger: element,
@@ -499,10 +514,10 @@ export default function GSAPToolPage() {
                         .querySelectorAll<HTMLElement>(".motion-copy")
                         .forEach((element) => {
                             gsap.from(element, {
-                                y: 30,
+                                y: isMobile ? 18 : 30,
                                 opacity: 0,
-                                filter: "blur(6px)",
-                                duration: 0.68,
+                                filter: isMobile ? "blur(0px)" : "blur(6px)",
+                                duration: isMobile ? 0.5 : 0.68,
                                 ease: "power3.out",
                                 scrollTrigger: {
                                     trigger: element,
@@ -517,14 +532,14 @@ export default function GSAPToolPage() {
                         .querySelectorAll<HTMLElement>(".motion-card")
                         .forEach((element, index) => {
                             gsap.from(element, {
-                                y: 84,
-                                rotateX: 10,
-                                rotateZ: index % 2 === 0 ? -2 : 2,
-                                scale: 0.92,
+                                y: isMobile ? 34 : 84,
+                                rotateX: isMobile ? 0 : 10,
+                                rotateZ: isMobile ? 0 : index % 2 === 0 ? -2 : 2,
+                                scale: isMobile ? 0.97 : 0.92,
                                 opacity: 0,
                                 transformPerspective: 1100,
-                                duration: 0.82,
-                                ease: "back.out(1.18)",
+                                duration: isMobile ? 0.58 : 0.82,
+                                ease: isMobile ? "power3.out" : "back.out(1.18)",
                                 scrollTrigger: {
                                     trigger: element,
                                     start: "top 92%",
@@ -538,10 +553,11 @@ export default function GSAPToolPage() {
                         .querySelectorAll<HTMLElement>(".motion-code")
                         .forEach((element) => {
                             gsap.from(element, {
-                                x: 48,
+                                x: isMobile ? 0 : 48,
+                                y: isMobile ? 20 : 0,
                                 opacity: 0,
-                                clipPath: "inset(0 0 0 18%)",
-                                duration: 0.78,
+                                clipPath: isMobile ? "inset(0 0 0 0)" : "inset(0 0 0 18%)",
+                                duration: isMobile ? 0.52 : 0.78,
                                 ease: "power3.out",
                                 scrollTrigger: {
                                     trigger: element,
@@ -557,137 +573,196 @@ export default function GSAPToolPage() {
              * CINEMATIC STORY
              */
             if (storyRef.current) {
-                const storyTl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: storyRef.current,
-                        start: "top top",
-                        end: "+=3400",
-                        pin: ".story-pin",
-                        scrub: 0.65,
-                        anticipatePin: 1,
-                    },
-                });
+                if (isMobile) {
+                    gsap.utils
+                        .toArray<HTMLElement>(
+                            ".story-step-1, .story-step-2, .story-step-3"
+                        )
+                        .forEach((step, index) => {
+                            gsap.fromTo(
+                                step,
+                                {
+                                    y: 28,
+                                    opacity: index === 0 ? 1 : 0.2,
+                                    filter: "blur(0px)",
+                                },
+                                {
+                                    y: 0,
+                                    opacity: 1,
+                                    duration: 0.58,
+                                    ease: "power3.out",
+                                    scrollTrigger: {
+                                        trigger: step,
+                                        start: "top 88%",
+                                        toggleActions:
+                                            "play none none reverse",
+                                    },
+                                }
+                            );
+                        });
 
-                storyTl
-                    .to(".story-blob", {
-                        xPercent: 42,
-                        yPercent: -17,
-                        rotate: 96,
-                        scale: 1.17,
-                        borderRadius:
-                            "30% 70% 58% 42% / 56% 32% 68% 44%",
-                        duration: 1,
-                    })
-                    .to(
-                        ".story-ring",
-                        {
-                            rotate: 190,
-                            scale: 1.2,
-                            duration: 1,
+                    gsap.to(".story-blob", {
+                        rotate: 70,
+                        yPercent: 8,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: storyRef.current,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: 0.8,
                         },
-                        "<"
-                    )
-                    .to(
-                        ".story-step-1",
-                        {
-                            y: -34,
-                            opacity: 0.08,
-                            filter: "blur(7px)",
-                            duration: 0.5,
+                    });
+
+                    gsap.to(".story-ring", {
+                        rotate: 120,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: storyRef.current,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: 0.9,
                         },
-                        "<0.08"
-                    )
-                    .fromTo(
-                        ".story-step-2",
-                        {
-                            y: 64,
-                            opacity: 0.08,
-                            filter: "blur(7px)",
+                    });
+                } else {
+                    const storyTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: storyRef.current,
+                            start: "top top",
+                            end: "+=3400",
+                            pin: ".story-pin",
+                            scrub: 0.65,
+                            anticipatePin: 1,
                         },
-                        {
-                            y: 0,
-                            opacity: 1,
-                            filter: "blur(0px)",
-                            duration: 0.62,
-                        },
-                        "<"
-                    )
-                    .to(".story-blob", {
-                        xPercent: -28,
-                        yPercent: 30,
-                        rotate: 188,
-                        scale: 0.98,
-                        borderRadius:
-                            "72% 28% 36% 64% / 38% 72% 28% 62%",
-                        duration: 1,
-                    })
-                    .to(
-                        ".story-ring",
-                        {
-                            rotate: 375,
-                            scale: 0.84,
-                            duration: 1,
-                        },
-                        "<"
-                    )
-                    .to(
-                        ".story-step-2",
-                        {
-                            y: -34,
-                            opacity: 0.08,
-                            filter: "blur(7px)",
-                            duration: 0.5,
-                        },
-                        "<0.08"
-                    )
-                    .fromTo(
-                        ".story-step-3",
-                        {
-                            y: 64,
-                            opacity: 0.08,
-                            filter: "blur(7px)",
-                        },
-                        {
-                            y: 0,
-                            opacity: 1,
-                            filter: "blur(0px)",
-                            duration: 0.62,
-                        },
-                        "<"
-                    )
-                    .to(
-                        ".story-blob",
-                        {
-                            xPercent: 11,
-                            yPercent: -9,
-                            rotate: 304,
-                            scale: 0.84,
+                    });
+
+                    storyTl
+                        .to(".story-blob", {
+                            xPercent: 42,
+                            yPercent: -17,
+                            rotate: 96,
+                            scale: 1.17,
                             borderRadius:
-                                "66% 34% 30% 70% / 40% 68% 32% 60%",
+                                "30% 70% 58% 42% / 56% 32% 68% 44%",
                             duration: 1,
-                        },
-                        "<0.08"
-                    )
-                    .to(
-                        ".story-ring",
-                        {
-                            rotate: 560,
-                            scale: 1.28,
+                        })
+                        .to(
+                            ".story-ring",
+                            {
+                                rotate: 190,
+                                scale: 1.2,
+                                duration: 1,
+                            },
+                            "<"
+                        )
+                        .to(
+                            ".story-step-1",
+                            {
+                                y: -34,
+                                opacity: 0.08,
+                                filter: "blur(7px)",
+                                duration: 0.5,
+                            },
+                            "<0.08"
+                        )
+                        .fromTo(
+                            ".story-step-2",
+                            {
+                                y: 64,
+                                opacity: 0.08,
+                                filter: "blur(7px)",
+                            },
+                            {
+                                y: 0,
+                                opacity: 1,
+                                filter: "blur(0px)",
+                                duration: 0.62,
+                            },
+                            "<"
+                        )
+                        .to(".story-blob", {
+                            xPercent: -28,
+                            yPercent: 30,
+                            rotate: 188,
+                            scale: 0.98,
+                            borderRadius:
+                                "72% 28% 36% 64% / 38% 72% 28% 62%",
                             duration: 1,
-                        },
-                        "<"
-                    );
+                        })
+                        .to(
+                            ".story-ring",
+                            {
+                                rotate: 375,
+                                scale: 0.84,
+                                duration: 1,
+                            },
+                            "<"
+                        )
+                        .to(
+                            ".story-step-2",
+                            {
+                                y: -34,
+                                opacity: 0.08,
+                                filter: "blur(7px)",
+                                duration: 0.5,
+                            },
+                            "<0.08"
+                        )
+                        .fromTo(
+                            ".story-step-3",
+                            {
+                                y: 64,
+                                opacity: 0.08,
+                                filter: "blur(7px)",
+                            },
+                            {
+                                y: 0,
+                                opacity: 1,
+                                filter: "blur(0px)",
+                                duration: 0.62,
+                            },
+                            "<"
+                        )
+                        .to(
+                            ".story-blob",
+                            {
+                                xPercent: 11,
+                                yPercent: -9,
+                                rotate: 304,
+                                scale: 0.84,
+                                borderRadius:
+                                    "66% 34% 30% 70% / 40% 68% 32% 60%",
+                                duration: 1,
+                            },
+                            "<0.08"
+                        )
+                        .to(
+                            ".story-ring",
+                            {
+                                rotate: 560,
+                                scale: 1.28,
+                                duration: 1,
+                            },
+                            "<"
+                        );
+                }
             }
 
             /**
              * HORIZONTAL API
              */
-            if (horizontalRef.current && horizontalTrackRef.current) {
+            if (
+                horizontalRef.current &&
+                horizontalTrackRef.current &&
+                !isMobile
+            ) {
                 const section = horizontalRef.current;
                 const track = horizontalTrackRef.current;
 
                 const getDistance = () =>
-                    Math.max(0, track.scrollWidth - section.clientWidth);
+                    Math.max(
+                        0,
+                        track.scrollWidth - section.clientWidth
+                    );
 
                 const horizontalTween = gsap.to(track, {
                     x: () => -getDistance(),
@@ -721,13 +796,32 @@ export default function GSAPToolPage() {
                                 ease: "none",
                                 scrollTrigger: {
                                     trigger: panel,
-                                    containerAnimation: horizontalTween,
+                                    containerAnimation:
+                                        horizontalTween,
                                     start: "left 94%",
                                     end: "right 18%",
                                     scrub: true,
                                 },
                             }
                         );
+                    });
+            } else if (isMobile) {
+                gsap.utils
+                    .toArray<HTMLElement>(".api-panel")
+                    .forEach((panel) => {
+                        gsap.from(panel, {
+                            y: 34,
+                            opacity: 0,
+                            scale: 0.98,
+                            duration: 0.58,
+                            ease: "power3.out",
+                            scrollTrigger: {
+                                trigger: panel,
+                                start: "top 90%",
+                                toggleActions:
+                                    "play none none reverse",
+                            },
+                        });
                     });
             }
 
@@ -754,12 +848,12 @@ export default function GSAPToolPage() {
                 tl.fromTo(
                     card,
                     {
-                        y: 110,
-                        x: direction * 36,
-                        rotateX: 14,
-                        rotateY: direction * 8,
-                        rotateZ: direction * 1.6,
-                        scale: 0.88,
+                        y: isMobile ? 36 : 110,
+                        x: isMobile ? 0 : direction * 36,
+                        rotateX: isMobile ? 0 : 14,
+                        rotateY: isMobile ? 0 : direction * 8,
+                        rotateZ: isMobile ? 0 : direction * 1.6,
+                        scale: isMobile ? 0.97 : 0.88,
                         opacity: 0,
                         transformPerspective: 1200,
                         transformOrigin: "50% 100%",
@@ -772,8 +866,8 @@ export default function GSAPToolPage() {
                         rotateZ: 0,
                         scale: 1,
                         opacity: 1,
-                        duration: 0.92,
-                        ease: "power4.out",
+                        duration: isMobile ? 0.58 : 0.92,
+                        ease: isMobile ? "power3.out" : "power4.out",
                     }
                 );
 
@@ -837,68 +931,99 @@ export default function GSAPToolPage() {
                 }
 
                 // subtle pointer tilt — desktop pointer only
-                const rotateXTo = gsap.quickTo(card, "rotateX", {
-                    duration: 0.45,
-                    ease: "power3.out",
-                });
-                const rotateYTo = gsap.quickTo(card, "rotateY", {
-                    duration: 0.45,
-                    ease: "power3.out",
-                });
-                const scaleTo = gsap.quickTo(card, "scale", {
-                    duration: 0.35,
-                    ease: "power3.out",
-                });
-
-                const onMove = (event: PointerEvent) => {
-                    if (window.matchMedia("(pointer: coarse)").matches) return;
-
-                    const rect = card.getBoundingClientRect();
-                    const px = (event.clientX - rect.left) / rect.width - 0.5;
-                    const py = (event.clientY - rect.top) / rect.height - 0.5;
-
-                    rotateYTo(px * 5.5);
-                    rotateXTo(py * -5);
-                    scaleTo(1.012);
-
-                    if (shell) {
-                        gsap.to(shell, {
-                            x: px * 8,
-                            y: py * 7,
+                if (!isCoarsePointer && !isTablet) {
+                    const rotateXTo = gsap.quickTo(
+                        card,
+                        "rotateX",
+                        {
                             duration: 0.45,
                             ease: "power3.out",
-                            overwrite: "auto",
-                        });
-                    }
-                };
-
-                const onLeave = () => {
-                    rotateXTo(0);
-                    rotateYTo(0);
-                    scaleTo(1);
-
-                    if (shell) {
-                        gsap.to(shell, {
-                            x: 0,
-                            y: 0,
-                            duration: 0.55,
+                        }
+                    );
+                    const rotateYTo = gsap.quickTo(
+                        card,
+                        "rotateY",
+                        {
+                            duration: 0.45,
                             ease: "power3.out",
-                            overwrite: "auto",
-                        });
-                    }
-                };
+                        }
+                    );
+                    const scaleTo = gsap.quickTo(
+                        card,
+                        "scale",
+                        {
+                            duration: 0.35,
+                            ease: "power3.out",
+                        }
+                    );
 
-                card.addEventListener("pointermove", onMove);
-                card.addEventListener("pointerleave", onLeave);
+                    const onMove = (event: PointerEvent) => {
+                        const rect =
+                            card.getBoundingClientRect();
+                        const px =
+                            (event.clientX - rect.left) /
+                                rect.width -
+                            0.5;
+                        const py =
+                            (event.clientY - rect.top) /
+                                rect.height -
+                            0.5;
 
-                (
-                    card as HTMLElement & {
-                        __codeCleanup?: () => void;
-                    }
-                ).__codeCleanup = () => {
-                    card.removeEventListener("pointermove", onMove);
-                    card.removeEventListener("pointerleave", onLeave);
-                };
+                        rotateYTo(px * 5.5);
+                        rotateXTo(py * -5);
+                        scaleTo(1.012);
+
+                        if (shell) {
+                            gsap.to(shell, {
+                                x: px * 8,
+                                y: py * 7,
+                                duration: 0.45,
+                                ease: "power3.out",
+                                overwrite: "auto",
+                            });
+                        }
+                    };
+
+                    const onLeave = () => {
+                        rotateXTo(0);
+                        rotateYTo(0);
+                        scaleTo(1);
+
+                        if (shell) {
+                            gsap.to(shell, {
+                                x: 0,
+                                y: 0,
+                                duration: 0.55,
+                                ease: "power3.out",
+                                overwrite: "auto",
+                            });
+                        }
+                    };
+
+                    card.addEventListener(
+                        "pointermove",
+                        onMove
+                    );
+                    card.addEventListener(
+                        "pointerleave",
+                        onLeave
+                    );
+
+                    (
+                        card as HTMLElement & {
+                            __codeCleanup?: () => void;
+                        }
+                    ).__codeCleanup = () => {
+                        card.removeEventListener(
+                            "pointermove",
+                            onMove
+                        );
+                        card.removeEventListener(
+                            "pointerleave",
+                            onLeave
+                        );
+                    };
+                }
             });
 
             /**
@@ -908,7 +1033,7 @@ export default function GSAPToolPage() {
                 .toArray<HTMLElement>(".plugin-card")
                 .forEach((card, index) => {
                     gsap.to(card, {
-                        y: index % 2 === 0 ? -18 : 18,
+                        y: isMobile ? 0 : index % 2 === 0 ? -18 : 18,
                         ease: "none",
                         scrollTrigger: {
                             trigger: card,
@@ -923,9 +1048,9 @@ export default function GSAPToolPage() {
              * CTA
              */
             gsap.from(".cta-line", {
-                y: 70,
+                y: isMobile ? 28 : 70,
                 opacity: 0,
-                rotate: 2,
+                rotate: isMobile ? 0 : 2,
                 stagger: 0.08,
                 duration: 0.75,
                 ease: "power4.out",
@@ -1022,7 +1147,7 @@ export default function GSAPToolPage() {
     return (
         <div
             ref={rootRef}
-            className="min-h-screen overflow-x-hidden bg-[#f3f3ee] text-[#11120f]"
+            className="min-h-[100dvh] overflow-x-hidden bg-[#f3f3ee] text-[#11120f]"
         >
             <div className="pointer-events-none fixed left-0 top-16 z-[90] h-[2px] w-full bg-black/[0.04]">
                 <div
@@ -1035,7 +1160,7 @@ export default function GSAPToolPage() {
                 {/* HERO */}
                 <section
                     ref={heroRef}
-                    className="relative min-h-[calc(100vh-4rem)] overflow-hidden border-b border-black/[0.07] bg-[#f1f1eb]"
+                    className="relative min-h-0 overflow-hidden border-b border-black/[0.07] bg-[#f1f1eb] sm:min-h-[calc(100vh-4rem)]"
                 >
                     <div className="pointer-events-none absolute inset-0">
                         <div className="hero-depth-a absolute -left-[220px] -top-[240px] h-[640px] w-[640px] rounded-full bg-[#dfff84]/42 blur-[120px]" />
@@ -1052,8 +1177,8 @@ export default function GSAPToolPage() {
                         />
                     </div>
 
-                    <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1540px] gap-8 px-5 py-8 md:px-8 lg:grid-cols-[1.05fr_.95fr] lg:px-10">
-                        <div className="hero-content flex min-w-0 flex-col justify-between py-4 lg:py-8">
+                    <div className="relative mx-auto grid min-h-0 max-w-[1540px] gap-4 px-4 py-7 sm:min-h-[calc(100vh-4rem)] sm:gap-8 sm:px-5 sm:py-8 md:px-8 lg:grid-cols-[1.05fr_.95fr] lg:px-10">
+                        <div className="hero-content flex min-w-0 flex-col justify-between py-2 sm:py-4 lg:py-8">
                             <div className="hero-kicker flex flex-wrap items-center justify-between gap-3">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className="inline-flex items-center gap-2 rounded-full bg-[#11120f] px-3.5 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-white">
@@ -1070,17 +1195,17 @@ export default function GSAPToolPage() {
                                 </span>
                             </div>
 
-                            <div className="my-8 lg:my-4">
-                                <h1 className="hero-title-word block text-[clamp(4.6rem,10.6vw,10rem)] font-black leading-[0.88] tracking-[-0.085em] text-[#11120f]">
+                            <div className="my-6 sm:my-8 lg:my-4">
+                                <h1 className="hero-title-word block text-[clamp(3.15rem,16vw,4.8rem)] font-black leading-[0.88] tracking-[-0.075em] text-[#11120f] sm:text-[clamp(4.6rem,10.6vw,10rem)] sm:tracking-[-0.085em]">
                                     MOTION
                                 </h1>
 
-                                <div className="mt-1 flex items-end gap-4 sm:gap-6">
-                                    <h1 className="hero-title-word block text-[clamp(4.6rem,10.6vw,10rem)] font-black leading-[0.88] tracking-[-0.085em] text-transparent [-webkit-text-stroke:2px_#11120f]">
+                                <div className="mt-1 flex items-end gap-2 sm:gap-6">
+                                    <h1 className="hero-title-word block text-[clamp(3.15rem,16vw,4.8rem)] font-black leading-[0.88] tracking-[-0.075em] text-transparent [-webkit-text-stroke:1.5px_#11120f] sm:text-[clamp(4.6rem,10.6vw,10rem)] sm:tracking-[-0.085em] sm:[-webkit-text-stroke:2px_#11120f]">
                                         FEELS
                                     </h1>
 
-                                    <div className="mb-[0.22em] flex-1 border-b border-black/15 pb-3">
+                                    <div className="mb-[0.22em] hidden flex-1 border-b border-black/15 pb-3 sm:block">
                                         <div className="max-w-[320px] text-[10px] font-black uppercase leading-5 tracking-[0.14em] text-black/34">
                                             Code makes it move.
                                             <br />
@@ -1090,7 +1215,7 @@ export default function GSAPToolPage() {
                                 </div>
 
                                 <div className="mt-1 flex items-center gap-5">
-                                    <h1 className="hero-title-word block text-[clamp(4.6rem,10.6vw,10rem)] font-black leading-[0.88] tracking-[-0.085em] text-[#11120f]">
+                                    <h1 className="hero-title-word block text-[clamp(3.15rem,16vw,4.8rem)] font-black leading-[0.88] tracking-[-0.075em] text-[#11120f] sm:text-[clamp(4.6rem,10.6vw,10rem)] sm:tracking-[-0.085em]">
                                         ALIVE.
                                     </h1>
 
@@ -1128,7 +1253,7 @@ export default function GSAPToolPage() {
                             </div>
                         </div>
 
-                        <div className="hero-stage relative mx-auto h-[430px] w-full max-w-[650px] self-center sm:h-[540px] lg:h-[650px]">
+                        <div className="hero-stage relative mx-auto h-[330px] w-full max-w-[650px] self-center sm:h-[540px] lg:h-[650px]">
                             <div className="hero-depth-b absolute left-[8%] top-[9%] h-[73%] w-[72%] rotate-[8deg] rounded-[34%_66%_58%_42%/46%_34%_66%_54%] bg-[#d7c4ff]" />
                             <div className="hero-depth-a absolute bottom-[5%] left-[-1%] h-[62%] w-[77%] -rotate-[12deg] rounded-[58%_42%_36%_64%/58%_40%_60%_42%] bg-[#9feaff] mix-blend-multiply" />
                             <div className="absolute right-[-2%] top-[17%] h-[61%] w-[61%] rotate-[13deg] rounded-[38%_62%_70%_30%/61%_34%_66%_39%] bg-[#dfff84] mix-blend-multiply" />
@@ -1142,18 +1267,18 @@ export default function GSAPToolPage() {
                                 <span className="absolute left-[15%] top-[2%] h-2 w-2 rounded-full bg-black/70" />
                             </div>
 
-                            <div className="hero-core absolute left-1/2 top-1/2 flex h-[175px] w-[175px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[48px] bg-[#11120f] shadow-[0_45px_100px_-38px_rgba(0,0,0,.65)] sm:h-[215px] sm:w-[215px]">
+                            <div className="hero-core absolute left-1/2 top-1/2 flex h-[138px] w-[138px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[36px] bg-[#11120f] shadow-[0_38px_80px_-38px_rgba(0,0,0,.62)] sm:h-[215px] sm:w-[215px] sm:rounded-[48px]">
                                 <div className="text-center">
                                     <div className="text-[9px] font-black uppercase tracking-[0.22em] text-white/25">
                                         Motion engine
                                     </div>
-                                    <div className="mt-2 text-[52px] font-black tracking-[-0.09em] text-[#aaff57] sm:text-[66px]">
+                                    <div className="mt-2 text-[42px] font-black tracking-[-0.09em] text-[#aaff57] sm:text-[66px]">
                                         GSAP
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="hero-float hero-float-a absolute left-[0%] top-[13%] -rotate-5 rounded-2xl border border-black/[0.08] bg-white/90 px-4 py-3 shadow-[0_24px_60px_-30px_rgba(0,0,0,.38)] backdrop-blur-xl">
+                            <div className="hero-float hero-float-a absolute left-[0%] top-[11%] rounded-xl border border-black/[0.08] bg-white/90 px-3 py-2 shadow-[0_20px_50px_-30px_rgba(0,0,0,.35)] backdrop-blur-xl sm:top-[13%] sm:-rotate-5 sm:rounded-2xl sm:px-4 sm:py-3">
                                 <div className="font-mono text-[9px] font-black uppercase tracking-[0.16em] text-black/30">
                                     ScrollTrigger
                                 </div>
@@ -1162,7 +1287,7 @@ export default function GSAPToolPage() {
                                 </div>
                             </div>
 
-                            <div className="hero-float hero-float-b absolute bottom-[13%] right-[0%] rotate-4 rounded-2xl border border-black/[0.08] bg-[#11120f] px-4 py-3 text-white shadow-[0_24px_60px_-30px_rgba(0,0,0,.52)]">
+                            <div className="hero-float hero-float-b absolute bottom-[10%] right-[0%] rounded-xl border border-black/[0.08] bg-[#11120f] px-3 py-2 text-white shadow-[0_20px_50px_-30px_rgba(0,0,0,.48)] sm:bottom-[13%] sm:rotate-4 sm:rounded-2xl sm:px-4 sm:py-3">
                                 <div className="flex items-center gap-2 text-sm font-black">
                                     <Gauge className="h-4 w-4 text-[#aaff57]" />
                                     60 FPS
@@ -1172,7 +1297,7 @@ export default function GSAPToolPage() {
                                 </div>
                             </div>
 
-                            <div className="hero-float hero-float-c absolute right-[3%] top-[6%] rounded-full bg-[#aaff57] px-4 py-2 font-mono text-[10px] font-black text-black shadow-xl">
+                            <div className="hero-float hero-float-c absolute right-[3%] top-[6%] hidden rounded-full bg-[#aaff57] px-4 py-2 font-mono text-[10px] font-black text-black shadow-xl sm:block">
                                 timeline()
                             </div>
 
@@ -1191,7 +1316,7 @@ export default function GSAPToolPage() {
                                 key={`${item}-${index}`}
                                 className="flex items-center gap-8"
                             >
-                                <span className="text-4xl font-black tracking-[-0.05em] text-white/[0.16] md:text-6xl">
+                                <span className="text-3xl font-black tracking-[-0.05em] text-white/[0.16] sm:text-4xl md:text-6xl">
                                     {item}
                                 </span>
                                 <span className="h-3 w-3 rounded-full bg-[#aaff57] shadow-[0_0_20px_#aaff57]" />
@@ -1203,7 +1328,7 @@ export default function GSAPToolPage() {
                 {/* MANIFESTO */}
                 <section
                     ref={manifestoRef}
-                    className="relative overflow-hidden bg-[#f3f3ee] px-5 py-24 md:px-8 lg:py-36"
+                    className="relative overflow-hidden bg-[#f3f3ee] px-4 py-16 sm:px-5 sm:py-24 md:px-8 lg:py-36"
                 >
                     <div className="manifesto-orbit pointer-events-none absolute right-[-160px] top-[8%] h-[480px] w-[480px] rounded-full border border-black/[0.08]">
                         <span className="absolute left-[13%] top-[8%] h-3 w-3 rounded-full bg-[#aaff57]" />
@@ -1227,7 +1352,7 @@ export default function GSAPToolPage() {
                             ].map((word, index) => (
                                 <div
                                     key={`${word}-${index}`}
-                                    className={`manifesto-word text-[clamp(3.8rem,9vw,9.2rem)] font-black leading-[0.82] tracking-[-0.075em] ${
+                                    className={`manifesto-word text-[clamp(2.65rem,14vw,4.2rem)] font-black leading-[0.84] tracking-[-0.065em] sm:text-[clamp(3.8rem,9vw,9.2rem)] sm:leading-[0.82] sm:tracking-[-0.075em] ${
                                         index === 1 || index === 5
                                             ? "ml-[8vw] text-transparent [-webkit-text-stroke:2px_#11120f]"
                                             : ""
@@ -1250,7 +1375,7 @@ export default function GSAPToolPage() {
                     ref={storyRef}
                     className="relative bg-[#11120f] text-white"
                 >
-                    <div className="story-pin relative min-h-screen overflow-hidden">
+                    <div className="story-pin relative overflow-hidden lg:min-h-screen">
                         <div
                             className="pointer-events-none absolute inset-0 opacity-[0.07]"
                             style={{
@@ -1263,14 +1388,14 @@ export default function GSAPToolPage() {
                         <div className="absolute -left-[150px] top-[30%] h-[420px] w-[420px] rounded-full bg-[#7ce7ff]/10 blur-[120px]" />
                         <div className="absolute -right-[130px] top-[10%] h-[450px] w-[450px] rounded-full bg-[#b8ff68]/10 blur-[120px]" />
 
-                        <div className="relative mx-auto grid min-h-screen max-w-[1440px] items-center gap-14 px-5 py-20 md:px-8 lg:grid-cols-[.86fr_1.14fr] lg:px-10">
+                        <div className="relative mx-auto grid max-w-[1440px] items-center gap-10 px-4 py-16 sm:px-5 sm:py-20 md:px-8 lg:min-h-screen lg:grid-cols-[.86fr_1.14fr] lg:gap-14 lg:px-10">
                             <div>
                                 <div className="mb-5 flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-[#aaff61]">
                                     <span className="h-2 w-2 rounded-full bg-[#aaff61] shadow-[0_0_18px_#aaff61]" />
                                     SCROLLTRIGGER LIVE
                                 </div>
 
-                                <h2 className="max-w-xl text-5xl font-black leading-[0.9] tracking-[-0.06em] sm:text-6xl lg:text-7xl">
+                                <h2 className="max-w-xl text-[2.55rem] font-black leading-[0.92] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
                                     Scroll is
                                     <br />
                                     not distance.
@@ -1278,7 +1403,7 @@ export default function GSAPToolPage() {
                                     It is time.
                                 </h2>
 
-                                <div className="mt-12 max-w-lg space-y-10">
+                                <div className="mt-9 max-w-lg space-y-8 sm:mt-12 sm:space-y-10">
                                     <div className="story-step-1">
                                         <div className="text-[9px] font-black tracking-[0.2em] text-[#8ee9ff]">
                                             01 / TRIGGER
@@ -1294,7 +1419,7 @@ export default function GSAPToolPage() {
                                         </p>
                                     </div>
 
-                                    <div className="story-step-2 opacity-[0.08]">
+                                    <div className="story-step-2 opacity-100 lg:opacity-[0.08]">
                                         <div className="text-[9px] font-black tracking-[0.2em] text-[#c8afff]">
                                             02 / SCRUB
                                         </div>
@@ -1309,7 +1434,7 @@ export default function GSAPToolPage() {
                                         </p>
                                     </div>
 
-                                    <div className="story-step-3 opacity-[0.08]">
+                                    <div className="story-step-3 opacity-100 lg:opacity-[0.08]">
                                         <div className="text-[9px] font-black tracking-[0.2em] text-[#baff68]">
                                             03 / PIN
                                         </div>
@@ -1325,8 +1450,8 @@ export default function GSAPToolPage() {
                                 </div>
                             </div>
 
-                            <div className="relative mx-auto h-[440px] w-full max-w-[650px] sm:h-[540px]">
-                                <div className="story-ring absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-white/20 sm:h-[450px] sm:w-[450px]">
+                            <div className="relative mx-auto h-[330px] w-full max-w-[650px] sm:h-[540px]">
+                                <div className="story-ring absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-white/20 sm:h-[450px] sm:w-[450px]">
                                     <span className="absolute left-1/2 top-[-7px] h-3.5 w-3.5 rounded-full bg-[#aaff61] shadow-[0_0_28px_#aaff61]" />
                                 </div>
 
@@ -1355,22 +1480,22 @@ export default function GSAPToolPage() {
                 {/* HORIZONTAL API */}
                 <section
                     ref={horizontalRef}
-                    className="relative min-h-screen overflow-hidden bg-[#f3f3ee]"
+                    className="relative min-h-0 overflow-hidden bg-[#f3f3ee] lg:min-h-screen"
                 >
-                    <div className="absolute left-5 top-6 z-20 md:left-8 md:top-8">
+                    <div className="absolute left-4 top-6 z-20 sm:left-5 md:left-8 md:top-8">
                         <div className="text-[9px] font-black tracking-[0.2em] text-black/30">
                             02 / CORE API
                         </div>
                         <p className="mt-1 text-xs font-bold text-black/40">
-                            继续向下滚动 →
+                            手机纵向浏览 · 桌面滚动 →
                         </p>
                     </div>
 
                     <div
                         ref={horizontalTrackRef}
-                        className="flex h-screen w-max items-center gap-5 px-[5vw] pt-12"
+                        className="flex w-full flex-col gap-4 px-4 pb-16 pt-20 sm:px-5 lg:h-screen lg:w-max lg:flex-row lg:items-center lg:gap-5 lg:px-[5vw] lg:pb-0 lg:pt-12"
                     >
-                        <article className="api-panel flex h-[68vh] w-[84vw] max-w-[900px] shrink-0 flex-col justify-end rounded-[48px] bg-[#11120f] p-8 text-white shadow-[0_40px_100px_-55px_rgba(0,0,0,.45)] sm:p-10">
+                        <article className="api-panel flex min-h-[430px] w-full shrink-0 flex-col justify-end rounded-[28px] bg-[#11120f] p-6 text-white shadow-[0_30px_80px_-55px_rgba(0,0,0,.42)] sm:p-8 lg:h-[68vh] lg:w-[84vw] lg:max-w-[900px] lg:rounded-[48px] lg:p-10">
                             <div className="text-[9px] font-black tracking-[0.2em] text-[#baff6c]">
                                 GSAP CORE
                             </div>
@@ -1386,7 +1511,7 @@ export default function GSAPToolPage() {
                         {apiCards.map((item) => (
                             <article
                                 key={item.method}
-                                className={`api-panel ${item.color} flex h-[68vh] w-[78vw] max-w-[700px] shrink-0 flex-col justify-between rounded-[48px] p-8 shadow-[0_40px_100px_-58px_rgba(0,0,0,.24)] sm:p-10`}
+                                className={`api-panel ${item.color} flex min-h-[430px] w-full shrink-0 flex-col justify-between rounded-[28px] p-6 shadow-[0_30px_80px_-58px_rgba(0,0,0,.22)] sm:p-8 lg:h-[68vh] lg:w-[78vw] lg:max-w-[700px] lg:rounded-[48px] lg:p-10`}
                             >
                                 <div className="flex items-start justify-between">
                                     <Code2 className="h-7 w-7" />
@@ -1400,7 +1525,7 @@ export default function GSAPToolPage() {
                                         {item.method}
                                     </div>
 
-                                    <h3 className="mt-4 text-5xl font-black tracking-[-0.06em] sm:text-6xl">
+                                    <h3 className="mt-4 text-4xl font-black tracking-[-0.055em] sm:text-6xl">
                                         {item.title}
                                     </h3>
 
@@ -1417,7 +1542,7 @@ export default function GSAPToolPage() {
                             </article>
                         ))}
 
-                        <article className="api-panel flex h-[68vh] w-[65vw] max-w-[620px] shrink-0 items-center justify-center rounded-[48px] border border-black/10 bg-white p-8">
+                        <article className="api-panel flex min-h-[330px] w-full shrink-0 items-center justify-center rounded-[28px] border border-black/10 bg-white p-6 lg:h-[68vh] lg:w-[65vw] lg:max-w-[620px] lg:rounded-[48px] lg:p-8">
                             <div className="text-center">
                                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#aaff57]">
                                     <ArrowDown className="h-5 w-5" />
@@ -1435,7 +1560,7 @@ export default function GSAPToolPage() {
                 {/* PLAYGROUND */}
                 <section
                     id="playground"
-                    className="motion-section relative overflow-hidden bg-white px-5 py-28 md:px-8 lg:py-36"
+                    className="motion-section relative overflow-hidden bg-white px-4 py-16 sm:px-5 sm:py-24 md:px-8 lg:py-36"
                 >
                     <div className="pointer-events-none absolute left-[-200px] top-[20%] h-[500px] w-[500px] rounded-full bg-[#dfff91]/30 blur-[110px]" />
                     <div className="pointer-events-none absolute right-[-200px] top-[10%] h-[500px] w-[500px] rounded-full bg-[#d8c5ff]/30 blur-[110px]" />
@@ -1446,7 +1571,7 @@ export default function GSAPToolPage() {
                                 03 / INTERACTIVE PLAYGROUND
                             </div>
 
-                            <h2 className="motion-title max-w-4xl text-5xl font-black leading-[0.95] tracking-[-0.06em] sm:text-6xl lg:text-7xl">
+                            <h2 className="motion-title max-w-4xl text-[2.55rem] font-black leading-[0.96] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
                                 别只看代码，
                                 <br />
                                 <span className="inline-block rotate-[-1deg] rounded-[20px] bg-[#e7ff9c] px-4 py-2">
@@ -1460,7 +1585,7 @@ export default function GSAPToolPage() {
                             </p>
                         </div>
 
-                        <div className="motion-card grid overflow-hidden rounded-[36px] border border-black/[0.08] bg-[#fafaf7] shadow-[0_30px_100px_rgba(0,0,0,.07)] lg:grid-cols-[.82fr_1.18fr]">
+                        <div className="motion-card grid overflow-hidden rounded-[26px] border border-black/[0.08] bg-[#fafaf7] shadow-[0_24px_80px_rgba(0,0,0,.06)] sm:rounded-[36px] lg:grid-cols-[.82fr_1.18fr]">
                             <div className="border-b border-black/[0.07] p-6 lg:border-b-0 lg:border-r md:p-8">
                                 <div className="mb-8 flex items-center justify-between">
                                     <div>
@@ -1591,8 +1716,8 @@ export default function GSAPToolPage() {
                                 </div>
                             </div>
 
-                            <div className="flex min-h-[560px] flex-col">
-                                <div className="relative flex flex-1 items-center overflow-hidden bg-[#f0f0eb] px-8 sm:px-12">
+                            <div className="flex min-h-[380px] flex-col sm:min-h-[560px]">
+                                <div className="relative flex flex-1 items-center overflow-hidden bg-[#f0f0eb] px-5 sm:px-12">
                                     <div
                                         className="pointer-events-none absolute inset-0 opacity-[0.08]"
                                         style={{
@@ -1939,7 +2064,7 @@ function CodeBlock({
     };
 
     return (
-        <div className="code-shell motion-code relative overflow-hidden rounded-[22px] border border-black/[0.07] bg-[#11120f] shadow-[0_28px_70px_-42px_rgba(0,0,0,.72)]">
+        <div className="code-shell motion-code relative overflow-hidden rounded-[18px] border border-black/[0.07] bg-[#11120f] shadow-[0_24px_60px_-42px_rgba(0,0,0,.68)] sm:rounded-[22px]">
             <div className="code-scan pointer-events-none absolute left-0 top-0 z-20 h-[14%] w-full bg-gradient-to-b from-transparent via-[#aaff57]/14 to-transparent blur-[1px]" />
             <div className="flex h-11 items-center justify-between border-b border-white/[0.08] px-4">
                 <div className="flex items-center gap-2">
@@ -1997,7 +2122,7 @@ function CodePanel({
 
     return (
         <article
-            className={`code-panel ${color} group relative isolate overflow-hidden rounded-[34px] border border-black/[0.055] ${
+            className={`code-panel ${color} group relative isolate overflow-hidden rounded-[24px] border border-black/[0.055] sm:rounded-[34px] ${
                 isCompact ? "min-h-[290px] p-6 sm:p-7" : "p-6 sm:p-7"
             } ${isWide ? "lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-7" : ""}`}
         >

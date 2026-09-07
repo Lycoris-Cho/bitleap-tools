@@ -136,4 +136,12 @@ export const tools: Tool[] = [
     icon: 'MessagesSquare',
     category: '心迹',
   },
+  {
+    id: 'GardenTime',
+    title: '时序花园',
+    description: '让时间生长，把温暖留住',
+    href: '/tools/GardenTime',
+    icon: 'Leaf',
+    category: '心迹',
+  },
 ]

@@ -24,7 +24,7 @@ type PaperTheme = {
 
 const DRAFT_KEY = 'letter-workshop:draft:v2'
 const LINE_HEIGHT = 32
-const MAX_CONTENT_LENGTH = 6000
+const MAX_CONTENT_LENGTH = 10000
 
 const paperThemes: PaperTheme[] = [
   {
