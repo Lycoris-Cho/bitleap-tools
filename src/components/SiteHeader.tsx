@@ -13,6 +13,10 @@ const navItems = [
         label: 'BL社区',
     },
     {
+        href: '/aboutBit',
+        label: '关于BitLeap',
+    },
+    {
         href: '/about',
         label: '关于我',
     },
@@ -56,11 +60,11 @@ export default function SiteHeader() {
 
     const isActive = (href: string) => {
         if (href === '/') {
-            return pathname === '/'
+          return pathname === '/'
         }
-
-        return pathname.startsWith(href)
-    }
+      
+        return pathname === href || pathname.startsWith(`${href}/`)
+      }
 
     return (
         <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-black/[0.06] bg-[#f7f7f5]">

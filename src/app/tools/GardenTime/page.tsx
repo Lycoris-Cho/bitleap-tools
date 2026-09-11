@@ -1,11 +1,13 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Breadcrumb } from '@/components/breadcrumb'
+import FooterNote from '@/components/FooterNote'
 
 type Phase = "day" | "dusk" | "night" | "dawn";
 type Season = "spring" | "summer" | "autumn" | "winter";
+type DetailPanel = "story" | "botany" | "season";
 type StemStage = "stem-base" | "stem-mid" | "stem-tip" | "side-base" | "side-tip";
 type LeafTone = "deep" | "sage" | "light" | "olive";
 type FlowerKind = "daisy" | "blossom" | "bell" | "star";
@@ -539,6 +541,29 @@ const pollen = Array.from({ length: 10 }, (_, index) => ({
   r: index % 4 === 0 ? 1.9 : 1.15,
 }));
 
+const DETAIL_PANEL_LABEL: Record<DetailPanel, string> = {
+  story: "STORY",
+  botany: "BOTANY",
+  season: "SEASON",
+};
+
+const PHASE_ORDER: Phase[] = ["day", "dusk", "night", "dawn"];
+const SEASON_ORDER: Season[] = ["spring", "summer", "autumn", "winter"];
+
+const PHASE_HINT: Record<Phase, string> = {
+  day: "光线稳定，枝叶保持清醒的绿色。",
+  dusk: "暖色进入表盘，花影和藤蔓变得柔软。",
+  night: "月相浮现，星点接管背景呼吸。",
+  dawn: "色温回升，冬末的枝叶开始准备复苏。",
+};
+
+const SEASON_HINT: Record<Season, string> = {
+  spring: "发芽、长枝、开花，适合作为进入页的默认状态。",
+  summer: "叶色加深，植物体量最饱满。",
+  autumn: "叶片转为金棕色，并触发缓慢飘落。",
+  winter: "枝条退回安静状态，为下一轮春天留白。",
+};
+
 export default function ChronoGardenTool() {
   const rootRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -550,6 +575,33 @@ export default function ChronoGardenTool() {
   const [season, setSeason] = useState<Season>("spring");
   const [paused, setPaused] = useState(false);
   const [cycleSpeed, setCycleSpeed] = useState(1);
+  const [detailPanel, setDetailPanel] = useState<DetailPanel>("story");
+  const [quietMode, setQuietMode] = useState(false);
+  const [showTechnicalMarks, setShowTechnicalMarks] = useState(true);
+
+  const activeDetail = useMemo(() => {
+    if (detailPanel === "botany") {
+      return {
+        eyebrow: "BOTANICAL ENGINE",
+        title: "叶、花和花苞都贴在真实 SVG path 上。",
+        body: "这版保留原始的 path attachment 结构，枝条负责骨架，叶片和花朵根据路径长度与切线自动落位，视觉上会更像真的从枝条长出来。",
+      };
+    }
+
+    if (detailPanel === "season") {
+      return {
+        eyebrow: "SEASON CYCLE",
+        title: SEASON_LABEL[season],
+        body: `${SEASON_NOTE[season]} ${SEASON_HINT[season]}`,
+      };
+    }
+
+    return {
+      eyebrow: PHASE_COPY[phase].eyebrow,
+      title: PHASE_COPY[phase].title,
+      body: `${PHASE_COPY[phase].body} ${PHASE_HINT[phase]}`,
+    };
+  }, [detailPanel, phase, season]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -746,6 +798,45 @@ export default function ChronoGardenTool() {
         duration: 1.15,
         ease: "power3.out",
         svgOrigin: `${CENTER} ${CENTER}`,
+      });
+
+      gsap.to(".dial-breath", {
+        scale: 1.018,
+        opacity: 0.22,
+        duration: 5.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        svgOrigin: `${CENTER} ${CENTER}`,
+      });
+
+      gsap.to(".chrono-dial-glint", {
+        opacity: 0.34,
+        duration: 3.2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      gsap.to(".pointer-ring", {
+        scale: 1.07,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        stagger: 0.18,
+        ease: "sine.inOut",
+        transformOrigin: "50% 50%",
+      });
+
+      gsap.to(".tick-mark", {
+        opacity: 0.72,
+        duration: 1.8,
+        stagger: {
+          each: 0.018,
+          repeat: -1,
+          yoyo: true,
+        },
+        ease: "sine.inOut",
       });
 
       gsap.to(".gear-outer", {
@@ -1794,18 +1885,43 @@ export default function ChronoGardenTool() {
 
   const previewPhase = (target: Phase) => {
     const cycle = cycleTimelineRef.current;
-    if (!cycle) return;
+    if (!cycle) {
+      setPhase(target);
+      return;
+    }
 
     cycle.pause();
     seasonTimelineRef.current?.pause();
     setPaused(true);
+    setPhase(target);
 
     gsap.to(cycle, {
       time: PHASE_TIME[target],
-      duration: 1.15,
+      duration: 1.05,
       ease: "power2.inOut",
       overwrite: true,
       onComplete: () => setPhase(target),
+    });
+  };
+
+  const previewSeason = (target: Season) => {
+    const seasonCycle = seasonTimelineRef.current;
+    if (!seasonCycle) {
+      setSeason(target);
+      return;
+    }
+
+    cycleTimelineRef.current?.pause();
+    seasonCycle.pause();
+    setPaused(true);
+    setSeason(target);
+
+    gsap.to(seasonCycle, {
+      time: SEASON_TIME[target],
+      duration: 1.05,
+      ease: "power2.inOut",
+      overwrite: true,
+      onComplete: () => setSeason(target),
     });
   };
 
@@ -1852,6 +1968,24 @@ export default function ChronoGardenTool() {
       ref={rootRef}
       className="ui-ink relative min-h-[calc(100dvh-4rem)] overflow-hidden bg-[#ddd8cf] text-[#171713]"
     >
+      <style>{`
+        .chrono-panel-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .chrono-panel-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chrono-panel-scroll::-webkit-scrollbar-thumb { background: currentColor; border-radius: 999px; opacity: .18; }
+        .chrono-hairline { background-image: linear-gradient(90deg, transparent, currentColor, transparent); }
+        .chrono-num { font-variant-numeric: tabular-nums lining-nums; }
+        .chrono-topline { align-items: center; }
+        .chrono-tag { box-sizing: border-box; line-height: 1; }
+        .chrono-breadcrumb-clean { line-height: 1; }
+        .chrono-breadcrumb-clean > * { margin: 0 !important; }
+        .chrono-breadcrumb-clean :is(nav, ol, ul) { display: inline-flex !important; align-items: center !important; width: auto !important; max-width: max-content !important; min-height: 36px !important; height: 36px !important; margin: 0 !important; }
+        .chrono-breadcrumb-clean :is(nav, ol, ul, li, a, span) { font-size: 11px; line-height: 1 !important; }
+        .chrono-breadcrumb-clean :is(nav, ol, ul) > * { min-height: 0 !important; }
+        .chrono-breadcrumb-clean :is(a, span) { display: inline-flex; align-items: center; padding-top: 0 !important; padding-bottom: 0 !important; }
+        .chrono-breadcrumb-clean svg { width: 13px; height: 13px; }
+        .chrono-dial-glint { mix-blend-mode: screen; }
+        .chrono-micro-label { letter-spacing: .22em; }
+      `}</style>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_43%,#fffdf7_0%,#f3eddf_57%,#ddd8cf_100%)]" />
       <div className="dusk-layer pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(218,151,116,.36)_0%,rgba(176,121,137,.2)_43%,rgba(73,84,111,.18)_100%)] opacity-0" />
       <div className="night-layer pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_47%,rgba(66,103,140,.2),transparent_31%),radial-gradient(circle_at_86%_46%,rgba(66,103,140,.17),transparent_31%),linear-gradient(180deg,#101a2a_0%,#0a1422_50%,#07101a_100%)] opacity-0" />
@@ -1880,56 +2014,103 @@ export default function ChronoGardenTool() {
         ))}
       </div>
 
-      <header className="tool-heading absolute left-4 top-5 z-30 max-w-[390px] sm:left-7 sm:top-7">
-        <div className="text-[8px] font-semibold uppercase tracking-[0.24em] text-current/42">
-        < Breadcrumb />
+      <header className={`tool-heading absolute left-4 top-4 z-30 max-w-[720px] transition-opacity duration-500 sm:left-7 sm:top-6 ${quietMode ? "pointer-events-none opacity-0" : "opacity-100"}`}>
+        <div className="chrono-topline flex flex-wrap items-center gap-2">
+          <div className="chrono-breadcrumb-clean flex h-9 max-w-max items-center">
+            <Breadcrumb />
+          </div>
+          <div className="chrono-tag inline-flex h-9 items-center gap-2 rounded-full border border-current/[0.08] bg-white/18 px-3 text-[8px] font-semibold tracking-[0.2em] text-current/42 backdrop-blur-xl">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#a78d54]" />
+            CHRONO GARDEN · POLISHED V17.2
+          </div>
         </div>
-        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.055em] sm:text-3xl">
+        <h1 className="mt-5 text-[clamp(2rem,4vw,4.7rem)] font-semibold leading-[0.95] tracking-[-0.07em]">
           时序花园
         </h1>
-        <p className="mt-2 max-w-[350px] text-[10px] font-medium leading-5 text-current/54 sm:text-[11px]">
-          让时间慢一点，让光、枝叶和花，陪你走完这一圈。
+        <p className="mt-4 max-w-[385px] text-[10px] font-medium leading-5 text-current/54 sm:text-[11px]">
+          一只会生长的时间仪器。机械表盘、藤蔓、昼夜、四季与花影在同一圈里缓慢同步。
         </p>
       </header>
 
-      <div className="absolute right-4 top-5 z-30 flex flex-col items-end gap-1.5 sm:right-7 sm:top-7">
-        <div className="ui-soft-surface rounded-full border border-current/[0.08] bg-white/28 px-3 py-2 text-[8px] font-semibold tracking-[0.18em] text-current/70 backdrop-blur-xl">
-          {PHASE_LABEL[phase]}
+      <div className={`absolute right-4 top-5 z-30 flex flex-col items-end gap-2 transition-opacity duration-500 sm:right-7 sm:top-7 ${quietMode ? "pointer-events-none opacity-0" : "opacity-100"}`}>
+        <div className="ui-soft-surface inline-flex h-9 items-center rounded-full border border-current/[0.08] bg-white/28 px-3 text-[8px] font-semibold tracking-[0.18em] text-current/70 backdrop-blur-xl">
+          {PHASE_LABEL[phase]} · {SEASON_LABEL[season]}
         </div>
-        <div className="ui-soft-surface rounded-full border border-current/[0.08] bg-white/28 px-3 py-2 text-[8px] font-semibold tracking-[0.14em] text-current/70 backdrop-blur-xl">
-          {SEASON_LABEL[season]}
+        <div className="ui-soft-surface hidden rounded-[22px] border border-current/[0.08] bg-white/22 p-2 backdrop-blur-xl sm:block">
+          <div className="grid grid-cols-4 gap-1">
+            {SEASON_ORDER.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => previewSeason(item)}
+                className={`rounded-full px-2.5 py-1.5 text-[7px] font-semibold tracking-[0.12em] transition ${
+                  season === item ? "bg-current text-white" : "text-current/42 hover:bg-white/20"
+                }`}
+              >
+                {item.slice(0, 3).toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <aside className="pointer-events-none absolute right-5 top-1/2 z-20 hidden w-[220px] -translate-y-1/2 text-right lg:block">
-        <div className="text-[8px] font-semibold uppercase tracking-[0.22em] text-current/28">
-          {PHASE_COPY[phase].eyebrow}
+      <aside className={`absolute right-5 top-1/2 z-20 hidden w-[260px] -translate-y-1/2 text-right transition-opacity duration-500 lg:block ${quietMode ? "pointer-events-none opacity-0" : "opacity-100"}`}>
+        <div className="ui-soft-surface rounded-[28px] border border-current/[0.08] bg-white/18 p-5 backdrop-blur-xl">
+          <div className="mb-4 flex justify-end gap-1.5">
+            {(Object.keys(DETAIL_PANEL_LABEL) as DetailPanel[]).map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setDetailPanel(item)}
+                className={`rounded-full px-2.5 py-1.5 text-[7px] font-semibold tracking-[0.13em] transition ${
+                  detailPanel === item ? "bg-current text-white" : "text-current/36 hover:bg-white/20 hover:text-current/70"
+                }`}
+              >
+                {DETAIL_PANEL_LABEL[item]}
+              </button>
+            ))}
+          </div>
+          <div className="text-[8px] font-semibold uppercase tracking-[0.22em] text-current/28">
+            {activeDetail.eyebrow}
+          </div>
+          <div className="mt-3 text-[clamp(1.2rem,1.8vw,1.72rem)] font-semibold leading-[1.05] tracking-[-0.045em] text-current/74">
+            {activeDetail.title}
+          </div>
+          <p className="mt-3 ml-auto max-w-[230px] text-[10px] font-medium leading-5 text-current/45">
+            {activeDetail.body}
+          </p>
+          <div className="chrono-hairline mt-7 ml-auto h-px w-24 bg-current/12 opacity-20" />
+          <div className="mt-4 grid grid-cols-2 gap-2 text-left">
+            <div className="rounded-2xl border border-current/[0.06] bg-white/16 p-3">
+              <div className="text-[7px] font-semibold tracking-[0.14em] text-current/28">PHASE</div>
+              <div className="chrono-num mt-1 font-mono text-[10px] text-current/68">{PHASE_LABEL[phase]}</div>
+            </div>
+            <div className="rounded-2xl border border-current/[0.06] bg-white/16 p-3">
+              <div className="text-[7px] font-semibold tracking-[0.14em] text-current/28">SPEED</div>
+              <div className="chrono-num mt-1 font-mono text-[10px] text-current/68">{cycleSpeed}×</div>
+            </div>
+          </div>
         </div>
-        <div className="mt-3 text-[clamp(1.2rem,1.8vw,1.7rem)] font-semibold leading-[1.05] tracking-[-0.045em] text-current/72">
-          {PHASE_COPY[phase].title}
-        </div>
-        <p className="mt-3 ml-auto max-w-[210px] text-[10px] font-medium leading-5 text-current/44">
-          {PHASE_COPY[phase].body}
-        </p>
-        <div className="mt-7 ml-auto h-px w-12 bg-current/12" />
-        <div className="mt-4 text-[8px] font-semibold tracking-[0.16em] text-current/38">
-          {SEASON_LABEL[season]}
-        </div>
-        <p className="mt-2 ml-auto max-w-[205px] text-[10px] font-medium leading-5 text-current/44">
-          {SEASON_NOTE[season]}
-        </p>
       </aside>
 
-      <div className="pointer-events-none absolute bottom-24 left-5 z-20 hidden max-w-[250px] lg:block">
-        <div className="h-px w-14 bg-current/12" />
-        <p className="mt-4 text-[9px] font-medium leading-5 tracking-[0.03em] text-current/28">
-          有些日子不需要走得很快，
-          <br />
-          只要还有光，还有花在慢慢长，
-          <br />
-          时间就会变得温柔一点。
-        </p>
-      </div>
+      {showTechnicalMarks && !quietMode && (
+        <div className="pointer-events-none absolute bottom-28 left-5 z-20 hidden max-w-[280px] lg:block">
+          <div className="h-px w-14 bg-current/12" />
+          <div className="mt-4 grid gap-2">
+            {[
+              ["STEMS", `${stems.length} path segments`],
+              ["LEAVES", `${leaves.length + rimVineLeaves.length} attached nodes`],
+              ["FLOWERS", `${flowers.length + rimVineFlowers.length} blossoms`],
+              ["CYCLE", `${CYCLE_DURATION}s day rhythm`],
+            ].map(([label, value]) => (
+              <div key={label} className="ui-soft-surface rounded-full border border-current/[0.06] bg-white/18 px-3 py-2 text-[8px] font-semibold tracking-[0.12em] text-current/38 backdrop-blur-xl">
+                <span className="text-current/24">{label}</span>
+                <span className="ml-2 font-mono text-current/52">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <main className="relative z-10 flex min-h-[calc(100dvh-4rem)] items-center justify-center px-2 py-20 sm:px-8 sm:py-10">
         <div
@@ -2118,6 +2299,27 @@ export default function ChronoGardenTool() {
               />
 
               <circle
+                className="dial-breath"
+                cx={CENTER}
+                cy={CENTER}
+                r={DIAL_RADIUS + 17}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.65"
+                opacity="0.13"
+              />
+
+              <path
+                className="chrono-dial-glint"
+                d="M246 252 C348 142 515 112 646 169"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                opacity="0.18"
+              />
+
+              <circle
                 className="dial-inner"
                 cx={CENTER}
                 cy={CENTER}
@@ -2156,6 +2358,13 @@ export default function ChronoGardenTool() {
                 <text x="205" y="505" textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="600" letterSpacing="2.4">
                   冬
                 </text>
+              </g>
+
+              <g className="chrono-micro-label" fill="currentColor" opacity="0.24">
+                <text x="500" y="118" textAnchor="middle" fontSize="8" fontWeight="700">MORNING</text>
+                <text x="884" y="506" textAnchor="middle" dominantBaseline="middle" fontSize="8" fontWeight="700">EVENING</text>
+                <text x="500" y="890" textAnchor="middle" fontSize="8" fontWeight="700">NIGHT</text>
+                <text x="116" y="506" textAnchor="middle" dominantBaseline="middle" fontSize="8" fontWeight="700">DAWN</text>
               </g>
             </g>
 
@@ -2535,39 +2744,48 @@ export default function ChronoGardenTool() {
         </div>
       </main>
 
-      <div className="absolute bottom-4 left-1/2 z-30 w-[calc(100%-2rem)] max-w-[720px] -translate-x-1/2 sm:bottom-6">
-        <div className="ui-soft-surface rounded-[22px] border border-current/[0.075] bg-white/26 p-2 shadow-[0_18px_60px_-40px_rgba(24,24,20,.35)] backdrop-blur-xl">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="grid flex-1 grid-cols-4 gap-1 rounded-[15px] bg-black/[0.025] p-1">
-              {(["day", "dusk", "night", "dawn"] as Phase[]).map(
-                (item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => previewPhase(item)}
-                    className={`rounded-xl px-2 py-2 text-[8px] font-semibold tracking-[0.13em] transition ${
-                      phase === item
-                        ? "bg-white/78 text-black/72 shadow-sm"
-                        : "text-current/52 hover:bg-white/18 hover:text-current/82"
-                    }`}
-                  >
-                    {PHASE_LABEL[item]}
-                  </button>
-                ),
-              )}
+      <div className={`absolute bottom-4 left-1/2 z-30 w-[calc(100%-2rem)] max-w-[980px] -translate-x-1/2 transition-opacity duration-500 sm:bottom-6 ${quietMode ? "opacity-0 hover:opacity-100" : "opacity-100"}`}>
+        <div className="ui-soft-surface rounded-[28px] border border-current/[0.075] bg-white/28 p-2 shadow-[0_18px_60px_-40px_rgba(24,24,20,.35)] backdrop-blur-2xl">
+          <div className="grid gap-2 lg:grid-cols-[1fr_1fr_auto] lg:items-center">
+            <div className="grid grid-cols-4 gap-1 rounded-[19px] bg-black/[0.025] p-1">
+              {PHASE_ORDER.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => previewPhase(item)}
+                  className={`rounded-2xl px-2 py-2.5 text-[8px] font-semibold tracking-[0.13em] transition ${
+                    phase === item ? "bg-white/82 text-black/72 shadow-sm" : "text-current/52 hover:bg-white/18 hover:text-current/82"
+                  }`}
+                >
+                  {PHASE_LABEL[item]}
+                </button>
+              ))}
             </div>
 
-            <div className="flex items-center justify-between gap-2 sm:justify-end">
+            <div className="grid grid-cols-4 gap-1 rounded-[19px] bg-black/[0.025] p-1">
+              {SEASON_ORDER.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => previewSeason(item)}
+                  className={`rounded-2xl px-2 py-2.5 text-[8px] font-semibold tracking-[0.1em] transition ${
+                    season === item ? "bg-white/82 text-black/72 shadow-sm" : "text-current/52 hover:bg-white/18 hover:text-current/82"
+                  }`}
+                >
+                  {SEASON_LABEL[item].slice(0, 1)}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-end">
               <div className="flex rounded-full bg-black/[0.025] p-1">
-                {[0.75, 1, 1.35].map((item) => (
+                {[0.6, 0.85, 1, 1.35, 1.8].map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setCycleSpeed(item)}
                     className={`rounded-full px-2.5 py-1.5 text-[8px] font-semibold transition ${
-                      cycleSpeed === item
-                        ? "bg-white/78 text-black/70 shadow-sm"
-                        : "text-current/50 hover:text-current/82"
+                      cycleSpeed === item ? "bg-white/82 text-black/70 shadow-sm" : "text-current/50 hover:text-current/82"
                     }`}
                     title="昼夜与四季循环速度"
                   >
@@ -2578,8 +2796,26 @@ export default function ChronoGardenTool() {
 
               <button
                 type="button"
+                onClick={() => setShowTechnicalMarks((value) => !value)}
+                className={`rounded-full border border-current/[0.07] px-3 py-2 text-[8px] font-semibold tracking-[0.1em] transition ${
+                  showTechnicalMarks ? "bg-white/46 text-current/70" : "bg-transparent text-current/42 hover:bg-white/20"
+                }`}
+              >
+                DETAIL
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuietMode((value) => !value)}
+                className="rounded-full border border-current/[0.07] bg-white/30 px-3 py-2 text-[8px] font-semibold tracking-[0.1em] text-current/62 transition hover:bg-white/45"
+              >
+                QUIET
+              </button>
+
+              <button
+                type="button"
                 onClick={replayGrowth}
-                className="rounded-full border border-current/[0.07] bg-white/36 px-3 py-2 text-[8px] font-semibold tracking-[0.1em] text-current/66 transition hover:bg-white/45"
+                className="rounded-full border border-current/[0.07] bg-white/36 px-3 py-2 text-[8px] font-semibold tracking-[0.1em] text-current/66 transition hover:bg-white/48"
               >
                 REGROW
               </button>
@@ -2595,6 +2831,12 @@ export default function ChronoGardenTool() {
           </div>
         </div>
       </div>
+
+      {!quietMode && (
+        <div className="absolute bottom-4 left-5 z-20 hidden max-w-[240px] text-current/34 lg:block [&_*]:!text-current/34">
+          <FooterNote />
+        </div>
+      )}
     </div>
   );
 }

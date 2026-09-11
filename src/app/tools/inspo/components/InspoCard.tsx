@@ -1,80 +1,131 @@
-import Link from 'next/link'
-import type { InspoSite } from '../data'
+"use client"
+
+import Link from "next/link"
+import type { MouseEvent } from "react"
+import type { InspoSite } from "../data"
 
 const tagStyles: Record<string, string> = {
-  '动效重': 'text-amber-700 bg-amber-50 border-amber-200',
-  '极简': 'text-blue-700 bg-blue-50 border-blue-200',
-  '高对比': 'text-violet-700 bg-violet-50 border-violet-200',
-  '暗黑': 'text-gray-800 bg-gray-100 border-gray-300',
-  '复古': 'text-rose-700 bg-rose-50 border-rose-200',
-  '玻璃拟态': 'text-cyan-700 bg-cyan-50 border-cyan-200',
-  '粗野主义': 'text-orange-700 bg-orange-50 border-orange-200',
-  'UI': 'text-blue-700 bg-blue-50 border-blue-200',
-  '可商用': 'text-emerald-700 bg-emerald-50 border-emerald-200',
+  "动效重": "border-amber-200 bg-amber-50 text-amber-700",
+  "极简": "border-[#bfd3c7] bg-[#eef6f1] text-[#4f685c]",
+  "高对比": "border-zinc-200 bg-zinc-50 text-zinc-700",
+  "暗黑": "border-stone-300 bg-stone-100 text-stone-700",
+  "复古": "border-[#d6d0bf] bg-[#f5f0e6] text-[#76674e]",
+  "玻璃拟态": "border-[#bfd3c7] bg-[#eef6f1] text-[#4f685c]",
+  "粗野主义": "border-orange-200 bg-orange-50 text-orange-700",
+  "UI": "border-[#bfd3c7] bg-[#eef6f1] text-[#4f685c]",
+  "可商用": "border-emerald-200 bg-emerald-50 text-emerald-700",
 }
 
 function getTagClass(tag: string) {
-  return (
-    tagStyles[tag] ??
-    'text-app-muted bg-gray-50 border-app-border'
-  )
+  return tagStyles[tag] ?? "border-stone-200 bg-stone-50 text-stone-500"
 }
 
-export default function InspoCard({ site }: { site: InspoSite }) {
-  const MAX_TAGS = 3
-  const visibleTags = site.tags.slice(0, MAX_TAGS)
-  const hiddenTagsCount = site.tags.length - MAX_TAGS
+export default function InspoCard({
+  site,
+  index = 0,
+  favorite = false,
+  compact = false,
+  toneLabel = "视觉参考",
+  score = 0,
+  onToggleFavorite,
+}: {
+  site: InspoSite
+  index?: number
+  favorite?: boolean
+  compact?: boolean
+  toneLabel?: string
+  score?: number
+  onToggleFavorite?: (slug: string) => void
+}) {
+  const maxTags = compact ? 3 : 4
+  const visibleTags = site.tags.slice(0, maxTags)
+  const hiddenTagsCount = Math.max(0, site.tags.length - maxTags)
+  const scoreWidth = `${Math.min(100, Math.max(12, (score / 10) * 100))}%`
+
+  const handleFavorite = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    onToggleFavorite?.(site.slug)
+  }
+
+  if (compact) {
+    return (
+      <Link href={`/tools/inspo/${site.slug}`} className="group grid gap-4 rounded-[24px] border border-[#dedfd6]/90 bg-white/68 p-4 shadow-[0_22px_82px_-72px_rgba(31,33,28,.38)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#9bb4a6] hover:bg-white sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:items-center">
+        <div className="inspo-num font-mono text-[11px] text-[#989c91]">{String(index + 1).padStart(2, "0")}</div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-lg font-semibold tracking-[-0.04em] text-[#1f211c]">{site.name}</h3>
+            <span className="rounded-full border border-[#bfd3c7] bg-[#eef6f1] px-2.5 py-1 text-[9px] font-semibold text-[#4f685c]">{toneLabel}</span>
+            <span className="rounded-full border border-[#dedfd6] bg-[#f8f6f0] px-2.5 py-1 text-[9px] font-semibold text-[#74786d]">{site.category}</span>
+          </div>
+          <p className="mt-1 line-clamp-1 text-xs leading-5 text-[#74786d]">{site.desc}</p>
+        </div>
+        <div className="flex items-center gap-2 sm:justify-end">
+          <button type="button" onClick={handleFavorite} className={`grid h-9 w-9 place-items-center rounded-full border text-sm transition ${favorite ? "border-[#5f7f70] bg-[#5f7f70] text-[#f8f5ee]" : "border-[#dedfd6] bg-white text-[#b6b9ae] hover:border-[#9bb4a6] hover:text-[#4f685c]"}`} aria-label={favorite ? "取消收藏" : "收藏站点"}>
+            ★
+          </button>
+          <span className="rounded-full border border-[#dedfd6] bg-white px-3 py-2 text-[10px] font-semibold text-[#74786d] transition group-hover:border-[#9bb4a6] group-hover:text-[#4f685c]">拆解 →</span>
+        </div>
+      </Link>
+    )
+  }
 
   return (
-    <Link
-      href={`/tools/inspo/${site.slug}`}
-      className="group relative flex flex-col justify-between rounded-2xl bg-app-bg p-6 border border-app-border transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-100 hover:bg-gray-50"
+    <Link href={`/tools/inspo/${site.slug}`} className="group relative block h-full overflow-hidden rounded-[30px] border border-[#dedfd6]/90 bg-white/68 p-5 shadow-[0_28px_96px_-78px_rgba(31,33,28,.42)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[#9bb4a6] hover:bg-white hover:shadow-[0_34px_120px_-80px_rgba(95,127,112,.24)]">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#8fa596]/16 blur-3xl transition group-hover:bg-[#8fa596]/26" />
+      <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent" />
 
-    >
-      {/* ===== Header：标题 + 分类 ===== */}
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <h3 className="text-lg font-semibold text-app-text group-hover:text-black transition-colors">
-          {site.name}
-        </h3>
-        {/* ✅ 分类：极简文字，无背景，无边框 */}
-        <span className="shrink-0 text-[11px] font-medium uppercase tracking-widest text-gray-500 px-2 py-1 rounded-full bg-gray-100 pt-0">
-          {site.category}
-        </span>
-      </div>
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="inspo-num mb-3 font-mono text-[10px] text-[#989c91]">{String(index + 1).padStart(2, "0")}</div>
+            <h3 className="line-clamp-2 text-2xl font-semibold leading-[1.02] tracking-[-0.055em] text-[#1f211c]">{site.name}</h3>
+          </div>
 
-      {/* ===== Body：描述 ===== */}
-      <p className="text-sm text-gray-500 line-clamp-2 mb-6 flex-grow leading-relaxed">
-        {site.desc}
-      </p>
+          <button type="button" onClick={handleFavorite} className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border text-sm transition ${favorite ? "border-[#5f7f70] bg-[#5f7f70] text-[#f8f5ee]" : "border-[#dedfd6] bg-white/72 text-[#b6b9ae] hover:border-[#9bb4a6] hover:text-[#4f685c]"}`} aria-label={favorite ? "取消收藏" : "收藏站点"}>
+            ★
+          </button>
+        </div>
 
-      {/* ===== Footer：标签 + 学习建议 ===== */}
-      <div className="space-y-4">
-        {/* 标签区域：轻量胶囊 */}
-        <div className="flex flex-wrap items-center gap-2">
-          {visibleTags.map((tag) => (
-            <span
-              key={tag}
-              className={`text-[12px] font-medium px-2 py-1 rounded-lg border ${getTagClass(tag)}`}
-            >
-              {tag}
+        <p className="line-clamp-3 min-h-[72px] text-sm leading-6 text-[#74786d]">{site.desc}</p>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <span className="rounded-full border border-[#bfd3c7] bg-[#eef6f1] px-3 py-1.5 text-[10px] font-semibold text-[#4f685c]">{toneLabel}</span>
+          <span className="rounded-full border border-[#dedfd6] bg-[#f8f6f0] px-3 py-1.5 text-[10px] font-semibold text-[#74786d]">{site.category}</span>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {visibleTags.map((item) => (
+            <span key={item} className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${getTagClass(item)}`}>
+              {item}
             </span>
           ))}
           {hiddenTagsCount > 0 && (
-            <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-gray-50 text-app-muted border border-app-border">
-              +{hiddenTagsCount}
-            </span>
+            <span className="rounded-full border border-[#dedfd6] bg-[#f8f6f0] px-2.5 py-1 text-[10px] font-semibold text-[#74786d]">+{hiddenTagsCount}</span>
           )}
         </div>
 
-        {/* 学习建议：弱化的文字 */}
-        <div className="text-xs text-app-muted truncate">
-          <span className="font-medium text-gray-500">适合学：</span>
-          {site.learn}
+        <div className="mt-5 rounded-[22px] border border-[#dedfd6]/90 bg-[#f8f6f0]/70 p-4">
+          <div className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#989c91]">适合学</div>
+          <p className="mt-2 line-clamp-2 text-[11px] leading-5 text-[#55594f]">{site.learn}</p>
+        </div>
+
+        <div className="mt-auto pt-6">
+          <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-t border-[#dedfd6] pt-4">
+            <div>
+              <div className="mb-2 flex items-center justify-between text-[8px] font-semibold uppercase tracking-[0.16em] text-[#989c91]">
+                <span>Inspiration value</span>
+                <span className="inspo-num">{score}/10</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-[#dedfd6]">
+                <div className="h-full rounded-full bg-[#5f7f70] transition-all duration-500" style={{ width: scoreWidth }} />
+              </div>
+            </div>
+
+            <span className="rounded-full border border-[#dedfd6] bg-white px-3 py-2 text-[10px] font-semibold text-[#74786d] transition group-hover:border-[#9bb4a6] group-hover:text-[#4f685c]">查看拆解 →</span>
+          </div>
         </div>
       </div>
-
-      {/* ✅ 极简 Hover 光效（可选，增加高级感） */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-gray-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </Link>
   )
 }
