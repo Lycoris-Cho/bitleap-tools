@@ -82,7 +82,7 @@ function getNodeCount(value: unknown): number {
 
   return (
     1 +
-    Object.values(value as Record<string, unknown>).reduce(
+    Object.values(value as Record<string, unknown>).reduce<number>(
       (sum, item) => sum + getNodeCount(item),
       0,
     )
@@ -99,7 +99,7 @@ function getKeyCount(value: unknown): number {
   const object = value as Record<string, unknown>
   return (
     Object.keys(object).length +
-    Object.values(object).reduce(
+    Object.values(object).reduce<number>(
       (sum, item) => sum + getKeyCount(item),
       0,
     )
@@ -241,7 +241,7 @@ export default function JsonPage() {
   const [dragging, setDragging] = useState(false)
 
   const pageRef = useRef<HTMLDivElement>(null)
-  const outputRef = useRef<HTMLDivElement>(null)
+  const outputRef = useRef<HTMLPreElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 

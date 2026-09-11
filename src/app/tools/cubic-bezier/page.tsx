@@ -474,6 +474,9 @@ export default function EasingGenerator() {
     }
 
     const driver = { t: 0 }
+    const activeRunner = runner
+    if (!activeRunner) return
+
     timeline.to(
       driver,
       {
@@ -482,9 +485,9 @@ export default function EasingGenerator() {
         ease: "none",
         onUpdate: () => {
           const progress = solveYForX(driver.t, p1, p2)
-          runner.style.transform = `translateX(${progress * travelDistance}px) scale(${0.94 + progress * 0.07})`
-          runner.style.opacity = String(0.62 + progress * 0.38)
-          runner.style.filter = `drop-shadow(0 0 ${10 + progress * 28}px rgba(10,228,72,.22))`
+          activeRunner.style.transform = `translateX(${progress * travelDistance}px) scale(${0.94 + progress * 0.07})`
+          activeRunner.style.opacity = String(0.62 + progress * 0.38)
+          activeRunner.style.filter = `drop-shadow(0 0 ${10 + progress * 28}px rgba(10,228,72,.22))`
         },
       },
       0,

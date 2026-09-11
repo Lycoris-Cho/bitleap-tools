@@ -5,7 +5,7 @@ import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
 
-type CopyKey = "input" | "output" | "operation" | "report" | null
+type CopyKey = "input" | "output" | "operation" | "report" | OperationId | null
 type OperationId =
   | "htmlEscape"
   | "htmlUnescape"

@@ -117,7 +117,6 @@ function parseInput(
             noRefs: true,
             indent,
             lineWidth: -1,
-            noCompatMode: true,
             sortKeys: false,
           })
         : JSON.stringify(data, null, indent)

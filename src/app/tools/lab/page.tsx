@@ -1,6 +1,6 @@
 "use client"
 
-import type { ChangeEvent, MessageEvent } from "react"
+import type { ChangeEvent } from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"

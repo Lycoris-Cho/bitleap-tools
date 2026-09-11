@@ -408,14 +408,14 @@ function SpaceVisual() {
           <div className="absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.055]" />
           <div className="absolute left-1/2 top-1/2 h-[280%] w-[280%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.035]" />
         </div>
-        {[
+        {([
           ["18%", "22%", false],
           ["76%", "26%", true],
           ["22%", "70%", false],
           ["84%", "68%", false],
           ["66%", "82%", true],
           ["35%", "15%", false],
-        ].map(([left, top, danger], index) => (
+        ] satisfies Array<[string, string, boolean]>).map(([left, top, danger], index) => (
           <div key={index} className={`absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border ${danger ? "border-[#ff826d]/50 bg-[#ff826d]/20 shadow-[0_0_24px_rgba(255,130,109,.28)]" : "border-white/30 bg-white/5"}`} style={{ left, top }}>
             <span className={`absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full ${danger ? "bg-[#ff826d]" : "bg-white/70"}`} />
           </div>

@@ -311,7 +311,7 @@ export default function ColorExtractorPro() {
     event.target.value = "";
   }
 
-  function onDrop(event: DragEvent<HTMLDivElement>) {
+  function onDrop(event: DragEvent<HTMLButtonElement>) {
     event.preventDefault();
     const nextFile = event.dataTransfer.files?.[0];
     if (nextFile) loadFile(nextFile);

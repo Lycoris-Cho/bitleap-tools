@@ -175,6 +175,19 @@ function loadImage(src: string) {
   })
 }
 
+
+function downloadText(content: string, filename: string) {
+  if (!content) return
+
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement("a")
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 500)
+}
+
 function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality: number) {
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(

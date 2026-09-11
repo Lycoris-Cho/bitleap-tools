@@ -206,7 +206,9 @@ export default function TidePage() {
       gsap.fromTo(glowRef.current, { scale: 0.96, opacity: 0.72 }, { scale: 1, opacity: 1, duration: 1.4, ease: "sine.out" })
     }
 
-    return () => tween.kill()
+    return () => {
+      tween.kill()
+    }
   }, [mood, mounted])
 
   useEffect(() => {

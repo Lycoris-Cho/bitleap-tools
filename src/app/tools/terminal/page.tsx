@@ -48,7 +48,7 @@ type QueueItem = {
 
 const STORAGE_KEY = "bitleap-terminal-command-favorites"
 
-const COMMANDS = [
+const COMMANDS: TerminalCommand[] = [
   {
     "id": "file-find",
     "category": "文件操作",
@@ -1807,7 +1807,7 @@ const COMMANDS = [
       "install"
     ]
   }
-] satisfies TerminalCommand[]
+]
 
 const RISK_META: Record<RiskLevel, { label: string; desc: string }> = {
   safe: {
