@@ -1,18 +1,43 @@
-'use client'
+"use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Breadcrumb } from '@/components/breadcrumb'
-import FooterNote from '@/components/FooterNote'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type DragEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react"
+import { Breadcrumb } from "@/components/breadcrumb"
+import FooterNote from "@/components/FooterNote"
 
-type Device = 'desktop' | 'tablet' | 'mobile'
-type LeftTab = 'components' | 'layers' | 'templates'
-type ExportTab = 'jsx' | 'html' | 'json'
-type SaveStatus = 'saved' | 'saving' | 'error'
-type NodeType = 'container' | 'heading' | 'text' | 'button' | 'input' | 'image' | 'spacer'
+type Device = "desktop" | "tablet" | "mobile"
+type StyleScope = "base" | Device
+type LeftTab = "components" | "layers" | "templates"
+type InspectorTab = "content" | "layout" | "style" | "advanced"
+type ExportTab = "jsx" | "html" | "json"
+type SaveStatus = "saved" | "saving" | "error"
+type NodeType =
+  | "section"
+  | "container"
+  | "grid"
+  | "heading"
+  | "text"
+  | "button"
+  | "input"
+  | "image"
+  | "badge"
+  | "divider"
+  | "spacer"
 
 type BuilderNode = {
   id: string
   type: NodeType
+  hidden?: boolean
+  locked?: boolean
   props: {
     text?: string
     placeholder?: string
@@ -20,86 +45,238 @@ type BuilderNode = {
     alt?: string
     href?: string
   }
-  style: React.CSSProperties
+  style: CSSProperties
+  responsive?: Partial<Record<Device, CSSProperties>>
   children?: BuilderNode[]
 }
 
 type ProjectData = {
-  version: 2
+  version: 4
   name: string
   nodes: BuilderNode[]
   updatedAt: number
 }
 
 type DragPayload =
-  | { kind: 'new'; nodeType: NodeType }
-  | { kind: 'move'; nodeId: string }
+  | { kind: "new"; nodeType: NodeType }
+  | { kind: "move"; nodeId: string }
 
 type LocationInfo = {
   parentId: string | null
   index: number
 }
 
-const STORAGE_KEY = 'bitleap-page-builder-v2'
-const LEGACY_STORAGE_KEY = 'bitleap-page-builder-v1'
-const HISTORY_LIMIT = 80
-const NODE_TYPES: NodeType[] = ['container', 'heading', 'text', 'button', 'input', 'image', 'spacer']
-
-const COMPONENTS: Array<{ type: NodeType; label: string; icon: string; desc: string }> = [
-  { type: 'container', label: '容器', icon: '▣', desc: '布局、分组与嵌套' },
-  { type: 'heading', label: '标题', icon: 'H', desc: '页面标题与区块标题' },
-  { type: 'text', label: '文本', icon: 'T', desc: '正文与说明文字' },
-  { type: 'button', label: '按钮', icon: '●', desc: 'CTA 与操作入口' },
-  { type: 'input', label: '输入框', icon: '⌨', desc: '表单输入控件' },
-  { type: 'image', label: '图片', icon: '◫', desc: '网络图片与 Banner' },
-  { type: 'spacer', label: '间距', icon: '↕', desc: '控制页面留白' },
-]
-
-const DEFAULT_STYLES: Record<NodeType, React.CSSProperties> = {
-  container: {
-    display: 'flex', flexDirection: 'column', gap: 16, padding: 24, width: '100%', minHeight: 120,
-    borderRadius: 20, background: '#ffffff', border: '1px solid #e5e7eb',
-  },
-  heading: {
-    margin: 0, fontSize: 40, lineHeight: 1.12, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.035em',
-  },
-  text: { margin: 0, fontSize: 16, lineHeight: 1.7, color: '#475569' },
-  button: {
-    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start',
-    padding: '12px 20px', borderRadius: 12, border: 'none', background: '#7c3aed', color: '#ffffff',
-    fontSize: 14, fontWeight: 700, cursor: 'pointer',
-  },
-  input: {
-    width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1',
-    background: '#ffffff', color: '#0f172a', fontSize: 14, outline: 'none',
-  },
-  image: {
-    display: 'block', width: '100%', height: 240, objectFit: 'cover', borderRadius: 16, background: '#f1f5f9',
-  },
-  spacer: { height: 40, width: '100%' },
+type ComponentMeta = {
+  type: NodeType
+  label: string
+  icon: string
+  desc: string
+  group: "layout" | "content" | "form" | "media"
 }
 
+const STORAGE_KEY = "bitleap-page-builder-v4"
+const LEGACY_STORAGE_KEY = "bitleap-page-builder-v3"
+const HISTORY_LIMIT = 90
+const NODE_TYPES: NodeType[] = [
+  "section",
+  "container",
+  "grid",
+  "heading",
+  "text",
+  "button",
+  "input",
+  "image",
+  "badge",
+  "divider",
+  "spacer",
+]
+
+const COMPONENTS: ComponentMeta[] = [
+  { type: "section", label: "页面区块", icon: "▤", desc: "大段落、首屏、内容分区", group: "layout" },
+  { type: "container", label: "容器", icon: "▣", desc: "纵向布局、卡片、分组", group: "layout" },
+  { type: "grid", label: "栅格", icon: "▦", desc: "多列卡片与响应式布局", group: "layout" },
+  { type: "heading", label: "标题", icon: "H", desc: "Hero 标题、区块标题", group: "content" },
+  { type: "text", label: "文本", icon: "T", desc: "正文、说明、介绍", group: "content" },
+  { type: "button", label: "按钮", icon: "●", desc: "CTA、链接按钮", group: "content" },
+  { type: "badge", label: "徽标", icon: "✦", desc: "标签、状态、卖点", group: "content" },
+  { type: "input", label: "输入框", icon: "⌨", desc: "表单输入控件", group: "form" },
+  { type: "image", label: "图片", icon: "◫", desc: "网络图片、Banner、封面", group: "media" },
+  { type: "divider", label: "分割线", icon: "─", desc: "内容分隔与装饰线", group: "layout" },
+  { type: "spacer", label: "间距", icon: "↕", desc: "精确控制留白", group: "layout" },
+]
+
+const DEFAULT_STYLES: Record<NodeType, CSSProperties> = {
+  section: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    gap: 24,
+    width: "100%",
+    minHeight: "520px",
+    padding: "72px 40px",
+    borderRadius: 28,
+    background: "linear-gradient(135deg,#faf7f0 0%,#ffffff 52%,#eee6d8 100%)",
+    border: "1px solid rgba(214,202,184,.72)",
+    boxShadow: "0 24px 70px rgba(92,74,45,.08)",
+  },
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    width: "100%",
+    minHeight: 120,
+    padding: 24,
+    borderRadius: 22,
+    background: "#ffffff",
+    border: "1px solid #e7e0d5",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3,minmax(0,1fr))",
+    gap: 18,
+    width: "100%",
+    padding: 0,
+    background: "transparent",
+    border: "none",
+  },
+  heading: {
+    margin: 0,
+    maxWidth: "820px",
+    fontSize: 56,
+    lineHeight: 1.04,
+    fontWeight: 800,
+    color: "#1f2937",
+    letterSpacing: "-0.045em",
+  },
+  text: {
+    margin: 0,
+    maxWidth: "680px",
+    fontSize: 16,
+    lineHeight: 1.8,
+    color: "#64748b",
+  },
+  button: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-start",
+    width: "fit-content",
+    minHeight: 44,
+    padding: "12px 20px",
+    borderRadius: 14,
+    border: "none",
+    background: "#7c3aed",
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: 750,
+    cursor: "pointer",
+    boxShadow: "0 14px 34px rgba(124,58,237,.2)",
+  },
+  input: {
+    width: "100%",
+    maxWidth: "420px",
+    minHeight: 44,
+    padding: "12px 14px",
+    borderRadius: 14,
+    border: "1px solid #cbd5e1",
+    background: "#ffffff",
+    color: "#0f172a",
+    fontSize: 14,
+    outline: "none",
+  },
+  image: {
+    display: "block",
+    width: "100%",
+    height: 260,
+    objectFit: "cover",
+    objectPosition: "center",
+    borderRadius: 18,
+    background: "#f1f5f9",
+  },
+  badge: {
+    display: "inline-flex",
+    alignItems: "center",
+    width: "fit-content",
+    padding: "7px 11px",
+    borderRadius: 999,
+    border: "1px solid rgba(124,58,237,.22)",
+    background: "#f3e8ff",
+    color: "#6d28d9",
+    fontSize: 12,
+    fontWeight: 800,
+    letterSpacing: "0.08em",
+  },
+  divider: {
+    width: "100%",
+    height: 1,
+    margin: "8px 0",
+    background: "#e7e0d5",
+  },
+  spacer: {
+    width: "100%",
+    height: 40,
+  },
+}
+
+const SHADOW_PRESETS = [
+  { label: "无", value: "" },
+  { label: "轻柔", value: "0 8px 24px rgba(15,23,42,.08)" },
+  { label: "卡片", value: "0 18px 45px rgba(15,23,42,.12)" },
+  { label: "浮层", value: "0 28px 70px rgba(15,23,42,.18)" },
+  { label: "瓷感", value: "0 24px 70px rgba(92,74,45,.08)" },
+]
+
+const GRADIENT_PRESETS = [
+  { label: "白色", value: "#ffffff" },
+  { label: "瓷白", value: "linear-gradient(135deg,#faf7f0 0%,#ffffff 52%,#eee6d8 100%)" },
+  { label: "紫雾", value: "linear-gradient(135deg,#f5f3ff 0%,#ffffff 52%,#faf5ff 100%)" },
+  { label: "深色", value: "linear-gradient(135deg,#111827 0%,#1f2937 100%)" },
+  { label: "透明", value: "transparent" },
+]
+
+const DIMENSION_CHIPS = ["auto", "100%", "50%", "fit-content", "320px", "640px", "100vh"]
+
 function uid() {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID()
   return `node-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 }
 
 function createNode(type: NodeType): BuilderNode {
-  const base: BuilderNode = { id: uid(), type, props: {}, style: { ...DEFAULT_STYLES[type] } }
+  const base: BuilderNode = {
+    id: uid(),
+    type,
+    props: {},
+    style: { ...DEFAULT_STYLES[type] },
+  }
+
   switch (type) {
-    case 'container': return { ...base, children: [] }
-    case 'heading': return { ...base, props: { text: '这是一个标题' } }
-    case 'text': return { ...base, props: { text: '这里是一段正文内容。你可以在右侧属性面板中修改文字与样式。' } }
-    case 'button': return { ...base, props: { text: '立即开始', href: '#' } }
-    case 'input': return { ...base, props: { placeholder: '请输入内容...' } }
-    case 'image': return {
-      ...base,
-      props: {
-        src: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80',
-        alt: '示例图片',
-      },
-    }
-    case 'spacer': return base
+    case "section":
+      return { ...base, children: [] }
+    case "container":
+      return { ...base, children: [] }
+    case "grid":
+      return { ...base, children: [] }
+    case "heading":
+      return { ...base, props: { text: "把想法，更快变成产品" } }
+    case "text":
+      return { ...base, props: { text: "这里是一段正文内容。你可以在右侧属性面板中修改文字、宽高、间距、布局与响应式样式。" } }
+    case "button":
+      return { ...base, props: { text: "立即开始", href: "#" } }
+    case "input":
+      return { ...base, props: { placeholder: "请输入内容..." } }
+    case "image":
+      return {
+        ...base,
+        props: {
+          src: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+          alt: "示例图片",
+        },
+      }
+    case "badge":
+      return { ...base, props: { text: "NEW RELEASE" } }
+    case "divider":
+    case "spacer":
+      return base
   }
 }
 
@@ -109,8 +286,19 @@ function cloneNodeDeep(node: BuilderNode): BuilderNode {
     id: uid(),
     props: { ...node.props },
     style: { ...node.style },
+    responsive: node.responsive
+      ? {
+          desktop: node.responsive.desktop ? { ...node.responsive.desktop } : undefined,
+          tablet: node.responsive.tablet ? { ...node.responsive.tablet } : undefined,
+          mobile: node.responsive.mobile ? { ...node.responsive.mobile } : undefined,
+        }
+      : undefined,
     children: node.children?.map(cloneNodeDeep),
   }
+}
+
+function canHaveChildren(type: NodeType) {
+  return type === "section" || type === "container" || type === "grid"
 }
 
 function getNode(nodes: BuilderNode[], id: string): BuilderNode | null {
@@ -125,9 +313,9 @@ function getNode(nodes: BuilderNode[], id: string): BuilderNode | null {
 }
 
 function getLocation(nodes: BuilderNode[], id: string, parentId: string | null = null): LocationInfo | null {
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]
-    if (node.id === id) return { parentId, index: i }
+  for (let index = 0; index < nodes.length; index += 1) {
+    const node = nodes[index]
+    if (node.id === id) return { parentId, index }
     if (node.children) {
       const found = getLocation(node.children, id, node.id)
       if (found) return found
@@ -137,7 +325,7 @@ function getLocation(nodes: BuilderNode[], id: string, parentId: string | null =
 }
 
 function updateNode(nodes: BuilderNode[], id: string, updater: (node: BuilderNode) => BuilderNode): BuilderNode[] {
-  return nodes.map(node => {
+  return nodes.map((node) => {
     if (node.id === id) return updater(node)
     if (node.children) return { ...node, children: updateNode(node.children, id, updater) }
     return node
@@ -147,30 +335,35 @@ function updateNode(nodes: BuilderNode[], id: string, updater: (node: BuilderNod
 function removeNode(nodes: BuilderNode[], id: string): { next: BuilderNode[]; removed: BuilderNode | null } {
   let removed: BuilderNode | null = null
   const next = nodes
-    .filter(node => {
-      if (node.id === id) { removed = node; return false }
+    .filter((node) => {
+      if (node.id === id) {
+        removed = node
+        return false
+      }
       return true
     })
-    .map(node => {
+    .map((node) => {
       if (!node.children) return node
       const result = removeNode(node.children, id)
       if (result.removed) removed = result.removed
       return { ...node, children: result.next }
     })
+
   return { next, removed }
 }
 
 function insertNode(nodes: BuilderNode[], parentId: string | null, node: BuilderNode, index?: number): BuilderNode[] {
   if (parentId === null) {
     const next = [...nodes]
-    if (typeof index === 'number') next.splice(Math.max(0, Math.min(index, next.length)), 0, node)
+    if (typeof index === "number") next.splice(clamp(index, 0, next.length), 0, node)
     else next.push(node)
     return next
   }
-  return nodes.map(item => {
-    if (item.id === parentId) {
+
+  return nodes.map((item) => {
+    if (item.id === parentId && canHaveChildren(item.type)) {
       const children = [...(item.children || [])]
-      if (typeof index === 'number') children.splice(Math.max(0, Math.min(index, children.length)), 0, node)
+      if (typeof index === "number") children.splice(clamp(index, 0, children.length), 0, node)
       else children.push(node)
       return { ...item, children }
     }
@@ -181,189 +374,622 @@ function insertNode(nodes: BuilderNode[], parentId: string | null, node: Builder
 
 function hasDescendant(node: BuilderNode, id: string): boolean {
   if (!node.children) return false
-  return node.children.some(child => child.id === id || hasDescendant(child, id))
+  return node.children.some((child) => child.id === id || hasDescendant(child, id))
 }
 
-function isEditableTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false
-  return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable
+function countNodes(nodes: BuilderNode[]): number {
+  return nodes.reduce((total, node) => total + 1 + countNodes(node.children || []), 0)
 }
 
 function validateNodes(value: unknown, depth = 0): value is BuilderNode[] {
   if (!Array.isArray(value) || depth > 20) return false
-  return value.every(item => {
-    if (!item || typeof item !== 'object') return false
+  return value.every((item) => {
+    if (!item || typeof item !== "object") return false
     const node = item as Partial<BuilderNode>
-    if (typeof node.id !== 'string' || !NODE_TYPES.includes(node.type as NodeType)) return false
-    if (!node.props || typeof node.props !== 'object' || Array.isArray(node.props)) return false
-    if (!node.style || typeof node.style !== 'object' || Array.isArray(node.style)) return false
-    if (node.type === 'container') return node.children === undefined || validateNodes(node.children, depth + 1)
-    return node.children === undefined || validateNodes(node.children, depth + 1)
+    if (typeof node.id !== "string" || !NODE_TYPES.includes(node.type as NodeType)) return false
+    if (!node.props || typeof node.props !== "object" || Array.isArray(node.props)) return false
+    if (!node.style || typeof node.style !== "object" || Array.isArray(node.style)) return false
+    if (node.responsive && (typeof node.responsive !== "object" || Array.isArray(node.responsive))) return false
+    if (node.children !== undefined && !validateNodes(node.children, depth + 1)) return false
+    return true
   })
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
+}
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false
+  return target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable
+}
+
 function styleValue(value: unknown) {
-  if (typeof value === 'number') return String(value)
-  return value ?? ''
+  if (typeof value === "number") return String(value)
+  return typeof value === "string" ? value : ""
 }
 
-function jsxStyleObject(style: React.CSSProperties) {
-  const entries = Object.entries(style).filter(([, value]) => value !== undefined && value !== '')
-  if (!entries.length) return ''
-  const body = entries.map(([key, value]) => `${key}: ${typeof value === 'number' ? value : JSON.stringify(value)}`).join(', ')
-  return ` style={{ ${body} }}`
+function normalizeStyleValue(value: string | number | undefined) {
+  if (value === "" || value === undefined) return undefined
+  return value
 }
 
-function escapeJsxText(text: string) {
-  return text.replace(/[{}]/g, match => (match === '{' ? '&#123;' : '&#125;'))
+function setStyleProperty(style: CSSProperties, key: keyof CSSProperties, value: string | number | undefined) {
+  const next = { ...style }
+  ;(next as Record<string, unknown>)[key as string] = normalizeStyleValue(value)
+  return next
 }
 
-function escapeHtml(text: string) {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-function cssStyle(style: React.CSSProperties) {
-  return Object.entries(style)
-    .filter(([, value]) => value !== undefined && value !== '')
-    .map(([key, value]) => `${key.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`)}:${value}`)
-    .join(';')
-}
-
-function exportNode(node: BuilderNode, level = 1): string {
-  const pad = '  '.repeat(level)
-  const style = jsxStyleObject(node.style)
-  switch (node.type) {
-    case 'container': {
-      const children = (node.children || []).map(child => exportNode(child, level + 1)).join('\n')
-      return children ? `${pad}<div${style}>\n${children}\n${pad}</div>` : `${pad}<div${style} />`
-    }
-    case 'heading': return `${pad}<h2${style}>${escapeJsxText(node.props.text || '')}</h2>`
-    case 'text': return `${pad}<p${style}>${escapeJsxText(node.props.text || '')}</p>`
-    case 'button': return `${pad}<a href=${JSON.stringify(node.props.href || '#')} style={{ textDecoration: 'none' }}>\n${pad}  <button${style}>${escapeJsxText(node.props.text || '')}</button>\n${pad}</a>`
-    case 'input': return `${pad}<input placeholder=${JSON.stringify(node.props.placeholder || '')}${style} />`
-    case 'image': return `${pad}<img src=${JSON.stringify(node.props.src || '')} alt=${JSON.stringify(node.props.alt || '')}${style} />`
-    case 'spacer': return `${pad}<div aria-hidden="true"${style} />`
+function mergeStyleForDevice(node: BuilderNode, device: Device): CSSProperties {
+  return {
+    ...node.style,
+    ...(node.responsive?.desktop || {}),
+    ...(device === "tablet" || device === "mobile" ? node.responsive?.tablet || {} : {}),
+    ...(device === "mobile" ? node.responsive?.mobile || {} : {}),
   }
 }
 
-function exportHtmlNode(node: BuilderNode, level = 2): string {
-  const pad = '  '.repeat(level)
-  const style = cssStyle(node.style)
-  const attr = style ? ` style="${escapeHtml(style)}"` : ''
+function scopedStyleValue(node: BuilderNode | null, scope: StyleScope, key: keyof CSSProperties) {
+  if (!node) return ""
+  if (scope === "base") return styleValue(node.style[key])
+  return styleValue(node.responsive?.[scope]?.[key] ?? node.style[key])
+}
+
+function escapeJsxText(text: string) {
+  return text.replace(/[{}]/g, (match) => (match === "{" ? "&#123;" : "&#125;"))
+}
+
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+function cssKey(key: string) {
+  return key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
+}
+
+function cssStyle(style: CSSProperties) {
+  return Object.entries(style)
+    .filter(([, value]) => value !== undefined && value !== "")
+    .map(([key, value]) => `${cssKey(key)}:${value}`)
+    .join(";")
+}
+
+function cssClass(node: BuilderNode) {
+  return `pb-${node.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`
+}
+
+function collectCss(nodes: BuilderNode[]): string {
+  const base: string[] = []
+  const desktop: string[] = []
+  const tablet: string[] = []
+  const mobile: string[] = []
+
+  const walk = (items: BuilderNode[]) => {
+    items.forEach((node) => {
+      if (node.hidden) return
+      const className = cssClass(node)
+      const baseStyle = cssStyle(node.style)
+      if (baseStyle) base.push(`.${className}{${baseStyle}}`)
+      const desktopStyle = cssStyle(node.responsive?.desktop || {})
+      const tabletStyle = cssStyle(node.responsive?.tablet || {})
+      const mobileStyle = cssStyle(node.responsive?.mobile || {})
+      if (desktopStyle) desktop.push(`.${className}{${desktopStyle}}`)
+      if (tabletStyle) tablet.push(`.${className}{${tabletStyle}}`)
+      if (mobileStyle) mobile.push(`.${className}{${mobileStyle}}`)
+      if (node.children) walk(node.children)
+    })
+  }
+
+  walk(nodes)
+
+  const parts = [...base]
+  if (desktop.length) parts.push(`@media (min-width: 901px){${desktop.join("")}}`)
+  if (tablet.length) parts.push(`@media (max-width: 900px){${tablet.join("")}}`)
+  if (mobile.length) parts.push(`@media (max-width: 640px){${mobile.join("")}}`)
+  return parts.join("\n")
+}
+
+function exportNode(node: BuilderNode, level = 2): string {
+  if (node.hidden) return ""
+  const pad = "  ".repeat(level)
+  const classAttr = ` className="${cssClass(node)}"`
+
   switch (node.type) {
-    case 'container': {
-      const children = (node.children || []).map(child => exportHtmlNode(child, level + 1)).join('\n')
-      return `${pad}<div${attr}>${children ? `\n${children}\n${pad}` : ''}</div>`
+    case "section":
+    case "container":
+    case "grid": {
+      const children = (node.children || []).map((child) => exportNode(child, level + 1)).filter(Boolean).join("\n")
+      return children ? `${pad}<div${classAttr}>\n${children}\n${pad}</div>` : `${pad}<div${classAttr} />`
     }
-    case 'heading': return `${pad}<h2${attr}>${escapeHtml(node.props.text || '')}</h2>`
-    case 'text': return `${pad}<p${attr}>${escapeHtml(node.props.text || '')}</p>`
-    case 'button': return `${pad}<a href="${escapeHtml(node.props.href || '#')}" style="text-decoration:none"><button${attr}>${escapeHtml(node.props.text || '')}</button></a>`
-    case 'input': return `${pad}<input placeholder="${escapeHtml(node.props.placeholder || '')}"${attr}>`
-    case 'image': return `${pad}<img src="${escapeHtml(node.props.src || '')}" alt="${escapeHtml(node.props.alt || '')}"${attr}>`
-    case 'spacer': return `${pad}<div aria-hidden="true"${attr}></div>`
+    case "heading":
+      return `${pad}<h2${classAttr}>${escapeJsxText(node.props.text || "")}</h2>`
+    case "text":
+      return `${pad}<p${classAttr}>${escapeJsxText(node.props.text || "")}</p>`
+    case "button":
+      return `${pad}<a href=${JSON.stringify(node.props.href || "#")} style={{ textDecoration: "none" }}>\n${pad}  <button${classAttr}>${escapeJsxText(node.props.text || "")}</button>\n${pad}</a>`
+    case "input":
+      return `${pad}<input${classAttr} placeholder=${JSON.stringify(node.props.placeholder || "")} />`
+    case "image":
+      return `${pad}<img${classAttr} src=${JSON.stringify(node.props.src || "")} alt=${JSON.stringify(node.props.alt || "")} />`
+    case "badge":
+      return `${pad}<span${classAttr}>${escapeJsxText(node.props.text || "")}</span>`
+    case "divider":
+    case "spacer":
+      return `${pad}<div${classAttr} aria-hidden="true" />`
+  }
+}
+
+function exportHtmlNode(node: BuilderNode, level = 3): string {
+  if (node.hidden) return ""
+  const pad = "  ".repeat(level)
+  const classAttr = ` class="${cssClass(node)}"`
+
+  switch (node.type) {
+    case "section":
+    case "container":
+    case "grid": {
+      const children = (node.children || []).map((child) => exportHtmlNode(child, level + 1)).filter(Boolean).join("\n")
+      return `${pad}<div${classAttr}>${children ? `\n${children}\n${pad}` : ""}</div>`
+    }
+    case "heading":
+      return `${pad}<h2${classAttr}>${escapeHtml(node.props.text || "")}</h2>`
+    case "text":
+      return `${pad}<p${classAttr}>${escapeHtml(node.props.text || "")}</p>`
+    case "button":
+      return `${pad}<a href="${escapeHtml(node.props.href || "#")}" style="text-decoration:none"><button${classAttr}>${escapeHtml(node.props.text || "")}</button></a>`
+    case "input":
+      return `${pad}<input${classAttr} placeholder="${escapeHtml(node.props.placeholder || "")}">`
+    case "image":
+      return `${pad}<img${classAttr} src="${escapeHtml(node.props.src || "")}" alt="${escapeHtml(node.props.alt || "")}">`
+    case "badge":
+      return `${pad}<span${classAttr}>${escapeHtml(node.props.text || "")}</span>`
+    case "divider":
+    case "spacer":
+      return `${pad}<div${classAttr} aria-hidden="true"></div>`
   }
 }
 
 function generatePageCode(nodes: BuilderNode[]) {
-  const body = nodes.map(node => exportNode(node, 2)).join('\n')
-  return `'use client'\n\nexport default function GeneratedPage() {\n  return (\n    <main style={{ minHeight: '100vh', padding: '48px 24px', background: '#f8fafc' }}>\n      <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>\n${body || '        {/* 拖拽组件到画布后，这里会生成 JSX */}'}\n      </div>\n    </main>\n  )\n}\n`
+  const css = collectCss(nodes)
+  const body = nodes.map((node) => exportNode(node, 3)).filter(Boolean).join("\n")
+  return `'use client'
+
+export default function GeneratedPage() {
+  return (
+    <main className="generated-page">
+      <style>{\`
+.generated-page{min-height:100vh;padding:48px 24px;background:#f8fafc}
+.generated-page-shell{width:100%;max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+${css}
+      \`}</style>
+      <div className="generated-page-shell">
+${body || "        {/* 拖拽组件到画布后，这里会生成 JSX */}"}
+      </div>
+    </main>
+  )
+}
+`
 }
 
 function generateHtml(nodes: BuilderNode[]) {
-  const body = nodes.map(node => exportHtmlNode(node, 3)).join('\n')
-  return `<!doctype html>\n<html lang="zh-CN">\n  <head>\n    <meta charset="utf-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1">\n    <title>Generated Page</title>\n  </head>\n  <body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif">\n    <main style="min-height:100vh;padding:48px 24px">\n      <div style="width:100%;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:20px">\n${body || '        <!-- 拖拽组件到画布后，这里会生成 HTML -->'}\n      </div>\n    </main>\n  </body>\n</html>\n`
+  const css = collectCss(nodes)
+  const body = nodes.map((node) => exportHtmlNode(node, 4)).filter(Boolean).join("\n")
+  return `<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Generated Page</title>
+    <style>
+      body{margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a}
+      main{min-height:100vh;padding:48px 24px}
+      .generated-page-shell{width:100%;max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+${css}
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="generated-page-shell">
+${body || "        <!-- 拖拽组件到画布后，这里会生成 HTML -->"}
+      </div>
+    </main>
+  </body>
+</html>
+`
+}
+
+function sanitizeFileName(value: string) {
+  const safe = value.trim().replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-")
+  return safe || "bitleap-page"
+}
+
+function downloadTextFile(fileName: string, content: string, type: string) {
+  const blob = new Blob([content], { type })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement("a")
+  anchor.href = url
+  anchor.download = fileName
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  URL.revokeObjectURL(url)
 }
 
 function makeHeroTemplate(): BuilderNode[] {
-  const section = createNode('container')
-  section.style = { ...section.style, minHeight: 520, justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '72px 32px', background: '#f8fafc' }
-  const heading = createNode('heading'); heading.props.text = '把想法，更快变成产品'; heading.style = { ...heading.style, fontSize: 56, maxWidth: 760, textAlign: 'center' }
-  const text = createNode('text'); text.props.text = '一个用于快速构建、预览和导出前端页面的可视化编辑器。'; text.style = { ...text.style, fontSize: 18, maxWidth: 620, textAlign: 'center' }
-  const button = createNode('button'); button.props.text = '免费开始构建'; button.style = { ...button.style, alignSelf: 'center', padding: '14px 24px', borderRadius: 14 }
-  section.children = [heading, text, button]
+  const section = createNode("section")
+  const badge = createNode("badge")
+  const heading = createNode("heading")
+  const text = createNode("text")
+  const button = createNode("button")
+  const row = createNode("container")
+
+  section.style = {
+    ...section.style,
+    minHeight: "620px",
+    alignItems: "center",
+    textAlign: "center",
+    padding: "92px 44px",
+  }
+  section.responsive = {
+    mobile: {
+      minHeight: "560px",
+      padding: "64px 22px",
+      borderRadius: 22,
+    },
+  }
+  badge.props.text = "PRODUCT BUILDER"
+  badge.style = { ...badge.style, alignSelf: "center" }
+  heading.props.text = "把想法，更快变成产品页面"
+  heading.style = { ...heading.style, textAlign: "center", fontSize: 68 }
+  heading.responsive = { mobile: { fontSize: 42, lineHeight: 1.05 } }
+  text.props.text = "一个用于快速搭建、预览和导出前端页面的可视化编辑器。现在支持更完整的尺寸、布局、响应式与高级样式控制。"
+  text.style = { ...text.style, textAlign: "center", fontSize: 18 }
+  text.responsive = { mobile: { fontSize: 15 } }
+  row.style = {
+    display: "flex",
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+    background: "transparent",
+    border: "none",
+    minHeight: "auto",
+  }
+  row.responsive = { mobile: { flexDirection: "column", width: "100%" } }
+  button.props.text = "免费开始构建"
+  button.style = { ...button.style, alignSelf: "center", padding: "14px 24px" }
+
+  row.children = [button]
+  section.children = [badge, heading, text, row]
+  return [section]
+}
+
+function makeFeatureTemplate(): BuilderNode[] {
+  const section = createNode("section")
+  const heading = createNode("heading")
+  const text = createNode("text")
+  const grid = createNode("grid")
+  const labels = [
+    ["灵活尺寸", "宽高、最小最大值、单位、响应式覆写都可以细调。"],
+    ["真实预览", "同一套数据可以切换桌面、平板和手机画布。"],
+    ["干净导出", "导出 JSX、HTML 或 JSON，隐藏图层不会出现在成品里。"],
+  ]
+
+  section.style = { ...section.style, alignItems: "center", textAlign: "center", minHeight: "auto" }
+  heading.props.text = "更接近产品级的编辑体验"
+  heading.style = { ...heading.style, textAlign: "center", fontSize: 44 }
+  text.props.text = "不只是拖拽几个组件，而是让每个组件都能被精确调整。"
+  text.style = { ...text.style, textAlign: "center" }
+  grid.responsive = {
+    tablet: { gridTemplateColumns: "repeat(2,minmax(0,1fr))" },
+    mobile: { gridTemplateColumns: "1fr" },
+  }
+
+  grid.children = labels.map(([title, copy]) => {
+    const card = createNode("container")
+    const cardTitle = createNode("heading")
+    const cardText = createNode("text")
+    card.style = {
+      ...card.style,
+      minHeight: 190,
+      padding: 24,
+      borderRadius: 24,
+      boxShadow: "0 14px 38px rgba(15,23,42,.06)",
+    }
+    cardTitle.props.text = title
+    cardTitle.style = { ...cardTitle.style, fontSize: 24, letterSpacing: "-0.02em" }
+    cardText.props.text = copy
+    cardText.style = { ...cardText.style, fontSize: 14 }
+    card.children = [cardTitle, cardText]
+    return card
+  })
+
+  section.children = [heading, text, grid]
   return [section]
 }
 
 function makeLoginTemplate(): BuilderNode[] {
-  const shell = createNode('container')
-  shell.style = { ...shell.style, maxWidth: 460, margin: '48px auto', padding: 32, gap: 18, boxShadow: '0 24px 60px rgba(15,23,42,.10)' }
-  const heading = createNode('heading'); heading.props.text = '欢迎回来'; heading.style = { ...heading.style, fontSize: 30 }
-  const text = createNode('text'); text.props.text = '登录你的账户以继续。'; text.style = { ...text.style, fontSize: 14 }
-  const email = createNode('input'); email.props.placeholder = '邮箱地址'
-  const password = createNode('input'); password.props.placeholder = '密码'
-  const button = createNode('button'); button.props.text = '登录'; button.style = { ...button.style, width: '100%', alignSelf: 'stretch' }
+  const shell = createNode("container")
+  const heading = createNode("heading")
+  const text = createNode("text")
+  const email = createNode("input")
+  const password = createNode("input")
+  const button = createNode("button")
+
+  shell.style = {
+    ...shell.style,
+    maxWidth: "460px",
+    margin: "48px auto",
+    padding: 32,
+    gap: 18,
+    boxShadow: "0 24px 60px rgba(15,23,42,.10)",
+  }
+  heading.props.text = "欢迎回来"
+  heading.style = { ...heading.style, fontSize: 30 }
+  text.props.text = "登录你的账户以继续。"
+  text.style = { ...text.style, fontSize: 14 }
+  email.props.placeholder = "邮箱地址"
+  password.props.placeholder = "密码"
+  button.props.text = "登录"
+  button.style = { ...button.style, width: "100%", alignSelf: "stretch" }
   shell.children = [heading, text, email, password, button]
   return [shell]
 }
 
-function makePricingTemplate(): BuilderNode[] {
-  const root = createNode('container')
-  root.style = { ...root.style, border: 'none', background: '#f8fafc', padding: '64px 24px', alignItems: 'center' }
-  const heading = createNode('heading'); heading.props.text = '简单透明的价格'; heading.style = { ...heading.style, textAlign: 'center' }
-  const subtitle = createNode('text'); subtitle.props.text = '选择适合你当前阶段的方案，随时可以升级。'; subtitle.style = { ...subtitle.style, textAlign: 'center' }
-  const row = createNode('container'); row.style = { ...row.style, flexDirection: 'row', alignItems: 'stretch', background: 'transparent', border: 'none', padding: 0, maxWidth: 900 }
-  const labels = [['基础版', '¥0 / 月'], ['专业版', '¥99 / 月'], ['团队版', '¥299 / 月']]
-  row.children = labels.map(([name, price]) => {
-    const card = createNode('container'); card.style = { ...card.style, flex: 1, minWidth: 0, padding: 24, boxShadow: '0 12px 30px rgba(15,23,42,.06)' }
-    const title = createNode('heading'); title.props.text = name; title.style = { ...title.style, fontSize: 22 }
-    const p = createNode('heading'); p.props.text = price; p.style = { ...p.style, fontSize: 30 }
-    const copy = createNode('text'); copy.props.text = '包含核心编辑、实时预览与代码导出能力。'; copy.style = { ...copy.style, fontSize: 14 }
-    const btn = createNode('button'); btn.props.text = '选择方案'; btn.style = { ...btn.style, width: '100%', alignSelf: 'stretch' }
-    card.children = [title, p, copy, btn]
-    return card
-  })
-  root.children = [heading, subtitle, row]
-  return [root]
-}
-
 const TEMPLATES = [
-  { id: 'hero', name: 'Hero 落地页', desc: '适合产品首页与营销页首屏', make: makeHeroTemplate },
-  { id: 'login', name: '登录卡片', desc: '适合后台与 SaaS 登录入口', make: makeLoginTemplate },
-  { id: 'pricing', name: '价格方案', desc: '三栏 Pricing 区块', make: makePricingTemplate },
+  { id: "hero", name: "Hero 落地页", desc: "产品首页与营销页首屏", make: makeHeroTemplate },
+  { id: "features", name: "功能三栏", desc: "Feature Cards 与响应式栅格", make: makeFeatureTemplate },
+  { id: "login", name: "登录卡片", desc: "后台与 SaaS 登录入口", make: makeLoginTemplate },
 ]
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="text-[11px] font-semibold text-slate-500">{children}</span>
-}
-
-function TextField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
-  return <label className="space-y-1.5"><FieldLabel>{label}</FieldLabel><input value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100" /></label>
-}
-
-function NumberField({ label, value, onChange, min, max, step = 1 }: { label: string; value: number | undefined; onChange: (value: number | undefined) => void; min?: number; max?: number; step?: number }) {
-  return <label className="space-y-1.5"><FieldLabel>{label}</FieldLabel><input type="number" value={value ?? ''} min={min} max={max} step={step} onChange={e => onChange(e.target.value === '' ? undefined : Number(e.target.value))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100" /></label>
-}
-
-function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }> }) {
-  return <label className="space-y-1.5"><FieldLabel>{label}</FieldLabel><select value={value} onChange={e => onChange(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100">{options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-}
-
-function LayerTree({ nodes, selectedId, onSelect, depth = 0 }: { nodes: BuilderNode[]; selectedId: string | null; onSelect: (id: string) => void; depth?: number }) {
-  return <div className="space-y-1">{nodes.map(node => {
-    const meta = COMPONENTS.find(item => item.type === node.type)
-    return <div key={node.id}>
-      <button onClick={() => onSelect(node.id)} style={{ paddingLeft: 10 + depth * 14 }} className={`flex w-full items-center gap-2 rounded-lg py-2 pr-2 text-left text-xs transition ${selectedId === node.id ? 'bg-violet-100 text-violet-800' : 'text-slate-600 hover:bg-slate-100'}`}>
-        <span className="w-4 text-center text-[10px] font-black">{meta?.icon}</span><span className="truncate">{node.props.text || meta?.label}</span>{node.children && <span className="ml-auto text-[9px] text-slate-400">{node.children.length}</span>}
-      </button>
-      {node.children && node.children.length > 0 && <LayerTree nodes={node.children} selectedId={selectedId} onSelect={onSelect} depth={depth + 1} />}
+function FieldLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-0.5">
+      <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">{children}</span>
+      {action}
     </div>
-  })}</div>
+  )
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  multiline = false,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  multiline?: boolean
+}) {
+  const className = "w-full rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-xs font-medium text-slate-800 shadow-sm shadow-slate-950/[0.02] outline-none transition placeholder:font-normal placeholder:text-slate-300 hover:border-slate-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-100/80"
+
+  return (
+    <label className="space-y-1.5">
+      <FieldLabel>{label}</FieldLabel>
+      {multiline ? (
+        <textarea value={value} placeholder={placeholder} rows={4} onChange={(event) => onChange(event.target.value)} className={`${className} resize-none leading-5`} />
+      ) : (
+        <input value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} className={className} />
+      )}
+    </label>
+  )
+}
+
+function NumberField({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+}: {
+  label: string
+  value: number | undefined
+  onChange: (value: number | undefined) => void
+  min?: number
+  max?: number
+  step?: number
+}) {
+  return (
+    <label className="space-y-1.5">
+      <FieldLabel>{label}</FieldLabel>
+      <input
+        type="number"
+        value={value ?? ""}
+        min={min}
+        max={max}
+        step={step}
+        onChange={(event) => onChange(event.target.value === "" ? undefined : Number(event.target.value))}
+        className="w-full rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-xs font-medium text-slate-800 shadow-sm shadow-slate-950/[0.02] outline-none transition hover:border-slate-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-100/80"
+      />
+    </label>
+  )
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  options: Array<{ value: string; label: string }>
+}) {
+  return (
+    <label className="space-y-1.5">
+      <FieldLabel>{label}</FieldLabel>
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-xs font-medium text-slate-800 shadow-sm shadow-slate-950/[0.02] outline-none transition hover:border-slate-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-100/80">
+        {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+      </select>
+    </label>
+  )
+}
+
+function ColorField({
+  label,
+  value,
+  onChange,
+  fallback = "#0f172a",
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  fallback?: string
+}) {
+  const colorValue = value.startsWith("#") && (value.length === 4 || value.length === 7) ? value : fallback
+
+  return (
+    <label className="space-y-1.5">
+      <FieldLabel>{label}</FieldLabel>
+      <div className="flex h-10 items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-2 shadow-sm shadow-slate-950/[0.02] transition hover:border-slate-300 focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-100/80">
+        <input type="color" value={colorValue} onChange={(event) => onChange(event.target.value)} className="h-7 w-9 cursor-pointer rounded-lg border-0 bg-transparent p-0" />
+        <input value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 bg-transparent text-xs text-slate-900 outline-none" />
+      </div>
+    </label>
+  )
+}
+
+function DimensionField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+}) {
+  return (
+    <div className="space-y-1.5">
+      <FieldLabel>{label}</FieldLabel>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-xs font-medium text-slate-800 shadow-sm shadow-slate-950/[0.02] outline-none transition placeholder:font-normal placeholder:text-slate-300 hover:border-slate-300 focus:border-violet-400 focus:ring-4 focus:ring-violet-100/80"
+      />
+      <div className="flex flex-wrap gap-1.5">
+        {DIMENSION_CHIPS.map((chip) => (
+          <button
+            key={chip}
+            type="button"
+            onClick={() => onChange(chip)}
+            className="rounded-lg border border-transparent bg-slate-100 px-2 py-1 text-[9px] font-semibold text-slate-500 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PatchButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-left text-[11px] font-semibold text-slate-600 shadow-sm shadow-slate-950/[0.02] transition hover:-translate-y-px hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 hover:shadow-md"
+    >
+      {children}
+    </button>
+  )
+}
+
+function LayerTree({
+  nodes,
+  selectedId,
+  onSelect,
+  onToggleHidden,
+  onToggleLocked,
+  depth = 0,
+}: {
+  nodes: BuilderNode[]
+  selectedId: string | null
+  onSelect: (id: string) => void
+  onToggleHidden: (id: string, hidden: boolean) => void
+  onToggleLocked: (id: string, locked: boolean) => void
+  depth?: number
+}) {
+  return (
+    <div className="space-y-1">
+      {nodes.map((node) => {
+        const meta = COMPONENTS.find((item) => item.type === node.type)
+        return (
+          <div key={node.id}>
+            <div
+              style={{ paddingLeft: 6 + depth * 13 }}
+              className={`group flex items-center gap-1 rounded-xl py-1.5 pr-1 transition ${
+                selectedId === node.id
+                  ? "bg-violet-100 text-violet-900"
+                  : node.hidden
+                    ? "text-slate-300"
+                    : "text-slate-600 hover:bg-stone-100"
+              }`}
+            >
+              <button type="button" onClick={() => onSelect(node.id)} className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-1 text-left text-xs">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/80 text-[9px] font-black shadow-sm">{meta?.icon}</span>
+                <span className={`truncate ${node.hidden ? "line-through opacity-60" : ""}`}>
+                  {node.props.text || node.props.placeholder || meta?.label}
+                </span>
+                {node.locked && <span className="text-[9px] text-slate-400">锁</span>}
+                {node.children && <span className="ml-auto rounded-full bg-white/80 px-1.5 py-0.5 text-[9px] text-slate-400">{node.children.length}</span>}
+              </button>
+              <button type="button" title={node.hidden ? "显示" : "隐藏"} onClick={() => onToggleHidden(node.id, !node.hidden)} className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] text-slate-400 transition hover:bg-white hover:text-violet-700 group-hover:flex">
+                {node.hidden ? "○" : "◉"}
+              </button>
+              <button type="button" title={node.locked ? "解锁" : "锁定"} onClick={() => onToggleLocked(node.id, !node.locked)} className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] text-slate-400 transition hover:bg-white hover:text-violet-700 group-hover:flex">
+                {node.locked ? "◆" : "◇"}
+              </button>
+            </div>
+            {node.children && node.children.length > 0 && (
+              <LayerTree
+                nodes={node.children}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                onToggleHidden={onToggleHidden}
+                onToggleLocked={onToggleLocked}
+                depth={depth + 1}
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function PageBuilderPro() {
   const [nodes, setNodes] = useState<BuilderNode[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [projectName, setProjectName] = useState('未命名页面')
-  const [device, setDevice] = useState<Device>('desktop')
-  const [leftTab, setLeftTab] = useState<LeftTab>('components')
-  const [exportTab, setExportTab] = useState<ExportTab>('jsx')
+  const [projectName, setProjectName] = useState("未命名页面")
+  const [device, setDevice] = useState<Device>("desktop")
+  const [styleScope, setStyleScope] = useState<StyleScope>("base")
+  const [leftTab, setLeftTab] = useState<LeftTab>("components")
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>("content")
+  const [exportTab, setExportTab] = useState<ExportTab>("jsx")
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [showCode, setShowCode] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
-  const [notice, setNotice] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
+  const [componentQuery, setComponentQuery] = useState("")
+  const [zoom, setZoom] = useState(100)
+  const [notice, setNotice] = useState("")
   const [copied, setCopied] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved')
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved")
   const [hydrated, setHydrated] = useState(false)
+
   const undoRef = useRef<BuilderNode[][]>([])
   const redoRef = useRef<BuilderNode[][]>([])
   const clipboardRef = useRef<BuilderNode | null>(null)
@@ -372,12 +998,12 @@ export default function PageBuilderPro() {
   const flash = useCallback((message: string) => {
     setNotice(message)
     if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current)
-    noticeTimerRef.current = setTimeout(() => setNotice(''), 1800)
+    noticeTimerRef.current = setTimeout(() => setNotice(""), 1800)
   }, [])
 
   const commitNodes = useCallback((recipe: BuilderNode[] | ((prev: BuilderNode[]) => BuilderNode[])) => {
-    setNodes(prev => {
-      const next = typeof recipe === 'function' ? recipe(prev) : recipe
+    setNodes((prev) => {
+      const next = typeof recipe === "function" ? recipe(prev) : recipe
       if (next === prev) return prev
       undoRef.current = [...undoRef.current.slice(-(HISTORY_LIMIT - 1)), prev]
       redoRef.current = []
@@ -388,25 +1014,25 @@ export default function PageBuilderPro() {
   const undo = useCallback(() => {
     const previous = undoRef.current.at(-1)
     if (!previous) return
-    setNodes(current => {
+    setNodes((current) => {
       redoRef.current = [...redoRef.current.slice(-(HISTORY_LIMIT - 1)), current]
       undoRef.current = undoRef.current.slice(0, -1)
       return previous
     })
     setSelectedId(null)
-    flash('已撤销')
+    flash("已撤销")
   }, [flash])
 
   const redo = useCallback(() => {
     const next = redoRef.current.at(-1)
     if (!next) return
-    setNodes(current => {
+    setNodes((current) => {
       undoRef.current = [...undoRef.current.slice(-(HISTORY_LIMIT - 1)), current]
       redoRef.current = redoRef.current.slice(0, -1)
       return next
     })
     setSelectedId(null)
-    flash('已重做')
+    flash("已重做")
   }, [flash])
 
   useEffect(() => {
@@ -416,18 +1042,21 @@ export default function PageBuilderPro() {
         const parsed = JSON.parse(raw) as Partial<ProjectData>
         if (validateNodes(parsed.nodes)) {
           setNodes(parsed.nodes)
-          if (typeof parsed.name === 'string') setProjectName(parsed.name)
+          if (typeof parsed.name === "string") setProjectName(parsed.name)
           setHydrated(true)
           return
         }
       }
+
       const legacy = localStorage.getItem(LEGACY_STORAGE_KEY)
       if (legacy) {
-        const parsed = JSON.parse(legacy)
-        if (validateNodes(parsed)) setNodes(parsed)
+        const parsed = JSON.parse(legacy) as Partial<ProjectData> | BuilderNode[]
+        const candidate = Array.isArray(parsed) ? parsed : parsed.nodes
+        if (validateNodes(candidate)) setNodes(candidate)
+        if (!Array.isArray(parsed) && typeof parsed.name === "string") setProjectName(parsed.name)
       }
     } catch {
-      flash('本地草稿加载失败，已使用空白画布')
+      flash("本地草稿加载失败，已使用空白画布")
     } finally {
       setHydrated(true)
     }
@@ -435,58 +1064,137 @@ export default function PageBuilderPro() {
 
   useEffect(() => {
     if (!hydrated) return
-    setSaveStatus('saving')
+    setSaveStatus("saving")
     const timer = setTimeout(() => {
       try {
-        const payload: ProjectData = { version: 2, name: projectName, nodes, updatedAt: Date.now() }
+        const payload: ProjectData = { version: 4, name: projectName, nodes, updatedAt: Date.now() }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-        setSaveStatus('saved')
+        setSaveStatus("saved")
       } catch {
-        setSaveStatus('error')
+        setSaveStatus("error")
       }
     }, 320)
     return () => clearTimeout(timer)
   }, [nodes, projectName, hydrated])
 
-  const selected = useMemo(() => selectedId ? getNode(nodes, selectedId) : null, [nodes, selectedId])
+  useEffect(() => {
+    return () => {
+      if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current)
+    }
+  }, [])
+
+  const selected = useMemo(() => (selectedId ? getNode(nodes, selectedId) : null), [nodes, selectedId])
   const generatedCode = useMemo(() => generatePageCode(nodes), [nodes])
   const generatedHtml = useMemo(() => generateHtml(nodes), [nodes])
-  const projectJson = useMemo(() => JSON.stringify({ version: 2, name: projectName, nodes }, null, 2), [nodes, projectName])
-  const exportValue = exportTab === 'jsx' ? generatedCode : exportTab === 'html' ? generatedHtml : projectJson
-  const canvasWidth = device === 'desktop' ? '100%' : device === 'tablet' ? '768px' : '390px'
+  const projectJson = useMemo(() => JSON.stringify({ version: 4, name: projectName, nodes }, null, 2), [nodes, projectName])
+  const exportValue = exportTab === "jsx" ? generatedCode : exportTab === "html" ? generatedHtml : projectJson
+  const canvasWidth = device === "desktop" ? "1180px" : device === "tablet" ? "768px" : "390px"
+  const totalNodeCount = useMemo(() => countNodes(nodes), [nodes])
+  const editableStyle = selected ? (styleScope === "base" ? selected.style : selected.responsive?.[styleScope] || {}) : {}
 
-  const setNodeStyle = useCallback((key: keyof React.CSSProperties, value: unknown) => {
+  const visibleComponents = useMemo(() => {
+    const query = componentQuery.trim().toLowerCase()
+    if (!query) return COMPONENTS
+    return COMPONENTS.filter((item) => `${item.label} ${item.desc} ${item.type}`.toLowerCase().includes(query))
+  }, [componentQuery])
+
+  const setNodeStyle = useCallback((key: keyof CSSProperties, value: string | number | undefined) => {
     if (!selectedId) return
-    commitNodes(prev => updateNode(prev, selectedId, node => ({ ...node, style: { ...node.style, [key]: value === '' ? undefined : value } })))
+    commitNodes((prev) =>
+      updateNode(prev, selectedId, (node) => {
+        if (node.locked) return node
+        if (styleScope === "base") {
+          return { ...node, style: setStyleProperty(node.style, key, value) }
+        }
+
+        const nextResponsive = { ...(node.responsive || {}) }
+        nextResponsive[styleScope] = setStyleProperty(nextResponsive[styleScope] || {}, key, value)
+        return { ...node, responsive: nextResponsive }
+      }),
+    )
+  }, [commitNodes, selectedId, styleScope])
+
+  const setNodeStylePatch = useCallback((patch: CSSProperties) => {
+    if (!selectedId) return
+    commitNodes((prev) =>
+      updateNode(prev, selectedId, (node) => {
+        if (node.locked) return node
+        if (styleScope === "base") return { ...node, style: { ...node.style, ...patch } }
+        return {
+          ...node,
+          responsive: {
+            ...(node.responsive || {}),
+            [styleScope]: { ...(node.responsive?.[styleScope] || {}), ...patch },
+          },
+        }
+      }),
+    )
+  }, [commitNodes, selectedId, styleScope])
+
+  const clearCurrentOverrides = useCallback(() => {
+    if (!selectedId || styleScope === "base") return
+    commitNodes((prev) =>
+      updateNode(prev, selectedId, (node) => {
+        const responsive = { ...(node.responsive || {}) }
+        delete responsive[styleScope]
+        return { ...node, responsive }
+      }),
+    )
+    flash(`${styleScope} 覆写已清除`)
+  }, [commitNodes, flash, selectedId, styleScope])
+
+  const setNodeProp = useCallback((key: keyof BuilderNode["props"], value: string) => {
+    if (!selectedId) return
+    commitNodes((prev) =>
+      updateNode(prev, selectedId, (node) => {
+        if (node.locked) return node
+        return { ...node, props: { ...node.props, [key]: value } }
+      }),
+    )
   }, [commitNodes, selectedId])
 
-  const setNodeProp = useCallback((key: keyof BuilderNode['props'], value: string) => {
-    if (!selectedId) return
-    commitNodes(prev => updateNode(prev, selectedId, node => ({ ...node, props: { ...node.props, [key]: value } })))
-  }, [commitNodes, selectedId])
+  const toggleHidden = useCallback((id: string, hidden: boolean) => {
+    commitNodes((prev) => updateNode(prev, id, (node) => ({ ...node, hidden })))
+    flash(hidden ? "图层已隐藏" : "图层已显示")
+  }, [commitNodes, flash])
+
+  const toggleLocked = useCallback((id: string, locked: boolean) => {
+    commitNodes((prev) => updateNode(prev, id, (node) => ({ ...node, locked })))
+    flash(locked ? "图层已锁定" : "图层已解锁")
+  }, [commitNodes, flash])
 
   const deleteSelected = useCallback(() => {
     if (!selectedId) return
-    commitNodes(prev => removeNode(prev, selectedId).next)
+    const target = getNode(nodes, selectedId)
+    if (target?.locked) {
+      flash("锁定图层不能删除，请先解锁")
+      return
+    }
+    commitNodes((prev) => removeNode(prev, selectedId).next)
     setSelectedId(null)
-    flash('组件已删除')
-  }, [commitNodes, flash, selectedId])
+    flash("组件已删除")
+  }, [commitNodes, flash, nodes, selectedId])
 
   const duplicateSelected = useCallback(() => {
     if (!selectedId) return
     const source = getNode(nodes, selectedId)
     const location = getLocation(nodes, selectedId)
     if (!source || !location) return
+    if (source.locked) {
+      flash("锁定图层不能复制，请先解锁")
+      return
+    }
+
     const copy = cloneNodeDeep(source)
-    commitNodes(prev => insertNode(prev, location.parentId, copy, location.index + 1))
+    commitNodes((prev) => insertNode(prev, location.parentId, copy, location.index + 1))
     setSelectedId(copy.id)
-    flash('组件已复制')
+    flash("组件已复制")
   }, [commitNodes, flash, nodes, selectedId])
 
   const copySelected = useCallback(() => {
     if (!selected) return
     clipboardRef.current = cloneNodeDeep(selected)
-    flash('已复制到编辑器剪贴板')
+    flash("已复制到编辑器剪贴板")
   }, [flash, selected])
 
   const pasteSelected = useCallback(() => {
@@ -494,188 +1202,838 @@ export default function PageBuilderPro() {
     if (!source) return
     const copy = cloneNodeDeep(source)
     const location = selectedId ? getLocation(nodes, selectedId) : null
-    commitNodes(prev => insertNode(prev, location?.parentId ?? null, copy, location ? location.index + 1 : undefined))
+    commitNodes((prev) => insertNode(prev, location?.parentId ?? null, copy, location ? location.index + 1 : undefined))
     setSelectedId(copy.id)
-    flash('已粘贴组件')
+    flash("已粘贴组件")
   }, [commitNodes, flash, nodes, selectedId])
 
+  const selectParent = useCallback(() => {
+    if (!selectedId) return
+    const location = getLocation(nodes, selectedId)
+    setSelectedId(location?.parentId ?? null)
+  }, [nodes, selectedId])
+
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      const mod = e.metaKey || e.ctrlKey
-      if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return }
-      if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return }
-      if (isEditableTarget(e.target)) return
-      if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicateSelected(); return }
-      if (mod && e.key.toLowerCase() === 'c') { e.preventDefault(); copySelected(); return }
-      if (mod && e.key.toLowerCase() === 'v') { e.preventDefault(); pasteSelected(); return }
-      if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); return }
-      if (e.key === 'Escape') setSelectedId(null)
+    const onKeyDown = (event: KeyboardEvent) => {
+      const mod = event.metaKey || event.ctrlKey
+      if (isEditableTarget(event.target)) return
+      if (mod && event.key.toLowerCase() === "z") {
+        event.preventDefault()
+        event.shiftKey ? redo() : undo()
+        return
+      }
+      if (mod && event.key.toLowerCase() === "y") {
+        event.preventDefault()
+        redo()
+        return
+      }
+      if (mod && event.key.toLowerCase() === "d") {
+        event.preventDefault()
+        duplicateSelected()
+        return
+      }
+      if (mod && event.key.toLowerCase() === "c") {
+        event.preventDefault()
+        copySelected()
+        return
+      }
+      if (mod && event.key.toLowerCase() === "v") {
+        event.preventDefault()
+        pasteSelected()
+        return
+      }
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault()
+        deleteSelected()
+        return
+      }
+      if (event.key === "Escape") setSelectedId(null)
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
   }, [copySelected, deleteSelected, duplicateSelected, pasteSelected, redo, undo])
 
-  const getPayload = (e: React.DragEvent): DragPayload | null => {
+  const getPayload = (event: DragEvent): DragPayload | null => {
     try {
-      const raw = e.dataTransfer.getData('application/x-page-builder')
+      const raw = event.dataTransfer.getData("application/x-page-builder")
       return raw ? JSON.parse(raw) : null
-    } catch { return null }
+    } catch {
+      return null
+    }
   }
 
-  const handleDrop = (e: React.DragEvent, parentId: string | null, index?: number) => {
-    e.preventDefault(); e.stopPropagation(); setDragOverId(null)
-    const payload = getPayload(e)
+  const handleDrop = (event: DragEvent, parentId: string | null, index?: number) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setDragOverId(null)
+
+    const payload = getPayload(event)
     if (!payload) return
-    if (payload.kind === 'new') {
+
+    if (payload.kind === "new") {
       const node = createNode(payload.nodeType)
-      commitNodes(prev => insertNode(prev, parentId, node, index))
+      commitNodes((prev) => insertNode(prev, parentId, node, index))
       setSelectedId(node.id)
       return
     }
+
     const moving = getNode(nodes, payload.nodeId)
-    if (!moving || parentId === moving.id || (parentId && hasDescendant(moving, parentId))) return
+    if (!moving || moving.locked || parentId === moving.id || (parentId && hasDescendant(moving, parentId))) return
+
     const oldLocation = getLocation(nodes, moving.id)
     const result = removeNode(nodes, moving.id)
     if (!result.removed) return
+
     let adjustedIndex = index
-    if (oldLocation && oldLocation.parentId === parentId && typeof index === 'number' && oldLocation.index < index) adjustedIndex = index - 1
+    if (oldLocation && oldLocation.parentId === parentId && typeof index === "number" && oldLocation.index < index) adjustedIndex = index - 1
+
     commitNodes(insertNode(result.next, parentId, result.removed, adjustedIndex))
     setSelectedId(moving.id)
   }
 
   const importJson = () => {
-    const raw = window.prompt('粘贴 Page Builder JSON：')
+    const raw = window.prompt("粘贴 Page Builder JSON：")
     if (!raw) return
+
     try {
-      const parsed = JSON.parse(raw)
-      const candidate = Array.isArray(parsed) ? parsed : parsed?.nodes
-      if (!validateNodes(candidate)) throw new Error('invalid')
+      const parsed = JSON.parse(raw) as Partial<ProjectData> | BuilderNode[]
+      const candidate = Array.isArray(parsed) ? parsed : parsed.nodes
+      if (!validateNodes(candidate)) throw new Error("invalid")
       commitNodes(candidate)
-      if (!Array.isArray(parsed) && typeof parsed.name === 'string') setProjectName(parsed.name)
+      if (!Array.isArray(parsed) && typeof parsed.name === "string") setProjectName(parsed.name)
       setSelectedId(null)
-      flash('JSON 已安全导入')
-    } catch { flash('JSON 无效或结构不受支持') }
+      flash("JSON 已安全导入")
+    } catch {
+      flash("JSON 无效或结构不受支持")
+    }
   }
 
   const applyTemplate = (make: () => BuilderNode[]) => {
     const template = make()
-    commitNodes(prev => prev.length ? [...prev, ...template] : template)
+    commitNodes((prev) => (prev.length ? [...prev, ...template] : template))
     setSelectedId(template[0]?.id || null)
-    setLeftTab('layers')
-    flash('模板已添加到画布')
+    setLeftTab("layers")
+    flash("模板已添加到画布")
   }
 
   const copyExport = async () => {
     try {
       await navigator.clipboard.writeText(exportValue)
-      setCopied(true); setTimeout(() => setCopied(false), 1400)
-    } catch { flash('复制失败，请检查剪贴板权限') }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1400)
+    } catch {
+      flash("复制失败，请检查剪贴板权限")
+    }
   }
 
-  const renderNode = (node: BuilderNode, parentId: string | null, index: number): React.ReactNode => {
-    const isSelected = selectedId === node.id
+  const downloadExport = () => {
+    const base = sanitizeFileName(projectName)
+    if (exportTab === "jsx") downloadTextFile(`${base}.tsx`, generatedCode, "text/plain;charset=utf-8")
+    if (exportTab === "html") downloadTextFile(`${base}.html`, generatedHtml, "text/html;charset=utf-8")
+    if (exportTab === "json") downloadTextFile(`${base}.json`, projectJson, "application/json;charset=utf-8")
+    flash("导出文件已生成")
+  }
+
+  const renderNode = (node: BuilderNode, parentId: string | null, index: number, mode: "edit" | "preview" = "edit"): ReactNode => {
+    if (node.hidden) return null
+
+    const isSelected = selectedId === node.id && mode === "edit"
     const dropActive = dragOverId === node.id
-    const commonProps = {
-      draggable: true,
-      onDragStart: (e: React.DragEvent) => {
-        e.stopPropagation(); e.dataTransfer.effectAllowed = 'move'
-        e.dataTransfer.setData('application/x-page-builder', JSON.stringify({ kind: 'move', nodeId: node.id } satisfies DragPayload))
-      },
-      onClick: (e: React.MouseEvent) => { e.stopPropagation(); setSelectedId(node.id) },
-      onDragOver: (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setDragOverId(node.id) },
-      onDragLeave: (e: React.DragEvent) => { e.stopPropagation(); if (dragOverId === node.id) setDragOverId(null) },
+    const nodeStyle = mode === "preview" ? mergeStyleForDevice(node, device) : mergeStyleForDevice(node, device)
+
+    const renderChildren = () => {
+      if (!node.children || node.children.length === 0) {
+        if (mode === "preview") return null
+        return (
+          <div className="flex min-h-20 items-center justify-center rounded-xl border border-dashed border-stone-300 bg-stone-50/70 px-4 text-center text-xs text-slate-400">
+            拖拽组件到这个容器
+          </div>
+        )
+      }
+
+      return node.children.map((child, childIndex) => (
+        <div key={child.id}>
+          {mode === "edit" && (
+            <div
+              onDragOver={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+              }}
+              onDrop={(event) => handleDrop(event, node.id, childIndex)}
+              className="h-2 rounded-full transition hover:bg-violet-300"
+            />
+          )}
+          {renderNode(child, node.id, childIndex, mode)}
+        </div>
+      ))
     }
-    const wrapperClass = `group/node relative rounded-[18px] transition ${isSelected ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-white' : 'hover:ring-2 hover:ring-violet-200'}`
-    let content: React.ReactNode
+
+    let content: ReactNode
+
     switch (node.type) {
-      case 'container': content = <div style={node.style} onDrop={e => handleDrop(e, node.id)} className={dropActive ? 'outline outline-2 outline-dashed outline-violet-400' : ''}>{(node.children || []).length === 0 ? <div className="flex min-h-20 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50/70 px-4 text-center text-xs text-slate-400">拖拽组件到这个容器</div> : node.children!.map((child, childIndex) => <div key={child.id}><div onDragOver={e => { e.preventDefault(); e.stopPropagation() }} onDrop={e => handleDrop(e, node.id, childIndex)} className="h-2 rounded-full transition hover:bg-violet-300" />{renderNode(child, node.id, childIndex)}</div>)}</div>; break
-      case 'heading': content = <h2 style={node.style}>{node.props.text}</h2>; break
-      case 'text': content = <p style={node.style}>{node.props.text}</p>; break
-      case 'button': content = <button type="button" style={node.style}>{node.props.text}</button>; break
-      case 'input': content = <input readOnly placeholder={node.props.placeholder} style={node.style} />; break
-      case 'image': content = <img src={node.props.src} alt={node.props.alt || ''} style={node.style} draggable={false} />; break
-      case 'spacer': content = <div aria-hidden="true" style={node.style} className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50" />; break
+      case "section":
+      case "container":
+      case "grid":
+        content = (
+          <div
+            style={nodeStyle}
+            onDrop={mode === "edit" ? (event) => handleDrop(event, node.id) : undefined}
+            className={dropActive && mode === "edit" ? "outline outline-2 outline-dashed outline-violet-400" : ""}
+          >
+            {renderChildren()}
+          </div>
+        )
+        break
+      case "heading":
+        content = <h2 style={nodeStyle}>{node.props.text}</h2>
+        break
+      case "text":
+        content = <p style={nodeStyle}>{node.props.text}</p>
+        break
+      case "button":
+        content = <button type="button" style={nodeStyle}>{node.props.text}</button>
+        break
+      case "input":
+        content = <input readOnly placeholder={node.props.placeholder} style={nodeStyle} />
+        break
+      case "image":
+        content = <img src={node.props.src} alt={node.props.alt || ""} style={nodeStyle} draggable={false} />
+        break
+      case "badge":
+        content = <span style={nodeStyle}>{node.props.text}</span>
+        break
+      case "divider":
+        content = <div aria-hidden="true" style={nodeStyle} />
+        break
+      case "spacer":
+        content = <div aria-hidden="true" style={nodeStyle} className={mode === "edit" ? "rounded-xl border border-dashed border-stone-200 bg-stone-50/50" : ""} />
+        break
     }
-    return <div {...commonProps} className={wrapperClass}>
-      {isSelected && <div className="pointer-events-none absolute -top-3 left-3 z-20 rounded-lg bg-violet-600 px-2 py-1 text-[10px] font-semibold text-white shadow-lg">{COMPONENTS.find(item => item.type === node.type)?.label}</div>}
-      {content}
-      <div onDragOver={e => { e.preventDefault(); e.stopPropagation() }} onDrop={e => handleDrop(e, parentId, index + 1)} className="absolute -bottom-2 left-0 right-0 z-10 h-4" />
-    </div>
+
+    if (mode === "preview") return content
+
+    const wrapperClass = `group/node relative rounded-[18px] transition ${
+      isSelected
+        ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-white"
+        : node.locked
+          ? "ring-1 ring-stone-200"
+          : "hover:ring-2 hover:ring-violet-200"
+    }`
+
+    return (
+      <div
+        draggable={!node.locked}
+        onDragStart={(event) => {
+          if (node.locked) {
+            event.preventDefault()
+            return
+          }
+          event.stopPropagation()
+          event.dataTransfer.effectAllowed = "move"
+          event.dataTransfer.setData("application/x-page-builder", JSON.stringify({ kind: "move", nodeId: node.id } satisfies DragPayload))
+        }}
+        onClick={(event: MouseEvent) => {
+          event.stopPropagation()
+          setSelectedId(node.id)
+        }}
+        onDragOver={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          setDragOverId(node.id)
+        }}
+        onDragLeave={(event) => {
+          event.stopPropagation()
+          if (dragOverId === node.id) setDragOverId(null)
+        }}
+        className={wrapperClass}
+      >
+        {isSelected && (
+          <div className="pointer-events-none absolute -top-3 left-3 z-20 rounded-lg bg-violet-600 px-2 py-1 text-[10px] font-semibold text-white shadow-lg">
+            {COMPONENTS.find((item) => item.type === node.type)?.label}
+            {node.locked ? " · 已锁定" : ""}
+          </div>
+        )}
+        {content}
+        <div onDragOver={(event) => { event.preventDefault(); event.stopPropagation() }} onDrop={(event) => handleDrop(event, parentId, index + 1)} className="absolute -bottom-2 left-0 right-0 z-10 h-4" />
+      </div>
+    )
   }
 
-  const saveLabel = saveStatus === 'saved' ? '已保存' : saveStatus === 'saving' ? '保存中…' : '保存失败'
-  const saveDot = saveStatus === 'saved' ? 'bg-emerald-500' : saveStatus === 'saving' ? 'bg-amber-400' : 'bg-red-500'
+  const saveLabel = saveStatus === "saved" ? "已保存" : saveStatus === "saving" ? "保存中…" : "保存失败"
+  const saveDot = saveStatus === "saved" ? "bg-emerald-500" : saveStatus === "saving" ? "bg-amber-400" : "bg-red-500"
 
-  return <div className="min-h-screen bg-slate-100 text-slate-900">
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className='mt-2 ml-2'><Breadcrumb /></div>
-      <div className="flex min-h-16 items-center gap-3 px-4 lg:px-5">
-        <div className="flex min-w-0 items-center gap-3">
-          <input value={projectName} onChange={e => setProjectName(e.target.value)} className="w-36 truncate rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm font-bold text-slate-900 outline-none transition hover:border-slate-200 focus:border-violet-300 focus:bg-white sm:w-52" aria-label="项目名称" />
-          <span className={`hidden h-2 w-2 rounded-full sm:block ${saveDot}`} /><span className="hidden text-[10px] text-slate-400 sm:block">{saveLabel}</span>
-        </div>
-        <div className="ml-auto flex items-center gap-1.5">
-          <button onClick={undo} disabled={undoRef.current.length === 0} title="撤销 Ctrl/⌘ + Z" className="rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30">↶</button>
-          <button onClick={redo} disabled={redoRef.current.length === 0} title="重做 Ctrl/⌘ + Shift + Z" className="rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30">↷</button>
-          <div className="mx-1 hidden h-6 w-px bg-slate-200 md:block" />
-          <div className="hidden rounded-xl bg-slate-100 p-1 md:flex">{([['desktop','桌面'],['tablet','平板'],['mobile','手机']] as Array<[Device,string]>).map(([value,label]) => <button key={value} onClick={() => setDevice(value)} className={`rounded-lg px-3 py-2 text-xs font-medium transition ${device === value ? 'bg-white text-violet-700 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}>{label}</button>)}</div>
-          <button onClick={importJson} className="hidden rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-violet-200 hover:text-violet-700 lg:block">导入</button>
-          <button onClick={() => setShowCode(true)} className="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-violet-600 active:scale-95">导出</button>
-        </div>
-      </div>
-    </header>
+  const dimensionValue = (key: keyof CSSProperties) => scopedStyleValue(selected, styleScope, key)
+  const editableNumberValue = (key: keyof CSSProperties) => {
+    const value = editableStyle[key]
+    return typeof value === "number" ? value : undefined
+  }
 
-    {notice && <div className="fixed left-1/2 top-20 z-[120] -translate-x-1/2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-medium text-white shadow-2xl">{notice}</div>}
+  return (
+    <div className="min-h-screen bg-[#f3f5f9] text-slate-900">
+      <style>{`
+        .builder-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+        .builder-scroll::-webkit-scrollbar-thumb { background: rgba(120,113,108,.22); border-radius: 999px; }
+        .builder-scroll::-webkit-scrollbar-track { background: transparent; }
+        .builder-scroll { scrollbar-gutter: stable; }
+        .inspector-sections > div { border: 1px solid rgba(226,232,240,.86); background: #fff; border-radius: 20px; padding: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.025); }
+        .inspector-sections > div > h3 { display: flex; align-items: center; gap: 8px; color: #1e293b; font-weight: 800; letter-spacing: -.01em; }
+        .inspector-sections > div > h3::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: #8b5cf6; box-shadow: 0 0 0 4px rgba(139,92,246,.10); }
+        input, textarea, select, button { -webkit-font-smoothing: antialiased; }
+      `}</style>
 
-    <main className="grid min-h-[calc(100vh-65px)] grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_310px]">
-      <aside className="border-b border-slate-200 bg-white lg:border-b-0 lg:border-r">
-        <div className="sticky top-16 max-h-[calc(100vh-65px)] overflow-y-auto p-3">
-          <div className="grid grid-cols-3 rounded-xl bg-slate-100 p-1">{([['components','组件'],['layers','图层'],['templates','模板']] as Array<[LeftTab,string]>).map(([value,label]) => <button key={value} onClick={() => setLeftTab(value)} className={`rounded-lg px-2 py-2 text-[11px] font-semibold transition ${leftTab === value ? 'bg-white text-violet-700 shadow-sm' : 'text-slate-500'}`}>{label}</button>)}</div>
-          {leftTab === 'components' && <div className="mt-4 space-y-2">{COMPONENTS.map(item => <div key={item.type} draggable onDragStart={e => { e.dataTransfer.effectAllowed = 'copy'; e.dataTransfer.setData('application/x-page-builder', JSON.stringify({ kind: 'new', nodeType: item.type } satisfies DragPayload)) }} className="group cursor-grab rounded-2xl border border-slate-200 bg-white p-3 transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/10 active:cursor-grabbing"><div className="flex items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-black text-slate-600 transition group-hover:bg-violet-100 group-hover:text-violet-700">{item.icon}</div><div className="min-w-0"><div className="text-xs font-semibold text-slate-800">{item.label}</div><div className="mt-0.5 truncate text-[10px] text-slate-400">{item.desc}</div></div></div></div>)}</div>}
-          {leftTab === 'layers' && <div className="mt-4">{nodes.length ? <LayerTree nodes={nodes} selectedId={selectedId} onSelect={setSelectedId} /> : <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-xs text-slate-400">画布暂无图层</div>}</div>}
-          {leftTab === 'templates' && <div className="mt-4 space-y-2">{TEMPLATES.map(template => <button key={template.id} onClick={() => applyTemplate(template.make)} className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/10"><div className="text-xs font-bold text-slate-800">{template.name}</div><div className="mt-1 text-[10px] leading-5 text-slate-400">{template.desc}</div><div className="mt-3 text-[10px] font-semibold text-violet-600">添加到画布 →</div></button>)}</div>}
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-[10px] leading-5 text-slate-500"><b className="text-slate-700">快捷键</b><br />⌘/Ctrl Z 撤销 · ⇧⌘/Ctrl Z 重做<br />⌘/Ctrl D 复制 · Delete 删除<br />⌘/Ctrl C / V 编辑器内复制粘贴</div>
-        </div>
-      </aside>
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <div className="flex min-h-16 items-center gap-3 px-3 sm:px-4 lg:px-5">
+          <div className="hidden shrink-0 xl:block"><Breadcrumb /></div>
+          <div className="hidden h-6 w-px bg-stone-200 xl:block" />
+          <div className="flex min-w-0 items-center gap-2">
+            <input
+              value={projectName}
+              onChange={(event) => setProjectName(event.target.value)}
+              className="w-32 truncate rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm font-bold text-slate-900 outline-none transition hover:border-stone-200 focus:border-violet-300 focus:bg-white sm:w-48"
+              aria-label="项目名称"
+            />
+            <span className={`hidden h-2 w-2 rounded-full sm:block ${saveDot}`} />
+            <span className="hidden text-[10px] text-slate-400 sm:block">{saveLabel}</span>
+          </div>
 
-      <section className="min-w-0 bg-slate-100/80">
-        <div className="flex min-h-12 items-center justify-between border-b border-slate-200 px-4 py-2">
-          <div className="flex items-center gap-2 text-xs text-slate-500"><span className={`h-2 w-2 rounded-full ${saveDot}`} />{saveLabel}<span className="hidden text-slate-300 sm:inline">·</span><span className="hidden text-slate-400 sm:inline">{nodes.length} 个顶层区块</span></div>
-          <div className="flex gap-1"><button onClick={duplicateSelected} disabled={!selected} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white hover:text-slate-900 disabled:opacity-30">复制</button><button onClick={copySelected} disabled={!selected} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white hover:text-slate-900 disabled:opacity-30">复制到剪贴板</button><button onClick={() => setShowClearConfirm(true)} disabled={!nodes.length} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-30">清空</button></div>
+          <div className="ml-auto flex items-center gap-1.5">
+            <button onClick={undo} title="撤销 Ctrl/⌘ + Z" className="rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-white hover:text-slate-900">↶</button>
+            <button onClick={redo} title="重做 Ctrl/⌘ + Shift + Z" className="rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-white hover:text-slate-900">↷</button>
+            <div className="mx-1 hidden h-6 w-px bg-stone-200 md:block" />
+            <div className="hidden rounded-xl bg-stone-100 p-1 md:flex">
+              {([["desktop", "桌面"], ["tablet", "平板"], ["mobile", "手机"]] as Array<[Device, string]>).map(([value, label]) => (
+                <button key={value} onClick={() => { setDevice(value); if (styleScope !== "base") setStyleScope(value) }} className={`rounded-lg px-3 py-2 text-xs font-medium transition ${device === value ? "bg-white text-violet-700 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setShowPreview(true)} className="hidden rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-violet-200 hover:text-violet-700 sm:block">
+              预览
+            </button>
+            <button onClick={importJson} className="hidden rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-violet-200 hover:text-violet-700 lg:block">
+              导入
+            </button>
+            <button onClick={() => setShowCode(true)} className="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-violet-600 active:scale-95">
+              导出
+            </button>
+          </div>
         </div>
-        <div className="overflow-auto p-4 sm:p-7">
-          <div style={{ width: canvasWidth }} className="mx-auto min-h-[740px] max-w-full overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl shadow-slate-300/40 transition-all duration-300">
-            <div className="flex h-10 items-center gap-2 border-b border-slate-100 bg-slate-50 px-4"><span className="h-2.5 w-2.5 rounded-full bg-red-300" /><span className="h-2.5 w-2.5 rounded-full bg-amber-300" /><span className="h-2.5 w-2.5 rounded-full bg-emerald-300" /><div className="ml-3 flex h-6 flex-1 items-center rounded-md border border-slate-200 bg-white px-2 text-[9px] text-slate-300">preview.local/{projectName.replace(/\s+/g,'-').toLowerCase()}</div></div>
-            <div onClick={() => setSelectedId(null)} onDragOver={e => { e.preventDefault(); setDragOverId('root') }} onDragLeave={() => { if (dragOverId === 'root') setDragOverId(null) }} onDrop={e => handleDrop(e, null)} className={`min-h-[700px] p-5 sm:p-8 ${dragOverId === 'root' ? 'bg-violet-50/60' : 'bg-white'}`}>
-              {!nodes.length ? <div className="flex min-h-[610px] items-center justify-center"><div className="max-w-sm text-center"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-violet-100 text-2xl text-violet-700">✦</div><h3 className="mt-5 text-lg font-bold text-slate-800">开始搭建你的页面</h3><p className="mt-2 text-xs leading-6 text-slate-400">从左侧拖入组件，或直接套用一个模板。所有修改都会自动保存在当前浏览器。</p><button onClick={e => { e.stopPropagation(); setLeftTab('templates') }} className="mt-4 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-violet-500">浏览模板</button></div></div> : <div className="flex flex-col gap-4">{nodes.map((node,index) => <div key={node.id}><div onDragOver={e => e.preventDefault()} onDrop={e => handleDrop(e,null,index)} className="h-2 rounded-full transition hover:bg-violet-300" />{renderNode(node,null,index)}</div>)}</div>}
+      </header>
+
+      {notice && <div className="fixed left-1/2 top-20 z-[120] -translate-x-1/2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-medium text-white shadow-2xl">{notice}</div>}
+
+      <main className="grid min-h-[calc(100vh-65px)] grid-cols-1 lg:grid-cols-[288px_minmax(0,1fr)_390px]">
+        <aside className="border-b border-slate-200 bg-white/92 lg:border-b-0 lg:border-r">
+          <div className="builder-scroll sticky top-16 max-h-[calc(100vh-65px)] overflow-y-auto p-3">
+            <div className="grid grid-cols-3 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1">
+              {([["components", "组件"], ["layers", "图层"], ["templates", "模板"]] as Array<[LeftTab, string]>).map(([value, label]) => (
+                <button key={value} onClick={() => setLeftTab(value)} className={`rounded-lg px-2 py-2 text-[11px] font-semibold transition ${leftTab === value ? "bg-white text-violet-700 shadow-sm ring-1 ring-slate-200/70" : "text-slate-500 hover:text-slate-800"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {leftTab === "components" && (
+              <div className="mt-4">
+                <div className="relative mb-3">
+                  <input
+                    value={componentQuery}
+                    onChange={(event) => setComponentQuery(event.target.value)}
+                    placeholder="搜索组件、布局、图片…"
+                    className="h-10 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 pr-9 text-xs text-slate-800 outline-none transition focus:border-violet-300 focus:bg-white"
+                  />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">⌕</span>
+                </div>
+                <div className="space-y-5">
+                  {(["layout", "content", "form", "media"] as ComponentMeta["group"][]).map((group) => {
+                    const list = visibleComponents.filter((item) => item.group === group)
+                    if (!list.length) return null
+                    return (
+                      <div key={group}>
+                        <div className="mb-2 px-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                          {group === "layout" ? "布局" : group === "content" ? "内容" : group === "form" ? "表单" : "媒体"}
+                        </div>
+                        <div className="space-y-2">
+                          {list.map((item) => (
+                            <div
+                              key={item.type}
+                              draggable
+                              onDragStart={(event) => {
+                                event.dataTransfer.effectAllowed = "copy"
+                                event.dataTransfer.setData("application/x-page-builder", JSON.stringify({ kind: "new", nodeType: item.type } satisfies DragPayload))
+                              }}
+                              className="group cursor-grab rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-sm shadow-slate-950/[0.02] transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/10 active:cursor-grabbing"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-sm font-black text-slate-600 transition group-hover:bg-violet-100 group-hover:text-violet-700">{item.icon}</div>
+                                <div className="min-w-0">
+                                  <div className="text-xs font-semibold text-slate-800">{item.label}</div>
+                                  <div className="mt-0.5 truncate text-[10px] text-slate-400">{item.desc}</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+                {!visibleComponents.length && <div className="rounded-2xl border border-dashed border-stone-200 p-5 text-center text-xs text-slate-400">没有匹配的组件</div>}
+              </div>
+            )}
+
+            {leftTab === "layers" && (
+              <div className="mt-4">
+                {nodes.length ? (
+                  <LayerTree nodes={nodes} selectedId={selectedId} onSelect={setSelectedId} onToggleHidden={toggleHidden} onToggleLocked={toggleLocked} />
+                ) : (
+                  <div className="rounded-[22px] border border-dashed border-slate-300 bg-white p-6 text-center shadow-sm shadow-slate-950/[0.02] text-xs text-slate-400">画布暂无图层</div>
+                )}
+              </div>
+            )}
+
+            {leftTab === "templates" && (
+              <div className="mt-4 space-y-2">
+                {TEMPLATES.map((template) => (
+                  <button key={template.id} onClick={() => applyTemplate(template.make)} className="w-full rounded-2xl border border-stone-200 bg-white p-4 text-left transition hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/10">
+                    <div className="text-xs font-bold text-slate-800">{template.name}</div>
+                    <div className="mt-1 text-[10px] leading-5 text-slate-400">{template.desc}</div>
+                    <div className="mt-3 text-[10px] font-semibold text-violet-600">添加到画布 →</div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-5 rounded-2xl border border-stone-200 bg-stone-50 p-3 text-[10px] leading-5 text-slate-500">
+              <b className="text-slate-700">快捷键</b><br />
+              ⌘/Ctrl Z 撤销 · ⇧⌘/Ctrl Z 重做<br />
+              ⌘/Ctrl D 复制 · Delete 删除<br />
+              图层可隐藏、锁定，隐藏后不参与导出
             </div>
           </div>
-          <FooterNote />
+        </aside>
+
+        <section className="min-w-0 bg-[#f3f5f9]">
+          <div className="flex min-h-12 flex-wrap items-center gap-2 border-b border-stone-200 px-4 py-2">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span className={`h-2 w-2 rounded-full ${saveDot}`} />
+              {saveLabel}
+              <span className="hidden text-slate-300 sm:inline">·</span>
+              <span className="hidden text-slate-400 sm:inline">{totalNodeCount} 个组件</span>
+            </div>
+
+            <div className="ml-auto flex items-center gap-1">
+              <button onClick={selectParent} disabled={!selectedId} className="hidden rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white hover:text-slate-900 disabled:opacity-30 sm:block">父级</button>
+              <button onClick={duplicateSelected} disabled={!selected || selected.locked} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white hover:text-slate-900 disabled:opacity-30">副本</button>
+              <button onClick={() => setShowClearConfirm(true)} disabled={!nodes.length} className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-30">清空</button>
+              <div className="mx-1 h-5 w-px bg-stone-200" />
+              <button onClick={() => setZoom((value) => Math.max(50, value - 10))} className="h-8 w-8 rounded-lg text-xs font-bold text-slate-500 transition hover:bg-white">−</button>
+              <button onClick={() => setZoom(100)} className="min-w-12 rounded-lg px-2 py-1.5 text-[10px] font-semibold text-slate-500 transition hover:bg-white">{zoom}%</button>
+              <button onClick={() => setZoom((value) => Math.min(140, value + 10))} className="h-8 w-8 rounded-lg text-xs font-bold text-slate-500 transition hover:bg-white">+</button>
+            </div>
+          </div>
+
+          <div className="builder-scroll overflow-auto p-4 sm:p-7">
+            <div className="mx-auto flex min-h-[790px] w-max min-w-full items-start justify-center">
+              <div
+                style={{ width: canvasWidth, transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
+                className="min-h-[740px] max-w-none overflow-hidden rounded-[30px] border border-slate-200/80 bg-white shadow-[0_24px_70px_rgba(15,23,42,.12)] transition-[width,transform] duration-300"
+              >
+                <div className="flex h-10 items-center gap-2 border-b border-stone-100 bg-stone-50 px-4">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
+                  <div className="ml-3 flex h-6 flex-1 items-center rounded-md border border-stone-200 bg-white px-2 text-[9px] text-slate-300">
+                    preview.local/{projectName.replace(/\s+/g, "-").toLowerCase()}
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => setSelectedId(null)}
+                  onDragOver={(event) => {
+                    event.preventDefault()
+                    setDragOverId("root")
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverId === "root") setDragOverId(null)
+                  }}
+                  onDrop={(event) => handleDrop(event, null)}
+                  className={`min-h-[700px] p-5 sm:p-8 ${dragOverId === "root" ? "bg-violet-50/60" : "bg-white"}`}
+                >
+                  {!nodes.length ? (
+                    <div className="flex min-h-[610px] items-center justify-center">
+                      <div className="max-w-sm text-center">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-violet-100 text-2xl text-violet-700">✦</div>
+                        <h3 className="mt-5 text-lg font-bold text-slate-800">开始搭建你的页面</h3>
+                        <p className="mt-2 text-xs leading-6 text-slate-400">从左侧拖入组件，或直接套用一个模板。所有修改都会自动保存在当前浏览器。</p>
+                        <button onClick={(event) => { event.stopPropagation(); setLeftTab("templates") }} className="mt-4 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-violet-500">浏览模板</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {nodes.map((node, index) => (
+                        <div key={node.id}>
+                          <div onDragOver={(event) => event.preventDefault()} onDrop={(event) => handleDrop(event, null, index)} className="h-2 rounded-full transition hover:bg-violet-300" />
+                          {renderNode(node, null, index)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <FooterNote />
+          </div>
+        </section>
+
+        <aside className="border-t border-slate-200 bg-[#fbfcfe] lg:border-l lg:border-t-0">
+          <div className="builder-scroll sticky top-16 max-h-[calc(100vh-65px)] overflow-y-auto p-3.5">
+            <div className="mb-4 rounded-[22px] border border-slate-200/80 bg-white p-3.5 shadow-sm shadow-slate-950/[0.03]">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-violet-100 text-[11px] font-black text-violet-700">✦</span>
+                    <div>
+                      <h2 className="text-[12px] font-extrabold tracking-tight text-slate-800">属性检查器</h2>
+                      <p className="mt-0.5 text-[10px] text-slate-400">{selected ? `正在编辑 · ${COMPONENTS.find((item) => item.type === selected.type)?.label}` : "选择画布中的组件开始编辑"}</p>
+                    </div>
+                  </div>
+                </div>
+                {selected && (
+                  <div className="flex gap-1">
+                    <button onClick={() => toggleHidden(selected.id, !selected.hidden)} className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700">{selected.hidden ? "显示" : "隐藏"}</button>
+                    <button onClick={() => toggleLocked(selected.id, !selected.locked)} className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700">{selected.locked ? "解锁" : "锁定"}</button>
+                  </div>
+                )}
+              </div>
+
+              {selected && (
+                <>
+                  <div className="mt-4 grid grid-cols-4 gap-1 rounded-2xl bg-slate-100/90 p-1.5">
+                    {([["content", "内容"], ["layout", "布局"], ["style", "样式"], ["advanced", "高级"]] as Array<[InspectorTab, string]>).map(([value, label]) => (
+                      <button key={value} onClick={() => setInspectorTab(value)} className={`rounded-xl px-2 py-2.5 text-[11px] font-bold transition ${inspectorTab === value ? "bg-white text-violet-700 shadow-sm ring-1 ring-slate-200/70" : "text-slate-500 hover:bg-white/60 hover:text-slate-800"}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-4 gap-1 rounded-2xl border border-slate-200/70 bg-slate-50 p-1">
+                    {([["base", "基础"], ["desktop", "桌面"], ["tablet", "平板"], ["mobile", "手机"]] as Array<[StyleScope, string]>).map(([value, label]) => (
+                      <button key={value} onClick={() => setStyleScope(value)} className={`rounded-xl px-2 py-2 text-[10px] font-bold transition ${styleScope === value ? "bg-slate-900 text-white shadow-md shadow-slate-900/10" : "text-slate-500 hover:bg-white hover:text-slate-800"}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {styleScope !== "base" && (
+                    <button onClick={clearCurrentOverrides} className="mt-2 w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-[10px] font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600">
+                      清除当前设备覆写
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {!selected ? (
+              <div className="rounded-[22px] border border-dashed border-slate-300 bg-white p-6 text-center shadow-sm shadow-slate-950/[0.02]">
+                <div className="text-2xl">↖</div>
+                <p className="mt-2 text-xs font-medium text-slate-500">点击画布或图层中的组件</p>
+                <p className="mt-1 text-[10px] leading-5 text-slate-400">选中后可以修改内容、尺寸、排版、布局、响应式与高级样式。</p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div className={`rounded-2xl border p-3.5 text-[10px] leading-5 shadow-sm ${selected.locked ? "border-amber-200 bg-amber-50 text-amber-700" : "border-violet-100 bg-gradient-to-br from-violet-50 to-white text-slate-500"}`}>
+                  <span className="font-semibold text-slate-700">节点</span> · {selected.type}{selected.locked ? " · 已锁定" : ""}<br />
+                  <span className="font-mono text-[9px] text-slate-400">{selected.id}</span>
+                </div>
+
+                {inspectorTab === "content" && (
+                  <div className="rounded-[20px] border border-slate-200/80 bg-white p-3.5 shadow-sm shadow-slate-950/[0.025] space-y-3">
+                    {(selected.type === "heading" || selected.type === "text" || selected.type === "button" || selected.type === "badge") && (
+                      <TextField label="文字" value={selected.props.text || ""} onChange={(value) => setNodeProp("text", value)} multiline={selected.type === "text"} />
+                    )}
+                    {selected.type === "button" && <TextField label="链接" value={selected.props.href || ""} onChange={(value) => setNodeProp("href", value)} placeholder="#" />}
+                    {selected.type === "input" && <TextField label="Placeholder" value={selected.props.placeholder || ""} onChange={(value) => setNodeProp("placeholder", value)} />}
+                    {selected.type === "image" && (
+                      <>
+                        <TextField label="图片地址" value={selected.props.src || ""} onChange={(value) => setNodeProp("src", value)} />
+                        <TextField label="Alt" value={selected.props.alt || ""} onChange={(value) => setNodeProp("alt", value)} />
+                        <DimensionField label="Object Position" value={dimensionValue("objectPosition")} onChange={(value) => setNodeStyle("objectPosition", value)} placeholder="center / 50% 40%" />
+                      </>
+                    )}
+                    {(selected.type === "section" || selected.type === "container" || selected.type === "grid") && (
+                      <p className="rounded-2xl border border-stone-200 bg-white p-4 text-xs leading-6 text-slate-500">
+                        这个组件是布局容器。请切到「布局」调整宽高、栅格、Flex 和间距；切到「样式」调整背景、边框与阴影。
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {inspectorTab === "layout" && (
+                  <div className="inspector-sections space-y-3.5">
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">尺寸 Size</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <DimensionField label="Width" value={dimensionValue("width")} onChange={(value) => setNodeStyle("width", value)} placeholder="auto / 100% / 320px" />
+                        <DimensionField label="Height" value={dimensionValue("height")} onChange={(value) => setNodeStyle("height", value)} placeholder="auto / 240px / 100vh" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <DimensionField label="Min Width" value={dimensionValue("minWidth")} onChange={(value) => setNodeStyle("minWidth", value)} placeholder="0 / 320px" />
+                        <DimensionField label="Max Width" value={dimensionValue("maxWidth")} onChange={(value) => setNodeStyle("maxWidth", value)} placeholder="none / 1180px" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <DimensionField label="Min Height" value={dimensionValue("minHeight")} onChange={(value) => setNodeStyle("minHeight", value)} placeholder="0 / 520px" />
+                        <DimensionField label="Max Height" value={dimensionValue("maxHeight")} onChange={(value) => setNodeStyle("maxHeight", value)} placeholder="none / 80vh" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <DimensionField label="Aspect Ratio" value={dimensionValue("aspectRatio")} onChange={(value) => setNodeStyle("aspectRatio", value)} placeholder="16 / 9" />
+                        <SelectField label="Overflow" value={dimensionValue("overflow") || "visible"} onChange={(value) => setNodeStyle("overflow", value)} options={[{ value: "visible", label: "Visible" }, { value: "hidden", label: "Hidden" }, { value: "auto", label: "Auto" }, { value: "scroll", label: "Scroll" }]} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">快捷尺寸</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <PatchButton onClick={() => setNodeStylePatch({ width: "100%", height: "auto" })}>铺满宽度</PatchButton>
+                        <PatchButton onClick={() => setNodeStylePatch({ width: "fit-content", height: "auto" })}>内容自适应</PatchButton>
+                        <PatchButton onClick={() => setNodeStylePatch({ width: "100%", minHeight: "100vh" })}>整屏区块</PatchButton>
+                        <PatchButton onClick={() => setNodeStylePatch({ width: "320px", height: "320px", aspectRatio: "1 / 1" })}>正方形</PatchButton>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">间距 Spacing</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <DimensionField label="Padding" value={dimensionValue("padding")} onChange={(value) => setNodeStyle("padding", value)} placeholder="24px / 24px 32px" />
+                        <DimensionField label="Margin" value={dimensionValue("margin")} onChange={(value) => setNodeStyle("margin", value)} placeholder="0 auto / 24px 0" />
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <DimensionField label="PT" value={dimensionValue("paddingTop")} onChange={(value) => setNodeStyle("paddingTop", value)} />
+                        <DimensionField label="PR" value={dimensionValue("paddingRight")} onChange={(value) => setNodeStyle("paddingRight", value)} />
+                        <DimensionField label="PB" value={dimensionValue("paddingBottom")} onChange={(value) => setNodeStyle("paddingBottom", value)} />
+                        <DimensionField label="PL" value={dimensionValue("paddingLeft")} onChange={(value) => setNodeStyle("paddingLeft", value)} />
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <DimensionField label="MT" value={dimensionValue("marginTop")} onChange={(value) => setNodeStyle("marginTop", value)} />
+                        <DimensionField label="MR" value={dimensionValue("marginRight")} onChange={(value) => setNodeStyle("marginRight", value)} />
+                        <DimensionField label="MB" value={dimensionValue("marginBottom")} onChange={(value) => setNodeStyle("marginBottom", value)} />
+                        <DimensionField label="ML" value={dimensionValue("marginLeft")} onChange={(value) => setNodeStyle("marginLeft", value)} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">布局 Display</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <SelectField label="Display" value={dimensionValue("display") || "block"} onChange={(value) => setNodeStyle("display", value)} options={[{ value: "block", label: "Block" }, { value: "flex", label: "Flex" }, { value: "inline-flex", label: "Inline Flex" }, { value: "grid", label: "Grid" }, { value: "none", label: "None" }]} />
+                        <DimensionField label="Gap" value={dimensionValue("gap")} onChange={(value) => setNodeStyle("gap", value)} placeholder="16px" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <SelectField label="Flex Direction" value={dimensionValue("flexDirection") || "column"} onChange={(value) => setNodeStyle("flexDirection", value)} options={[{ value: "row", label: "Row" }, { value: "column", label: "Column" }, { value: "row-reverse", label: "Row Reverse" }, { value: "column-reverse", label: "Column Reverse" }]} />
+                        <SelectField label="Wrap" value={dimensionValue("flexWrap") || "nowrap"} onChange={(value) => setNodeStyle("flexWrap", value)} options={[{ value: "nowrap", label: "No Wrap" }, { value: "wrap", label: "Wrap" }]} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <SelectField label="Justify" value={dimensionValue("justifyContent") || "flex-start"} onChange={(value) => setNodeStyle("justifyContent", value)} options={[{ value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "space-between", label: "Between" }, { value: "space-around", label: "Around" }, { value: "space-evenly", label: "Evenly" }]} />
+                        <SelectField label="Align" value={dimensionValue("alignItems") || "stretch"} onChange={(value) => setNodeStyle("alignItems", value)} options={[{ value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }, { value: "baseline", label: "Baseline" }]} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <DimensionField label="Grid Columns" value={dimensionValue("gridTemplateColumns")} onChange={(value) => setNodeStyle("gridTemplateColumns", value)} placeholder="repeat(3,minmax(0,1fr))" />
+                        <DimensionField label="Grid Rows" value={dimensionValue("gridTemplateRows")} onChange={(value) => setNodeStyle("gridTemplateRows", value)} placeholder="auto" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <NumberField label="Grow" value={editableNumberValue("flexGrow")} min={0} max={12} onChange={(value) => setNodeStyle("flexGrow", value)} />
+                        <NumberField label="Shrink" value={editableNumberValue("flexShrink")} min={0} max={12} onChange={(value) => setNodeStyle("flexShrink", value)} />
+                        <DimensionField label="Basis" value={dimensionValue("flexBasis")} onChange={(value) => setNodeStyle("flexBasis", value)} placeholder="auto" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {inspectorTab === "style" && (
+                  <div className="inspector-sections space-y-3.5">
+                    {(selected.type === "heading" || selected.type === "text" || selected.type === "button" || selected.type === "input" || selected.type === "badge") && (
+                      <div className="space-y-3">
+                        <h3 className="text-[11px] font-bold text-slate-700">文字 Typography</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          <DimensionField label="Font Size" value={dimensionValue("fontSize")} onChange={(value) => setNodeStyle("fontSize", Number.isFinite(Number(value)) ? Number(value) : value)} placeholder="16 / 1rem / clamp(...)" />
+                          <NumberField label="Font Weight" value={editableNumberValue("fontWeight")} min={100} max={950} step={50} onChange={(value) => setNodeStyle("fontWeight", value)} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <DimensionField label="Line Height" value={dimensionValue("lineHeight")} onChange={(value) => setNodeStyle("lineHeight", Number.isFinite(Number(value)) ? Number(value) : value)} placeholder="1.5 / 24px" />
+                          <DimensionField label="Letter Spacing" value={dimensionValue("letterSpacing")} onChange={(value) => setNodeStyle("letterSpacing", value)} placeholder="-0.02em / 1px" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <SelectField label="Text Align" value={dimensionValue("textAlign") || "left"} onChange={(value) => setNodeStyle("textAlign", value)} options={[{ value: "left", label: "Left" }, { value: "center", label: "Center" }, { value: "right", label: "Right" }, { value: "justify", label: "Justify" }]} />
+                          <ColorField label="文字颜色" value={dimensionValue("color")} onChange={(value) => setNodeStyle("color", value)} />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">背景 Background</h3>
+                      <TextField label="背景值" value={dimensionValue("background")} onChange={(value) => setNodeStyle("background", value)} placeholder="#fff / linear-gradient(...)" />
+                      <div className="grid grid-cols-2 gap-2">
+                        {GRADIENT_PRESETS.map((preset) => (
+                          <PatchButton key={preset.label} onClick={() => setNodeStyle("background", preset.value)}>{preset.label}</PatchButton>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">边框与圆角</h3>
+                      <TextField label="Border" value={dimensionValue("border")} onChange={(value) => setNodeStyle("border", value)} placeholder="1px solid #e7e0d5" />
+                      <div className="grid grid-cols-2 gap-2">
+                        <DimensionField label="Radius" value={dimensionValue("borderRadius")} onChange={(value) => setNodeStyle("borderRadius", Number.isFinite(Number(value)) ? Number(value) : value)} placeholder="16 / 24px / 999px" />
+                        <SelectField label="Object Fit" value={dimensionValue("objectFit") || "cover"} onChange={(value) => setNodeStyle("objectFit", value)} options={[{ value: "cover", label: "Cover" }, { value: "contain", label: "Contain" }, { value: "fill", label: "Fill" }, { value: "none", label: "None" }]} />
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <DimensionField label="TL" value={dimensionValue("borderTopLeftRadius")} onChange={(value) => setNodeStyle("borderTopLeftRadius", value)} />
+                        <DimensionField label="TR" value={dimensionValue("borderTopRightRadius")} onChange={(value) => setNodeStyle("borderTopRightRadius", value)} />
+                        <DimensionField label="BR" value={dimensionValue("borderBottomRightRadius")} onChange={(value) => setNodeStyle("borderBottomRightRadius", value)} />
+                        <DimensionField label="BL" value={dimensionValue("borderBottomLeftRadius")} onChange={(value) => setNodeStyle("borderBottomLeftRadius", value)} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">效果 Effects</h3>
+                      <SelectField label="阴影" value={dimensionValue("boxShadow")} onChange={(value) => setNodeStyle("boxShadow", value)} options={SHADOW_PRESETS} />
+                      <div className="grid grid-cols-2 gap-2">
+                        <NumberField label="透明度" value={typeof editableStyle.opacity === "number" ? editableStyle.opacity : 1} min={0} max={1} step={0.05} onChange={(value) => setNodeStyle("opacity", value)} />
+                        <DimensionField label="Filter" value={dimensionValue("filter")} onChange={(value) => setNodeStyle("filter", value)} placeholder="blur(4px)" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {inspectorTab === "advanced" && (
+                  <div className="inspector-sections space-y-3.5">
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">定位 Position</h3>
+                      <SelectField label="Position" value={dimensionValue("position") || "static"} onChange={(value) => setNodeStyle("position", value)} options={[{ value: "static", label: "Static" }, { value: "relative", label: "Relative" }, { value: "absolute", label: "Absolute" }, { value: "sticky", label: "Sticky" }, { value: "fixed", label: "Fixed" }]} />
+                      <div className="grid grid-cols-4 gap-2">
+                        <DimensionField label="Top" value={dimensionValue("top")} onChange={(value) => setNodeStyle("top", value)} />
+                        <DimensionField label="Right" value={dimensionValue("right")} onChange={(value) => setNodeStyle("right", value)} />
+                        <DimensionField label="Bottom" value={dimensionValue("bottom")} onChange={(value) => setNodeStyle("bottom", value)} />
+                        <DimensionField label="Left" value={dimensionValue("left")} onChange={(value) => setNodeStyle("left", value)} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <NumberField label="Z Index" value={editableNumberValue("zIndex")} min={-10} max={999} onChange={(value) => setNodeStyle("zIndex", value)} />
+                        <SelectField label="Align Self" value={dimensionValue("alignSelf") || "auto"} onChange={(value) => setNodeStyle("alignSelf", value)} options={[{ value: "auto", label: "Auto" }, { value: "stretch", label: "Stretch" }, { value: "flex-start", label: "Start" }, { value: "center", label: "Center" }, { value: "flex-end", label: "End" }]} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">变换 Transform</h3>
+                      <TextField label="Transform" value={dimensionValue("transform")} onChange={(value) => setNodeStyle("transform", value)} placeholder="translateY(-8px) scale(1.05)" />
+                      <div className="grid grid-cols-2 gap-2">
+                        <PatchButton onClick={() => setNodeStyle("transform", "translateY(-8px)")}>上浮</PatchButton>
+                        <PatchButton onClick={() => setNodeStyle("transform", "scale(1.05)")}>放大</PatchButton>
+                        <PatchButton onClick={() => setNodeStyle("transform", "rotate(-3deg)")}>轻旋转</PatchButton>
+                        <PatchButton onClick={() => setNodeStyle("transform", undefined)}>清除</PatchButton>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-[11px] font-bold text-slate-700">CSS 速写</h3>
+                      <TextField label="Box Shadow" value={dimensionValue("boxShadow")} onChange={(value) => setNodeStyle("boxShadow", value)} placeholder="0 20px 60px rgba(...)" />
+                      <TextField label="Transition" value={dimensionValue("transition")} onChange={(value) => setNodeStyle("transition", value)} placeholder="all .2s ease" />
+                      <TextField label="Cursor" value={dimensionValue("cursor")} onChange={(value) => setNodeStyle("cursor", value)} placeholder="pointer / default" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="sticky bottom-0 grid grid-cols-3 gap-2 rounded-[18px] border border-slate-200/80 bg-white/95 p-2 shadow-[0_-8px_28px_rgba(15,23,42,.06)] backdrop-blur">
+                  <button onClick={copySelected} className="rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-xs font-bold text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700">复制</button>
+                  <button onClick={duplicateSelected} disabled={selected.locked} className="rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-xs font-bold text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 disabled:opacity-40">副本</button>
+                  <button onClick={deleteSelected} disabled={selected.locked} className="rounded-xl bg-red-50 px-2 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-40">删除</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+      </main>
+
+      {showCode && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.currentTarget === event.target) setShowCode(false) }}>
+          <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-slate-950 shadow-2xl">
+            <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
+              <div>
+                <h3 className="text-sm font-bold text-white">导出项目</h3>
+                <p className="mt-0.5 text-[11px] text-slate-400">JSX / HTML 会包含响应式 CSS；JSON 用于继续编辑。</p>
+              </div>
+              <button onClick={() => setShowCode(false)} className="ml-auto flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">✕</button>
+            </div>
+            <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3">
+              <div className="flex rounded-xl bg-white/5 p-1">
+                {([["jsx", "React JSX"], ["html", "HTML"], ["json", "项目 JSON"]] as Array<[ExportTab, string]>).map(([value, label]) => (
+                  <button key={value} onClick={() => setExportTab(value)} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${exportTab === value ? "bg-white text-slate-900" : "text-slate-400 hover:text-white"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="ml-auto flex gap-2">
+                <button onClick={downloadExport} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/10">下载文件</button>
+                <button onClick={copyExport} className="rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-violet-500">{copied ? "✓ 已复制" : "复制代码"}</button>
+              </div>
+            </div>
+            <pre className="builder-scroll overflow-auto p-5 text-[12px] leading-6 text-slate-300"><code>{exportValue}</code></pre>
+          </div>
         </div>
-      </section>
+      )}
 
-      <aside className="border-t border-slate-200 bg-white lg:border-l lg:border-t-0">
-        <div className="sticky top-16 max-h-[calc(100vh-65px)] overflow-y-auto p-4">
-          <div className="mb-4"><h2 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">属性面板</h2><p className="mt-1 text-[11px] text-slate-400">{selected ? `正在编辑：${COMPONENTS.find(item => item.type === selected.type)?.label}` : '请选择一个组件'}</p></div>
-          {!selected ? <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center"><div className="text-2xl">↖</div><p className="mt-2 text-xs font-medium text-slate-500">点击画布或图层中的组件</p><p className="mt-1 text-[10px] leading-5 text-slate-400">选中后可以修改内容、尺寸、排版、布局与外观。</p></div> : <div className="space-y-5">
-            {(selected.type === 'heading' || selected.type === 'text' || selected.type === 'button') && <div className="space-y-3"><h3 className="text-[11px] font-bold text-slate-700">内容</h3><label className="space-y-1.5"><FieldLabel>文字</FieldLabel><textarea value={selected.props.text || ''} onChange={e => setNodeProp('text',e.target.value)} rows={4} className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100" /></label></div>}
-            {selected.type === 'button' && <TextField label="链接" value={selected.props.href || ''} onChange={value => setNodeProp('href',value)} placeholder="#" />}
-            {selected.type === 'input' && <TextField label="Placeholder" value={selected.props.placeholder || ''} onChange={value => setNodeProp('placeholder',value)} />}
-            {selected.type === 'image' && <div className="space-y-3"><TextField label="图片地址" value={selected.props.src || ''} onChange={value => setNodeProp('src',value)} /><TextField label="Alt" value={selected.props.alt || ''} onChange={value => setNodeProp('alt',value)} /><SelectField label="图片裁切" value={String(selected.style.objectFit || 'cover')} onChange={value => setNodeStyle('objectFit',value as React.CSSProperties['objectFit'])} options={[{value:'cover',label:'Cover'},{value:'contain',label:'Contain'},{value:'fill',label:'Fill'}]} /></div>}
-            <div className="h-px bg-slate-100" />
-            <div className="space-y-3"><h3 className="text-[11px] font-bold text-slate-700">尺寸与间距</h3><div className="grid grid-cols-2 gap-2"><TextField label="宽度" value={String(styleValue(selected.style.width))} onChange={value => setNodeStyle('width',value)} placeholder="100%" /><TextField label="高度" value={String(styleValue(selected.style.height))} onChange={value => setNodeStyle('height',value)} placeholder="auto" /></div><div className="grid grid-cols-2 gap-2"><TextField label="最大宽度" value={String(styleValue(selected.style.maxWidth))} onChange={value => setNodeStyle('maxWidth',value)} placeholder="none" /><TextField label="最小高度" value={String(styleValue(selected.style.minHeight))} onChange={value => setNodeStyle('minHeight',value)} placeholder="auto" /></div><TextField label="Padding" value={String(styleValue(selected.style.padding))} onChange={value => setNodeStyle('padding',value)} placeholder="24px" /><TextField label="Margin" value={String(styleValue(selected.style.margin))} onChange={value => setNodeStyle('margin',value)} placeholder="0" /><div className="grid grid-cols-2 gap-2"><NumberField label="圆角" value={typeof selected.style.borderRadius === 'number' ? selected.style.borderRadius : undefined} min={0} max={120} onChange={value => setNodeStyle('borderRadius',value)} /><NumberField label="Gap" value={typeof selected.style.gap === 'number' ? selected.style.gap : undefined} min={0} max={120} onChange={value => setNodeStyle('gap',value)} /></div></div>
-            {(selected.type === 'heading' || selected.type === 'text' || selected.type === 'button' || selected.type === 'input') && <><div className="h-px bg-slate-100" /><div className="space-y-3"><h3 className="text-[11px] font-bold text-slate-700">文字</h3><div className="grid grid-cols-2 gap-2"><NumberField label="字号" value={typeof selected.style.fontSize === 'number' ? selected.style.fontSize : undefined} min={8} max={160} onChange={value => setNodeStyle('fontSize',value)} /><NumberField label="字重" value={typeof selected.style.fontWeight === 'number' ? selected.style.fontWeight : undefined} min={100} max={900} step={100} onChange={value => setNodeStyle('fontWeight',value)} /></div><SelectField label="对齐" value={String(selected.style.textAlign || 'left')} onChange={value => setNodeStyle('textAlign',value as React.CSSProperties['textAlign'])} options={[{value:'left',label:'左对齐'},{value:'center',label:'居中'},{value:'right',label:'右对齐'}]} /></div></>}
-            {selected.type === 'container' && <><div className="h-px bg-slate-100" /><div className="space-y-3"><h3 className="text-[11px] font-bold text-slate-700">Flex 布局</h3><SelectField label="方向" value={String(selected.style.flexDirection || 'column')} onChange={value => setNodeStyle('flexDirection',value as React.CSSProperties['flexDirection'])} options={[{value:'column',label:'纵向 Column'},{value:'row',label:'横向 Row'}]} /><SelectField label="主轴对齐" value={String(selected.style.justifyContent || 'flex-start')} onChange={value => setNodeStyle('justifyContent',value as React.CSSProperties['justifyContent'])} options={[{value:'flex-start',label:'开始'},{value:'center',label:'居中'},{value:'flex-end',label:'结束'},{value:'space-between',label:'两端对齐'},{value:'space-around',label:'环绕'}]} /><SelectField label="交叉轴" value={String(selected.style.alignItems || 'stretch')} onChange={value => setNodeStyle('alignItems',value as React.CSSProperties['alignItems'])} options={[{value:'stretch',label:'拉伸'},{value:'flex-start',label:'开始'},{value:'center',label:'居中'},{value:'flex-end',label:'结束'}]} /><SelectField label="换行" value={String(selected.style.flexWrap || 'nowrap')} onChange={value => setNodeStyle('flexWrap',value as React.CSSProperties['flexWrap'])} options={[{value:'nowrap',label:'不换行'},{value:'wrap',label:'自动换行'}]} /></div></>}
-            <div className="h-px bg-slate-100" />
-            <div className="space-y-3"><h3 className="text-[11px] font-bold text-slate-700">外观</h3><div className="grid grid-cols-2 gap-2"><label className="space-y-1.5"><FieldLabel>文字颜色</FieldLabel><input type="color" value={typeof selected.style.color === 'string' && selected.style.color.startsWith('#') ? selected.style.color : '#0f172a'} onChange={e => setNodeStyle('color',e.target.value)} className="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-1" /></label><label className="space-y-1.5"><FieldLabel>背景颜色</FieldLabel><input type="color" value={typeof selected.style.background === 'string' && selected.style.background.startsWith('#') ? selected.style.background : '#ffffff'} onChange={e => setNodeStyle('background',e.target.value)} className="h-10 w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-1" /></label></div><TextField label="Border" value={String(styleValue(selected.style.border))} onChange={value => setNodeStyle('border',value)} placeholder="1px solid #e5e7eb" /><SelectField label="阴影" value={String(selected.style.boxShadow || '')} onChange={value => setNodeStyle('boxShadow',value)} options={[{value:'',label:'无阴影'},{value:'0 8px 24px rgba(15,23,42,.08)',label:'柔和'},{value:'0 18px 45px rgba(15,23,42,.12)',label:'浮层'},{value:'0 28px 70px rgba(15,23,42,.18)',label:'强阴影'}]} /><NumberField label="透明度" value={typeof selected.style.opacity === 'number' ? selected.style.opacity : 1} min={0} max={1} step={0.05} onChange={value => setNodeStyle('opacity',value)} /></div>
-            <div className="grid grid-cols-3 gap-2 pt-2"><button onClick={copySelected} className="rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700">复制</button><button onClick={duplicateSelected} className="rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700">副本</button><button onClick={deleteSelected} className="rounded-xl border border-red-100 bg-red-50 px-2 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-100">删除</button></div>
-          </div>}
+      {showPreview && (
+        <div className="fixed inset-0 z-[105] bg-[#f3f5f9] p-3 sm:p-6">
+          <div className="mx-auto flex h-full max-w-[1600px] flex-col overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-2xl shadow-stone-300/40">
+            <div className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                实时预览
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="hidden text-[10px] text-slate-400 sm:inline">{totalNodeCount} 个组件 · {device}</span>
+                <button onClick={() => setShowPreview(false)} className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-violet-600">返回编辑</button>
+              </div>
+            </div>
+            <div className="builder-scroll flex-1 overflow-auto bg-stone-100 p-4 sm:p-8">
+              <div style={{ width: canvasWidth }} className="mx-auto min-h-full max-w-full overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
+                <div className="min-h-[700px] p-5 sm:p-8">
+                  {!nodes.length ? (
+                    <div className="flex min-h-[600px] items-center justify-center text-sm text-slate-400">暂无内容</div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {nodes.map((node, index) => <div key={node.id}>{renderNode(node, null, index, "preview")}</div>)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </aside>
-    </main>
+      )}
 
-    {showCode && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" onMouseDown={e => { if (e.currentTarget === e.target) setShowCode(false) }}><div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-slate-950 shadow-2xl"><div className="flex items-center gap-3 border-b border-white/10 px-5 py-4"><div><h3 className="text-sm font-bold text-white">导出项目</h3><p className="mt-0.5 text-[11px] text-slate-400">JSX 用于 React，HTML 可直接预览，JSON 用于继续编辑。</p></div><button onClick={() => setShowCode(false)} className="ml-auto flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">✕</button></div><div className="flex items-center gap-2 border-b border-white/10 px-5 py-3"><div className="flex rounded-xl bg-white/5 p-1">{([['jsx','React JSX'],['html','HTML'],['json','项目 JSON']] as Array<[ExportTab,string]>).map(([value,label]) => <button key={value} onClick={() => setExportTab(value)} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${exportTab === value ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'}`}>{label}</button>)}</div><button onClick={copyExport} className="ml-auto rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-violet-500">{copied ? '✓ 已复制' : '复制代码'}</button></div><pre className="overflow-auto p-5 text-[12px] leading-6 text-slate-300"><code>{exportValue}</code></pre></div></div>}
-
-    {showClearConfirm && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"><div className="w-full max-w-sm rounded-[24px] bg-white p-5 shadow-2xl"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-lg">⚠</div><h3 className="mt-4 text-base font-bold text-slate-900">清空整个画布？</h3><p className="mt-2 text-xs leading-6 text-slate-500">所有当前组件都会被移除。你仍然可以通过“撤销”恢复这次操作。</p><div className="mt-5 flex justify-end gap-2"><button onClick={() => setShowClearConfirm(false)} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">取消</button><button onClick={() => { commitNodes([]); setSelectedId(null); setShowClearConfirm(false); flash('画布已清空，可使用撤销恢复') }} className="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white">确认清空</button></div></div></div>}
-  </div>
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-[24px] bg-white p-5 shadow-2xl">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-lg">⚠</div>
+            <h3 className="mt-4 text-base font-bold text-slate-900">清空整个画布？</h3>
+            <p className="mt-2 text-xs leading-6 text-slate-500">所有当前组件都会被移除。你仍然可以通过“撤销”恢复这次操作。</p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setShowClearConfirm(false)} className="rounded-xl border border-stone-200 px-4 py-2.5 text-xs font-semibold text-slate-600">取消</button>
+              <button
+                onClick={() => {
+                  commitNodes([])
+                  setSelectedId(null)
+                  setShowClearConfirm(false)
+                  flash("画布已清空，可使用撤销恢复")
+                }}
+                className="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white"
+              >
+                确认清空
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }

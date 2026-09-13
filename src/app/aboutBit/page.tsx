@@ -141,14 +141,89 @@ const FEATURED = [
   },
 ]
 
-const MORE_TOOLS = [
-  ["GSAP 动画实验室", "/tools/gsap"],
-  ["汇率计算", "/tools/currency-intelligence"],
-  ["今天想请假？", "/tools/holiday-optimizer"],
-  ["截图美化", "/tools/screenshot-beautifier"],
-  ["图片配色提取器", "/tools/color-extractor"],
-  ["时序花园", "/tools/GardenTime"],
-]
+
+const PARALLAX_IMAGES = [
+  {
+    src: "/image/m1 (1).jpg",
+    index: "01",
+    position: "center center",
+    eyebrow: "QUIET INTERFACE",
+    title: `让画面先抓住情绪，
+再让内容开口。`,
+    body: "不是把一句标题贴在图片下方，而是把文案变成画面里的叙事层。滚动时，背景、遮罩、编号和内容卡分别以不同速度移动。",
+    note: "SCENE / OPENING FRAME",
+    stat: "FULL SCREEN · STICKY PARALLAX",
+    bridgeTitle: "Scene opening",
+    bridgeBody: "让滚动从第一屏开始就有停留感，不只是看图。",
+    middleText: "在画面中央留下一句低声的提示，让过渡段不再空着。",
+    align: "left-bottom",
+    accent: "#a996ff",
+  },
+  {
+    src: "/image/m1 (2).jpg",
+    index: "02",
+    position: "center 38%",
+    eyebrow: "SLOW DEPTH",
+    title: `一张图就占一屏。
+但内容不要都挤在一起。`,
+    body: "这一屏把文字卡抬到右侧中部，左边只保留影像和超大编号，让视觉重心自然错开，不会每一段都像同一个模板。",
+    note: "STORY / OFFSET LAYOUT",
+    stat: "RIGHT PANEL · FLOATING CHIP",
+    bridgeTitle: "Offset layout",
+    bridgeBody: "让图片和内容错位呼吸，不要把所有信息都压在一条线上。",
+    middleText: "错位、停顿和滚动速度一起决定这一屏的情绪。",
+    align: "right-middle",
+    accent: "#7bb7ff",
+  },
+  {
+    src: "/image/m1 (3).jpg",
+    index: "03",
+    position: "center center",
+    eyebrow: "CONTENT OVERLAY",
+    title: `在图片上加一层遮盖。
+上面放内容，才更完整。`,
+    body: "这层遮盖不是纯黑蒙版，而是叠加渐变、磨砂和轻微高光，让文字更清楚，同时保留照片本身的氛围和层次。",
+    note: "LAYER / SHADE + GLASS",
+    stat: "READABLE · SOFT MASK",
+    bridgeTitle: "Overlay layer",
+    bridgeBody: "遮罩、玻璃和正文一起工作，空的地方也保持氛围。",
+    middleText: "不仅是图片本身，图片上的内容层也应该成为设计的一部分。",
+    align: "left-top",
+    accent: "#79d6c3",
+  },
+  {
+    src: "/image/m1 (4).jpg",
+    index: "04",
+    position: "center 42%",
+    eyebrow: "VISUAL RHYTHM",
+    title: `有的画面只说一句话，
+有的画面留更多空间。`,
+    body: "因此我把这一屏做成更靠下、更轻一点的内容块，让整段滚动里有疏有密，有重有轻，不会五屏都是同一阅读节奏。",
+    note: "RHYTHM / BREATHING SPACE",
+    stat: "BOTTOM RIGHT · LIGHT COPY",
+    bridgeTitle: "Visual rhythm",
+    bridgeBody: "有的地方给画面，有的地方给文字，让节奏松开。",
+    middleText: "视觉不是一直填满，而是知道什么时候留给画面呼吸。",
+    align: "right-bottom",
+    accent: "#ffab75",
+  },
+  {
+    src: "/image/m1 (5).jpg",
+    index: "05",
+    position: "center center",
+    eyebrow: "FINAL FRAME",
+    title: `最后一屏更像封面。
+图像、信息和留白一起收束。`,
+    body: "结尾做成偏居中的收束式构图：背景仍然保持景深滚动，前景内容卡和辅助标签稍微分离，形成最后一段停留感。",
+    note: "ENDING / HOLD THE MOMENT",
+    stat: "CENTERED COMPOSITION · CLOSE",
+    bridgeTitle: "Closing frame",
+    bridgeBody: "最后一屏用更完整的收束信息，避免结尾突然变空。",
+    middleText: "结尾不是突然结束，而是慢慢把视线收回来。",
+    align: "center-bottom",
+    accent: "#f2a3c6",
+  },
+] as const
 
 function Arrow() {
   return (
@@ -782,6 +857,29 @@ export default function BitLeapIntroFlowtyV2() {
         })
       }
 
+      if (!reduced) {
+        gsap.to(".ambient-drift", {
+          y: (index) => index % 2 === 0 ? -18 : 22,
+          x: (index) => (index % 3 - 1) * 14,
+          rotation: (index) => (index % 2 === 0 ? 7 : -7),
+          duration: (index) => 5.5 + index * 0.65,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          stagger: 0.2,
+        })
+
+        gsap.to(".breath-ring", {
+          scale: 1.08,
+          opacity: 0.46,
+          duration: 4.6,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          stagger: 0.5,
+        })
+      }
+
       mm.add("(min-width: 769px)", () => {
         if (reduced) return
 
@@ -1069,6 +1167,381 @@ export default function BitLeapIntroFlowtyV2() {
           }
         })
 
+        // Sticky full-screen image story: the outer section is taller than the viewport,
+        // while the inner stage stays pinned visually through CSS `position: sticky`.
+        // This makes the parallax much more obvious than a shallow one-screen translate.
+        gsap.utils.toArray<HTMLElement>("[data-fullscreen-parallax]").forEach((section, index) => {
+          const image = section.querySelector<HTMLElement>("[data-parallax-image]")
+          const copy = section.querySelector<HTMLElement>(".fullscreen-parallax-copy")
+          const panel = section.querySelector<HTMLElement>(".fullscreen-parallax-panel")
+          const meta = section.querySelector<HTMLElement>(".fullscreen-parallax-meta")
+          const bridge = section.querySelector<HTMLElement>(".fullscreen-parallax-bridge")
+          const centerGlow = section.querySelector<HTMLElement>(".fullscreen-parallax-center-glow")
+          const middle = section.querySelector<HTMLElement>(".fullscreen-parallax-middle")
+          const interlude = section.querySelector<HTMLElement>(".fullscreen-parallax-interlude-inner")
+          const number = section.querySelector<HTMLElement>(".fullscreen-parallax-index")
+          const shade = section.querySelector<HTMLElement>(".fullscreen-parallax-shade")
+          const chips = section.querySelectorAll<HTMLElement>(".fullscreen-parallax-chip")
+          const accentLine = section.querySelector<HTMLElement>(".fullscreen-parallax-accent")
+
+          if (image) {
+            gsap.fromTo(
+              image,
+              { yPercent: index % 2 === 0 ? -14 : -10, scale: 1.18 },
+              {
+                yPercent: index % 2 === 0 ? 14 : 10,
+                scale: 1.05,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 0.9,
+                },
+              },
+            )
+          }
+
+          if (shade) {
+            gsap.fromTo(
+              shade,
+              { opacity: 0.28 },
+              {
+                opacity: 0.7,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 0.9,
+                },
+              },
+            )
+          }
+
+          if (copy) {
+            gsap.fromTo(
+              copy,
+              { yPercent: 12, opacity: 0.45 },
+              {
+                yPercent: -9,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.05,
+                },
+              },
+            )
+          }
+
+          if (panel) {
+            gsap.fromTo(
+              panel,
+              { y: 56, opacity: 0, rotateX: 8 },
+              {
+                y: -4,
+                opacity: 1,
+                rotateX: 0,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top 85%",
+                  end: "center center",
+                  scrub: 0.9,
+                },
+              },
+            )
+          }
+
+          if (meta) {
+            gsap.fromTo(
+              meta,
+              { y: -18, opacity: 0 },
+              {
+                y: 12,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.15,
+                },
+              },
+            )
+          }
+
+          if (bridge) {
+            gsap.fromTo(
+              bridge,
+              { yPercent: 16, opacity: 0 },
+              {
+                yPercent: -12,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1,
+                },
+              },
+            )
+          }
+
+          if (centerGlow) {
+            gsap.fromTo(
+              centerGlow,
+              { scale: 0.92, opacity: 0.22 },
+              {
+                scale: 1.18,
+                opacity: 0.46,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.05,
+                },
+              },
+            )
+          }
+
+          if (middle) {
+            gsap.fromTo(
+              middle,
+              { yPercent: 18, opacity: 0 },
+              {
+                yPercent: -10,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.1,
+                },
+              },
+            )
+          }
+
+          if (interlude) {
+            gsap.fromTo(
+              interlude,
+              { y: 40, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: interlude,
+                  start: "top 92%",
+                  end: "center center",
+                  scrub: 0.9,
+                },
+              },
+            )
+          }
+
+          if (number) {
+            gsap.fromTo(
+              number,
+              { xPercent: index % 2 === 0 ? 30 : -30, yPercent: -10 },
+              {
+                xPercent: index % 2 === 0 ? -24 : 24,
+                yPercent: 14,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.2,
+                },
+              },
+            )
+          }
+
+          if (accentLine) {
+            gsap.fromTo(
+              accentLine,
+              { scaleX: 0.08, opacity: 0.45, transformOrigin: "left center" },
+              {
+                scaleX: 1,
+                opacity: 1,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top 72%",
+                  once: true,
+                },
+              },
+            )
+          }
+
+          if (chips.length) {
+            gsap.from(chips, {
+              y: 24,
+              opacity: 0,
+              stagger: 0.08,
+              duration: 0.7,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 72%",
+                once: true,
+              },
+            })
+          }
+        })
+
+        // Global depth layers: reusable for any image/card you add later.
+        gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((layer) => {
+          const speed = Number(layer.dataset.parallax || "0.16")
+          const rotate = Number(layer.dataset.parallaxRotate || "0")
+          gsap.fromTo(
+            layer,
+            { yPercent: speed * 42, rotation: -rotate },
+            {
+              yPercent: speed * -42,
+              rotation: rotate,
+              ease: "none",
+              scrollTrigger: {
+                trigger: layer.closest("section") || layer,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.15,
+              },
+            },
+          )
+        })
+
+        gsap.to(".hero-depth-far", {
+          yPercent: 18,
+          xPercent: -5,
+          ease: "none",
+          scrollTrigger: { trigger: ".flow-hero", start: "top top", end: "bottom top", scrub: 1.25 },
+        })
+
+        gsap.to(".hero-depth-mid", {
+          yPercent: 30,
+          xPercent: 7,
+          ease: "none",
+          scrollTrigger: { trigger: ".flow-hero", start: "top top", end: "bottom top", scrub: 1.05 },
+        })
+
+        gsap.to(".hero-depth-near", {
+          yPercent: 44,
+          xPercent: -10,
+          ease: "none",
+          scrollTrigger: { trigger: ".flow-hero", start: "top top", end: "bottom top", scrub: 0.9 },
+        })
+
+        gsap.to(".flow-scroll-progress", {
+          scaleX: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: rootRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.2,
+          },
+        })
+
+        gsap.utils.toArray<HTMLElement>(".depth-card").forEach((card, index) => {
+          gsap.fromTo(
+            card,
+            { y: index % 2 === 0 ? 80 : 130, rotation: index % 2 === 0 ? -2.5 : 2.5 },
+            {
+              y: index % 2 === 0 ? -30 : -58,
+              rotation: index % 2 === 0 ? 1.2 : -1.2,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card.parentElement || card,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.05 + index * 0.08,
+              },
+            },
+          )
+        })
+
+        gsap.utils.toArray<HTMLElement>(".feature-section").forEach((section, index) => {
+          const orbit = section.querySelector(".feature-orbit")
+          const wash = section.querySelector(".feature-wash")
+          const meta = section.querySelectorAll(".feature-meta-reveal")
+
+          if (orbit) {
+            gsap.to(orbit, {
+              rotation: index % 2 === 0 ? 28 : -28,
+              scale: 1.1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: section,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.4,
+              },
+            })
+          }
+
+          if (wash) {
+            gsap.fromTo(
+              wash,
+              { yPercent: -18, scale: 0.9 },
+              {
+                yPercent: 20,
+                scale: 1.12,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.2,
+                },
+              },
+            )
+          }
+
+          if (meta.length) {
+            gsap.from(meta, {
+              y: 18,
+              opacity: 0,
+              stagger: 0.07,
+              duration: 0.65,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 68%",
+                once: true,
+              },
+            })
+          }
+        })
+
+        gsap.to(".manifest-float-left", {
+          yPercent: -34,
+          rotation: -7,
+          ease: "none",
+          scrollTrigger: { trigger: ".manifest-section", start: "top bottom", end: "bottom top", scrub: 1.1 },
+        })
+
+        gsap.to(".manifest-float-right", {
+          yPercent: 28,
+          rotation: 8,
+          ease: "none",
+          scrollTrigger: { trigger: ".manifest-section", start: "top bottom", end: "bottom top", scrub: 1.25 },
+        })
+
+        gsap.to(".final-orb", {
+          yPercent: -38,
+          scale: 1.16,
+          ease: "none",
+          scrollTrigger: { trigger: ".final-section", start: "top bottom", end: "bottom bottom", scrub: 1.2 },
+        })
+
         gsap.to(".manifest-copy", {
           yPercent: -22,
           ease: "none",
@@ -1079,18 +1552,6 @@ export default function BitLeapIntroFlowtyV2() {
             scrub: 1,
           },
         })
-
-        gsap.to(".more-track", {
-          xPercent: -27,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".more-section",
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.2,
-          },
-        })
-
         return () => {
           pointerCleanups.forEach((cleanup) => cleanup())
         }
@@ -1140,7 +1601,8 @@ export default function BitLeapIntroFlowtyV2() {
   }, [])
 
   return (
-    <main ref={rootRef} className="overflow-hidden bg-[#08080b] text-[#f1f0ed] selection:bg-white selection:text-black">
+    <main ref={rootRef} className="overflow-x-hidden bg-[#08080b] text-[#f1f0ed] selection:bg-white selection:text-black">
+      <div className="flow-scroll-progress" />
       <style>{`
         html.lenis, html.lenis body { height: auto; }
         .lenis.lenis-smooth { scroll-behavior: auto !important; }
@@ -1205,6 +1667,395 @@ export default function BitLeapIntroFlowtyV2() {
           opacity: 0;
           mix-blend-mode: screen;
         }
+        .flow-scroll-progress {
+          position: fixed;
+          z-index: 100;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 2px;
+          transform: scaleX(0);
+          transform-origin: left center;
+          background: linear-gradient(90deg, #a99cff, #e49bc9 52%, #8fd8c3);
+          box-shadow: 0 0 22px rgba(169,156,255,.45);
+          pointer-events: none;
+        }
+        [data-parallax],
+        .depth-card,
+        .feature-orbit,
+        .feature-wash,
+        .manifest-float-left,
+        .manifest-float-right,
+        .final-orb {
+          will-change: transform;
+        }
+        .fullscreen-parallax {
+          isolation: isolate;
+          background: #08080b;
+          min-height: 132svh;
+        }
+        .fullscreen-parallax-stage {
+          position: sticky;
+          top: 0;
+          height: 100svh;
+          overflow: hidden;
+        }
+        .fullscreen-parallax-image-wrap {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+        .fullscreen-parallax-image {
+          position: absolute;
+          left: 0;
+          top: -14%;
+          width: 100%;
+          height: 128%;
+          max-width: none;
+          object-fit: cover;
+          display: block;
+          will-change: transform;
+          transform: translateZ(0) scale(1.16);
+          backface-visibility: hidden;
+          filter: saturate(0.98) contrast(1.03) brightness(0.96);
+        }
+        .fullscreen-parallax-shade {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(180deg, rgba(6,6,9,.12) 0%, rgba(6,6,9,.03) 24%, rgba(6,6,9,.22) 52%, rgba(6,6,9,.72) 100%),
+            linear-gradient(90deg, rgba(6,6,9,.48) 0%, rgba(6,6,9,.14) 28%, rgba(6,6,9,.08) 52%, rgba(6,6,9,.38) 100%);
+          pointer-events: none;
+          will-change: opacity;
+        }
+        .fullscreen-parallax-noise {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: .18;
+          background-image:
+            linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+          background-size: 34px 34px;
+          mask-image: linear-gradient(180deg, transparent, black 20%, black 80%, transparent);
+        }
+        .fullscreen-parallax::before {
+          content: "";
+          position: absolute;
+          z-index: 3;
+          inset: 0;
+          pointer-events: none;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,.055);
+        }
+        .fullscreen-parallax::after {
+          content: "";
+          position: absolute;
+          z-index: 2;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 26%;
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent, rgba(7,7,10,.54));
+        }
+        .fullscreen-parallax-copy {
+          position: relative;
+          height: 100%;
+          will-change: transform, opacity;
+        }
+        .fullscreen-parallax-index {
+          will-change: transform;
+          text-shadow: 0 12px 70px rgba(0,0,0,.22);
+        }
+        .fullscreen-parallax-layout-left-bottom {
+          align-items: end;
+          justify-items: start;
+          padding-bottom: clamp(28px, 5vh, 56px);
+        }
+        .fullscreen-parallax-layout-right-middle {
+          align-items: center;
+          justify-items: end;
+        }
+        .fullscreen-parallax-layout-left-top {
+          align-items: start;
+          justify-items: start;
+          padding-top: clamp(26px, 6vh, 72px);
+        }
+        .fullscreen-parallax-layout-right-bottom {
+          align-items: end;
+          justify-items: end;
+          padding-bottom: clamp(26px, 5.5vh, 68px);
+        }
+        .fullscreen-parallax-layout-center-bottom {
+          align-items: end;
+          justify-items: center;
+          padding-bottom: clamp(26px, 6vh, 74px);
+        }
+        .fullscreen-parallax-panel {
+          position: relative;
+          max-width: min(640px, calc(100vw - 40px));
+          padding: clamp(20px, 2vw, 28px);
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 28px;
+          background: linear-gradient(180deg, rgba(18,18,24,.56), rgba(13,13,18,.34));
+          backdrop-filter: blur(22px);
+          box-shadow: 0 30px 90px rgba(0,0,0,.32);
+          will-change: transform, opacity;
+        }
+        .fullscreen-parallax-panel::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          background: linear-gradient(135deg, rgba(255,255,255,.09), transparent 38%, transparent 62%, rgba(255,255,255,.04));
+          mix-blend-mode: screen;
+        }
+        .fullscreen-parallax-accent {
+          height: 2px;
+          width: min(160px, 32vw);
+          border-radius: 999px;
+          will-change: transform, opacity;
+          box-shadow: 0 0 22px currentColor;
+        }
+        .fullscreen-parallax-meta {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          max-width: 250px;
+          will-change: transform, opacity;
+        }
+        .fullscreen-parallax-meta.is-left { left: clamp(20px, 4vw, 54px); bottom: clamp(20px, 5vh, 48px); }
+        .fullscreen-parallax-meta.is-right { right: clamp(20px, 4vw, 54px); top: clamp(20px, 7vh, 64px); align-items: flex-end; text-align: right; }
+        .fullscreen-parallax-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          width: fit-content;
+          max-width: 100%;
+          border: 1px solid rgba(255,255,255,.1);
+          border-radius: 999px;
+          padding: 10px 14px;
+          background: rgba(9,9,12,.3);
+          backdrop-filter: blur(14px);
+        }
+        .fullscreen-parallax-float-card {
+          padding: 16px 18px;
+          border: 1px solid rgba(255,255,255,.1);
+          border-radius: 22px;
+          background: rgba(9,9,12,.28);
+          backdrop-filter: blur(18px);
+          box-shadow: 0 20px 70px rgba(0,0,0,.22);
+        }
+        .fullscreen-parallax-center-glow {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          z-index: 1;
+          width: min(52vw, 720px);
+          height: min(52vw, 720px);
+          border-radius: 999px;
+          transform: translate(-50%, -50%);
+          filter: blur(54px);
+          opacity: .34;
+          pointer-events: none;
+          will-change: transform, opacity;
+        }
+        .fullscreen-parallax-bridge {
+          position: absolute;
+          z-index: 4;
+          top: 50%;
+          max-width: min(320px, calc(100vw - 40px));
+          padding: 18px 18px 16px;
+          border-radius: 24px;
+          border: 1px solid rgba(255,255,255,.09);
+          background: linear-gradient(180deg, rgba(10,10,14,.38), rgba(10,10,14,.18));
+          backdrop-filter: blur(16px);
+          box-shadow: 0 18px 70px rgba(0,0,0,.18);
+          will-change: transform, opacity;
+        }
+        .fullscreen-parallax-bridge.is-left {
+          left: clamp(20px, 8vw, 100px);
+          transform: translateY(-50%);
+        }
+        .fullscreen-parallax-bridge.is-right {
+          right: clamp(20px, 8vw, 100px);
+          transform: translateY(-50%);
+        }
+        .fullscreen-parallax-bridge::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          background: linear-gradient(135deg, rgba(255,255,255,.07), transparent 42%, rgba(255,255,255,.03));
+        }
+        .fullscreen-parallax-middle {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          z-index: 4;
+          width: min(540px, calc(100vw - 48px));
+          transform: translate(-50%, -50%);
+          text-align: center;
+          will-change: transform, opacity;
+          pointer-events: none;
+        }
+        .fullscreen-parallax-middle-card {
+          display: inline-flex;
+          flex-direction: column;
+          gap: 10px;
+          align-items: center;
+          padding: 16px 20px;
+          border-radius: 24px;
+          border: 1px solid rgba(255,255,255,.08);
+          background: linear-gradient(180deg, rgba(8,8,12,.24), rgba(8,8,12,.12));
+          backdrop-filter: blur(14px);
+          box-shadow: 0 16px 70px rgba(0,0,0,.14);
+        }
+        .fullscreen-parallax-interlude {
+          position: relative;
+          z-index: 7;
+          min-height: 32svh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px 20px 36px;
+          background:
+            linear-gradient(180deg, rgba(8,8,11,0) 0%, rgba(8,8,11,.72) 18%, #08080b 100%);
+        }
+        .fullscreen-parallax-interlude::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 16%;
+          width: min(48vw, 480px);
+          height: 1px;
+          transform: translateX(-50%);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+        }
+        .fullscreen-parallax-interlude-inner {
+          width: min(760px, 100%);
+          text-align: center;
+          padding: 8px 20px;
+          will-change: transform, opacity;
+        }
+        @media (max-width: 640px) {
+          .fullscreen-parallax-middle {
+            width: calc(100vw - 32px);
+          }
+        }
+        @media (max-width: 768px) {
+          .fullscreen-parallax {
+            min-height: 118svh;
+          }
+          .fullscreen-parallax-image {
+            top: -8%;
+            height: 116%;
+            transform: scale(1.05);
+          }
+          .fullscreen-parallax-copy {
+            display: flex;
+            align-items: end;
+            justify-content: stretch;
+            padding-bottom: 18px;
+          }
+          .fullscreen-parallax-panel {
+            max-width: 100%;
+            border-radius: 24px;
+          }
+          .fullscreen-parallax-meta {
+            left: 16px !important;
+            right: 16px !important;
+            top: auto !important;
+            bottom: auto !important;
+            margin-top: 14px;
+            position: relative;
+            align-items: flex-start !important;
+            text-align: left !important;
+            max-width: none;
+            order: 2;
+          }
+          .fullscreen-parallax-bridge {
+            top: auto;
+            left: 16px !important;
+            right: 16px !important;
+            bottom: 20px;
+            transform: none !important;
+            max-width: none;
+          }
+          .fullscreen-parallax-interlude {
+            min-height: 24svh;
+            padding: 18px 16px 28px;
+          }
+          .fullscreen-parallax-interlude-inner {
+            padding: 6px 12px;
+          }
+        }
+        .parallax-media {
+          position: relative;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,.1);
+          background:
+            linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+            radial-gradient(circle at 70% 20%, rgba(169,150,255,.2), transparent 34%),
+            #111116;
+          box-shadow: 0 24px 80px rgba(0,0,0,.28);
+          backdrop-filter: blur(18px);
+        }
+        .parallax-media::before {
+          content: "IMAGE / REPLACE ME";
+          position: absolute;
+          left: 18px;
+          bottom: 16px;
+          font-size: 7px;
+          letter-spacing: .14em;
+          color: rgba(255,255,255,.23);
+          z-index: 2;
+        }
+        .parallax-media::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.08) 48%, transparent 65%);
+          transform: translateX(-120%);
+          animation: mediaSheen 7s ease-in-out infinite;
+        }
+        .parallax-media > img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transform: scale(1.06);
+        }
+        .feature-orbit {
+          border: 1px solid rgba(255,255,255,.045);
+          border-radius: 999px;
+        }
+        .feature-orbit::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: -4px;
+          width: 7px;
+          height: 7px;
+          border-radius: 999px;
+          background: currentColor;
+          box-shadow: 0 0 22px currentColor;
+        }
+        .depth-grid {
+          background-image:
+            linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+          background-size: 46px 46px;
+          mask-image: linear-gradient(to bottom, transparent, black 18%, black 78%, transparent);
+        }
+        @keyframes mediaSheen {
+          0%, 62% { transform: translateX(-125%); opacity: 0; }
+          72% { opacity: 1; }
+          88%, 100% { transform: translateX(125%); opacity: 0; }
+        }
         @media (min-width: 640px) {
           .flow-body { font-size: 12px; }
         }
@@ -1214,6 +2065,11 @@ export default function BitLeapIntroFlowtyV2() {
         <div className="absolute inset-0 bg-[#08080b]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_55%,rgba(81,72,205,.29),transparent_31%),radial-gradient(circle_at_62%_88%,rgba(157,76,160,.24),transparent_27%),radial-gradient(circle_at_42%_100%,rgba(57,67,155,.22),transparent_30%)]" />
         <div className="flow-noise pointer-events-none absolute inset-0 opacity-[.14]" />
+        <div className="hero-depth-far pointer-events-none absolute -left-[8%] top-[12%] h-[42vw] w-[42vw] rounded-full border border-white/[.035]" />
+        <div className="hero-depth-mid breath-ring pointer-events-none absolute right-[10%] top-[18%] h-[28vw] w-[28vw] rounded-full border border-[#a89aff]/10 shadow-[0_0_90px_rgba(168,154,255,.08)]" />
+        <div className="hero-depth-near pointer-events-none absolute bottom-[4%] left-[35%] h-32 w-32 rotate-12 rounded-[34px] border border-white/[.055] bg-white/[.018] backdrop-blur-sm" />
+        <div className="hero-depth-mid ambient-drift pointer-events-none absolute left-[16%] top-[18%] h-12 w-12 rotate-45 border border-white/[.06] bg-white/[.018]" />
+        <div className="hero-depth-far ambient-drift pointer-events-none absolute bottom-[12%] right-[8%] h-20 w-20 rounded-full border border-[#d78bc5]/10" />
         <div className="hero-aurora hero-aurora-a pointer-events-none absolute left-[48%] top-[9%] h-[48vw] w-[48vw] rounded-full bg-[#6d60ff]/14 blur-[95px]" />
         <div className="hero-aurora hero-aurora-b pointer-events-none absolute bottom-[-18%] right-[3%] h-[42vw] w-[42vw] rounded-full bg-[#c44aa6]/12 blur-[110px]" />
         <div className="hero-spark pointer-events-none absolute left-[8%] top-[24%] h-1.5 w-1.5 rounded-full bg-white/70 shadow-[0_0_18px_rgba(255,255,255,.75)]" />
@@ -1284,7 +2140,7 @@ export default function BitLeapIntroFlowtyV2() {
         </div>
 
         <div className="simple-reveal relative z-10 mx-auto mt-20 grid max-w-[1180px] gap-4 lg:grid-cols-2">
-          <div className="rounded-[30px] border border-white/[.08] bg-white/[.035] p-7 lg:min-h-[390px]">
+          <div className="depth-card rounded-[30px] border border-white/[.08] bg-white/[.035] p-7 lg:min-h-[390px]">
             <div className="text-[8px] font-semibold tracking-[.17em] text-white/20">01 / LESS FRICTION</div>
             <div className="cn-display-relaxed cn-lines mt-8 text-[clamp(32px,4.1vw,56px)] font-medium">
               <span>打开就用。</span>
@@ -1296,7 +2152,7 @@ export default function BitLeapIntroFlowtyV2() {
             </div>
           </div>
 
-          <div className="rounded-[30px] border border-white/[.08] bg-white/[.035] p-7 lg:min-h-[390px]">
+          <div className="depth-card rounded-[30px] border border-white/[.08] bg-white/[.035] p-7 lg:min-h-[390px]">
             <div className="text-[8px] font-semibold tracking-[.17em] text-white/20">02 / LOCAL WHEN POSSIBLE</div>
             <div className="cn-display-relaxed cn-lines mt-8 text-[clamp(32px,4.1vw,56px)] font-medium">
               <span>能在本地完成，</span>
@@ -1307,6 +2163,111 @@ export default function BitLeapIntroFlowtyV2() {
             <div className="mt-4 flex justify-between text-[7px] text-white/20"><span>BROWSER</span><span>PROCESS</span><span>RESULT</span></div>
           </div>
         </div>
+
+      </section>
+
+      <section aria-label="BitLeap visual story" className="bg-[#08080b]">
+        {PARALLAX_IMAGES.map((image, index) => {
+          const layoutClass =
+            image.align === "right-middle"
+              ? "fullscreen-parallax-layout-right-middle"
+              : image.align === "left-top"
+                ? "fullscreen-parallax-layout-left-top"
+                : image.align === "right-bottom"
+                  ? "fullscreen-parallax-layout-right-bottom"
+                  : image.align === "center-bottom"
+                    ? "fullscreen-parallax-layout-center-bottom"
+                    : "fullscreen-parallax-layout-left-bottom"
+
+          const metaSideClass =
+            image.align === "right-middle" || image.align === "right-bottom"
+              ? "is-left"
+              : "is-right"
+
+          return (
+            <section
+              key={image.src}
+              data-fullscreen-parallax
+              className="fullscreen-parallax relative overflow-hidden border-t border-white/[.065]"
+            >
+              <div className="fullscreen-parallax-stage">
+                <div className="fullscreen-parallax-image-wrap">
+                  <img
+                    data-parallax-image
+                    src={image.src}
+                    alt={`BitLeap visual ${image.index}`}
+                    className="fullscreen-parallax-image"
+                    style={{ objectPosition: image.position }}
+                  />
+                </div>
+
+                <div className="fullscreen-parallax-shade" />
+                <div className="fullscreen-parallax-center-glow" style={{ background: `radial-gradient(circle, ${image.accent}55 0%, ${image.accent}00 68%)` }} />
+                <div className="fullscreen-parallax-noise" />
+                <div className="fullscreen-parallax-middle">
+                  <div className="fullscreen-parallax-middle-card">
+                    <div className="text-[7px] font-semibold tracking-[.22em] text-white/30">SCROLL NOTE</div>
+                    <p className="max-w-[34rem] text-[10px] leading-7 text-white/46">{image.middleText}</p>
+                  </div>
+                </div>
+                <div className="depth-grid pointer-events-none absolute inset-0 z-[1] opacity-[.12]" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 z-[4] h-px bg-white/[.12]" />
+
+                <div className={`fullscreen-parallax-index pointer-events-none absolute z-[3] font-mono text-[clamp(150px,28vw,430px)] font-semibold leading-none tracking-[-.1em] text-white/[.055] ${index % 2 === 0 ? "-right-[2vw] top-[3vh]" : "left-[-2vw] bottom-[6vh]"}`}>
+                  {image.index}
+                </div>
+
+                <div className={`fullscreen-parallax-bridge ${index % 2 === 0 ? "is-right" : "is-left"}`}>
+                  <div className="text-[7px] font-semibold tracking-[.18em] text-white/28">TRANSITION {image.index}</div>
+                  <div className="mt-3 text-[18px] font-semibold leading-7 text-white/82">{image.bridgeTitle}</div>
+                  <p className="mt-2 text-[9px] leading-6 text-white/44">{image.bridgeBody}</p>
+                </div>
+
+                <div className={`fullscreen-parallax-copy relative z-[5] mx-auto grid h-full max-w-[1580px] px-5 sm:px-8 lg:px-10 ${layoutClass}`}>
+
+                  <div className="fullscreen-parallax-panel">
+                    <div className="text-[8px] font-semibold tracking-[.22em] text-white/54">{image.eyebrow}</div>
+                    <div className="fullscreen-parallax-accent mt-5" style={{ background: image.accent, color: image.accent }} />
+                    <h3 className="cn-display-relaxed mt-5 whitespace-pre-line text-[clamp(34px,4vw,68px)] font-medium leading-[1.02] tracking-[-.05em] text-white">
+                      {image.title}
+                    </h3>
+                    <p className="flow-body mt-5 max-w-[34rem] text-white/52">{image.body}</p>
+
+                    <div className="mt-7 flex flex-wrap gap-3">
+                      <span className="fullscreen-parallax-chip text-[8px] font-semibold tracking-[.18em] text-white/60">
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: image.accent }} />
+                        {image.note}
+                      </span>
+                      <span className="fullscreen-parallax-chip text-[8px] font-semibold tracking-[.18em] text-white/42">
+                        {image.stat}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={`fullscreen-parallax-meta ${metaSideClass}`}>
+                    <div className="fullscreen-parallax-float-card">
+                      <div className="text-[7px] tracking-[.16em] text-white/28">FRAME {image.index} / 05</div>
+                      <div className="mt-3 text-[15px] font-semibold leading-6 text-white/78">BitLeap Visual Story</div>
+                      <div className="mt-2 max-w-[220px] text-[8px] leading-5 text-white/40">FULL BLEED · OVERLAY CONTENT · STICKY SCROLL SCENE</div>
+                    </div>
+                    <div className="fullscreen-parallax-chip text-[8px] font-semibold tracking-[.18em] text-white/36">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+                      SCROLL TO MOVE
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="fullscreen-parallax-interlude">
+                <div className="fullscreen-parallax-interlude-inner">
+                  <div className="text-[7px] font-semibold tracking-[.24em] text-white/24">INTERLUDE / FRAME {image.index}</div>
+                  <h4 className="mt-4 text-[clamp(24px,2.3vw,36px)] font-medium tracking-[-.05em] text-white/88">{image.bridgeTitle}</h4>
+                  <p className="mx-auto mt-4 max-w-[44rem] text-[10px] leading-7 text-white/42">{image.middleText}</p>
+                </div>
+              </div>
+            </section>
+          )
+        })}
       </section>
 
       <section id="tools" className="bg-[#08080b]">
@@ -1326,22 +2287,25 @@ export default function BitLeapIntroFlowtyV2() {
         {FEATURED.map((tool, index) => (
           <section key={tool.id} className="feature-section relative min-h-[105svh] overflow-hidden border-t border-white/[.065] px-5 py-24 sm:px-8 lg:px-10 lg:py-28">
             <div className="absolute inset-0" style={{ background: `radial-gradient(circle at ${index % 2 === 0 ? "78% 50%" : "22% 50%"}, ${tool.accent}20, transparent 31%)` }} />
+            <div className="feature-wash absolute inset-[-8%] opacity-70" style={{ background: `radial-gradient(circle at ${index % 2 === 0 ? "76% 48%" : "24% 48%"}, ${tool.accent}22, transparent 28%)` }} />
+            <div className="feature-orbit pointer-events-none absolute h-[46vw] w-[46vw] min-h-[420px] min-w-[420px] opacity-60" style={{ color: tool.accent, right: index % 2 === 0 ? "-12%" : "auto", left: index % 2 === 1 ? "-12%" : "auto", top: "22%" }} />
+            <div className="depth-grid pointer-events-none absolute inset-0 opacity-40" />
             <div className="feature-glow pointer-events-none absolute h-[36vw] w-[36vw] rounded-full blur-[100px]" style={{ left: index % 2 === 0 ? "63%" : "3%", top: "30%", background: `${tool.accent}16` }} />
             <div className="feature-ghost-number pointer-events-none absolute right-[2%] top-[3%] font-mono text-[clamp(120px,23vw,330px)] font-semibold leading-none tracking-[-.08em] text-white/[.018]">{tool.number}</div>
             <div className={`relative mx-auto grid min-h-[78svh] max-w-[1480px] items-center gap-14 lg:grid-cols-2 ${index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
               <div className="feature-copy mobile-reveal">
-                <div className="flex items-center gap-3">
+                <div className="feature-meta-reveal flex items-center gap-3">
                   <span className="font-mono text-[8px] text-white/17">{tool.number}</span>
                   <span className="h-px w-10 bg-white/12" />
                   <span className="text-[8px] font-semibold tracking-[.17em]" style={{ color: `${tool.accent}aa` }}>{tool.eyebrow}</span>
                 </div>
-                <div className="mt-8 text-[11px] font-semibold text-white/38">{tool.title}</div>
+                <div className="feature-meta-reveal mt-8 text-[11px] font-semibold text-white/38">{tool.title}</div>
                 <h3 className="cn-display mt-5 max-w-[690px] text-[clamp(42px,5.6vw,82px)] font-medium">
                   <span className="feature-line-wrap"><span className="feature-line">{tool.line1}</span></span>
                   <span className="feature-line-wrap mt-[.06em]"><span className="feature-line">{tool.line2}</span></span>
                 </h3>
-                <p className="flow-body mt-7 max-w-[520px] text-white/39">{tool.body}</p>
-                <a href={tool.href} className="mt-8 inline-flex items-center gap-4 rounded-full border border-white/[.11] bg-white/[.04] px-5 py-3 text-[9px] font-semibold text-white/62 transition hover:gap-5 hover:bg-white hover:text-black"><span>打开 {tool.title}</span><Arrow /></a>
+                <p className="feature-meta-reveal flow-body mt-7 max-w-[520px] text-white/39">{tool.body}</p>
+                <a href={tool.href} className="feature-meta-reveal mt-8 inline-flex items-center gap-4 rounded-full border border-white/[.11] bg-white/[.04] px-5 py-3 text-[9px] font-semibold text-white/62 transition hover:gap-5 hover:bg-white hover:text-black"><span>打开 {tool.title}</span><Arrow /></a>
               </div>
 
               <div className="feature-visual mobile-reveal">
@@ -1353,7 +2317,7 @@ export default function BitLeapIntroFlowtyV2() {
         ))}
       </section>
 
-      <section id="about" className="manifest-section relative min-h-[105svh] overflow-hidden bg-[#ededeb] px-5 py-28 text-[#151613] sm:px-8 lg:px-10 lg:py-40">
+      <section id="about" className="manifest-section relative overflow-hidden bg-[#ededeb] px-5 py-24 text-[#151613] sm:px-8 lg:px-10 lg:py-28">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(108,98,232,.13),transparent_27%),radial-gradient(circle_at_25%_92%,rgba(158,85,156,.11),transparent_25%)]" />
         <div className="manifest-copy simple-reveal relative mx-auto max-w-[1320px]">
           <div className="text-center text-[9px] font-semibold tracking-[.22em] text-black/24">SMALL TOOLS · SERIOUSLY MADE</div>
@@ -1371,30 +2335,10 @@ export default function BitLeapIntroFlowtyV2() {
         </div>
       </section>
 
-      <section className="more-section relative overflow-hidden bg-[#7065dc] py-24 text-white lg:py-32">
-        <div className="simple-reveal mx-auto max-w-[1480px] px-5 sm:px-8 lg:px-10">
-          <div className="grid gap-6 lg:grid-cols-[.7fr_1.3fr] lg:items-end">
-            <h2 className="cn-display-relaxed cn-lines text-[clamp(40px,5.2vw,70px)] font-medium">
-              <span>还有更多，</span>
-              <span>但不必一次看完。</span>
-            </h2>
-            <p className="flow-body max-w-[520px] text-white/55 lg:justify-self-end">工具站应该在需要的时候出现，而不是要求你记住所有功能。下面只是其中一小部分。</p>
-          </div>
-        </div>
-
-        <div className="more-track mt-16 flex w-max gap-4 pl-[8vw] will-change-transform lg:mt-20">
-          {[...MORE_TOOLS, ...MORE_TOOLS].map(([title, href], index) => (
-            <a key={`${title}-${index}`} href={href} className="group flex h-[220px] w-[290px] shrink-0 flex-col justify-between rounded-[26px] border border-white/18 bg-white/[.07] p-5 backdrop-blur-sm transition hover:bg-white hover:text-[#191919] sm:h-[260px] sm:w-[340px]">
-              <div className="flex items-center justify-between"><span className="text-[8px] tracking-[.13em] opacity-40">BITLEAP</span><Arrow /></div>
-              <div><div className="text-[clamp(22px,2.7vw,36px)] font-medium leading-[.95] tracking-[-.055em]">{title}</div><div className="mt-3 text-[8px] opacity-40">OPEN TOOL →</div></div>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative min-h-[95svh] overflow-hidden bg-[#08080b] px-5 py-24 sm:px-8 lg:px-10">
+      <section className="final-section relative h-[100svh] min-h-[680px] overflow-hidden bg-[#08080b] px-5 sm:px-8 lg:px-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(91,78,205,.38),transparent_48%),radial-gradient(ellipse_at_70%_95%,rgba(167,75,158,.25),transparent_39%)]" />
-        <div className="simple-reveal relative z-10 mx-auto flex min-h-[72svh] max-w-[1320px] flex-col items-center justify-center text-center">
+        <div className="final-orb breath-ring pointer-events-none absolute left-1/2 top-[50%] h-[60vw] w-[60vw] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.035]" />
+        <div className="simple-reveal relative z-10 mx-auto flex h-full max-w-[1320px] flex-col items-center justify-center pb-24 text-center sm:pb-20">
           <div className="text-[9px] font-semibold tracking-[.22em] text-white/20">BITLEAP · OPEN WHEN NEEDED</div>
           <h2 className="cn-display mt-7 flex max-w-[1160px] flex-col items-center gap-[.12em] text-[clamp(54px,7.9vw,120px)] font-medium">
             <span className="block">找到工具。</span>
@@ -1407,7 +2351,7 @@ export default function BitLeapIntroFlowtyV2() {
           <Link href="/" className="mt-9 inline-flex items-center gap-5 rounded-full bg-white px-7 py-4 text-[10px] font-semibold text-black transition hover:gap-6"><span>探索全部工具</span><Arrow /></Link>
         </div>
 
-        <footer className="relative z-10 mx-auto flex max-w-[1480px] flex-col gap-4 border-t border-white/[.07] pt-5 text-[8px] text-white/18 sm:flex-row sm:items-center sm:justify-between">
+        <footer className="absolute inset-x-5 bottom-5 z-10 mx-auto flex max-w-[1480px] flex-col gap-4 border-t border-white/[.07] pt-5 text-[8px] text-white/18 sm:inset-x-8 sm:flex-row sm:items-center sm:justify-between lg:inset-x-10">
           <span className="text-[11px] font-black tracking-[-.04em] text-white/60">BitLeap</span>
           <span>100 TOOLS · MADE FOR THE SMALL THINGS</span>
           <div className="flex gap-5"><Link href="/" className="hover:text-white/50">Home</Link><Link href="/" className="hover:text-white/50">Tools</Link></div>

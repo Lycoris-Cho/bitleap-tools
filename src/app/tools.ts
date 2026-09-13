@@ -192,5 +192,21 @@ export const tools: Tool[] = [
     icon: "Radius",
     category: "日常工具",
   },
+  {
+    id: "character-poster",
+    title: "人物海报制作",
+    description: "上传喜欢的人物图片，自定义配色/文字，打造只属于自己的人物海报",
+    href: "/tools/character-poster",
+    icon: "Cannabis",
+    category: "趣味工具",
+  },
+  {
+    id: "day-night",
+    title: "js昼夜更替",
+    description: "纯js的昼夜更替（源于“在这里”导航demo示例）",
+    href: "/tools/day-night",
+    icon: "Clock",
+    category: "趣味工具",
+  },
   { id: 'uiverse', title: 'Uiverse', description: '集合前端简约精美UI的组件库', href: 'https://uiverse.io/', icon: 'Presentation', category: '灵感与API', target: '_blank' },
 ]

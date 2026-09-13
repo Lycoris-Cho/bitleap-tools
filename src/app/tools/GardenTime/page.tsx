@@ -323,6 +323,34 @@ const leaves: LeafAttachment[] = [
   { path: "nw-upper-a", t: 0.5, side: 1, scale: 0.6, tone: "sage", pair: true },
   { path: "nw-upper-b", t: 0.55, side: -1, scale: 0.48, tone: "light" },
   { path: "nw-lower-a", t: 0.52, side: -1, scale: 0.55, tone: "olive", pair: true },
+
+  // Extra foliage — smaller leaves used to make the crown feel fuller
+  // without overpowering the flowers or hiding the stem structure.
+  { path: "n-base", t: 0.28, side: 1, scale: 0.56, tone: "sage" },
+  { path: "n-tip", t: 0.3, side: -1, scale: 0.46, tone: "light" },
+  { path: "ne-base", t: 0.7, side: 1, scale: 0.54, tone: "olive" },
+  { path: "ne-tip", t: 0.3, side: -1, scale: 0.45, tone: "light" },
+  { path: "e-base", t: 0.72, side: 1, scale: 0.54, tone: "sage" },
+  { path: "e-tip", t: 0.28, side: -1, scale: 0.45, tone: "olive" },
+  { path: "se-base", t: 0.72, side: -1, scale: 0.53, tone: "deep" },
+  { path: "se-tip", t: 0.3, side: 1, scale: 0.46, tone: "light" },
+  { path: "s-base", t: 0.28, side: -1, scale: 0.55, tone: "sage" },
+  { path: "s-tip", t: 0.3, side: 1, scale: 0.46, tone: "olive" },
+  { path: "sw-base", t: 0.72, side: 1, scale: 0.53, tone: "deep" },
+  { path: "sw-tip", t: 0.3, side: -1, scale: 0.45, tone: "light" },
+  { path: "w-base", t: 0.72, side: -1, scale: 0.54, tone: "sage" },
+  { path: "w-tip", t: 0.28, side: 1, scale: 0.45, tone: "olive" },
+  { path: "nw-base", t: 0.7, side: -1, scale: 0.54, tone: "sage" },
+  { path: "nw-tip", t: 0.3, side: 1, scale: 0.45, tone: "light" },
+
+  { path: "n-left-a", t: 0.76, side: -1, scale: 0.46, tone: "light" },
+  { path: "ne-upper-a", t: 0.76, side: 1, scale: 0.46, tone: "olive" },
+  { path: "e-up-a", t: 0.76, side: 1, scale: 0.46, tone: "light" },
+  { path: "se-upper-a", t: 0.76, side: 1, scale: 0.46, tone: "sage" },
+  { path: "s-right-a", t: 0.76, side: 1, scale: 0.46, tone: "light" },
+  { path: "sw-upper-a", t: 0.76, side: -1, scale: 0.46, tone: "olive" },
+  { path: "w-up-a", t: 0.76, side: -1, scale: 0.46, tone: "light" },
+  { path: "nw-upper-a", t: 0.76, side: -1, scale: 0.46, tone: "sage" },
 ];
 
 const flowers: FlowerAttachment[] = [
@@ -343,6 +371,17 @@ const flowers: FlowerAttachment[] = [
   { path: "sw-upper-b", t: 1, kind: "daisy", tone: "lilac", scale: 0.7 },
   { path: "w-up-b", t: 1, kind: "blossom", tone: "blue", scale: 0.72 },
   { path: "nw-upper-b", t: 1, kind: "star", tone: "ivory", scale: 0.68 },
+
+  // A few smaller secondary blooms to make the garden richer,
+  // while keeping the eight main terminal flowers dominant.
+  { path: "n-right-a", t: 0.86, kind: "star", tone: "ivory", scale: 0.5, angle: -8 },
+  { path: "ne-lower-a", t: 0.84, kind: "blossom", tone: "lilac", scale: 0.54, angle: 7 },
+  { path: "e-down-a", t: 0.86, kind: "daisy", tone: "gold", scale: 0.5, angle: 8 },
+  { path: "se-lower-a", t: 0.84, kind: "bell", tone: "blush", scale: 0.52, angle: -6 },
+  { path: "s-left-a", t: 0.86, kind: "star", tone: "blue", scale: 0.5, angle: 6 },
+  { path: "sw-lower-a", t: 0.84, kind: "blossom", tone: "ivory", scale: 0.54, angle: -7 },
+  { path: "w-down-a", t: 0.86, kind: "daisy", tone: "blush", scale: 0.5, angle: -8 },
+  { path: "nw-lower-a", t: 0.84, kind: "bell", tone: "lilac", scale: 0.52, angle: 7 },
 ];
 
 const buds: BudAttachment[] = [
@@ -408,6 +447,8 @@ function makeSmoothWrapSegments(
   half: 'top' | 'bottom',
   angles: number[],
   radii: number[],
+  prefix = 'wrap',
+  baseWidth = 1.55,
 ): RimVine[] {
   const pts = angles.map((angle, index) => polarPoint(angle, radii[index] ?? WRAP_OUTER_RADIUS));
 
@@ -419,9 +460,9 @@ function makeSmoothWrapSegments(
     const isFront = index % 2 === 0;
 
     return {
-      id: isFront ? `wrap-${half}-front-${index + 1}` : `wrap-${half}-back-${index + 1}`,
+      id: isFront ? `${prefix}-${half}-front-${index + 1}` : `${prefix}-${half}-back-${index + 1}`,
       d: cubicPathFromCatmull(p0, p1, p2, p3, 0.78),
-      width: Math.max(1.18, 1.55 - index * 0.035),
+      width: Math.max(0.82, baseWidth - index * 0.028),
     };
   });
 }
@@ -457,6 +498,38 @@ const bottomRadii = [
 const topWrapSegments = makeSmoothWrapSegments('top', topAngles, topRadii);
 const bottomWrapSegments = makeSmoothWrapSegments('bottom', bottomAngles, bottomRadii);
 
+// Second coil: pulled slightly inward and phase-shifted harder, so the peaks do not line up.
+const topAngles2 = [180, 191, 214, 243, 274, 300, 321, 344, 360];
+const bottomAngles2 = [0, 12, 35, 65, 97, 123, 145, 168, 180];
+const topRadii2 = [
+  WRAP_OUTER_RADIUS - 10, WRAP_INNER_RADIUS + 14, WRAP_OUTER_RADIUS + 3,
+  WRAP_INNER_RADIUS + 1, WRAP_OUTER_RADIUS + 7, WRAP_INNER_RADIUS + 12,
+  WRAP_OUTER_RADIUS - 5, WRAP_INNER_RADIUS + 13, WRAP_OUTER_RADIUS - 10,
+];
+const bottomRadii2 = [
+  WRAP_OUTER_RADIUS - 9, WRAP_INNER_RADIUS + 13, WRAP_OUTER_RADIUS + 4,
+  WRAP_INNER_RADIUS + 2, WRAP_OUTER_RADIUS + 8, WRAP_INNER_RADIUS + 11,
+  WRAP_OUTER_RADIUS - 4, WRAP_INNER_RADIUS + 14, WRAP_OUTER_RADIUS - 9,
+];
+const topWrapSegments2 = makeSmoothWrapSegments('top', topAngles2, topRadii2, 'wrap2', 1.24);
+const bottomWrapSegments2 = makeSmoothWrapSegments('bottom', bottomAngles2, bottomRadii2, 'wrap2', 1.24);
+
+// Third coil: pushed outward and offset even further to create a DNA-like intertwined rhythm.
+const topAngles3 = [180, 218, 242, 264, 288, 313, 335, 352, 360];
+const bottomAngles3 = [0, 33, 57, 80, 104, 129, 152, 170, 180];
+const topRadii3 = [
+  WRAP_OUTER_RADIUS + 12, WRAP_INNER_RADIUS - 1, WRAP_OUTER_RADIUS + 16,
+  WRAP_INNER_RADIUS - 4, WRAP_OUTER_RADIUS + 17, WRAP_INNER_RADIUS,
+  WRAP_OUTER_RADIUS + 13, WRAP_INNER_RADIUS + 1, WRAP_OUTER_RADIUS + 12,
+];
+const bottomRadii3 = [
+  WRAP_OUTER_RADIUS + 12, WRAP_INNER_RADIUS, WRAP_OUTER_RADIUS + 15,
+  WRAP_INNER_RADIUS - 3, WRAP_OUTER_RADIUS + 17, WRAP_INNER_RADIUS - 1,
+  WRAP_OUTER_RADIUS + 13, WRAP_INNER_RADIUS + 1, WRAP_OUTER_RADIUS + 12,
+];
+const topWrapSegments3 = makeSmoothWrapSegments('top', topAngles3, topRadii3, 'wrap3', 0.98);
+const bottomWrapSegments3 = makeSmoothWrapSegments('bottom', bottomAngles3, bottomRadii3, 'wrap3', 0.98);
+
 const rimVines: RimVine[] = [
   {
     id: 'wrap-r-bridge',
@@ -470,6 +543,10 @@ const rimVines: RimVine[] = [
   },
   ...topWrapSegments,
   ...bottomWrapSegments,
+  ...topWrapSegments2,
+  ...bottomWrapSegments2,
+  ...topWrapSegments3,
+  ...bottomWrapSegments3,
   {
     id: 'wrap-r-curl',
     d: 'M868 500 C883 494 894 482 893 468 C891 454 878 448 867 452 C857 456 854 468 861 478 C866 486 874 489 882 489',
@@ -494,6 +571,60 @@ const rimVineLeaves: LeafAttachment[] = [
   { path: 'wrap-bottom-front-3', t: 0.48, side: -1, scale: 0.43, tone: 'light', pair: true },
   { path: 'wrap-bottom-front-5', t: 0.56, side: 1, scale: 0.41, tone: 'olive' },
   { path: 'wrap-bottom-front-7', t: 0.48, side: -1, scale: 0.38, tone: 'deep', pair: true },
+
+  // Denser rim foliage, kept deliberately small so the coil remains readable.
+  { path: 'wrap-top-front-1', t: 0.24, side: 1, scale: 0.34, tone: 'light' },
+  { path: 'wrap-top-front-3', t: 0.30, side: -1, scale: 0.35, tone: 'sage' },
+  { path: 'wrap-top-front-5', t: 0.72, side: 1, scale: 0.34, tone: 'deep' },
+  { path: 'wrap-top-front-7', t: 0.34, side: -1, scale: 0.33, tone: 'olive' },
+  { path: 'wrap-bottom-front-1', t: 0.28, side: -1, scale: 0.34, tone: 'light' },
+  { path: 'wrap-bottom-front-3', t: 0.74, side: 1, scale: 0.35, tone: 'sage' },
+  { path: 'wrap-bottom-front-5', t: 0.28, side: -1, scale: 0.34, tone: 'deep' },
+  { path: 'wrap-bottom-front-7', t: 0.72, side: 1, scale: 0.33, tone: 'olive' },
+
+  // Companion coil 02 — medium-small foliage.
+  { path: 'wrap2-top-front-1', t: 0.36, side: -1, scale: 0.34, tone: 'sage', pair: true },
+  { path: 'wrap2-top-front-3', t: 0.58, side: 1, scale: 0.31, tone: 'light' },
+  { path: 'wrap2-top-front-5', t: 0.42, side: -1, scale: 0.33, tone: 'olive', pair: true },
+  { path: 'wrap2-top-front-7', t: 0.62, side: 1, scale: 0.30, tone: 'deep' },
+  { path: 'wrap2-bottom-front-1', t: 0.55, side: 1, scale: 0.32, tone: 'light' },
+  { path: 'wrap2-bottom-front-3', t: 0.38, side: -1, scale: 0.34, tone: 'sage', pair: true },
+  { path: 'wrap2-bottom-front-5', t: 0.62, side: 1, scale: 0.31, tone: 'olive' },
+  { path: 'wrap2-bottom-front-7', t: 0.42, side: -1, scale: 0.30, tone: 'deep' },
+
+  // Companion coil 03 — sparse outer foliage for silhouette fullness.
+  { path: 'wrap3-top-front-1', t: 0.58, side: 1, scale: 0.29, tone: 'light' },
+  { path: 'wrap3-top-front-3', t: 0.36, side: -1, scale: 0.31, tone: 'sage' },
+  { path: 'wrap3-top-front-5', t: 0.64, side: 1, scale: 0.29, tone: 'olive', pair: true },
+  { path: 'wrap3-top-front-7', t: 0.42, side: -1, scale: 0.28, tone: 'deep' },
+  { path: 'wrap3-bottom-front-1', t: 0.40, side: -1, scale: 0.29, tone: 'sage' },
+  { path: 'wrap3-bottom-front-3', t: 0.62, side: 1, scale: 0.31, tone: 'light' },
+  { path: 'wrap3-bottom-front-5', t: 0.36, side: -1, scale: 0.29, tone: 'olive' },
+  { path: 'wrap3-bottom-front-7', t: 0.60, side: 1, scale: 0.28, tone: 'deep' },
+
+  // Extra wreath foliage — slightly denser, still small enough to keep the vines readable.
+  { path: 'wrap2-top-front-1', t: 0.72, side: 1, scale: 0.28, tone: 'light' },
+  { path: 'wrap2-top-front-3', t: 0.26, side: -1, scale: 0.30, tone: 'deep' },
+  { path: 'wrap2-top-front-5', t: 0.70, side: 1, scale: 0.29, tone: 'sage' },
+  { path: 'wrap2-top-front-7', t: 0.22, side: -1, scale: 0.27, tone: 'olive' },
+  { path: 'wrap2-bottom-front-1', t: 0.24, side: -1, scale: 0.28, tone: 'deep' },
+  { path: 'wrap2-bottom-front-3', t: 0.72, side: 1, scale: 0.30, tone: 'light' },
+  { path: 'wrap2-bottom-front-5', t: 0.26, side: -1, scale: 0.29, tone: 'sage' },
+  { path: 'wrap2-bottom-front-7', t: 0.74, side: 1, scale: 0.27, tone: 'olive' },
+
+  { path: 'wrap3-top-front-1', t: 0.24, side: -1, scale: 0.26, tone: 'sage' },
+  { path: 'wrap3-top-front-3', t: 0.70, side: 1, scale: 0.27, tone: 'light' },
+  { path: 'wrap3-top-front-5', t: 0.26, side: -1, scale: 0.26, tone: 'deep' },
+  { path: 'wrap3-top-front-7', t: 0.74, side: 1, scale: 0.25, tone: 'olive' },
+  { path: 'wrap3-bottom-front-1', t: 0.72, side: 1, scale: 0.26, tone: 'light' },
+  { path: 'wrap3-bottom-front-3', t: 0.24, side: -1, scale: 0.27, tone: 'sage' },
+  { path: 'wrap3-bottom-front-5', t: 0.74, side: 1, scale: 0.26, tone: 'olive' },
+  { path: 'wrap3-bottom-front-7', t: 0.26, side: -1, scale: 0.25, tone: 'deep' },
+
+  { path: 'wrap2-top-front-3', t: 0.84, side: 1, scale: 0.28, tone: 'light' },
+  { path: 'wrap2-bottom-front-5', t: 0.12, side: -1, scale: 0.27, tone: 'olive' },
+  { path: 'wrap3-top-front-5', t: 0.84, side: 1, scale: 0.24, tone: 'sage' },
+  { path: 'wrap3-bottom-front-3', t: 0.12, side: -1, scale: 0.25, tone: 'light' },
 ];
 
 const rimVineBuds: BudAttachment[] = [
@@ -501,6 +632,18 @@ const rimVineBuds: BudAttachment[] = [
   { path: 'wrap-top-front-7', t: 0.2, scale: 0.44 },
   { path: 'wrap-bottom-front-3', t: 0.24, scale: 0.46 },
   { path: 'wrap-bottom-front-5', t: 0.76, scale: 0.44 },
+  { path: 'wrap2-top-front-5', t: 0.78, scale: 0.40 },
+  { path: 'wrap2-bottom-front-3', t: 0.30, scale: 0.40 },
+  { path: 'wrap3-top-front-7', t: 0.72, scale: 0.36 },
+  { path: 'wrap3-bottom-front-5', t: 0.26, scale: 0.36 },
+  { path: 'wrap2-top-front-1', t: 0.60, scale: 0.36 },
+  { path: 'wrap2-bottom-front-7', t: 0.58, scale: 0.35 },
+  { path: 'wrap3-top-front-3', t: 0.76, scale: 0.33 },
+  { path: 'wrap3-bottom-front-1', t: 0.34, scale: 0.33 },
+  { path: 'wrap2-top-front-7', t: 0.84, scale: 0.34 },
+  { path: 'wrap2-bottom-front-5', t: 0.14, scale: 0.33 },
+  { path: 'wrap3-top-front-5', t: 0.86, scale: 0.31 },
+  { path: 'wrap3-bottom-front-3', t: 0.16, scale: 0.31 },
 ];
 
 const rimVineFlowers: FlowerAttachment[] = [
@@ -508,6 +651,34 @@ const rimVineFlowers: FlowerAttachment[] = [
   { path: 'wrap-top-front-5', t: 0.62, kind: 'daisy', tone: 'gold', scale: 0.52 },
   { path: 'wrap-bottom-front-3', t: 0.62, kind: 'star', tone: 'blue', scale: 0.5 },
   { path: 'wrap-bottom-front-7', t: 0.34, kind: 'blossom', tone: 'lilac', scale: 0.54 },
+
+  { path: 'wrap-top-front-3', t: 0.34, kind: 'star', tone: 'ivory', scale: 0.42, angle: 8 },
+  { path: 'wrap-top-front-7', t: 0.72, kind: 'bell', tone: 'blue', scale: 0.44, angle: -7 },
+  { path: 'wrap-bottom-front-1', t: 0.68, kind: 'daisy', tone: 'blush', scale: 0.42, angle: -6 },
+  { path: 'wrap-bottom-front-5', t: 0.34, kind: 'blossom', tone: 'gold', scale: 0.44, angle: 7 },
+
+  // A few blossoms on the companion coils — still one wreath, not three separate rings.
+  { path: 'wrap2-top-front-3', t: 0.70, kind: 'blossom', tone: 'ivory', scale: 0.40, angle: -5 },
+  { path: 'wrap2-top-front-7', t: 0.36, kind: 'daisy', tone: 'blush', scale: 0.39, angle: 6 },
+  { path: 'wrap2-bottom-front-1', t: 0.72, kind: 'star', tone: 'blue', scale: 0.38, angle: -8 },
+  { path: 'wrap2-bottom-front-5', t: 0.44, kind: 'blossom', tone: 'lilac', scale: 0.40, angle: 5 },
+  { path: 'wrap3-top-front-5', t: 0.36, kind: 'bell', tone: 'blue', scale: 0.35, angle: -6 },
+  { path: 'wrap3-bottom-front-3', t: 0.66, kind: 'daisy', tone: 'gold', scale: 0.35, angle: 7 },
+
+  // Extra small blossoms to make the single wreath feel fuller.
+  { path: 'wrap2-top-front-1', t: 0.78, kind: 'star', tone: 'lilac', scale: 0.34, angle: 8 },
+  { path: 'wrap2-top-front-5', t: 0.24, kind: 'bell', tone: 'blue', scale: 0.35, angle: -9 },
+  { path: 'wrap2-bottom-front-3', t: 0.78, kind: 'blossom', tone: 'blush', scale: 0.35, angle: 7 },
+  { path: 'wrap2-bottom-front-7', t: 0.30, kind: 'daisy', tone: 'ivory', scale: 0.34, angle: -6 },
+
+  { path: 'wrap3-top-front-1', t: 0.34, kind: 'daisy', tone: 'ivory', scale: 0.31, angle: -7 },
+  { path: 'wrap3-top-front-7', t: 0.62, kind: 'blossom', tone: 'blush', scale: 0.32, angle: 6 },
+  { path: 'wrap3-bottom-front-1', t: 0.68, kind: 'star', tone: 'blue', scale: 0.31, angle: -8 },
+  { path: 'wrap3-bottom-front-5', t: 0.30, kind: 'bell', tone: 'lilac', scale: 0.32, angle: 7 },
+  { path: 'wrap2-top-front-7', t: 0.82, kind: 'star', tone: 'ivory', scale: 0.33, angle: 9 },
+  { path: 'wrap2-bottom-front-5', t: 0.18, kind: 'bell', tone: 'gold', scale: 0.33, angle: -8 },
+  { path: 'wrap3-top-front-5', t: 0.84, kind: 'daisy', tone: 'blush', scale: 0.30, angle: 6 },
+  { path: 'wrap3-bottom-front-3', t: 0.18, kind: 'star', tone: 'blue', scale: 0.29, angle: -7 },
 ];
 
 const leafFill: Record<LeafTone, string> = {
@@ -686,6 +857,47 @@ export default function ChronoGardenTool() {
         ...rimVineBack,
         ...rimVineFront,
       ];
+
+      // Three independent wreath coils.  The first coil keeps the original wrap-* ids,
+      // while the companion coils use wrap2-* / wrap3-* ids.  Keeping them separate lets
+      // the growth animation overlap naturally instead of drawing one huge queue.
+      const rimCoil1 = [...rimVineBack, ...rimVineFront].filter(
+        (path) => !path.id.startsWith("wrap2-") && !path.id.startsWith("wrap3-"),
+      );
+      const rimCoil2 = [...rimVineBack, ...rimVineFront].filter((path) =>
+        path.id.startsWith("wrap2-"),
+      );
+      const rimCoil3 = [...rimVineBack, ...rimVineFront].filter((path) =>
+        path.id.startsWith("wrap3-"),
+      );
+
+      const vineLeaves1 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap-"] .vine-leaf-grow'),
+      );
+      const vineLeaves2 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap2-"] .vine-leaf-grow'),
+      );
+      const vineLeaves3 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap3-"] .vine-leaf-grow'),
+      );
+      const vineBuds1 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap-"] .vine-bud-grow'),
+      );
+      const vineBuds2 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap2-"] .vine-bud-grow'),
+      );
+      const vineBuds3 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap3-"] .vine-bud-grow'),
+      );
+      const vineFlowers1 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap-"] .vine-flower-grow'),
+      );
+      const vineFlowers2 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap2-"] .vine-flower-grow'),
+      );
+      const vineFlowers3 = Array.from(
+        svg.querySelectorAll<SVGGElement>('[data-path^="wrap3-"] .vine-flower-grow'),
+      );
       const seasonalLeaves = Array.from(
         svg.querySelectorAll<SVGGElement>(".leaf-grow, .vine-leaf-grow"),
       );
@@ -811,19 +1023,21 @@ export default function ChronoGardenTool() {
       });
 
       gsap.to(".chrono-dial-glint", {
-        opacity: 0.34,
-        duration: 3.2,
+        opacity: 0.38,
+        rotate: 360,
+        duration: 24,
         repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
+        ease: "none",
+        svgOrigin: `${CENTER} ${CENTER}`,
       });
 
       gsap.to(".pointer-ring", {
-        scale: 1.07,
-        duration: 2.8,
+        scale: 1.085,
+        opacity: 0.78,
+        duration: 3.25,
         repeat: -1,
         yoyo: true,
-        stagger: 0.18,
+        stagger: 0.24,
         ease: "sine.inOut",
         transformOrigin: "50% 50%",
       });
@@ -896,15 +1110,16 @@ export default function ChronoGardenTool() {
       });
 
       gsap.to(".ambient-star", {
-        opacity: 0.22,
-        scale: 1.3,
-        duration: 1.9,
+        opacity: () => gsap.utils.random(0.18, 0.72),
+        scale: () => gsap.utils.random(0.8, 1.55),
+        duration: () => gsap.utils.random(1.4, 3.8),
         stagger: {
-          each: 0.045,
+          each: 0.038,
           from: "random",
         },
         repeat: -1,
         yoyo: true,
+        repeatRefresh: true,
         ease: "sine.inOut",
       });
 
@@ -927,10 +1142,15 @@ export default function ChronoGardenTool() {
       });
 
       gsap.to(".flower-sway", {
-        rotate: 1.6,
-        duration: 5.4,
+        rotate: 1.65,
+        scale: 1.025,
+        duration: 5.6,
         repeat: -1,
         yoyo: true,
+        stagger: {
+          each: 0.07,
+          from: "random",
+        },
         ease: "sine.inOut",
         transformOrigin: "0px 0px",
       });
@@ -954,17 +1174,58 @@ export default function ChronoGardenTool() {
       });
 
       gsap.to(".pollen-dot", {
-        y: -8,
-        x: 3,
-        opacity: 0.42,
-        duration: 3.8,
+        y: () => gsap.utils.random(-16, -6),
+        x: () => gsap.utils.random(-7, 8),
+        opacity: () => gsap.utils.random(0.24, 0.58),
+        scale: () => gsap.utils.random(0.82, 1.25),
+        duration: () => gsap.utils.random(3.1, 6.2),
         stagger: {
-          each: 0.17,
+          each: 0.13,
           from: "random",
         },
         repeat: -1,
         yoyo: true,
+        repeatRefresh: true,
         ease: "sine.inOut",
+      });
+
+      // Ambient polish: these motions are deliberately slow and low-amplitude.
+      gsap.to(".moon-halo", {
+        scale: 1.09,
+        opacity: 0.29,
+        duration: 4.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        transformOrigin: "50% 50%",
+      });
+
+      gsap.to(".sunset-orb", {
+        xPercent: 4,
+        yPercent: 2.5,
+        scale: 1.045,
+        duration: 10.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      gsap.to(".dawn-orb", {
+        xPercent: -3.5,
+        yPercent: -2,
+        scale: 1.04,
+        duration: 11.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      gsap.from(".ui-soft-surface", {
+        y: 7,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.08,
+        ease: "power3.out",
       });
 
       const growth = gsap.timeline({
@@ -1062,91 +1323,176 @@ export default function ChronoGardenTool() {
           },
           "-=0.38",
         )
-        .to(
-          ".growth-glow",
-          {
-            opacity: 0.11,
-            scale: 1.08,
-            duration: 1.5,
-            yoyo: true,
-            repeat: 1,
-            transformOrigin: "50% 50%",
-            ease: "sine.inOut",
-          },
-          "-=0.25",
-        )
-        .to({}, { duration: 1.15 })
+        // Start the wreath while the inner flowers are still opening.  This removes the
+        // old dead pause and makes the growth feel like one continuous outward expansion.
+        .addLabel("wreathStart", "-=1.55")
         .to(
           rimVineBridge,
           {
             strokeDashoffset: 0,
-            duration: 2.8,
-            stagger: 0.35,
-            ease: "power1.inOut",
-          },
-        )
-        .to(
-          rimVineBack,
-          {
-            strokeDashoffset: 0,
-            duration: 5.6,
-            stagger: 0.72,
-            ease: "power1.inOut",
-          },
-          "-=0.8",
-        )
-        .to(
-          rimVineFront,
-          {
-            strokeDashoffset: 0,
-            duration: 5.9,
-            stagger: 0.76,
-            ease: "power1.inOut",
-          },
-          "-=4.35",
-        )
-        .to(
-          ".vine-leaf-grow",
-          {
-            scale: 1,
-            opacity: 0.92,
-            duration: 0.8,
+            duration: 1.45,
             stagger: 0.14,
-            ease: "back.out(1.2)",
+            ease: "power1.inOut",
           },
-          "-=4.8",
+          "wreathStart",
+        )
+
+        // Coil 01 — primary vine.
+        .to(
+          rimCoil1,
+          {
+            strokeDashoffset: 0,
+            duration: 3.15,
+            stagger: 0.20,
+            ease: "power1.inOut",
+          },
+          "wreathStart+=0.18",
         )
         .to(
-          ".vine-bud-grow",
+          vineLeaves1,
           {
             scale: 1,
             opacity: 0.92,
-            duration: 0.75,
-            stagger: 0.22,
-            ease: "back.out(1.25)",
+            duration: 0.58,
+            stagger: 0.065,
+            ease: "back.out(1.18)",
           },
-          "-=2.4",
+          "wreathStart+=0.85",
         )
         .to(
-          ".vine-flower-grow",
+          vineBuds1,
+          {
+            scale: 1,
+            opacity: 0.92,
+            duration: 0.55,
+            stagger: 0.10,
+            ease: "back.out(1.22)",
+          },
+          "wreathStart+=1.28",
+        )
+        .to(
+          vineFlowers1,
           {
             scale: 1,
             opacity: 0.96,
-            duration: 1.05,
-            stagger: 0.28,
-            ease: "back.out(1.4)",
+            duration: 0.78,
+            stagger: 0.12,
+            ease: "back.out(1.35)",
           },
-          "-=1.6",
+          "wreathStart+=1.58",
+        )
+
+        // Coil 02 — starts shortly after coil 01, with a different cadence.
+        .to(
+          rimCoil2,
+          {
+            strokeDashoffset: 0,
+            duration: 2.85,
+            stagger: 0.18,
+            ease: "power1.inOut",
+          },
+          "wreathStart+=0.62",
+        )
+        .to(
+          vineLeaves2,
+          {
+            scale: 1,
+            opacity: 0.90,
+            duration: 0.55,
+            stagger: 0.07,
+            ease: "back.out(1.16)",
+          },
+          "wreathStart+=1.22",
+        )
+        .to(
+          vineBuds2,
+          {
+            scale: 1,
+            opacity: 0.90,
+            duration: 0.52,
+            stagger: 0.11,
+            ease: "back.out(1.2)",
+          },
+          "wreathStart+=1.65",
+        )
+        .to(
+          vineFlowers2,
+          {
+            scale: 1,
+            opacity: 0.94,
+            duration: 0.74,
+            stagger: 0.13,
+            ease: "back.out(1.32)",
+          },
+          "wreathStart+=1.92",
+        )
+
+        // Coil 03 — the lightest outer strand trails the others rather than matching them.
+        .to(
+          rimCoil3,
+          {
+            strokeDashoffset: 0,
+            duration: 2.55,
+            stagger: 0.16,
+            ease: "power1.inOut",
+          },
+          "wreathStart+=1.05",
+        )
+        .to(
+          vineLeaves3,
+          {
+            scale: 1,
+            opacity: 0.88,
+            duration: 0.52,
+            stagger: 0.075,
+            ease: "back.out(1.14)",
+          },
+          "wreathStart+=1.56",
+        )
+        .to(
+          vineBuds3,
+          {
+            scale: 1,
+            opacity: 0.88,
+            duration: 0.50,
+            stagger: 0.11,
+            ease: "back.out(1.18)",
+          },
+          "wreathStart+=1.93",
+        )
+        .to(
+          vineFlowers3,
+          {
+            scale: 1,
+            opacity: 0.93,
+            duration: 0.70,
+            stagger: 0.14,
+            ease: "back.out(1.3)",
+          },
+          "wreathStart+=2.18",
         )
         .to(
           rimVineCurl,
           {
             strokeDashoffset: 0,
-            duration: 2.4,
-            stagger: 0.45,
+            duration: 1.25,
+            stagger: 0.22,
             ease: "power2.inOut",
           },
-          "-=1.2",
+          "wreathStart+=2.35",
+        )
+        .to(
+          ".growth-glow",
+          {
+            opacity: 0.11,
+            scale: 1.08,
+            duration: 1.25,
+            yoyo: true,
+            repeat: 1,
+            transformOrigin: "50% 50%",
+            ease: "sine.inOut",
+          },
+          "wreathStart+=1.0",
         );
 
       growthTimelineRef.current = growth;
@@ -1525,16 +1871,16 @@ export default function ChronoGardenTool() {
         .to(
           ".dusk-layer",
           {
-            opacity: 0.52,
-            duration: 7.5,
+            opacity: 0.46,
+            duration: 8.2,
           },
           PHASE_TIME.dusk,
         )
         .to(
           ".night-layer",
           {
-            opacity: 0.22,
-            duration: 8.5,
+            opacity: 0.18,
+            duration: 8.8,
           },
           PHASE_TIME.dusk + 1.5,
         )
@@ -1546,6 +1892,23 @@ export default function ChronoGardenTool() {
             duration: 6.2,
           },
           PHASE_TIME.dusk + 0.5,
+        )
+        .to(
+          ".plant-path",
+          {
+            stroke: (_index, target: SVGPathElement) =>
+              target.dataset.tone === "soft" ? "#8f9477" : "#767b63",
+            duration: 7.2,
+          },
+          PHASE_TIME.dusk + 0.2,
+        )
+        .to(
+          ".rim-vine-path",
+          {
+            stroke: "#849170",
+            duration: 7.2,
+          },
+          PHASE_TIME.dusk + 0.25,
         )
         .to(
           ".moon-symbol",
@@ -1560,8 +1923,8 @@ export default function ChronoGardenTool() {
         .to(
           ".night-layer",
           {
-            opacity: 1,
-            duration: 7.5,
+            opacity: 0.96,
+            duration: 8.2,
           },
           PHASE_TIME.night,
         )
@@ -1667,8 +2030,8 @@ export default function ChronoGardenTool() {
         .to(
           ".plant-path, .rim-vine-path",
           {
-            stroke: "#7e978b",
-            duration: 7,
+            stroke: "#7a9187",
+            duration: 7.4,
           },
           PHASE_TIME.night,
         )
@@ -1689,6 +2052,25 @@ export default function ChronoGardenTool() {
           },
           PHASE_TIME.night,
         )
+        .to(
+          ".dial-breath",
+          {
+            opacity: 0.3,
+            scale: 1.03,
+            duration: 6.5,
+            svgOrigin: `${CENTER} ${CENTER}`,
+          },
+          PHASE_TIME.night,
+        )
+        .to(
+          ".botanical-system",
+          {
+            scale: 0.992,
+            transformOrigin: "50% 50%",
+            duration: 7,
+          },
+          PHASE_TIME.night,
+        )
 
         .to(
           ".dawn-orb",
@@ -1703,8 +2085,8 @@ export default function ChronoGardenTool() {
         .to(
           ".dawn-layer",
           {
-            opacity: 0.54,
-            duration: 5.5,
+            opacity: 0.42,
+            duration: 6.4,
           },
           PHASE_TIME.dawn,
         )
@@ -1815,8 +2197,8 @@ export default function ChronoGardenTool() {
         .to(
           ".botanical-system",
           {
-            opacity: 1,
-            duration: 7.5,
+            opacity: 0.96,
+            duration: 8.2,
           },
           PHASE_TIME.dawn,
         )
@@ -1825,6 +2207,25 @@ export default function ChronoGardenTool() {
           {
             fill: "#ede7dc",
             stroke: "#514b43",
+            duration: 7.5,
+          },
+          PHASE_TIME.dawn,
+        )
+        .to(
+          ".dial-breath",
+          {
+            opacity: 0.22,
+            scale: 1.018,
+            duration: 7,
+            svgOrigin: `${CENTER} ${CENTER}`,
+          },
+          PHASE_TIME.dawn,
+        )
+        .to(
+          ".botanical-system",
+          {
+            scale: 1,
+            transformOrigin: "50% 50%",
             duration: 7.5,
           },
           PHASE_TIME.dawn,
@@ -1985,11 +2386,16 @@ export default function ChronoGardenTool() {
         .chrono-breadcrumb-clean svg { width: 13px; height: 13px; }
         .chrono-dial-glint { mix-blend-mode: screen; }
         .chrono-micro-label { letter-spacing: .22em; }
+        .ui-soft-surface { box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 16px 50px -38px rgba(18,18,16,.42); }
+        .chrono-panel-scroll { scroll-behavior: smooth; }
+        @media (prefers-reduced-motion: reduce) {
+          .ui-soft-surface { transition: none !important; }
+        }
       `}</style>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_43%,#fffdf7_0%,#f3eddf_57%,#ddd8cf_100%)]" />
-      <div className="dusk-layer pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(218,151,116,.36)_0%,rgba(176,121,137,.2)_43%,rgba(73,84,111,.18)_100%)] opacity-0" />
-      <div className="night-layer pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_47%,rgba(66,103,140,.2),transparent_31%),radial-gradient(circle_at_86%_46%,rgba(66,103,140,.17),transparent_31%),linear-gradient(180deg,#101a2a_0%,#0a1422_50%,#07101a_100%)] opacity-0" />
-      <div className="dawn-layer pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(220,153,139,.28)_0%,rgba(236,194,157,.12)_40%,transparent_72%)] opacity-0" />
+      <div className="dusk-layer pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(224,164,126,.32)_0%,rgba(188,129,141,.18)_43%,rgba(88,97,121,.14)_100%)] opacity-0" />
+      <div className="night-layer pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_47%,rgba(72,109,145,.18),transparent_33%),radial-gradient(circle_at_86%_46%,rgba(72,109,145,.16),transparent_33%),linear-gradient(180deg,#111b2a_0%,#0b1522_50%,#08111a_100%)] opacity-0" />
+      <div className="dawn-layer pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(228,163,145,.24)_0%,rgba(242,203,166,.10)_40%,transparent_74%)] opacity-0" />
 
       <div className="sunset-orb pointer-events-none absolute left-[18%] top-[7%] h-[46vw] w-[46vw] max-h-[620px] max-w-[620px] rounded-full bg-[#e3a06e]/35 opacity-0 blur-[100px]" />
       <div className="dawn-orb pointer-events-none absolute bottom-[2%] left-[20%] h-[42vw] w-[42vw] max-h-[560px] max-w-[560px] rounded-full bg-[#f1c78d]/34 opacity-0 blur-[105px]" />
@@ -2044,7 +2450,9 @@ export default function ChronoGardenTool() {
                 type="button"
                 onClick={() => previewSeason(item)}
                 className={`rounded-full px-2.5 py-1.5 text-[7px] font-semibold tracking-[0.12em] transition ${
-                  season === item ? "bg-current text-white" : "text-current/42 hover:bg-white/20"
+                  season === item
+                    ? "bg-[#171713] text-[#f7f3ea] shadow-[0_5px_16px_-10px_rgba(0,0,0,.65)] ring-1 ring-black/10"
+                    : "text-current/42 hover:bg-white/20 hover:text-current/72"
                 }`}
               >
                 {item.slice(0, 3).toUpperCase()}
@@ -2063,7 +2471,9 @@ export default function ChronoGardenTool() {
                 type="button"
                 onClick={() => setDetailPanel(item)}
                 className={`rounded-full px-2.5 py-1.5 text-[7px] font-semibold tracking-[0.13em] transition ${
-                  detailPanel === item ? "bg-current text-white" : "text-current/36 hover:bg-white/20 hover:text-current/70"
+                  detailPanel === item
+                    ? "bg-[#171713] text-[#f7f3ea] shadow-[0_5px_16px_-10px_rgba(0,0,0,.65)] ring-1 ring-black/10"
+                    : "text-current/36 hover:bg-white/20 hover:text-current/70"
                 }`}
               >
                 {DETAIL_PANEL_LABEL[item]}
