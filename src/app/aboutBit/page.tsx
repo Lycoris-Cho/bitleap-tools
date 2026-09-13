@@ -740,10 +740,13 @@ export default function BitLeapIntroFlowtyV2() {
 
     gsap.registerPlugin(ScrollTrigger)
 
+    const isMobile = window.matchMedia("(max-width: 768px)").matches
+
     const lenis = new Lenis({
-      lerp: 0.075,
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
+      lerp: isMobile ? 0.14 : 0.075,
+      smoothWheel: !isMobile,
+      wheelMultiplier: isMobile ? 1 : 0.9,
+      touchMultiplier: 1,
       anchors: true,
     })
 
@@ -779,7 +782,7 @@ export default function BitLeapIntroFlowtyV2() {
         transformOrigin: "50% 100%",
       })
 
-      if (!reduced) {
+      if (!reduced && !isMobile) {
         gsap.from(".hero-device-wrap", {
           y: 55,
           rotation: -2,
@@ -857,7 +860,7 @@ export default function BitLeapIntroFlowtyV2() {
         })
       }
 
-      if (!reduced) {
+      if (!reduced && !isMobile) {
         gsap.to(".ambient-drift", {
           y: (index) => index % 2 === 0 ? -18 : 22,
           x: (index) => (index % 3 - 1) * 14,
@@ -1558,19 +1561,100 @@ export default function BitLeapIntroFlowtyV2() {
       })
 
       mm.add("(max-width: 768px)", () => {
+        if (!reduced) {
+          gsap.fromTo(
+            ".hero-device-wrap",
+            { y: 28, scale: 0.96, opacity: 0 },
+            { y: 0, scale: 1, opacity: 1, duration: 0.9, delay: 0.12, ease: "power3.out" },
+          )
+
+          gsap.fromTo(
+            ".hero-aurora",
+            { opacity: 0.32, scale: 0.92 },
+            {
+              opacity: 0.58,
+              scale: 1.04,
+              duration: 5.5,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              stagger: 0.45,
+            },
+          )
+        }
+
         gsap.utils.toArray<HTMLElement>(".feature-section").forEach((section) => {
-          gsap.from(section.querySelectorAll(".mobile-reveal"), {
-            y: reduced ? 0 : 28,
+          const items = section.querySelectorAll(".mobile-reveal")
+
+          gsap.from(items, {
+            y: reduced ? 0 : 24,
             opacity: 0,
-            duration: reduced ? 0.01 : 0.7,
-            stagger: 0.07,
+            duration: reduced ? 0.01 : 0.68,
+            stagger: 0.06,
             ease: "power3.out",
             scrollTrigger: {
               trigger: section,
-              start: "top 82%",
+              start: "top 86%",
               once: true,
             },
           })
+
+          if (!reduced) {
+            const visual = section.querySelector<HTMLElement>(".feature-visual")
+            if (visual) {
+              gsap.fromTo(
+                visual,
+                { scale: 0.985 },
+                {
+                  scale: 1,
+                  ease: "none",
+                  scrollTrigger: {
+                    trigger: section,
+                    start: "top 92%",
+                    end: "center 48%",
+                    scrub: 0.45,
+                  },
+                },
+              )
+            }
+          }
+        })
+
+        gsap.utils.toArray<HTMLElement>("[data-fullscreen-parallax]").forEach((section) => {
+          const image = section.querySelector<HTMLElement>("[data-parallax-image]")
+          const panel = section.querySelector<HTMLElement>(".fullscreen-parallax-panel")
+
+          if (!reduced && image) {
+            gsap.fromTo(
+              image,
+              { yPercent: -3, scale: 1.08 },
+              {
+                yPercent: 3,
+                scale: 1.03,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 0.55,
+                },
+              },
+            )
+          }
+
+          if (panel) {
+            gsap.from(panel, {
+              y: reduced ? 0 : 18,
+              opacity: 0,
+              duration: reduced ? 0.01 : 0.7,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 78%",
+                once: true,
+              },
+            })
+          }
         })
       })
 
@@ -1946,6 +2030,15 @@ export default function BitLeapIntroFlowtyV2() {
             width: calc(100vw - 32px);
           }
         }
+        .final-section {
+          min-height: 100svh;
+        }
+        .final-content {
+          box-sizing: border-box;
+          min-height: 100svh;
+          padding: clamp(84px, 10vh, 118px) 0 clamp(92px, 11vh, 128px);
+        }
+
         @media (max-width: 768px) {
           .fullscreen-parallax {
             min-height: 118svh;
@@ -2056,6 +2149,432 @@ export default function BitLeapIntroFlowtyV2() {
           72% { opacity: 1; }
           88%, 100% { transform: translateX(125%); opacity: 0; }
         }
+        @media (max-width: 768px) {
+          html,
+          body {
+            overscroll-behavior-x: none;
+          }
+
+          .flow-hero {
+            min-height: auto !important;
+          }
+
+          .flow-hero > .relative.z-10 {
+            min-height: 100svh;
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+            padding-top: max(14px, env(safe-area-inset-top)) !important;
+            padding-bottom: 18px !important;
+          }
+
+          .flow-hero nav {
+            height: 44px !important;
+          }
+
+          .flow-hero nav > a:first-child {
+            font-size: 14px !important;
+          }
+
+          .flow-hero nav > a:last-child {
+            padding: 9px 13px !important;
+            font-size: 8px !important;
+          }
+
+          .hero-main-grid {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px !important;
+            padding-top: 26px !important;
+            padding-bottom: 16px !important;
+          }
+
+          .hero-copy-parallax {
+            width: 100%;
+          }
+
+          .hero-copy-parallax h1 {
+            margin-top: 18px !important;
+            font-size: clamp(43px, 13.2vw, 68px) !important;
+            line-height: .98 !important;
+            letter-spacing: -.055em !important;
+          }
+
+          .hero-copy-parallax .flow-body {
+            max-width: 92%;
+          }
+
+          .hero-copy-parallax .flow-hero-reveal.mt-8 {
+            margin-top: 22px !important;
+          }
+
+          .hero-device-wrap {
+            height: 350px !important;
+            max-width: 430px !important;
+            margin-top: 4px;
+          }
+
+          .hero-device-inner {
+            width: 92% !important;
+            transform: translate(-50%, -50%) rotate(3deg) !important;
+          }
+
+          .hero-device-inner > div {
+            border-radius: 20px !important;
+          }
+
+          .hero-device-inner .min-h-\[480px\] {
+            min-height: 320px !important;
+            padding: 16px !important;
+          }
+
+          .hero-device-inner .mt-8 {
+            margin-top: 20px !important;
+          }
+
+          .hero-device-inner .mt-7 {
+            margin-top: 16px !important;
+          }
+
+          .hero-device-inner .mt-5 {
+            margin-top: 12px !important;
+          }
+
+          .hero-device-glow {
+            inset: 16% 7% !important;
+            filter: blur(42px) !important;
+            opacity: .72;
+          }
+
+          .hero-depth-near,
+          .hero-depth-mid.ambient-drift,
+          .hero-depth-far.ambient-drift,
+          .hero-spark {
+            display: none !important;
+          }
+
+          .hero-depth-far {
+            width: 70vw !important;
+            height: 70vw !important;
+            left: -30% !important;
+            top: 10% !important;
+          }
+
+          .hero-depth-mid.breath-ring {
+            width: 58vw !important;
+            height: 58vw !important;
+            right: -20% !important;
+            top: 30% !important;
+          }
+
+          .hero-aurora-a {
+            width: 86vw !important;
+            height: 86vw !important;
+            left: 30% !important;
+            top: 14% !important;
+            filter: blur(72px) !important;
+          }
+
+          .hero-aurora-b {
+            width: 94vw !important;
+            height: 94vw !important;
+            right: -24% !important;
+            bottom: -10% !important;
+            filter: blur(82px) !important;
+          }
+
+          .flow-hero > .relative.z-10 > .flow-hero-reveal:last-child {
+            width: 100% !important;
+            padding-left: 12px !important;
+            padding-right: 6px !important;
+            gap: 6px !important;
+          }
+
+          #experience {
+            min-height: auto !important;
+            padding: 88px 16px !important;
+          }
+
+          #experience .simple-reveal.mt-20 {
+            margin-top: 48px !important;
+          }
+
+          .depth-card {
+            border-radius: 24px !important;
+            padding: 22px !important;
+          }
+
+          .depth-card .mt-12 {
+            margin-top: 28px !important;
+          }
+
+          .fullscreen-parallax {
+            min-height: 108svh !important;
+          }
+
+          .fullscreen-parallax-stage {
+            height: 100svh !important;
+          }
+
+          .fullscreen-parallax-image {
+            top: -5% !important;
+            height: 110% !important;
+            transform: scale(1.03);
+          }
+
+          .fullscreen-parallax-shade {
+            background:
+              linear-gradient(180deg, rgba(5,5,8,.20) 0%, rgba(5,5,8,.18) 28%, rgba(5,5,8,.82) 100%) !important;
+          }
+
+          .fullscreen-parallax-copy {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: flex-end !important;
+            padding: 0 16px 22px !important;
+          }
+
+          .fullscreen-parallax-panel {
+            width: 100% !important;
+            max-width: none !important;
+            border-radius: 22px !important;
+            padding: 20px !important;
+            backdrop-filter: blur(16px);
+          }
+
+          .fullscreen-parallax-panel h3 {
+            font-size: clamp(30px, 9.7vw, 45px) !important;
+            line-height: 1.04 !important;
+          }
+
+          .fullscreen-parallax-panel .flow-body {
+            font-size: 10px !important;
+            line-height: 1.75 !important;
+          }
+
+          .fullscreen-parallax-meta,
+          .fullscreen-parallax-bridge,
+          .fullscreen-parallax-middle {
+            display: none !important;
+          }
+
+          .fullscreen-parallax-index {
+            font-size: clamp(110px, 42vw, 190px) !important;
+            opacity: .6;
+          }
+
+          .fullscreen-parallax-interlude {
+            min-height: auto !important;
+            padding: 34px 18px 42px !important;
+          }
+
+          .fullscreen-parallax-interlude-inner {
+            padding: 0 !important;
+          }
+
+          #tools > div:first-child {
+            padding: 82px 16px 64px !important;
+          }
+
+          #tools > div:first-child h2 {
+            font-size: clamp(38px, 11.5vw, 54px) !important;
+          }
+
+          .feature-section {
+            min-height: auto !important;
+            padding: 76px 16px 82px !important;
+          }
+
+          .feature-section > .relative.mx-auto.grid {
+            min-height: auto !important;
+            gap: 36px !important;
+          }
+
+          .feature-copy h3 {
+            font-size: clamp(38px, 11.3vw, 55px) !important;
+            line-height: 1.01 !important;
+          }
+
+          .feature-copy .mt-8 {
+            margin-top: 20px !important;
+          }
+
+          .feature-copy .mt-7 {
+            margin-top: 20px !important;
+          }
+
+          .feature-copy .mt-5 {
+            margin-top: 14px !important;
+          }
+
+          .feature-visual {
+            width: 100%;
+            min-width: 0;
+          }
+
+          .feature-visual > div {
+            max-width: 100%;
+          }
+
+          .feature-visual .min-h-\[410px\] {
+            min-height: 300px !important;
+          }
+
+          .feature-visual .min-h-\[360px\] {
+            min-height: 270px !important;
+          }
+
+          .feature-visual .h-\[310px\] {
+            height: 245px !important;
+          }
+
+          .feature-visual .h-\[230px\],
+          .feature-visual .h-\[190px\] {
+            height: 150px !important;
+          }
+
+          .feature-visual .text-\[54px\] {
+            font-size: 40px !important;
+          }
+
+          .feature-visual .text-\[40px\],
+          .feature-visual .text-\[34px\] {
+            font-size: 27px !important;
+          }
+
+          .feature-visual .grid-cols-\[105px_1fr_120px\] {
+            grid-template-columns: 72px minmax(0, 1fr) 80px !important;
+          }
+
+          .feature-visual .grid-cols-\[\.72fr_1\.28fr\],
+          .feature-visual .grid-cols-\[1\.35fr_\.65fr\] {
+            grid-template-columns: 1fr !important;
+          }
+
+          .feature-visual .grid-cols-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+
+          .feature-orbit {
+            width: 80vw !important;
+            height: 80vw !important;
+            min-width: 280px !important;
+            min-height: 280px !important;
+            top: 46% !important;
+            opacity: .34 !important;
+          }
+
+          .feature-glow {
+            width: 76vw !important;
+            height: 76vw !important;
+            filter: blur(70px) !important;
+            opacity: .7;
+          }
+
+          .feature-ghost-number {
+            top: 1% !important;
+            right: -3% !important;
+            font-size: clamp(96px, 34vw, 160px) !important;
+          }
+
+          .feature-beam {
+            display: none !important;
+          }
+
+          .manifest-section {
+            padding: 88px 16px !important;
+          }
+
+          .manifest-section h2 {
+            font-size: clamp(43px, 12.4vw, 62px) !important;
+          }
+
+          .manifest-section .mt-16 {
+            margin-top: 44px !important;
+          }
+
+          .final-section {
+            min-height: 100svh !important;
+            height: 100svh !important;
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
+
+          .final-content {
+            min-height: 100svh !important;
+            padding-top: max(72px, calc(env(safe-area-inset-top) + 58px)) !important;
+            padding-bottom: max(86px, calc(env(safe-area-inset-bottom) + 70px)) !important;
+          }
+
+          .final-section h2 {
+            margin-top: 20px !important;
+            font-size: clamp(45px, 13.2vw, 66px) !important;
+            line-height: 1.02 !important;
+          }
+
+          .final-content > p {
+            margin-top: 24px !important;
+            max-width: 92% !important;
+          }
+
+          .final-content > a {
+            margin-top: 30px !important;
+          }
+
+          .final-section footer {
+            left: 16px !important;
+            right: 16px !important;
+            bottom: max(14px, env(safe-area-inset-bottom)) !important;
+          }
+
+          .final-orb {
+            width: 108vw !important;
+            height: 108vw !important;
+          }
+
+          .cn-display,
+          .cn-display-relaxed {
+            text-wrap: pretty;
+          }
+
+          .flow-body {
+            font-size: 10.5px;
+            line-height: 1.78;
+          }
+        }
+
+        @media (max-width: 390px) {
+          .hero-copy-parallax h1 {
+            font-size: 42px !important;
+          }
+
+          .hero-device-wrap {
+            height: 315px !important;
+          }
+
+          .feature-section {
+            padding-left: 14px !important;
+            padding-right: 14px !important;
+          }
+
+          .feature-copy h3 {
+            font-size: 37px !important;
+          }
+
+          .fullscreen-parallax-panel {
+            padding: 18px !important;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hero-aurora,
+          .ambient-drift,
+          .breath-ring,
+          .parallax-media::after {
+            animation: none !important;
+          }
+        }
+
         @media (min-width: 640px) {
           .flow-body { font-size: 12px; }
         }
@@ -2089,7 +2608,7 @@ export default function BitLeapIntroFlowtyV2() {
             <Link href="/" className="rounded-full border border-white/15 bg-white px-4 py-2.5 text-[9px] font-semibold text-[#0b0b0d] transition hover:scale-[1.02]">打开工具库</Link>
           </nav>
 
-          <div className="grid flex-1 items-center gap-5 pb-7 pt-8 lg:grid-cols-[.94fr_1.06fr]">
+          <div className="hero-main-grid grid flex-1 items-center gap-5 pb-7 pt-8 lg:grid-cols-[.94fr_1.06fr]">
             <div className="hero-copy-parallax relative z-20 lg:-mt-8">
               <div className="flow-hero-reveal text-[9px] font-semibold tracking-[.24em] text-white/24">100 TOOLS · ONE QUIET PLACE</div>
 
@@ -2196,6 +2715,8 @@ export default function BitLeapIntroFlowtyV2() {
                     data-parallax-image
                     src={image.src}
                     alt={`BitLeap visual ${image.index}`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    decoding="async"
                     className="fullscreen-parallax-image"
                     style={{ objectPosition: image.position }}
                   />
@@ -2338,7 +2859,7 @@ export default function BitLeapIntroFlowtyV2() {
       <section className="final-section relative h-[100svh] min-h-[680px] overflow-hidden bg-[#08080b] px-5 sm:px-8 lg:px-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(91,78,205,.38),transparent_48%),radial-gradient(ellipse_at_70%_95%,rgba(167,75,158,.25),transparent_39%)]" />
         <div className="final-orb breath-ring pointer-events-none absolute left-1/2 top-[50%] h-[60vw] w-[60vw] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.035]" />
-        <div className="simple-reveal relative z-10 mx-auto flex h-full max-w-[1320px] flex-col items-center justify-center pb-24 text-center sm:pb-20">
+        <div className="final-content simple-reveal relative z-10 mx-auto flex min-h-[100svh] max-w-[1320px] flex-col items-center justify-center text-center">
           <div className="text-[9px] font-semibold tracking-[.22em] text-white/20">BITLEAP · OPEN WHEN NEEDED</div>
           <h2 className="cn-display mt-7 flex max-w-[1160px] flex-col items-center gap-[.12em] text-[clamp(54px,7.9vw,120px)] font-medium">
             <span className="block">找到工具。</span>
