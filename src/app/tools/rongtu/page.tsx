@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -42,6 +44,13 @@ type ImageAsset = {
   name: string;
   width: number;
   height: number;
+};
+
+/** 进入撤销栈的状态快照：只收会改变成图的部分 */
+type Snapshot = {
+  settings: Settings;
+  transform: Transform;
+  lightPatches: LightPatch[];
 };
 
 type Transform = {
@@ -386,6 +395,29 @@ const PRESETS: Record<PresetName, Partial<Settings>> = {
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
+
+/**
+ * 复用的离屏画布。
+ *
+ * 合成流程每帧都要几块临时画布（调色、泛光、局部光斑图层）。
+ * 之前每帧都 document.createElement("canvas")，在 960~2880 这个量级上
+ * 会产生大量大块内存分配，拖动时 GC 抖动明显。这里按用途缓存下来复用。
+ */
+const scratchCanvases = new Map<string, HTMLCanvasElement>();
+
+function getScratch(key: string, w: number, h: number) {
+  let canvas = scratchCanvases.get(key);
+  if (!canvas) {
+    canvas = document.createElement("canvas");
+    scratchCanvases.set(key, canvas);
+  }
+  if (canvas.width !== w || canvas.height !== h) {
+    // 尺寸变化会顺带清空内容，正好符合预期。
+    canvas.width = w;
+    canvas.height = h;
+  }
+  return canvas;
+}
 
 function normalizeSettings(value: Partial<Settings> | Settings): Settings {
   return {
@@ -1398,8 +1430,7 @@ function makeIcon(path: string) {
   );
 }
 
-const Icons = {
-  photo: makeIcon("M4 5h16v14H4z M4 15l4-4 4 4 2-2 6 6 M15.5 9.5h.01"),
+const Icons = {  photo: makeIcon("M4 5h16v14H4z M4 15l4-4 4 4 2-2 6 6 M15.5 9.5h.01"),
   person: makeIcon("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M5 21a7 7 0 0 1 14 0"),
   magic: makeIcon("M12 3l1.2 3.3L16.5 7.5l-3.3 1.2L12 12l-1.2-3.3L7.5 7.5l3.3-1.2L12 3z M18 13l.8 2.2L21 16l-2.2.8L18 19l-.8-2.2L15 16l2.2-.8L18 13z"),
   reset: makeIcon("M3 12a9 9 0 1 0 3-6.7L3 8 M3 3v5h5"),
@@ -1407,8 +1438,21 @@ const Icons = {
   compare: makeIcon("M12 3v18 M5 5h7v14H5z M12 5h7v14h-7"),
   download: makeIcon("M12 3v12 M7 10l5 5 5-5 M5 21h14"),
   fullscreen: makeIcon("M8 3H3v5 M16 3h5v5 M8 21H3v-5 M16 21h5v-5"),
+  undo: makeIcon("M9 14 4 9l5-5 M4 9h10a6 6 0 0 1 0 12h-3"),
+  redo: makeIcon("M15 14l5-5-5-5 M20 9H10a6 6 0 0 0 0 12h3"),
   layers: makeIcon("M12 3l9 5-9 5-9-5 9-5z M3 12l9 5 9-5 M3 16l9 5 9-5"),
 };
+
+/**
+ * 交互质量降级用的上下文。
+ *
+ * 面板里有四十多个滑杆，逐个透传「开始/结束交互」回调太啰嗦；
+ * 用上下文让叶子组件自己接一次即可，滑杆一按下就切到低分辨率预览。
+ */
+const InteractionContext = createContext<{ begin: () => void; end: () => void }>({
+  begin: () => {},
+  end: () => {},
+});
 
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1435,7 +1479,14 @@ export default function Page() {
   const [showRawComposite, setShowRawComposite] = useState(false);
   const [activeTab, setActiveTab] = useState<"融合" | "空间" | "氛围" | "去背">("融合");
   const [ambientColor, setAmbientColor] = useState("#c5b6a8");
-  const ambientRef = useRef({ r: 197, g: 182, b: 168 });
+  // 保存最近一次的环境采样结果（含亮度与饱和度），交互期间会冻结在这里。
+  const ambientRef = useRef<{
+    r: number;
+    g: number;
+    b: number;
+    l: number;
+    s: number;
+  }>({ r: 197, g: 182, b: 168, l: 0.55, s: 0.2 });
   const [toast, setToast] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [personSelected, setPersonSelected] = useState(false);
@@ -1445,6 +1496,42 @@ export default function Page() {
   const [activeLightPatchId, setActiveLightPatchId] = useState<string | null>(null);
   const [lightPatchEditMode, setLightPatchEditMode] = useState(false);
   const [pickPatchColorMode, setPickPatchColorMode] = useState(false);
+
+  /*
+   * ── 交互质量降级 ────────────────────────────────────────────────────────
+   * 这套合成里最贵的一步是逐像素重照明（人物图层）。它是「所见即所得」的核心，
+   * 不能省，但可以降分辨率：交互期间按半分辨率处理，松手后再按原分辨率重算一次。
+   * 配合冻结环境采样，拖动时既不会每帧重算，观感也不会掉链子。
+   */
+  const frozenAmbientRef = useRef<{
+    r: number;
+    g: number;
+    b: number;
+    l: number;
+    s: number;
+  } | null>(null);
+  const interactingRef = useRef(false);
+  const [interactionTick, setInteractionTick] = useState(0);
+
+  /** 渲染输入镜像：渲染被合并进动画帧，取的是"最新"输入而不是闭包里的旧值 */
+  const renderInputRef = useRef({
+    background,
+    person,
+    settings,
+    transform,
+    showRawComposite,
+  });
+  const renderFrameRef = useRef<number | null>(null);
+
+  /** 给非 React 回调（粘贴、快捷键、撤销栈）读取最新状态 */
+  const backgroundRef = useRef<ImageAsset | null>(null);
+  const personRef = useRef<ImageAsset | null>(null);
+  const lightPatchesRef = useRef<LightPatch[]>([]);
+
+  const [exporting, setExporting] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  /** 撤销栈深度。栈本身放在 ref 里（改动频繁），只把长度同步到 state 渲染用 */
+  const [historyDepth, setHistoryDepth] = useState({ past: 0, future: 0 });
 
   // Next.js Fast Refresh 可能保留旧版本 state。
   // 当新增设置字段后，用默认值补齐，避免旧 state 中出现 undefined / NaN。
@@ -1488,7 +1575,69 @@ export default function Page() {
   const patchMoveFrameRef = useRef<number | null>(null);
   const pendingPatchMoveRef = useRef<{ id: string; patch: Partial<LightPatch> } | null>(null);
 
+  /*
+   * ── 撤销 / 重做 ────────────────────────────────────────────────────────
+   * 快照只收「会改变成图」的三块状态：参数、人物变换、光斑。
+   * 视图类开关（未融合对比、当前标签页等）不进历史，否则撤销时画面会莫名跳动。
+   */
+  const historyRef = useRef<{
+    past: Snapshot[];
+    future: Snapshot[];
+  }>({ past: [], future: [] });
+  const lastHistoryRef = useRef({ label: "", at: 0 });
+
+  const captureSnapshot = useCallback(
+    (): Snapshot => ({
+      settings: settingsRef.current,
+      transform: transformRef.current,
+      lightPatches: lightPatchesRef.current,
+    }),
+    [],
+  );
+
+  /**
+   * 记录"这次改动之前"的状态。
+   *
+   * 同一个 label 在 700ms 内的连续改动会合并成一条：拖一次滑杆或拖一次人物
+   * 只产生一步可撤销的改动，而不是几十步。
+   */
+  const pushHistory = useCallback(
+    (label: string) => {
+      const now = performance.now();
+      const last = lastHistoryRef.current;
+      if (last.label === label && now - last.at < 700) {
+        last.at = now;
+        return;
+      }
+      lastHistoryRef.current = { label, at: now };
+
+      const history = historyRef.current;
+      history.past.push(captureSnapshot());
+      if (history.past.length > 80) history.past.shift();
+      history.future.length = 0;
+      setHistoryDepth({ past: history.past.length, future: history.future.length });
+    },
+    [captureSnapshot],
+  );
+
+  const canUndo = historyDepth.past > 0;
+  const canRedo = historyDepth.future > 0;
+
+  const applySnapshot = useCallback((snap: Snapshot) => {
+    // 同步写回 ref：连续快速撤销时，下一步的快照才不会读到旧值。
+    settingsRef.current = snap.settings;
+    transformRef.current = snap.transform;
+    lightPatchesRef.current = snap.lightPatches;
+    setSettings(snap.settings);
+    setTransform(snap.transform);
+    setLightPatches(snap.lightPatches);
+    setActivePreset(null);
+  }, []);
+
   const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
+    // 值没变就不写历史，也不触发重渲染：滑杆抖动不会污染撤销栈。
+    if (Object.is(settingsRef.current[key], value)) return;
+    pushHistory(`setting:${key}`);
     setSettings((prev) => (Object.is(prev[key], value) ? prev : { ...prev, [key]: value }));
     setActivePreset((prev) => (prev === null ? prev : null));
   };
@@ -1519,6 +1668,7 @@ export default function Page() {
   // 这里统一合并到下一帧，同时严格跳过“值没有变化”的更新。
   const updateLightPatch = useCallback(
     (id: string, patch: Partial<LightPatch>) => {
+      pushHistory(`patch:${id}`);
       const pending = pendingPatchControlRef.current;
       pendingPatchControlRef.current =
         pending && pending.id === id
@@ -1548,7 +1698,7 @@ export default function Page() {
         setActivePreset((prev) => (prev === null ? prev : null));
       });
     },
-    [],
+    [pushHistory],
   );
 
   const previewPatchColor = useCallback((color: string) => {
@@ -1560,6 +1710,7 @@ export default function Page() {
 
   const commitPatchColor = useCallback(
     (id: string, color: string) => {
+      pushHistory(`patch-color:${id}`);
       if (patchColorHexRef.current) {
         patchColorHexRef.current.textContent = color.toUpperCase();
       }
@@ -1572,7 +1723,7 @@ export default function Page() {
       });
       setActivePreset((prev) => (prev === null ? prev : null));
     },
-    [],
+    [pushHistory],
   );
 
   useEffect(() => {
@@ -1593,6 +1744,7 @@ export default function Page() {
   }, []);
 
   const commitPersonGlowColor = useCallback((color: string) => {
+    pushHistory("glow-color");
     if (personGlowColorHexRef.current) {
       personGlowColorHexRef.current.textContent = color.toUpperCase();
     }
@@ -1600,7 +1752,7 @@ export default function Page() {
       prev.personGlowColor === color ? prev : { ...prev, personGlowColor: color },
     );
     setActivePreset((prev) => (prev === null ? prev : null));
-  }, []);
+  }, [pushHistory]);
 
   useEffect(() => {
     if (personGlowColorInputRef.current) {
@@ -1613,6 +1765,7 @@ export default function Page() {
 
   // PointerMove 可能每秒触发上百次；合并到每个动画帧一次，避免 React / Canvas 被拖垮。
   const queueLightPatchUpdate = useCallback((id: string, patch: Partial<LightPatch>) => {
+    pushHistory(`patch:${id}`);
     const pending = pendingPatchMoveRef.current;
     pendingPatchMoveRef.current = pending && pending.id === id
       ? { id, patch: { ...pending.patch, ...patch } }
@@ -1628,7 +1781,7 @@ export default function Page() {
       );
       setActivePreset(null);
     });
-  }, []);
+  }, [pushHistory]);
 
   useEffect(() => () => {
     if (patchMoveFrameRef.current !== null) cancelAnimationFrame(patchMoveFrameRef.current);
@@ -1640,6 +1793,7 @@ export default function Page() {
 
   const addLightPatch = useCallback(
     (kind: "暖光" | "冷光" | "硬窗光" | "阴影" = "暖光") => {
+      pushHistory("patch-add");
       const id = `light-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       const next: LightPatch =
         kind === "阴影"
@@ -1715,10 +1869,11 @@ export default function Page() {
       }));
       setActivePreset(null);
     },
-    [],
+    [pushHistory],
   );
 
   const applyReferenceSunlight = useCallback(() => {
+    pushHistory("sunlight");
     const stamp = Date.now();
     const patches: LightPatch[] = [
       {
@@ -1761,7 +1916,7 @@ export default function Page() {
       toastTimerRef.current = null;
       setToast("");
     }, 1800);
-  }, []);
+  }, [pushHistory]);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -1779,6 +1934,26 @@ export default function Page() {
       setToast("");
     }, 1800);
   }, []);
+
+  const undo = useCallback(() => {
+    const history = historyRef.current;
+    const snap = history.past.pop();
+    if (!snap) return;
+    history.future.push(captureSnapshot());
+    applySnapshot(snap);
+    setHistoryDepth({ past: history.past.length, future: history.future.length });
+    notify("已撤销上一步");
+  }, [applySnapshot, captureSnapshot, notify]);
+
+  const redo = useCallback(() => {
+    const history = historyRef.current;
+    const snap = history.future.pop();
+    if (!snap) return;
+    history.past.push(captureSnapshot());
+    applySnapshot(snap);
+    setHistoryDepth({ past: history.past.length, future: history.future.length });
+    notify("已重做");
+  }, [applySnapshot, captureSnapshot, notify]);
 
   const loadImage = useCallback(
     (file: File, kind: "background" | "person") => {
@@ -1833,6 +2008,26 @@ export default function Page() {
     },
     [notify],
   );
+
+  // 直接粘贴图片：这个工具最常见的入口就是截图/复制一张图过来。
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const items = Array.from(e.clipboardData?.items ?? []);
+      const item = items.find((i) => i.type.startsWith("image/"));
+      const file = item?.getAsFile();
+      if (!file) return;
+      e.preventDefault();
+
+      // 没有场景就先当场景，其次当人物；两张都齐了就替换人物。
+      // ClipboardEvent 上没有 shiftKey（只有鼠标/键盘事件才有），
+      // 所以这里不做修饰键分支，行为保持可预期。
+      if (!backgroundRef.current) loadImage(file, "background");
+      else loadImage(file, "person");
+    };
+
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [loadImage]);
 
   const backgroundUrlRef = useRef<string | null>(null);
   const personUrlRef = useRef<string | null>(null);
@@ -1969,7 +2164,7 @@ export default function Page() {
       fg: ImageAsset | null,
       s: Settings,
       t: Transform,
-      options?: { rawComposite?: boolean; exportMode?: boolean },
+      options?: { rawComposite?: boolean; exportMode?: boolean; preview?: boolean },
     ) => {
       const ctx = target.getContext("2d")!;
       const w = target.width;
@@ -1991,25 +2186,37 @@ export default function Page() {
         bgCanvas = buildBackgroundCanvas(w, h, bg, s, false);
         backgroundCanvasCacheRef.current = { key: bgCacheKey, canvas: bgCanvas };
       }
-      const ambient = analyzeAmbient(bgCanvas, t, fg);
-      ambientRef.current = ambient;
+
+      /*
+       * 拖动时冻结环境采样。
+       *
+       * 环境色是「按人物当前所在区域采样背景」得到的，所以人物一移动，采样区域
+       * 就跟着动，量化后几乎每帧都会落到新的档位；而它参与了 processedKey，
+       * 于是每帧都会重新执行整套逐像素重照明 —— 实测一帧要几百毫秒。
+       *
+       * 交互期间沿用上一次的环境值，processedKey 保持稳定，缓存的人物图层可以
+       * 直接复用；松手后再做一次完整重算。
+       */
+      const ambient =
+        options?.preview && frozenAmbientRef.current
+          ? frozenAmbientRef.current
+          : analyzeAmbient(bgCanvas, t, fg);
+      if (!options?.preview) ambientRef.current = ambient;
 
       ctx.clearRect(0, 0, w, h);
       ctx.drawImage(bgCanvas, 0, 0);
 
       if (fg) {
         const displayCanvas = canvasRef.current;
-        const cssW =
-          displayCanvas && !options?.exportMode
-            ? parseFloat(displayCanvas.style.width) || displayCanvas.clientWidth
-            : displayCanvas
-              ? parseFloat(displayCanvas.style.width) || displayCanvas.clientWidth
-              : w;
-        const scaleFactor = options?.exportMode ? w / Math.max(1, cssW) : w / Math.max(1, cssW);
+        const cssW = displayCanvas
+          ? parseFloat(displayCanvas.style.width) || displayCanvas.clientWidth
+          : w;
+        const scaleFactor = w / Math.max(1, cssW);
 
         const ambientKey = `${Math.round(ambient.r / 8)}-${Math.round(
           ambient.g / 8,
         )}-${Math.round(ambient.b / 8)}`;
+
         const processedKey = [
           fg.url,
           ambientKey,
@@ -2062,10 +2269,9 @@ export default function Page() {
         if (!options?.rawComposite && lightPatches.length) {
           // 局部光斑单独作为轻量图层叠加，不再因为拖动光斑反复执行整套逐像素重照明。
           // 这样拖动/缩放/旋转的反馈能稳定在动画帧级别。
-          const localLit = document.createElement("canvas");
-          localLit.width = processed.width;
-          localLit.height = processed.height;
+          const localLit = getScratch("localLit", processed.width, processed.height);
           const localCtx = localLit.getContext("2d")!;
+          localCtx.clearRect(0, 0, localLit.width, localLit.height);
           localCtx.drawImage(processed, 0, 0);
           drawLocalLightPatches(localLit, processed, lightPatches, s);
           personForDraw = localLit;
@@ -2088,12 +2294,14 @@ export default function Page() {
       }
 
       if (!options?.rawComposite) {
-        const graded = document.createElement("canvas");
-        graded.width = w;
-        graded.height = h;
+        const graded = getScratch("graded", w, h);
         const gctx = graded.getContext("2d")!;
+        gctx.globalCompositeOperation = "source-over";
+        gctx.globalAlpha = 1;
+        gctx.clearRect(0, 0, w, h);
         gctx.filter = `brightness(${s.overallExposure}) contrast(${s.overallContrast}) saturate(${s.overallSaturation})`;
         gctx.drawImage(target, 0, 0);
+        gctx.filter = "none";
 
         if (Math.abs(s.overallWarmth) > 0.004) {
           gctx.globalCompositeOperation = "soft-light";
@@ -2102,14 +2310,21 @@ export default function Page() {
               ? `rgba(255,145,70,${Math.abs(s.overallWarmth) * 0.22})`
               : `rgba(75,145,255,${Math.abs(s.overallWarmth) * 0.22})`;
           gctx.fillRect(0, 0, w, h);
+          gctx.globalCompositeOperation = "source-over";
         }
 
         ctx.clearRect(0, 0, w, h);
         ctx.drawImage(graded, 0, 0);
 
-        drawBloom(ctx, graded, s.bloom);
+        // 交互中跳过泛光与颗粒：这两项是纯观感修饰，拖动时省掉能明显降帧耗时，
+        // 松手后的完整渲染会把它们补回来。暗角便宜且观感差异大，保留。
+        if (!options?.preview) {
+          drawBloom(ctx, graded, s.bloom);
+        }
         drawVignette(ctx, w, h, s.vignette);
-        drawNoise(ctx, w, h, s.grain);
+        if (!options?.preview) {
+          drawNoise(ctx, w, h, s.grain);
+        }
       }
 
       return ambient;
@@ -2162,24 +2377,111 @@ export default function Page() {
     };
   }, []);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !background) return;
+  const beginInteraction = useCallback(() => {
+    if (interactingRef.current) return;
+    interactingRef.current = true;
+    // 沿用上一次的环境采样值：否则拖动时采样区域跟着人物移动、量化后不断换档，
+    // 人物图层缓存会一直失效，等于每帧重跑一次逐像素重照明。
+    frozenAmbientRef.current = ambientRef.current;
+  }, []);
 
-    const ambient = renderScene(
-      canvas,
+  const endInteraction = useCallback(() => {
+    if (!interactingRef.current) return;
+    interactingRef.current = false;
+    frozenAmbientRef.current = null;
+    // 触发一次完整质量渲染：把交互期间降掉的分辨率、泛光和环境重采样补回来。
+    setInteractionTick((v) => v + 1);
+  }, []);
+
+  // 兜底：指针在任何地方松开都要结束交互，避免一直卡在低质量预览。
+  useEffect(() => {
+    const finish = () => endInteraction();
+    window.addEventListener("pointerup", finish);
+    window.addEventListener("pointercancel", finish);
+    window.addEventListener("blur", finish);
+    return () => {
+      window.removeEventListener("pointerup", finish);
+      window.removeEventListener("pointercancel", finish);
+      window.removeEventListener("blur", finish);
+    };
+  }, [endInteraction]);
+
+  // 状态镜像，供上面的交互回调与非 React 回调读取。
+  useEffect(() => {
+    backgroundRef.current = background;
+  }, [background]);
+
+  useEffect(() => {
+    personRef.current = person;
+  }, [person]);
+
+  useEffect(() => {
+    lightPatchesRef.current = lightPatches;
+  }, [lightPatches]);
+
+  useEffect(() => {
+    renderInputRef.current = {
       background,
       person,
-      normalizeSettings(settings),
+      settings,
       transform,
-      { rawComposite: showRawComposite },
-    );
+      showRawComposite,
+    };
+  });
 
-    const hex = rgbToHex(ambient.r, ambient.g, ambient.b);
-    setAmbientColor((old) => (old === hex ? old : hex));
-  }, [background, person, settings, transform, showRawComposite, renderScene]);
+  /**
+   * 把渲染合并到动画帧。
+   *
+   * 拖动人物时 pointermove 的触发频率远高于屏幕刷新率，合并之前每个事件都会
+   * 完整跑一遍合成；合并之后一帧最多合成一次，且永远用的是最新输入。
+   */
+  useEffect(() => {
+    if (!background) return;
+    if (renderFrameRef.current !== null) return; // 本帧已经排好
+
+    renderFrameRef.current = requestAnimationFrame(() => {
+      renderFrameRef.current = null;
+      const canvas = canvasRef.current;
+      const input = renderInputRef.current;
+      if (!canvas || !input.background) return;
+
+      const ambient = renderScene(
+        canvas,
+        input.background,
+        input.person,
+        normalizeSettings(input.settings),
+        input.transform,
+        {
+          rawComposite: input.showRawComposite,
+          preview: interactingRef.current,
+        },
+      );
+
+      const hex = rgbToHex(ambient.r, ambient.g, ambient.b);
+      setAmbientColor((old) => (old === hex ? old : hex));
+    });
+  }, [
+    background,
+    person,
+    settings,
+    transform,
+    showRawComposite,
+    renderScene,
+    interactionTick,
+  ]);
+
+  useEffect(
+    () => () => {
+      if (renderFrameRef.current !== null) {
+        cancelAnimationFrame(renderFrameRef.current);
+        renderFrameRef.current = null;
+      }
+    },
+    [],
+  );
 
   const resetCharacter = useCallback(() => {
+    pushHistory("reset-transform");
     const canvas = canvasRef.current;
     if (!canvas || !person) return;
 
@@ -2196,7 +2498,7 @@ export default function Page() {
       rotation: 0,
       flipX: false,
     });
-  }, [person]);
+  }, [person, pushHistory]);
 
   useEffect(() => {
     if (!person) return;
@@ -2209,6 +2511,8 @@ export default function Page() {
       notify("先上传现实场景和人物图片");
       return;
     }
+
+    pushHistory("auto-blend");
 
     const canvas = canvasRef.current;
     const bgCanvas = buildBackgroundCanvas(
@@ -2290,9 +2594,11 @@ export default function Page() {
     buildBackgroundCanvas,
     notify,
     person,
+    pushHistory,
   ]);
 
   const applyPreset = (name: PresetName) => {
+    pushHistory("preset");
     setSettings((prev) => ({
       ...DEFAULT_SETTINGS,
       ...prev,
@@ -2302,6 +2608,7 @@ export default function Page() {
   };
 
   const resetAllAdjustments = useCallback(() => {
+    pushHistory("reset-all");
     setSettings(DEFAULT_SETTINGS);
     setActivePreset("自然融入");
     setShowRawComposite(false);
@@ -2316,7 +2623,7 @@ export default function Page() {
       requestAnimationFrame(resetCharacter);
     }
     notify("已恢复默认融合参数");
-  }, [notify, person, resetCharacter]);
+  }, [notify, person, pushHistory, resetCharacter]);
 
   const canvasPointToPersonUV = useCallback(
     (px: number, py: number) => {
@@ -2530,7 +2837,12 @@ export default function Page() {
             anchorX,
             anchorY,
           };
-          e.currentTarget.setPointerCapture(e.pointerId);
+          beginInteraction();
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {
+            // pointerId 失效（合成事件、设备切换）时会抛错，不能让它打断拖动
+          }
           return;
         }
 
@@ -2555,7 +2867,12 @@ export default function Page() {
             anchorX: hit.x,
             anchorY: hit.y,
           };
-          e.currentTarget.setPointerCapture(e.pointerId);
+          beginInteraction();
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {
+            // pointerId 失效（合成事件、设备切换）时会抛错，不能让它打断拖动
+          }
           return;
         }
 
@@ -2572,7 +2889,12 @@ export default function Page() {
             originX: transformRef.current.x,
             originY: transformRef.current.y,
           };
-          e.currentTarget.setPointerCapture(e.pointerId);
+          beginInteraction();
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {
+            // pointerId 失效（合成事件、设备切换）时会抛错，不能让它打断拖动
+          }
           setIsDragging(true);
         } else {
           setPersonSelected(false);
@@ -2589,15 +2911,21 @@ export default function Page() {
 
     setPersonSelected(true);
     setActiveLightPatchId(null);
+    pushHistory("transform");
     dragRef.current = {
       active: true,
       pointerId: e.pointerId,
       startX: px,
       startY: py,
-      originX: transform.x,
-      originY: transform.y,
+      originX: transformRef.current.x,
+      originY: transformRef.current.y,
     };
-    e.currentTarget.setPointerCapture(e.pointerId);
+    beginInteraction();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // 同上
+    }
     setIsDragging(true);
   };
 
@@ -2674,11 +3002,28 @@ export default function Page() {
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {}
     }
+
+    // 松手后回到全分辨率合成（泛光、颗粒与环境重采样一并补回来）
+    endInteraction();
   };
+
+  const wheelEndTimerRef = useRef<number | null>(null);
 
   const onWheel = (e: ReactWheelEvent<HTMLCanvasElement>) => {
     if (!person || lightPatchEditMode) return;
     e.preventDefault();
+
+    // 滚轮缩放同样走交互降级，停止滚动 180ms 后再做一次完整渲染。
+    pushHistory("transform");
+    beginInteraction();
+    if (wheelEndTimerRef.current !== null) {
+      window.clearTimeout(wheelEndTimerRef.current);
+    }
+    wheelEndTimerRef.current = window.setTimeout(() => {
+      wheelEndTimerRef.current = null;
+      endInteraction();
+    }, 180);
+
     const factor = e.deltaY > 0 ? 0.94 : 1.06;
     setTransform((prev) => ({
       ...prev,
@@ -2686,10 +3031,50 @@ export default function Page() {
     }));
   };
 
+  useEffect(
+    () => () => {
+      if (wheelEndTimerRef.current !== null) {
+        window.clearTimeout(wheelEndTimerRef.current);
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+
+      // 撤销 / 重做：滑杆（range）和取色器（color）获得焦点时也要能撤销，
+      // 只有真正在输入文字时才让浏览器自己处理。
+      const isTextEntry =
+        tag === "TEXTAREA" ||
+        (tag === "INPUT" &&
+          ![
+            "range",
+            "color",
+            "checkbox",
+            "radio",
+            "button",
+            "submit",
+          ].includes((target as HTMLInputElement).type));
+
+      if ((e.metaKey || e.ctrlKey) && !isTextEntry) {
+        const key = e.key.toLowerCase();
+        if (key === "z") {
+          e.preventDefault();
+          if (e.shiftKey) redo();
+          else undo();
+          return;
+        }
+        if (key === "y") {
+          e.preventDefault();
+          redo();
+          return;
+        }
+      }
+
       if (!person) return;
-      const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
 
       const step = e.shiftKey ? 10 : 2;
@@ -2715,13 +3100,30 @@ export default function Page() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [person]);
+  }, [person, redo, undo]);
 
-  const exportImage = useCallback(() => {
+  const exportImage = useCallback(async () => {
+    if (exporting) return;
     if (!background) {
       notify("请先上传现实场景");
       return;
     }
+
+    // 4K 导出会在主线程上跑好几百毫秒的合成。先把「导出中」这一帧画出来，
+    // 否则点下去到文件落地之间界面完全是死的，用户会以为没反应。
+    setExporting(true);
+    notify("正在合成导出…");
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        resolve();
+      };
+      // 后台标签页里 rAF 根本不会触发，所以必须有超时兜底。
+      requestAnimationFrame(finish);
+      window.setTimeout(finish, 120);
+    });
 
     const display = canvasRef.current;
     if (!display) return;
@@ -2880,8 +3282,9 @@ export default function Page() {
 
     out.toBlob(
       (blob) => {
+        setExporting(false);
         if (!blob) {
-          notify("导出失败");
+          notify("导出失败，请重试");
           return;
         }
         const url = URL.createObjectURL(blob);
@@ -2890,12 +3293,21 @@ export default function Page() {
         a.download = `入画-${Date.now()}.png`;
         a.click();
         window.setTimeout(() => URL.revokeObjectURL(url), 1200);
-        notify(`PNG 已导出 · ${width} × ${height} · 已自动去除预览黑边`);
+        notify(`PNG 已导出 · ${width} × ${height}`);
       },
       "image/png",
       1,
     );
-  }, [background, person, settings, transform, buildBackgroundCanvas, notify, lightPatches]);
+  }, [
+    background,
+    person,
+    settings,
+    transform,
+    buildBackgroundCanvas,
+    exporting,
+    lightPatches,
+    notify,
+  ]);
 
   const toggleFullscreen = async () => {
     const el = stageRef.current?.parentElement;
@@ -2909,6 +3321,11 @@ export default function Page() {
   };
 
   const hasBoth = Boolean(background && person);
+
+  const interaction = useMemo(
+    () => ({ begin: beginInteraction, end: endInteraction }),
+    [beginInteraction, endInteraction],
+  );
 
   const presetDock = useMemo<CSSProperties>(
     () => ({
@@ -2946,9 +3363,18 @@ export default function Page() {
           background: "#101116",
           color: "#fff",
         }}
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!dragOver) setDragOver(true);
+        }}
+        onDragLeave={(e) => {
+          // 只有真正离开舞台才取消高亮，子元素之间移动不算。
+          if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+          setDragOver(false);
+        }}
         onDrop={(e) => {
           e.preventDefault();
+          setDragOver(false);
           const files = Array.from(e.dataTransfer.files).filter((f) =>
             f.type.startsWith("image/"),
           );
@@ -2959,7 +3385,9 @@ export default function Page() {
         }}
       >
         <style>{`
-          * { box-sizing: border-box; }
+          .blend-stage *,
+          .blend-stage *::before,
+          .blend-stage *::after { box-sizing: border-box; }
           .blend-stage button, .blend-stage input, .blend-stage select { font: inherit; }
           .blend-stage button { -webkit-tap-highlight-color: transparent; }
           .blend-stage button:disabled {
@@ -3421,6 +3849,30 @@ export default function Page() {
           )}
         </div>
 
+        {dragOver && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 12,
+              zIndex: 45,
+              pointerEvents: "none",
+              borderRadius: 24,
+              border: "2px dashed rgba(244,190,177,.62)",
+              background: "rgba(20,18,24,.42)",
+              backdropFilter: "blur(3px)",
+              WebkitBackdropFilter: "blur(3px)",
+              display: "grid",
+              placeItems: "center",
+              color: "rgba(255,247,241,.92)",
+              fontSize: 13,
+              letterSpacing: ".04em",
+            }}
+          >
+            松开即可载入图片
+          </div>
+        )}
+
         {!background && (
           <div className="empty-grid">
             <button
@@ -3499,6 +3951,8 @@ export default function Page() {
           </div>
         )}
 
+        {/* 滑杆按下时切到低分辨率预览，见 beginInteraction */}
+        <InteractionContext.Provider value={interaction}>
         <aside className="panel">
           <div
             style={{
@@ -3631,7 +4085,10 @@ export default function Page() {
                     min={0.02}
                     max={2.5}
                     step={0.01}
-                    onChange={(v) => setTransform((p) => ({ ...p, scale: v }))}
+                    onChange={(v) => {
+                      pushHistory("transform");
+                      setTransform((p) => ({ ...p, scale: v }));
+                    }}
                     format={(v) => `${Math.round(v * 100)}%`}
                   />
                   <Slider
@@ -3640,18 +4097,20 @@ export default function Page() {
                     min={-30}
                     max={30}
                     step={0.2}
-                    onChange={(v) =>
-                      setTransform((p) => ({ ...p, rotation: v }))
-                    }
+                    onChange={(v) => {
+                      pushHistory("transform");
+                      setTransform((p) => ({ ...p, rotation: v }));
+                    }}
                     suffix="°"
                   />
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
                     <button
                       type="button"
                       style={smallAction}
-                      onClick={() =>
-                        setTransform((p) => ({ ...p, flipX: !p.flipX }))
-                      }
+                      onClick={() => {
+                        pushHistory("transform");
+                        setTransform((p) => ({ ...p, flipX: !p.flipX }));
+                      }}
                     >
                       {Icons.mirror}
                       水平镜像
@@ -4421,6 +4880,7 @@ export default function Page() {
             )}
           </div>
         </aside>
+        </InteractionContext.Provider>
 
         <div className="toolbar">
           <button
@@ -4452,9 +4912,10 @@ export default function Page() {
           <button
             type="button"
             style={toolbarButton}
-            onClick={() =>
-              setTransform((p) => ({ ...p, flipX: !p.flipX }))
-            }
+            onClick={() => {
+              pushHistory("transform");
+              setTransform((p) => ({ ...p, flipX: !p.flipX }));
+            }}
             disabled={!person}
           >
             {Icons.mirror}
@@ -4471,6 +4932,32 @@ export default function Page() {
           </button>
           <button
             type="button"
+            style={{
+              ...toolbarButton,
+              opacity: canUndo ? 1 : 0.42,
+            }}
+            onClick={undo}
+            disabled={!canUndo}
+            title="撤销（Ctrl / ⌘ + Z）"
+          >
+            {Icons.undo}
+            撤销
+          </button>
+          <button
+            type="button"
+            style={{
+              ...toolbarButton,
+              opacity: canRedo ? 1 : 0.42,
+            }}
+            onClick={redo}
+            disabled={!canRedo}
+            title="重做（Ctrl / ⌘ + Shift + Z）"
+          >
+            {Icons.redo}
+            重做
+          </button>
+          <button
+            type="button"
             style={toolbarButton}
             onClick={resetAllAdjustments}
             disabled={!background && !person}
@@ -4483,10 +4970,11 @@ export default function Page() {
             type="button"
             style={toolbarButton}
             onClick={exportImage}
-            disabled={!background}
+            disabled={!background || exporting}
+            title={exporting ? "正在合成，请稍候" : "按当前构图导出高分辨率 PNG"}
           >
             {Icons.download}
-            导出 PNG
+            {exporting ? "导出中…" : "导出 PNG"}
           </button>
           <button type="button" style={toolbarButton} onClick={toggleFullscreen}>
             {Icons.fullscreen}
@@ -4707,6 +5195,7 @@ function Slider({
   suffix?: string;
   format?: (value: number) => string;
 }) {
+  const interaction = useContext(InteractionContext);
   const decimals = step < 0.01 ? 3 : step < 1 ? 2 : 0;
   const safeValue =
     typeof value === "number" && Number.isFinite(value)
@@ -4746,6 +5235,11 @@ function Slider({
         max={max}
         step={step}
         onChange={(e) => onChange(Number(e.target.value))}
+        // 按住滑杆时切到低分辨率预览，松手后由全局兜底回到全质量渲染
+        onPointerDown={interaction.begin}
+        onPointerUp={interaction.end}
+        onPointerCancel={interaction.end}
+        onBlur={interaction.end}
       />
     </label>
   );

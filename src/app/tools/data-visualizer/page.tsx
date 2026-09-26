@@ -6,6 +6,7 @@ import { read, utils } from 'xlsx'
 import Papa from 'papaparse'
 import { Breadcrumb } from '@/components/breadcrumb'
 import FooterNote from '@/components/FooterNote'
+import { buildLegend, legendPalette } from './legend'
 
 type ChartType = 'bar' | 'line' | 'scatter' | 'pie' | 'radar' | 'heatmap'
 type Theme = 'light' | 'dark'
@@ -320,6 +321,9 @@ export default function DataVisualizerPage() {
     const subtleColor = isDark ? '#52525b' : '#e4e4e7'
     const categories = parsedData.map((row) => String(row[xField] ?? ''))
 
+    // 图例的配色跟着主题走，深浅两套在 legend.ts 里统一定义
+    const legendBase = legendPalette(theme)
+
     const commonTitle: echarts.TitleComponentOption = {
       text: title || '数据可视化',
       left: 22,
@@ -338,13 +342,20 @@ export default function DataVisualizerPage() {
         value: Number(parsedData[index]?.[y] ?? 0),
       }))
 
+      const total = data.reduce((sum, item) => sum + (Number.isFinite(item.value) ? item.value : 0), 0)
+
       return {
         backgroundColor: 'transparent',
         title: commonTitle,
         color: PALETTE,
         tooltip: { trigger: 'item', formatter: '{b}<br/>{c} · {d}%' },
         legend: showLegend
-          ? { bottom: 8, type: 'scroll', textStyle: { color: textColor } }
+          ? buildLegend(legendBase, {
+              names: data.map((item) => item.name),
+              values: data.map((item) =>
+                total > 0 ? `${((item.value / total) * 100).toFixed(1)}%` : '—',
+              ),
+            })
           : undefined,
         series: [
           {
@@ -382,7 +393,9 @@ export default function DataVisualizerPage() {
         color: PALETTE,
         tooltip: {},
         legend: showLegend
-          ? { bottom: 8, type: 'scroll', textStyle: { color: textColor } }
+          ? buildLegend(legendBase, {
+              names: parsedData.map((row, index) => String(row[xField] ?? `系列 ${index + 1}`)),
+            })
           : undefined,
         radar: {
           indicator,
@@ -500,7 +513,7 @@ export default function DataVisualizerPage() {
         title: commonTitle,
         color: PALETTE,
         tooltip: { trigger: 'item' },
-        legend: showLegend ? { bottom: 8, type: 'scroll', textStyle: { color: textColor } } : undefined,
+        legend: showLegend ? buildLegend(legendBase, { names: groupValues }) : undefined,
         grid: { top: 70, bottom: 62, left: 64, right: 24 },
         xAxis: {
           type: xIsNumber ? 'value' : 'category',
@@ -564,9 +577,7 @@ export default function DataVisualizerPage() {
         trigger: 'axis',
         axisPointer: { type: chartType === 'line' ? 'cross' : 'shadow' },
       },
-      legend: showLegend
-        ? { bottom: 8, type: 'scroll', textStyle: { color: textColor } }
-        : undefined,
+      legend: showLegend ? buildLegend(legendBase, { names: yFields }) : undefined,
       grid: { top: 70, bottom: 62, left: 64, right: 24 },
       xAxis: {
         type: 'category',

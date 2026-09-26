@@ -48,32 +48,57 @@ function ChevronIcon() {
   )
 }
 
-export function Breadcrumb() {
+interface BreadcrumbProps {
+  /**
+   * light：浅色页面上的白色药丸（默认，保持原有观感）
+   * dark：深色全屏页面上的毛玻璃药丸，避免出现突兀的白条
+   */
+  variant?: "light" | "dark"
+}
+
+export function Breadcrumb({ variant = "light" }: BreadcrumbProps) {
   const tool = useCurrentTool()
   const title = tool?.title || "工具"
+  const dark = variant === "dark"
 
   return (
     <nav
       aria-label="面包屑导航"
       className="mb-6 inline-flex max-w-full items-center"
     >
-      <div className="group flex max-w-full items-center gap-1 rounded-full border border-black/[0.07] bg-white/[0.76] px-2 py-1.5 text-zinc-700 shadow-[0_8px_28px_-18px_rgba(0,0,0,.28)] backdrop-blur-xl backdrop-saturate-150 transition duration-300 hover:bg-white/[0.9] hover:shadow-[0_10px_30px_-18px_rgba(0,0,0,.34)]">
+      <div
+        className={`group flex max-w-full items-center gap-1 rounded-full border px-2 py-1.5 backdrop-blur-xl backdrop-saturate-150 transition duration-300 ${
+          dark
+            ? "border-transparent bg-transparent text-white/60 hover:bg-white/[0.06]"
+            : "border-black/[0.07] bg-white/[0.76] text-zinc-700 shadow-[0_8px_28px_-18px_rgba(0,0,0,.28)] hover:bg-white/[0.9] hover:shadow-[0_10px_30px_-18px_rgba(0,0,0,.34)]"
+        }`}
+      >
         <Link
           href="/"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-[11px] font-medium text-zinc-500 transition-colors hover:bg-black/[0.045] hover:text-zinc-950 sm:text-xs"
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-[11px] font-medium transition-colors sm:text-xs ${
+            dark
+              ? "text-white/50 hover:bg-white/10 hover:text-white"
+              : "text-zinc-500 hover:bg-black/[0.045] hover:text-zinc-950"
+          }`}
         >
           <HomeIcon />
           <span>工具站</span>
         </Link>
 
-        <span className="flex shrink-0 items-center justify-center px-0.5 text-zinc-300">
+        <span
+          className={`flex shrink-0 items-center justify-center px-0.5 ${
+            dark ? "text-white/20" : "text-zinc-300"
+          }`}
+        >
           <ChevronIcon />
         </span>
 
         <span
           aria-current="page"
           title={title}
-          className="min-w-0 truncate rounded-full px-2 py-1 text-[11px] font-semibold tracking-[-0.01em] text-zinc-900 sm:max-w-[260px] sm:text-xs md:max-w-[360px]"
+          className={`min-w-0 truncate rounded-full px-2 py-1 text-[11px] font-semibold tracking-[-0.01em] sm:max-w-[260px] sm:text-xs md:max-w-[360px] ${
+            dark ? "text-white/85" : "text-zinc-900"
+          }`}
         >
           {title}
         </span>

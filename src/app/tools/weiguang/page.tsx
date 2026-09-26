@@ -392,17 +392,72 @@ function 粒子纹理(type: 粒子类型) {
 }
 
 
+/** 粒子类型到着色器分支的序号（“关闭”走 0 分支，但会被 drawRange 归零，不会绘制） */
+const 粒子类型序号: Record<粒子类型, number> = {
+  关闭: 0,
+  尘埃: 0,
+  樱花: 1,
+  萤火虫: 2,
+  雪花: 3,
+  雨丝: 4,
+};
+
 const 粒子顶点着色器 = `
   attribute float aSeed;
   attribute float aDepth;
   uniform float uSize;
+  uniform float uTime;
+  uniform float uSpeed;
+  uniform float uType;
+  uniform float uView;
   varying float vSeed;
   varying float vDepth;
 
   void main() {
     vSeed = aSeed;
     vDepth = aDepth;
-    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+
+    // 所有运动都在 GPU 上用「初值 + 时间」的解析式算。
+    // 原来是在 JS 里每帧把增量累加到 1000 个粒子上，再把整个 position buffer 传回 GPU，
+    // 两个问题：一是每帧 1000 次循环 + 12KB 上传；二是增量按帧给，
+    // 所以 144Hz 屏上的雨会比 60Hz 快 2.4 倍。解析式天生与帧率无关。
+    //
+    // 横向摆动在原实现里是「每帧加一个 sin 值」，那是 sin 的积分，写成解析式是 cos 之差，
+    // 这样才不会留下逐帧累积的漂移。系数与原来逐帧增量 × 60 完全对应。
+    float t = uTime;
+    float sp = uSpeed;
+    float extent = uView;
+    vec3 p = vec3(position.x * extent, position.y * extent, position.z);
+
+    if (uType > 3.5) {
+      // 雨丝：匀速斜落，出界后从另一端绕回
+      p.x += 0.168 * sp * t;
+      p.y -= 1.26 * sp * t;
+      p.x = mod(p.x + extent, 2.0 * extent) - extent;
+      p.y = mod(p.y + extent, 2.0 * extent) - extent;
+    } else if (uType > 2.5) {
+      // 雪花：匀速下落 + 横向摆动
+      p.x += 0.036 * (cos(aSeed * 9.0) - cos(t * 0.7 + aSeed * 9.0));
+      p.y -= 0.132 * sp * t;
+      p.y = mod(p.y + extent, 2.0 * extent) - extent;
+    } else if (uType > 1.5) {
+      // 萤火虫：两轴各自缓慢游走，本身有界所以不循环
+      p.x += 0.0583 * sp * (cos(aSeed * 10.0) - cos(t * 0.72 + aSeed * 10.0));
+      p.y += 0.06 * sp * (sin(t * 0.62 + aSeed * 12.0) - sin(aSeed * 12.0));
+    } else if (uType > 0.5) {
+      // 樱花：斜向飘落 + 打旋
+      p.x += 0.126 * sp * t + 0.0287 * (cos(aSeed * 10.0) - cos(t * 1.15 + aSeed * 10.0));
+      p.y -= 0.063 * sp * t;
+      p.x = mod(p.x + extent, 2.0 * extent) - extent;
+      p.y = mod(p.y + extent, 2.0 * extent) - extent;
+    } else {
+      // 尘埃：缓慢横移 + 轻微浮动
+      p.x += 0.03 * sp * t;
+      p.y += 0.0133 * (cos(aSeed * 8.0) - cos(t * 0.45 + aSeed * 8.0));
+      p.x = mod(p.x + extent, 2.0 * extent) - extent;
+    }
+
+    vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
     gl_PointSize = uSize * mix(0.50, 1.38, aDepth) * (0.76 + aSeed * 0.42);
     gl_Position = projectionMatrix * mvPosition;
   }
@@ -443,12 +498,16 @@ const 粒子片元着色器 = `
   }
 `;
 
-export default function 微光动态背景工作室() {
+// 组件名用拉丁字母：中文函数名会被 eslint 的 rules-of-hooks 判为非法组件，
+// 这个文件里 25 条 hook 报错全是这一个命名引起的
+export default function WeiguangStudio() {
   const 容器 = useRef<HTMLDivElement | null>(null);
   const 文件输入 = useRef<HTMLInputElement | null>(null);
   const 设置引用 = useRef<设置>(默认设置);
   const 运行时 = useRef<any>(null);
   const 录制计时器 = useRef<number | null>(null);
+  const 进度计时器 = useRef<number | null>(null);
+  const 录制器 = useRef<MediaRecorder | null>(null);
   const 原图预览引用 = useRef(false);
 
   const [设置值, set设置值] = useState<设置>(默认设置);
@@ -458,6 +517,8 @@ export default function 微光动态背景工作室() {
   const [原图预览, set原图预览] = useState(false);
   const [当前预设, set当前预设] = useState<预设名称 | "自然" | "自定义">("自然");
   const [正在录制, set正在录制] = useState(false);
+  const [录制总长, set录制总长] = useState(5);
+  const [录制已过, set录制已过] = useState(0);
   const [错误, set错误] = useState("");
 
   useEffect(() => {
@@ -490,9 +551,12 @@ export default function 微光动态背景工作室() {
     if (!mount) return;
 
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      // 后处理链是渲染到 render target 再把一张全屏贴图铺到画布上的，
+      // 场景里没有需要抗锯齿的几何边缘，开 antialias 只是白花 GPU。
+      antialias: false,
       alpha: false,
-      preserveDrawingBuffer: true,
+      // 不再开 preserveDrawingBuffer：那会让浏览器每帧多留一份画面拷贝。
+      // 导出 PNG 改成一帧内渲染完立刻取数据（见 导出图片 / capture 标记）。
       powerPreference: "high-performance",
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
@@ -526,8 +590,11 @@ export default function 微光动态背景工作室() {
     const depths = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = THREE.MathUtils.randFloatSpread(3.2);
-      pos[i * 3 + 1] = THREE.MathUtils.randFloatSpread(2.4);
+      // 归一化到 [-1,1]，由顶点着色器按当前可见区域铺开。
+      // 原来直接写死在 ±1.2 的世界坐标里，而默认 zoom 1.72 下可见范围只有 ±0.58，
+      // 有一半粒子一直在画外空转，缩放一动密度还会跟着变。
+      pos[i * 3] = Math.random() * 2 - 1;
+      pos[i * 3 + 1] = Math.random() * 2 - 1;
       pos[i * 3 + 2] = THREE.MathUtils.randFloat(-0.3, 0.3);
       seeds[i] = Math.random();
       depths[i] = Math.random();
@@ -544,6 +611,9 @@ export default function 微光动态背景工作室() {
         uOpacity: { value: 默认设置.粒子透明度 },
         uSize: { value: 7.5 },
         uTime: { value: 0 },
+        uSpeed: { value: 默认设置.粒子速度 },
+        uType: { value: 粒子类型序号[默认设置.粒子类型] },
+        uView: { value: 1.12 },
         uTwinkle: { value: 0.16 },
         uRotate: { value: 0.0 },
       },
@@ -597,16 +667,20 @@ export default function 微光动态背景工作室() {
       particleType: "尘埃" as 粒子类型,
       pointerX: 0,
       pointerY: 0,
+      targetX: 0,
+      targetY: 0,
       paused: false,
       motionTime: 0,
+      capture: false,
     };
 
     运行时.current = rt;
 
     const onPointerMove = (e: PointerEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
-      rt.pointerX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      rt.pointerY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      // 只记目标值，缓动放到动画循环里做：直接跟指针会让镜头一顿一顿的
+      rt.targetX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      rt.targetY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
     };
 
     renderer.domElement.addEventListener("pointermove", onPointerMove);
@@ -661,6 +735,11 @@ export default function 微光动态背景工作室() {
       const t = rt.motionTime;
       const s = 设置引用.current;
       const preview = 原图预览引用.current;
+
+      // 指针视差缓动，并且做成与帧率无关（0.92^60 ≈ 每秒收敛到 8%）
+      const follow = 1 - Math.pow(0.92, Math.max(delta, 0.001) * 60);
+      rt.pointerX += (rt.targetX - rt.pointerX) * follow;
+      rt.pointerY += (rt.targetY - rt.pointerY) * follow;
 
       // 后处理参数全部实时写入，确保每个滑杆都有响应。
       bloomPass.strength = preview ? 0 : s.泛光;
@@ -787,7 +866,6 @@ export default function 微光动态背景工作室() {
         imageMesh.rotation.z = THREE.MathUtils.degToRad(s.旋转) + dr;
       }
 
-      const arr = particleGeometry.attributes.position.array as Float32Array;
       const visibleCount = Math.floor(count * s.粒子数量);
       particleGeometry.setDrawRange(
         0,
@@ -808,45 +886,15 @@ export default function 微光动态背景工作室() {
       particleMaterial.uniforms.uOpacity.value = s.粒子透明度;
       particleMaterial.uniforms.uSize.value = particleSize;
       particleMaterial.uniforms.uTime.value = t;
+      // 运动参数也从这里喂：类型、速度、可见半高（粒子按可见范围铺开）
+      particleMaterial.uniforms.uSpeed.value = s.粒子速度;
+      particleMaterial.uniforms.uType.value = 粒子类型序号[s.粒子类型];
+      particleMaterial.uniforms.uView.value = (1 / camera.zoom) * 1.12;
       particleMaterial.uniforms.uTwinkle.value =
         s.粒子类型 === "萤火虫" ? 1.0 : s.粒子类型 === "尘埃" ? 0.22 : 0.0;
       particleMaterial.uniforms.uRotate.value =
         s.粒子类型 === "樱花" ? 1.0 : s.粒子类型 === "雪花" ? 0.35 : 0.0;
 
-      const ps = s.粒子速度;
-
-      for (let i = 0; i < visibleCount; i++) {
-        const k = i * 3;
-
-        if (s.粒子类型 === "雨丝") {
-          // 与纹理视觉方向一致：左上 -> 右下。
-          arr[k] += 0.0028 * ps;
-          arr[k + 1] -= 0.021 * ps;
-
-          if (arr[k + 1] < -1.2 || arr[k] > 1.7) {
-            arr[k + 1] = THREE.MathUtils.randFloat(1.05, 1.3);
-            arr[k] = THREE.MathUtils.randFloat(-1.7, 1.1);
-          }
-        } else if (s.粒子类型 === "雪花") {
-          arr[k] += Math.sin(t * 0.7 + seeds[i] * 9) * 0.00042;
-          arr[k + 1] -= 0.0022 * ps;
-          if (arr[k + 1] < -1.2) arr[k + 1] = 1.2;
-        } else if (s.粒子类型 === "樱花") {
-          arr[k] += 0.0021 * ps + Math.sin(t * 1.15 + seeds[i] * 10) * 0.00055;
-          arr[k + 1] -= 0.00105 * ps;
-          if (arr[k] > 1.6) arr[k] = -1.6;
-          if (arr[k + 1] < -1.2) arr[k + 1] = 1.2;
-        } else if (s.粒子类型 === "萤火虫") {
-          arr[k] += Math.sin(t * 0.72 + seeds[i] * 10) * 0.0007 * ps;
-          arr[k + 1] += Math.cos(t * 0.62 + seeds[i] * 12) * 0.00062 * ps;
-        } else {
-          arr[k] += 0.0005 * ps;
-          arr[k + 1] += Math.sin(t * 0.45 + seeds[i] * 8) * 0.0001;
-          if (arr[k] > 1.6) arr[k] = -1.6;
-        }
-      }
-
-      particleGeometry.attributes.position.needsUpdate = true;
 
       if (preview) {
         // 真正的原图比较：直接渲染场景，不经过 Bloom / RGB Shift /
@@ -854,6 +902,16 @@ export default function 微光动态背景工作室() {
         renderer.render(scene, camera);
       } else {
         composer.render();
+      }
+
+      // 导出必须紧跟在渲染之后：没有 preserveDrawingBuffer 时，
+      // 一旦让出这一帧，画布内容就可能被换走，toDataURL 只会拿到空白
+      if (rt.capture) {
+        rt.capture = false;
+        const a = document.createElement("a");
+        a.download = `微光-${Date.now()}.png`;
+        a.href = renderer.domElement.toDataURL("image/png");
+        a.click();
       }
     };
 
@@ -935,8 +993,10 @@ export default function 微光动态背景工作室() {
       requestAnimationFrame(fadeIn);
 
       set已有图片(true);
-      set暂停(false);
-      rt.paused = false;
+      // 系统开了「减少动态效果」就以暂停状态载入，用户按播放才开始动
+      const 减少动态 = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      rt.paused = 减少动态;
+      set暂停(减少动态);
     } catch (e) {
       set错误(e instanceof Error ? e.message : String(e));
     }
@@ -964,20 +1024,32 @@ export default function 微光动态背景工作室() {
     set暂停(rt.paused);
   }
 
+  function 收尾() {
+    if (录制计时器.current) {
+      window.clearTimeout(录制计时器.current);
+      录制计时器.current = null;
+    }
+    if (进度计时器.current) {
+      window.clearInterval(进度计时器.current);
+      进度计时器.current = null;
+    }
+    录制器.current = null;
+    set正在录制(false);
+    set录制已过(0);
+  }
+
+  function 停止录制() {
+    const recorder = 录制器.current;
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+    else 收尾();
+  }
+
   function 导出图片() {
     const rt = 运行时.current;
     if (!rt) return;
-
-    if (原图预览引用.current) {
-      rt.renderer.render(rt.scene, rt.camera);
-    } else {
-      rt.composer.render();
-    }
-
-    const a = document.createElement("a");
-    a.download = `微光-${Date.now()}.png`;
-    a.href = rt.renderer.domElement.toDataURL("image/png");
-    a.click();
+    // 交给动画循环：下一帧渲染完立刻取数据。这里自己渲染再取是拿不到的，
+    // 因为画面已经被换走（preserveDrawingBuffer 关掉之后就是这样）。
+    rt.capture = true;
   }
 
   async function 全屏() {
@@ -1009,22 +1081,32 @@ export default function 微光动态背景工作室() {
 
       recorder.onerror = () => {
         set错误("录制失败，请尝试使用最新版 Chrome / Edge。");
-        set正在录制(false);
+        收尾();
       };
 
       recorder.onstop = () => {
         const blob = new Blob(chunks, { type });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.download = `微光-${seconds}s-${Date.now()}.webm`;
+        a.download = `微光-${Math.round(录制已过)}s-${Date.now()}.webm`;
         a.href = url;
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 2000);
-        set正在录制(false);
+        收尾();
       };
 
+      录制器.current = recorder;
       recorder.start();
       set正在录制(true);
+      set录制总长(seconds);
+      set录制已过(0);
+
+      // 录像是固定时长的，但之前界面上完全看不出进度，很容易以为卡住了
+      const 起点 = performance.now();
+      if (进度计时器.current) window.clearInterval(进度计时器.current);
+      进度计时器.current = window.setInterval(() => {
+        set录制已过(Math.min(seconds, (performance.now() - 起点) / 1000));
+      }, 100);
 
       录制计时器.current = window.setTimeout(() => {
         if (recorder.state !== "inactive") recorder.stop();
@@ -1054,6 +1136,7 @@ export default function 微光动态背景工作室() {
 
   useEffect(() => () => {
     if (录制计时器.current) window.clearTimeout(录制计时器.current);
+    if (进度计时器.current) window.clearInterval(进度计时器.current);
   }, []);
 
   const rangeCss = useMemo(
@@ -1472,14 +1555,20 @@ export default function 微光动态背景工作室() {
             <button className="bl-ui-button" style={toolbarButton} onClick={导出图片}>
               导出 PNG
             </button>
-            <button
-              className="bl-ui-button"
-              style={toolbarButton}
-              disabled={正在录制}
-              onClick={() => 开始录制(5)}
-            >
-              {正在录制 ? "录制中…" : "录制 5 秒"}
-            </button>
+            {正在录制 ? (
+              <button
+                className="bl-ui-button"
+                style={{ ...toolbarButton, background: "rgba(255,120,120,.2)" }}
+                onClick={停止录制}
+                title="提前结束并保存"
+              >
+                停止录制 · {录制已过.toFixed(1)}s / {录制总长}s
+              </button>
+            ) : (
+              <button className="bl-ui-button" style={toolbarButton} onClick={() => 开始录制(5)}>
+                录制 5 秒
+              </button>
+            )}
             <button className="bl-ui-button" style={toolbarButton} onClick={全屏}>
               全屏
             </button>

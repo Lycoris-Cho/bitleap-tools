@@ -9,10 +9,23 @@ import {
   type CSSProperties,
   type DragEvent,
   type MouseEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import {
+  resolveInsertion,
+  resolveSnap,
+  shouldShowGuides,
+  thresholdForZoom,
+  type Anchor,
+  type AxisSnap,
+  type Box,
+  type GapHint,
+  type Guide,
+  type Slot,
+} from "./snapping"
 
 type Device = "desktop" | "tablet" | "mobile"
 type StyleScope = "base" | Device
@@ -77,6 +90,31 @@ type ComponentMeta = {
 const STORAGE_KEY = "bitleap-page-builder-v4"
 const LEGACY_STORAGE_KEY = "bitleap-page-builder-v3"
 const HISTORY_LIMIT = 90
+/** 吸附判定的屏幕像素阈值（会按缩放换算到画布坐标，保证任何缩放下手感一致） */
+const SNAP_SCREEN_PX = 6
+
+/** 自由拖拽期间的瞬时状态。放在 ref 里，不走 React 状态，避免拖动时整树重渲染 */
+type FreeDragState = {
+  nodeId: string
+  el: HTMLElement
+  scale: number
+  baseLeft: number
+  baseTop: number
+  startX: number
+  startY: number
+  pendingLeft: number
+  pendingTop: number
+  snap: { x: AxisSnap | null; y: AxisSnap | null }
+  anchors: Anchor[]
+  box: Box
+  originalLeft: string
+  originalTop: string
+  lastX: number
+  lastY: number
+  lastTime: number
+  velocity: number
+  moved: boolean
+}
 const NODE_TYPES: NodeType[] = [
   "section",
   "container",
@@ -1011,6 +1049,464 @@ export default function PageBuilderPro() {
     })
   }, [])
 
+  /* ==================== 画布自由拖拽 + 磁吸对齐 ====================
+     这段刻意不走 React 状态：拖动过程中每次指针移动都重渲染整棵节点树会卡，
+     所以拖动时只改 DOM（被拖元素的 left/top、叠加层里的参考线），
+     松手时才提交一次状态 —— 撤销栈里因此也只有一条记录。 */
+  const canvasRef = useRef<HTMLDivElement | null>(null)
+  const nodeElsRef = useRef(new Map<string, HTMLElement>())
+  const slotElsRef = useRef(new Map<string, HTMLElement>())
+  const guideRef = useRef<HTMLDivElement | null>(null)
+  const dragRef = useRef<FreeDragState | null>(null)
+  const commitRef = useRef(commitNodes)
+
+  useEffect(() => {
+    commitRef.current = commitNodes
+  }, [commitNodes])
+
+  /** 元素的内边距盒。绝对定位子元素的包含块原点就是它，所以吸附锚点也该用它 */
+  const paddingBoxOf = useCallback((el: HTMLElement, canvasRect: DOMRect, scale: number): Box => {
+    const rect = el.getBoundingClientRect()
+    const style = getComputedStyle(el)
+    const bl = parseFloat(style.borderLeftWidth) || 0
+    const bt = parseFloat(style.borderTopWidth) || 0
+    const br = parseFloat(style.borderRightWidth) || 0
+    const bb = parseFloat(style.borderBottomWidth) || 0
+    return {
+      left: (rect.left + bl - canvasRect.left) / scale,
+      top: (rect.top + bt - canvasRect.top) / scale,
+      width: (rect.width - bl - br) / scale,
+      height: (rect.height - bt - bb) / scale,
+    }
+  }, [])
+
+  const boxOf = useCallback((el: HTMLElement, canvasRect: DOMRect, scale: number): Box => {
+    const rect = el.getBoundingClientRect()
+    return {
+      left: (rect.left - canvasRect.left) / scale,
+      top: (rect.top - canvasRect.top) / scale,
+      width: rect.width / scale,
+      height: rect.height / scale,
+    }
+  }, [])
+
+  const isFreePositioned = useCallback((node: BuilderNode) => {
+    const position = String(node.style.position ?? "static")
+    return position === "absolute" || position === "fixed"
+  }, [])
+
+  /** 取节点当前的 left/top：有 px 值就用它，否则用实测偏移（绝对定位常见的 auto 情况） */
+  const resolvedOffsets = useCallback(
+    (node: BuilderNode): { left: number; top: number } | null => {
+      const canvas = canvasRef.current
+      const el = nodeElsRef.current.get(node.id)
+      if (!canvas || !el) return null
+      const canvasRect = canvas.getBoundingClientRect()
+      const scale = Math.max(0.05, zoom / 100)
+      const location = getLocation(nodes, node.id)
+      const parentEl = location?.parentId ? nodeElsRef.current.get(location.parentId) : canvas
+      const parentBox = parentEl ? paddingBoxOf(parentEl, canvasRect, scale) : { left: 0, top: 0, width: 0, height: 0 }
+      const box = boxOf(el, canvasRect, scale)
+      const parsePx = (value: unknown) => {
+        const text = String(value ?? "")
+        return text.endsWith("px") ? Number.parseFloat(text) : NaN
+      }
+      const styleLeft = parsePx(node.style.left)
+      const styleTop = parsePx(node.style.top)
+      return {
+        left: Number.isFinite(styleLeft) ? styleLeft : box.left - parentBox.left,
+        top: Number.isFinite(styleTop) ? styleTop : box.top - parentBox.top,
+      }
+    },
+    [boxOf, nodes, paddingBoxOf, zoom],
+  )
+
+  /**
+   * 采集吸附锚点：画布框、父容器内边距盒、以及同级兄弟的包围盒。
+   * 排除自己和自己的后代 —— 拖自己时不该被自己吸住。
+   */
+  const collectAnchors = useCallback(
+    (nodeId: string): { anchors: Anchor[]; box: Box } | null => {
+      const canvas = canvasRef.current
+      const el = nodeElsRef.current.get(nodeId)
+      if (!canvas || !el) return null
+      const canvasRect = canvas.getBoundingClientRect()
+      const scale = Math.max(0.05, zoom / 100)
+      const box = boxOf(el, canvasRect, scale)
+      const location = getLocation(nodes, nodeId)
+      const moving = getNode(nodes, nodeId)
+
+      const anchors: Anchor[] = [
+        { box: { left: 0, top: 0, width: canvas.clientWidth, height: canvas.clientHeight }, kind: "canvas" },
+      ]
+
+      const parentEl = location?.parentId ? nodeElsRef.current.get(location.parentId) : canvas
+      if (parentEl) anchors.push({ box: paddingBoxOf(parentEl, canvasRect, scale), kind: "parent" })
+
+      const siblings = location?.parentId ? (getNode(nodes, location.parentId)?.children ?? []) : nodes
+      for (const sibling of siblings) {
+        if (sibling.id === nodeId) continue
+        if (moving && hasDescendant(moving, sibling.id)) continue
+        const siblingEl = nodeElsRef.current.get(sibling.id)
+        if (!siblingEl) continue
+        anchors.push({ box: boxOf(siblingEl, canvasRect, scale), kind: "sibling", id: sibling.id })
+      }
+
+      return { anchors, box }
+    },
+    [boxOf, nodes, paddingBoxOf, zoom],
+  )
+
+  /** 刷新叠加层里的参考线、间距标签与插入指示线 */
+  const paintGuides = useCallback((guides: Guide[], gap: GapHint | null, scale: number) => {
+    const layer = guideRef.current
+    if (!layer) return
+    const thin = Math.max(1 / scale, 0.5)
+
+    for (let index = 0; index < 3; index += 1) {
+      const vertical = layer.querySelector<HTMLElement>(`[data-guide-x="${index}"]`)
+      if (vertical) {
+        const guide = guides.filter((item) => item.axis === "x")[index]
+        if (!guide) vertical.style.display = "none"
+        else {
+          vertical.style.display = "block"
+          vertical.style.left = `${guide.position}px`
+          vertical.style.top = `${guide.from}px`
+          vertical.style.width = `${thin}px`
+          vertical.style.height = `${Math.max(guide.to - guide.from, 1)}px`
+        }
+      }
+      const horizontal = layer.querySelector<HTMLElement>(`[data-guide-y="${index}"]`)
+      if (horizontal) {
+        const guide = guides.filter((item) => item.axis === "y")[index]
+        if (!guide) horizontal.style.display = "none"
+        else {
+          horizontal.style.display = "block"
+          horizontal.style.top = `${guide.position}px`
+          horizontal.style.left = `${guide.from}px`
+          horizontal.style.height = `${thin}px`
+          horizontal.style.width = `${Math.max(guide.to - guide.from, 1)}px`
+        }
+      }
+    }
+
+    const badge = layer.querySelector<HTMLElement>("[data-guide-gap]")
+    if (badge) {
+      if (!gap || gap.value < 1 || gap.value > 600) badge.style.display = "none"
+      else {
+        badge.style.display = "block"
+        badge.textContent = `${Math.round(gap.value)}px`
+        badge.style.fontSize = `${11 / scale}px`
+        badge.style.padding = `${2 / scale}px ${6 / scale}px`
+        badge.style.borderRadius = `${5 / scale}px`
+        const centerX = gap.axis === "x" ? (gap.from + gap.to) / 2 : gap.cross
+        const centerY = gap.axis === "x" ? gap.cross : (gap.from + gap.to) / 2
+        badge.style.left = `${centerX}px`
+        badge.style.top = `${centerY}px`
+      }
+    }
+  }, [])
+
+  type InsertTarget = {
+    containerId: string | null
+    index: number
+    axis: "x" | "y"
+    line: number
+    crossFrom: number
+    crossTo: number
+  }
+
+  /**
+   * 结构式拖拽的落点：按指针在容器主轴上的位置吸到最近的插入缝隙。
+   *
+   * 原来的做法是在每两个子节点之间铺一条 8px 高的拖放条，必须精准命中那 8px 才生效；
+   * 现在指针落在容器里任何位置都能算出落点 —— 命中的是「离指针最近的缝隙」，
+   * 而不是「你有没有对准那条细线」。落点同时用来画指示线。
+   */
+  const resolveDropSlot = useCallback(
+    (containerId: string | null, clientX: number, clientY: number): InsertTarget | null => {
+      const canvas = canvasRef.current
+      if (!canvas) return null
+      const containerEl = containerId ? nodeElsRef.current.get(containerId) : canvas
+      if (!containerEl) return null
+
+      const canvasRect = canvas.getBoundingClientRect()
+      const scale = Math.max(0.05, zoom / 100)
+      const toLocal = (value: number, origin: number) => (value - origin) / scale
+
+      const containerBox = boxOf(containerEl, canvasRect, scale)
+      const style = getComputedStyle(containerEl)
+      const borderTop = parseFloat(style.borderTopWidth) || 0
+      const borderLeft = parseFloat(style.borderLeftWidth) || 0
+      const padTop = parseFloat(style.paddingTop) || 0
+      const padBottom = parseFloat(style.paddingBottom) || 0
+      const padLeft = parseFloat(style.paddingLeft) || 0
+      const padRight = parseFloat(style.paddingRight) || 0
+
+      // flex 横向容器按 x 判定；grid 与 block 都是按 DOM 顺序铺开，用 y
+      const isRow = style.display.includes("flex") && style.flexDirection.startsWith("row")
+      const axis: "x" | "y" = isRow ? "x" : "y"
+
+      const children = containerId ? (getNode(nodes, containerId)?.children ?? []) : nodes
+      const slots: Slot[] = []
+      for (const child of children) {
+        const slotEl = slotElsRef.current.get(child.id)
+        if (!slotEl) continue
+        const rect = slotEl.getBoundingClientRect()
+        slots.push(
+          axis === "x"
+            ? { start: toLocal(rect.left, canvasRect.left), end: toLocal(rect.right, canvasRect.left) }
+            : { start: toLocal(rect.top, canvasRect.top), end: toLocal(rect.bottom, canvasRect.top) },
+        )
+      }
+
+      const bounds: Slot =
+        axis === "x"
+          ? { start: containerBox.left + borderLeft + padLeft, end: containerBox.left + containerBox.width - borderLeft - padRight }
+          : { start: containerBox.top + borderTop + padTop, end: containerBox.top + containerBox.height - borderTop - padBottom }
+
+      const pointer = axis === "x" ? toLocal(clientX, canvasRect.left) : toLocal(clientY, canvasRect.top)
+      const resolved = resolveInsertion(pointer, slots, bounds)
+      // 容器有子节点却一个槽位都没量到（理论上不该发生）：退化成追加到末尾，
+      // 至少不会把所有东西都插到第一个位置去
+      const index = children.length > 0 && slots.length === 0 ? children.length : resolved.index
+
+      return {
+        containerId,
+        index,
+        axis,
+        line: resolved.line,
+        crossFrom: axis === "x" ? containerBox.top + padTop : containerBox.left + padLeft,
+        crossTo: axis === "x"
+          ? containerBox.top + containerBox.height - padBottom
+          : containerBox.left + containerBox.width - padRight,
+      }
+    },
+    [boxOf, nodes, zoom],
+  )
+
+  const paintInsertion = useCallback((target: InsertTarget | null, scale: number) => {
+    const layer = guideRef.current
+    if (!layer) return
+    const line = layer.querySelector<HTMLElement>("[data-guide-insert]")
+    const label = layer.querySelector<HTMLElement>("[data-guide-insert-label]")
+    if (!line || !label) return
+
+    if (!target) {
+      line.style.display = "none"
+      label.style.display = "none"
+      return
+    }
+
+    const thick = Math.max(3 / scale, 1.5)
+    line.style.display = "block"
+    if (target.axis === "x") {
+      line.style.left = `${target.line - thick / 2}px`
+      line.style.top = `${target.crossFrom}px`
+      line.style.width = `${thick}px`
+      line.style.height = `${Math.max(target.crossTo - target.crossFrom, 1)}px`
+    } else {
+      line.style.left = `${target.crossFrom}px`
+      line.style.top = `${target.line - thick / 2}px`
+      line.style.width = `${Math.max(target.crossTo - target.crossFrom, 1)}px`
+      line.style.height = `${thick}px`
+    }
+
+    label.style.display = "block"
+    label.textContent = `插入到第 ${target.index + 1} 位`
+    label.style.fontSize = `${11 / scale}px`
+    label.style.padding = `${2 / scale}px ${6 / scale}px`
+    label.style.borderRadius = `${5 / scale}px`
+    if (target.axis === "x") {
+      label.style.left = `${target.line}px`
+      label.style.top = `${Math.max(target.crossFrom - 20 / scale, 0)}px`
+    } else {
+      label.style.left = `${target.crossTo + 6 / scale}px`
+      label.style.top = `${target.line}px`
+    }
+  }, [])
+
+  // 指针当前所在的插入落点。放在 ref 里，dragover 期间不触发重渲染
+  const dropTargetRef = useRef<InsertTarget | null>(null)
+  const handleDropRef = useRef<((event: DragEvent, parentId: string | null, index?: number) => void) | null>(null)
+
+  const handleContainerDragOver = useCallback(
+    (event: DragEvent, containerId: string | null) => {
+      event.preventDefault()
+      event.stopPropagation()
+      const target = resolveDropSlot(containerId, event.clientX, event.clientY)
+      dropTargetRef.current = target
+      paintInsertion(target, Math.max(0.05, zoom / 100))
+      setDragOverId(containerId ?? "root")
+    },
+    [paintInsertion, resolveDropSlot, zoom],
+  )
+
+  const handleContainerDrop = useCallback(
+    (event: DragEvent, containerId: string | null) => {
+      event.preventDefault()
+      event.stopPropagation()
+      const target = resolveDropSlot(containerId, event.clientX, event.clientY) ?? dropTargetRef.current
+      dropTargetRef.current = null
+      paintInsertion(null, 1)
+      // 落点按几何算出来，而不是看指针命中了哪条拖放条。
+      // handleDrop 在下面才声明，这里通过 ref 取最新那份，避免渲染期就引用它。
+      handleDropRef.current?.(event, containerId, target ? target.index : undefined)
+    },
+    [paintInsertion, resolveDropSlot],
+  )
+
+  const beginFreeDrag = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>, node: BuilderNode) => {
+      if (node.locked || node.hidden || event.button !== 0) return
+      if (!isFreePositioned(node)) return
+
+      const canvas = canvasRef.current
+      const el = nodeElsRef.current.get(node.id)
+      const collected = collectAnchors(node.id)
+      const offsets = resolvedOffsets(node)
+      if (!canvas || !el || !collected || !offsets) return
+
+      // 阻止原生 HTML5 拖拽接管这次指针
+      event.preventDefault()
+      event.stopPropagation()
+
+      dragRef.current = {
+        nodeId: node.id,
+        el,
+        scale: Math.max(0.05, zoom / 100),
+        baseLeft: offsets.left,
+        baseTop: offsets.top,
+        startX: event.clientX,
+        startY: event.clientY,
+        pendingLeft: offsets.left,
+        pendingTop: offsets.top,
+        snap: { x: null, y: null },
+        anchors: collected.anchors,
+        box: collected.box,
+        originalLeft: el.style.left,
+        originalTop: el.style.top,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        lastTime: performance.now(),
+        velocity: 0,
+        moved: false,
+      }
+
+      el.style.cursor = "grabbing"
+      if (guideRef.current) guideRef.current.style.display = "block"
+      setSelectedId(node.id)
+    },
+    [collectAnchors, isFreePositioned, resolvedOffsets, zoom],
+  )
+
+  useEffect(() => {
+    const finish = (commit: boolean) => {
+      const drag = dragRef.current
+      if (!drag) return
+      dragRef.current = null
+      drag.el.style.cursor = ""
+      if (guideRef.current) guideRef.current.style.display = "none"
+
+      if (!commit) {
+        drag.el.style.left = drag.originalLeft
+        drag.el.style.top = drag.originalTop
+        return
+      }
+
+      if (!drag.moved) return
+
+      const left = drag.pendingLeft
+      const top = drag.pendingTop
+      // 提交的是吸附之后的值：提交原始值会把吸附结果覆盖掉
+      commitRef.current((prev) =>
+        updateNode(prev, drag.nodeId, (node) => ({
+          ...node,
+          style: { ...node.style, left: `${Math.round(left * 100) / 100}px`, top: `${Math.round(top * 100) / 100}px` },
+        })),
+      )
+      const snapped = Boolean(drag.snap.x || drag.snap.y)
+      flash(snapped ? "位置已更新 · 已吸附到对齐线" : "位置已更新")
+    }
+
+    const onMove = (event: PointerEvent) => {
+      const drag = dragRef.current
+      if (!drag) return
+
+      const rawDx = (event.clientX - drag.startX) / drag.scale
+      const rawDy = (event.clientY - drag.startY) / drag.scale
+      if (Math.abs(rawDx) > 0.5 || Math.abs(rawDy) > 0.5) drag.moved = true
+
+      // 速度用指数平滑，用它决定参考线要不要收起来：拖得快时线会很晃眼
+      const now = performance.now()
+      const elapsed = Math.max(1, now - drag.lastTime)
+      const moved = Math.hypot(event.clientX - drag.lastX, event.clientY - drag.lastY)
+      drag.velocity = drag.velocity * 0.72 + (moved / elapsed) * 0.28
+      drag.lastX = event.clientX
+      drag.lastY = event.clientY
+      drag.lastTime = now
+
+      const proposed: Box = { ...drag.box, left: drag.box.left + rawDx, top: drag.box.top + rawDy }
+      const outcome = resolveSnap({
+        target: proposed,
+        anchors: drag.anchors,
+        // 按住 Alt 时临时关掉吸附，方便精细摆放
+        threshold: event.altKey ? 0 : thresholdForZoom(SNAP_SCREEN_PX, drag.scale),
+        previous: drag.snap,
+      })
+      drag.snap = outcome.state
+      drag.pendingLeft = drag.baseLeft + rawDx + outcome.dx
+      drag.pendingTop = drag.baseTop + rawDy + outcome.dy
+
+      drag.el.style.left = `${drag.pendingLeft}px`
+      drag.el.style.top = `${drag.pendingTop}px`
+
+      const show = shouldShowGuides(drag.velocity)
+      paintGuides(show ? outcome.guides : [], show ? outcome.gap : null, drag.scale)
+    }
+
+    const onUp = () => finish(true)
+    const onCancel = () => finish(false)
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !dragRef.current) return
+      event.preventDefault()
+      finish(false)
+      flash("已取消拖动")
+    }
+
+    window.addEventListener("pointermove", onMove)
+    window.addEventListener("pointerup", onUp)
+    window.addEventListener("pointercancel", onCancel)
+    window.addEventListener("keydown", onKey)
+    return () => {
+      window.removeEventListener("pointermove", onMove)
+      window.removeEventListener("pointerup", onUp)
+      window.removeEventListener("pointercancel", onCancel)
+      window.removeEventListener("keydown", onKey)
+    }
+  }, [flash, paintGuides])
+
+  /** 把普通节点转成绝对定位，left/top 取它现在所在的位置，转换后就能直接拖动吸附 */
+  const makeFreePositioned = useCallback(
+    (node: BuilderNode) => {
+      const offsets = resolvedOffsets(node)
+      if (!offsets) return
+      commitNodes((prev) =>
+        updateNode(prev, node.id, (item) => ({
+          ...item,
+          style: {
+            ...item.style,
+            position: "absolute",
+            left: `${Math.round(offsets.left * 100) / 100}px`,
+            top: `${Math.round(offsets.top * 100) / 100}px`,
+          },
+        })),
+      )
+      flash("已转为自由定位，现在可以直接拖动并自动吸附")
+    },
+    [commitNodes, flash, resolvedOffsets],
+  )
+
   const undo = useCallback(() => {
     const previous = undoRef.current.at(-1)
     if (!previous) return
@@ -1247,12 +1743,50 @@ export default function PageBuilderPro() {
         deleteSelected()
         return
       }
+      // 自由定位的节点用方向键微调：默认 1px，按住 Shift 一次 10px
+      if (event.key.startsWith("Arrow") && selectedId) {
+        const node = getNode(nodes, selectedId)
+        if (node && !node.locked && isFreePositioned(node)) {
+          const step = event.shiftKey ? 10 : 1
+          const dx = event.key === "ArrowLeft" ? -step : event.key === "ArrowRight" ? step : 0
+          const dy = event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0
+          if (dx || dy) {
+            event.preventDefault()
+            const offsets = resolvedOffsets(node)
+            if (offsets) {
+              commitNodes((prev) =>
+                updateNode(prev, node.id, (item) => ({
+                  ...item,
+                  style: {
+                    ...item.style,
+                    left: `${Math.round((offsets.left + dx) * 100) / 100}px`,
+                    top: `${Math.round((offsets.top + dy) * 100) / 100}px`,
+                  },
+                })),
+              )
+            }
+            return
+          }
+        }
+      }
       if (event.key === "Escape") setSelectedId(null)
     }
 
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [copySelected, deleteSelected, duplicateSelected, pasteSelected, redo, undo])
+  }, [
+    commitNodes,
+    copySelected,
+    deleteSelected,
+    duplicateSelected,
+    isFreePositioned,
+    nodes,
+    pasteSelected,
+    redo,
+    resolvedOffsets,
+    selectedId,
+    undo,
+  ])
 
   const getPayload = (event: DragEvent): DragPayload | null => {
     try {
@@ -1291,6 +1825,11 @@ export default function PageBuilderPro() {
     commitNodes(insertNode(result.next, parentId, result.removed, adjustedIndex))
     setSelectedId(moving.id)
   }
+
+  // handleContainerDrop 通过这个 ref 取用最新的 handleDrop，避免渲染期就引用尚未初始化的 const
+  useEffect(() => {
+    handleDropRef.current = handleDrop
+  })
 
   const importJson = () => {
     const raw = window.prompt("粘贴 Page Builder JSON：")
@@ -1353,17 +1892,13 @@ export default function PageBuilderPro() {
       }
 
       return node.children.map((child, childIndex) => (
-        <div key={child.id}>
-          {mode === "edit" && (
-            <div
-              onDragOver={(event) => {
-                event.preventDefault()
-                event.stopPropagation()
-              }}
-              onDrop={(event) => handleDrop(event, node.id, childIndex)}
-              className="h-2 rounded-full transition hover:bg-violet-300"
-            />
-          )}
+        <div
+          key={child.id}
+          ref={(element) => {
+            if (element) slotElsRef.current.set(child.id, element)
+            else slotElsRef.current.delete(child.id)
+          }}
+        >
           {renderNode(child, node.id, childIndex, mode)}
         </div>
       ))
@@ -1378,7 +1913,8 @@ export default function PageBuilderPro() {
         content = (
           <div
             style={nodeStyle}
-            onDrop={mode === "edit" ? (event) => handleDrop(event, node.id) : undefined}
+            onDragOver={mode === "edit" ? (event) => handleContainerDragOver(event, node.id) : undefined}
+            onDrop={mode === "edit" ? (event) => handleContainerDrop(event, node.id) : undefined}
             className={dropActive && mode === "edit" ? "outline outline-2 outline-dashed outline-violet-400" : ""}
           >
             {renderChildren()}
@@ -1413,6 +1949,8 @@ export default function PageBuilderPro() {
 
     if (mode === "preview") return content
 
+    const freePositioned = isFreePositioned(node)
+
     const wrapperClass = `group/node relative rounded-[18px] transition ${
       isSelected
         ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-white"
@@ -1423,7 +1961,15 @@ export default function PageBuilderPro() {
 
     return (
       <div
-        draggable={!node.locked}
+        ref={(element) => {
+          if (element) nodeElsRef.current.set(node.id, element)
+          else nodeElsRef.current.delete(node.id)
+        }}
+        data-node-id={node.id}
+        // 绝对定位的节点用指针直接拖（配合吸附），其余节点仍然走结构式拖拽
+        draggable={!node.locked && !freePositioned}
+        style={freePositioned ? { cursor: "grab" } : undefined}
+        onPointerDown={(event: ReactPointerEvent<HTMLDivElement>) => beginFreeDrag(event, node)}
         onDragStart={(event) => {
           if (node.locked) {
             event.preventDefault()
@@ -1439,7 +1985,7 @@ export default function PageBuilderPro() {
         }}
         onDragOver={(event) => {
           event.preventDefault()
-          event.stopPropagation()
+          // 不再 stopPropagation：要让事件冒泡到容器，由容器按几何算出插入缝隙
           setDragOverId(node.id)
         }}
         onDragLeave={(event) => {
@@ -1449,13 +1995,32 @@ export default function PageBuilderPro() {
         className={wrapperClass}
       >
         {isSelected && (
-          <div className="pointer-events-none absolute -top-3 left-3 z-20 rounded-lg bg-violet-600 px-2 py-1 text-[10px] font-semibold text-white shadow-lg">
-            {COMPONENTS.find((item) => item.type === node.type)?.label}
-            {node.locked ? " · 已锁定" : ""}
+          <div className="absolute -top-3 left-3 z-20 flex items-center gap-1.5">
+            <span className="rounded-lg bg-violet-600 px-2 py-1 text-[10px] font-semibold text-white shadow-lg">
+              {COMPONENTS.find((item) => item.type === node.type)?.label}
+              {node.locked ? " · 已锁定" : ""}
+            </span>
+            {!node.locked && !freePositioned && (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  makeFreePositioned(node)
+                }}
+                title="转为绝对定位，之后可以直接在画布上拖动并自动吸附对齐"
+                className="rounded-lg bg-slate-900/85 px-2 py-1 text-[10px] font-semibold text-white shadow-lg transition hover:bg-slate-900"
+              >
+                自由定位
+              </button>
+            )}
+            {freePositioned && (
+              <span className="rounded-lg bg-rose-500/90 px-2 py-1 text-[10px] font-semibold text-white shadow-lg">
+                可拖动 · 自动吸附
+              </span>
+            )}
           </div>
         )}
         {content}
-        <div onDragOver={(event) => { event.preventDefault(); event.stopPropagation() }} onDrop={(event) => handleDrop(event, parentId, index + 1)} className="absolute -bottom-2 left-0 right-0 z-10 h-4" />
       </div>
     )
   }
@@ -1647,19 +2212,22 @@ export default function PageBuilderPro() {
                   <div className="ml-3 flex h-6 flex-1 items-center rounded-md border border-stone-200 bg-white px-2 text-[9px] text-slate-300">
                     preview.local/{projectName.replace(/\s+/g, "-").toLowerCase()}
                   </div>
+                  <span className="hidden text-[10px] text-slate-400 lg:inline">
+                    拖动组件时按最近缝隙吸附 · 选中后点「自由定位」可拖动对齐（Alt 关吸附 / Shift+方向键 10px）
+                  </span>
                 </div>
 
                 <div
+                  ref={canvasRef}
                   onClick={() => setSelectedId(null)}
-                  onDragOver={(event) => {
-                    event.preventDefault()
-                    setDragOverId("root")
-                  }}
+                  onDragOver={(event) => handleContainerDragOver(event, null)}
                   onDragLeave={() => {
                     if (dragOverId === "root") setDragOverId(null)
+                    dropTargetRef.current = null
+                    paintInsertion(null, 1)
                   }}
-                  onDrop={(event) => handleDrop(event, null)}
-                  className={`min-h-[700px] p-5 sm:p-8 ${dragOverId === "root" ? "bg-violet-50/60" : "bg-white"}`}
+                  onDrop={(event) => handleContainerDrop(event, null)}
+                  className={`relative min-h-[700px] p-5 sm:p-8 ${dragOverId === "root" ? "bg-violet-50/60" : "bg-white"}`}
                 >
                   {!nodes.length ? (
                     <div className="flex min-h-[610px] items-center justify-center">
@@ -1673,13 +2241,41 @@ export default function PageBuilderPro() {
                   ) : (
                     <div className="flex flex-col gap-4">
                       {nodes.map((node, index) => (
-                        <div key={node.id}>
-                          <div onDragOver={(event) => event.preventDefault()} onDrop={(event) => handleDrop(event, null, index)} className="h-2 rounded-full transition hover:bg-violet-300" />
+                        <div
+                          key={node.id}
+                          ref={(element) => {
+                            if (element) slotElsRef.current.set(node.id, element)
+                            else slotElsRef.current.delete(node.id)
+                          }}
+                        >
                           {renderNode(node, null, index)}
                         </div>
                       ))}
                     </div>
                   )}
+
+                  {/* 对齐参考线 / 间距标签 / 插入指示线。
+                      挂在画布坐标系里（和缩放同一个坐标系），所以位置可以直接用画布坐标写；
+                      pointer-events-none 保证不影响画布上的任何交互。 */}
+                  <div ref={guideRef} className="pointer-events-none absolute inset-0 z-30" style={{ display: "none" }}>
+                    {[0, 1, 2].map((index) => (
+                      <div key={`gx${index}`} data-guide-x={index} className="absolute bg-rose-500/85" style={{ display: "none" }} />
+                    ))}
+                    {[0, 1, 2].map((index) => (
+                      <div key={`gy${index}`} data-guide-y={index} className="absolute bg-rose-500/85" style={{ display: "none" }} />
+                    ))}
+                    <div
+                      data-guide-gap
+                      className="absolute -translate-x-1/2 -translate-y-1/2 bg-rose-500 font-mono font-semibold text-white"
+                      style={{ display: "none" }}
+                    />
+                    <div data-guide-insert className="absolute rounded-full bg-violet-500" style={{ display: "none" }} />
+                    <div
+                      data-guide-insert-label
+                      className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-violet-600 font-semibold text-white"
+                      style={{ display: "none" }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
