@@ -5,6 +5,7 @@ import QRCode from "qrcode"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type ContentType = "url" | "text" | "wifi"
 type WifiSecurity = "WPA" | "WEP" | "nopass"
@@ -320,6 +321,7 @@ export default function QrcodePage() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(178,151,91,.11),transparent_27%),radial-gradient(circle_at_8%_88%,rgba(73,107,91,.09),transparent_31%)]" />
         <div className="qr-orbit-a absolute right-[-20vw] top-[-23vw] h-[57vw] w-[57vw] rounded-full border border-black/[.045]">
           <span className="absolute left-[15%] top-[43%] h-2 w-2 rounded-full bg-[#b28d48]/42" />

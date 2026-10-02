@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 interface IpResult {
   ip: string
@@ -344,6 +345,7 @@ export default function IPCalcPage() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_14%,rgba(178,151,91,.12),transparent_27%),radial-gradient(circle_at_8%_86%,rgba(73,107,91,.09),transparent_31%)]" />
         <div className="ip-orbit-a absolute right-[-19vw] top-[-23vw] h-[57vw] w-[57vw] rounded-full border border-black/[.045]">
           <span className="absolute left-[15%] top-[44%] h-2 w-2 rounded-full bg-[#b28d48]/40" />

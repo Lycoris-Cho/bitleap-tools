@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type Option = {
   id: string
@@ -490,6 +491,7 @@ export default function Roulette() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_18%,rgba(190,161,103,.13),transparent_27%),radial-gradient(circle_at_10%_82%,rgba(87,118,103,.10),transparent_31%)]" />
         <div className="roulette-orbit-a absolute right-[-17vw] top-[-19vw] h-[54vw] w-[54vw] rounded-full border border-black/[.045]">
           <span className="absolute left-[16%] top-[44%] h-2 w-2 rounded-full bg-[#c69e52]/45" />

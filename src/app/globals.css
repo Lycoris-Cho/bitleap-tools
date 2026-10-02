@@ -171,37 +171,78 @@ body {
 
 
 /* =========================================================
-   Sakura Animations
+   Sparkle Animations（掉落四角星）
+   ---------------------------------------------------------
+   三层各管一件事：
+   star-fall  纵向落下 + 整体的淡入淡出
+   star-sway  左右摆动 + 轻微倾斜，幅度由 --star-sway 传入
+   star-twinkle  闪烁（缩放 + 透明度），套在 svg 上
    ========================================================= */
 
-@keyframes sakura-fall {
+@keyframes star-fall {
   0% {
-    transform: translateY(-20px) rotate(0deg) translateX(0);
+    transform: translate3d(0, -12vh, 0);
     opacity: 0;
   }
 
   10% {
-    opacity: 0.6;
+    opacity: 1;
   }
 
-  90% {
-    opacity: 0.6;
+  88% {
+    opacity: 1;
   }
 
   100% {
-    transform: translateY(110vh) rotate(360deg) translateX(30px);
+    transform: translate3d(0, 112vh, 0);
     opacity: 0;
   }
 }
 
-@keyframes petal-glow {
-  0%,
-  100% {
-    filter: brightness(1);
+@keyframes star-sway {
+  0% {
+    transform: translateX(calc(var(--star-sway, 30px) * -1)) rotate(-24deg);
   }
 
-  50% {
-    filter: brightness(1.2);
+  100% {
+    transform: translateX(var(--star-sway, 30px)) rotate(24deg);
+  }
+}
+
+@keyframes star-twinkle {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.45;
+  }
+
+  100% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+/*
+ * 工具页站娘周围的四角星（src/components/CharacterBackdrop.tsx）。
+ * 复用上面的 star-twinkle，不另造关键帧；每颗星的时长/延迟由 CSS 变量传入。
+ * 浓淡由 SVG 的 fillOpacity 控制，不用 opacity —— 见组件里的注释。
+ *
+ * 放在全局样式表里而不是组件内 —— 和上面 .gpt-caret 同一个理由：
+ * styled-jsx 会加编译期类名，dev 重编译时服务端与客户端的类名对不上，触发 hydration 报错。
+ *
+ * 注意：star-twinkle 动的是 transform，所以这些星【不能】再用 transform 做居中定位
+ * （transform 会被关键帧整个覆盖掉），位置一律用 left/top 给。
+ */
+.cb-star {
+  animation: star-twinkle var(--twinkle, 3.6s) ease-in-out infinite alternate;
+  animation-delay: var(--twinkle-delay, 0s);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 关掉闪烁，停在动画中段的样子（0.72），保留 fillOpacity 的浓淡 */
+  .cb-star {
+    animation: none;
+    opacity: 0.72;
   }
 }
 
@@ -332,4 +373,26 @@ body::-webkit-scrollbar-corner {
   *:not(html):not(body)::-webkit-scrollbar-thumb {
     border-width: 0;
   }
+}
+
+/* =========================================================
+   ChatGPT 娘海报：光标闪烁
+   ---------------------------------------------------------
+   放在全局样式表里而不是用 <style jsx> —— styled-jsx 会给每个元素加一个
+   编译期生成的类名（jsx-xxxx），dev 重编译时服务端 HTML 与客户端 bundle
+   的类名会对不上，触发 hydration 报错。放进全局 CSS 就没有这个问题。
+   ========================================================= */
+
+@keyframes gpt-caret-blink {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.gpt-caret {
+  animation: gpt-caret-blink 1.05s steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gpt-caret { animation: none !important; }
 }

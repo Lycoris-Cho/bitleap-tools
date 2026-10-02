@@ -10,6 +10,7 @@ import {
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type RegexStatus = "idle" | "running" | "ready" | "error" | "timeout"
 type CopyState = "regex" | "matches" | "replacement" | null
@@ -818,6 +819,7 @@ export default function RegexTestPage() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_9%,rgba(178,151,91,.10),transparent_27%),radial-gradient(circle_at_8%_88%,rgba(73,107,91,.08),transparent_31%)]" />
 
         <div className="regex-orbit-a absolute right-[-20vw] top-[-24vw] h-[58vw] w-[58vw] rounded-full border border-black/[.04]">

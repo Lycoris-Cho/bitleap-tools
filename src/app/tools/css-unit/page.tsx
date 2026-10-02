@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type Unit = "px" | "rem" | "em" | "vw" | "vh" | "vmin" | "vmax" | "%" | "pt"
 type CopyKey = "value" | "css" | "tailwind" | "scale" | "clamp" | "report" | string | null
@@ -475,6 +476,7 @@ export default function CssUnitConvertPage() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_84%_10%,rgba(178,141,72,.08),transparent_25%),radial-gradient(circle_at_8%_88%,rgba(82,104,93,.08),transparent_29%)]" />
         <div className="unit-orbit absolute right-[-18vw] top-[-22vw] h-[56vw] w-[56vw] rounded-full border border-black/[.035]">
           <span className="absolute left-[18%] top-[44%] h-2 w-2 rounded-full bg-[#52685d]/30" />

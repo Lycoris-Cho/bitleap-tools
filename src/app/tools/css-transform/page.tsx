@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type CopyKey = "transform" | "css" | "tailwind" | "matrix" | "report" | null
 type OriginPreset = "top-left" | "top" | "top-right" | "left" | "center" | "right" | "bottom-left" | "bottom" | "bottom-right"
@@ -357,6 +358,7 @@ export default function CssTransformPage() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_83%_8%,rgba(178,141,72,.08),transparent_24%),radial-gradient(circle_at_8%_89%,rgba(82,104,93,.08),transparent_28%)]" />
         <div className="transform-orbit absolute right-[-17vw] top-[-21vw] h-[54vw] w-[54vw] rounded-full border border-black/[.035]">
           <span className="absolute left-[18%] top-[44%] h-2 w-2 rounded-full bg-[#52685d]/30" />

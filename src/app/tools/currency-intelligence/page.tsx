@@ -4,6 +4,7 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type Currency = {
   iso_code: string
@@ -346,6 +347,7 @@ export default function CurrencyIntelligencePage() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop tone="dark" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(211,194,137,.12),transparent_29%),radial-gradient(circle_at_12%_82%,rgba(117,150,133,.09),transparent_32%)]" />
         <div className="fx-orbit-a absolute right-[-12vw] top-[-16vw] h-[52vw] w-[52vw] rounded-full border border-white/[0.055]">
           <span className="absolute left-[11%] top-1/2 h-2 w-2 rounded-full bg-[#e5d69e]/55 shadow-[0_0_30px_rgba(229,214,158,.4)]" />

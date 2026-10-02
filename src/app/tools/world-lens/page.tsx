@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type Country = {
   id:string
@@ -276,6 +277,7 @@ export default function WorldLensPage(){
     <style>{`.world-scroll::-webkit-scrollbar{width:4px;height:4px}.world-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,.14)}.world-num{font-variant-numeric:tabular-nums lining-nums}`}</style>
 
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
+      <CharacterBackdrop />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_8%,rgba(180,155,93,.11),transparent_26%),radial-gradient(circle_at_8%_92%,rgba(83,118,105,.10),transparent_30%)]"/>
       <div className="world-ring-a absolute right-[-17vw] top-[-22vw] h-[58vw] w-[58vw] rounded-full border border-black/[.05]"><span className="absolute left-[16%] top-[38%] h-2 w-2 rounded-full bg-[#b38a39]/45"/></div>
       <div className="world-ring-b absolute bottom-[-25vw] left-[-18vw] h-[55vw] w-[55vw] rounded-full border border-black/[.04]"><span className="absolute right-[13%] top-[29%] h-1.5 w-1.5 rounded-full bg-[#31594e]/40"/></div>

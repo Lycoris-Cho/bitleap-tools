@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type Mode = "encode" | "decode"
 type Variant = "standard" | "url"
@@ -228,6 +229,7 @@ export default function Base64Page() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop tone="dark" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(111,138,120,.12),transparent_28%),radial-gradient(circle_at_10%_88%,rgba(151,119,79,.08),transparent_30%)]" />
         <div className="b64-orbit-a absolute right-[-20vw] top-[-24vw] h-[58vw] w-[58vw] rounded-full border border-white/[.035]">
           <span className="absolute left-[15%] top-[43%] h-2 w-2 rounded-full bg-[#a5c4ad]/38" />

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type View = "apod" | "neo" | "weather"
 type Apod = { date:string; title:string; explanation:string; media_type:"image"|"video"; url:string; hdurl?:string; thumbnail_url?:string; copyright?:string }
@@ -171,6 +172,7 @@ export default function NasaSpaceMonitorPage(){
     <style>{`.space-scroll::-webkit-scrollbar{width:4px;height:4px}.space-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14)}.space-num{font-variant-numeric:tabular-nums lining-nums}`}</style>
 
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
+      <CharacterBackdrop tone="dark" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_28%,rgba(91,108,124,.14),transparent_28%),radial-gradient(circle_at_18%_84%,rgba(102,80,64,.09),transparent_28%)]"/>
       <div className="space-glow absolute left-[62%] top-[16%] h-[22vw] w-[22vw] rounded-full bg-[#79899d]/10 blur-[90px]"/>
       <div className="orbit-a absolute right-[-12vw] top-[-16vw] h-[52vw] w-[52vw] rounded-full border border-white/[.045]"><span className="absolute left-[12%] top-1/2 h-1.5 w-1.5 rounded-full bg-[#f0d5a8]/70 shadow-[0_0_24px_rgba(240,213,168,.5)]"/></div>

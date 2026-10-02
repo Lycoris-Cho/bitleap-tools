@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type CopyKey = "event" | "json" | "react" | "report" | "history" | null
 type KeyPhase = "idle" | "down" | "up"
@@ -461,6 +462,7 @@ export default function KeyboardTester() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop tone="dark" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(143,230,174,.13),transparent_30%),radial-gradient(circle_at_85%_15%,rgba(243,200,114,.08),transparent_24%),radial-gradient(circle_at_18%_84%,rgba(122,163,255,.09),transparent_30%)]" />
         <div className="keyboard-grid absolute inset-0 opacity-70" />
         <div className="keyboard-orbit absolute right-[-18vw] top-[-22vw] h-[56vw] w-[56vw] rounded-full border border-white/[.04]">

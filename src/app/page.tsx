@@ -12,6 +12,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 import { tools } from "./tools"
 import ExternalLinkModal from "@/components/ExternalLinkModal"
+import { CharacterFigure } from "@/components/CharacterBackdrop"
 
 /* 热门搜索标签 */
 const HOT_TAGS = ["CSS", "图片压缩", "配色", "解码", "JSON", "二维码"]
@@ -227,6 +228,17 @@ export default function HomePage() {
           },
           "-=0.32",
         )
+        // 站娘从卡片下沿升起来。位置写绝对时间 0，只是不打断上面那串相对时序
+        .from(
+          ".home-figure",
+          {
+            y: 56,
+            opacity: 0,
+            duration: 1.15,
+            ease: "power3.out",
+          },
+          0,
+        )
 
       gsap.to(".home-orb-a", {
         x: 44,
@@ -251,6 +263,16 @@ export default function HomePage() {
         duration: 42,
         repeat: -1,
         ease: "none",
+      })
+
+      // 站娘极慢地浮一下，像站在光里呼吸
+      gsap.to(".home-figure-float", {
+        y: -10,
+        duration: 9,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: 1.6,
       })
     }, rootRef)
 
@@ -391,6 +413,25 @@ export default function HomePage() {
         <div className="home-orb-a absolute -left-[18rem] -top-[18rem] h-[44rem] w-[44rem] rounded-full bg-violet-200/30 blur-[150px]" />
         <div className="home-orb-b absolute -right-[18rem] top-[12%] h-[42rem] w-[42rem] rounded-full bg-sky-200/28 blur-[150px]" />
         <div className="absolute bottom-[-18rem] left-[30%] h-[38rem] w-[38rem] rounded-full bg-orange-100/50 blur-[150px]" />
+      </div>
+
+      {/* 站娘 · 整页半透明底纹
+          按反馈从 Hero 卡片里搬出来的：放在卡片里只覆盖顶部那一张卡，看着像卡片的装饰。
+          这一层固定在视口上（跟内容滚动无关），z-20 —— 在正文（main z-10）之上、
+          侧边栏（z-40）与弹窗（z-50）之下。之所以要压过正文：首页从 Hero 到工具卡
+          全是不透明白卡，"躲在正文之下"等于整页都看不见她；压上来之后她才是
+          "铺满整个工具页的那层人影"。
+          立绘本体和四角星都用共用组件（CharacterFigure）—— 之前这里自己写了一份立绘，
+          结果星星和透明度两次都只改了工具页、漏了首页。以后要调她的浓淡/混合，
+          改 components/CharacterBackdrop.tsx 一处即可，首页跟着走。
+          类名不变（home-figure / home-figure-float），入场与浮空动画原样生效。 */}
+      <div className="pointer-events-none fixed inset-0 z-20 overflow-hidden">
+        <div className="home-figure absolute bottom-0 right-[-3%] h-[54%] aspect-[1696/2560] sm:h-[66%] lg:h-[76%]">
+          <div className="home-figure-float relative h-full w-full">
+            {/* 首页这份比工具页大（约占视口高一屏的 3/4），所以 sizes 单独给 */}
+            <CharacterFigure tone="violet" sizes="(max-width: 640px) 78vw, (max-width: 1024px) 50vw, 34vw" />
+          </div>
+        </div>
       </div>
 
       {/* 桌面端侧边栏 */}

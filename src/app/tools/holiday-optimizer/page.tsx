@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Breadcrumb } from "@/components/breadcrumb"
 import FooterNote from "@/components/FooterNote"
+import CharacterBackdrop from "@/components/CharacterBackdrop"
 
 type Country = {
   countryCode: string
@@ -431,6 +432,7 @@ export default function HolidayOptimizerPage() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <CharacterBackdrop />
         <div className="holiday-sun absolute right-[-13vw] top-[-17vw] h-[48vw] w-[48vw] rounded-full border border-[#c1944e]/14">
           <span className="absolute left-[17%] top-[20%] h-3 w-3 rounded-full bg-[#d8a852]/42" />
           <span className="absolute bottom-[19%] right-[20%] h-2 w-2 rounded-full bg-[#738775]/38" />
