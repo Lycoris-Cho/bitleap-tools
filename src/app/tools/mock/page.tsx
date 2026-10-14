@@ -345,7 +345,7 @@ function CodePanel({
   return (
     <div className="overflow-hidden rounded-[26px] border border-black/[0.06] bg-[#11100e] shadow-[0_24px_85px_-62px_rgba(20,14,8,.7)]">
       <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
-        <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/28">Generated snippet</span>
+        <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">Generated snippet</span>
         <button type="button" onClick={onCopy} className="rounded-full border border-white/[0.1] px-3 py-1.5 text-[9px] font-semibold text-white/45 transition hover:bg-white/[0.08] hover:text-white">
           {copied ? "已复制" : "复制"}
         </button>
@@ -785,7 +785,7 @@ export default function MockServerPage() {
                   </button>
 
                   <div className="mt-4 rounded-[24px] border border-white/[0.08] bg-white/[0.045] p-4">
-                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/24">Simulation</div>
+                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">Simulation</div>
                     <div className="mt-4 space-y-3 text-[11px] text-white/45">
                       <div className="flex justify-between gap-3"><span>状态</span><span className="font-mono">{simStatus}</span></div>
                       <div className="flex justify-between gap-3"><span>耗时</span><span className="font-mono">{simTime === null ? "—" : `${simTime}ms`}</span></div>

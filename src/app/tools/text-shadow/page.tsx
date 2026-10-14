@@ -244,7 +244,7 @@ function Slider({
 }) {
   return (
     <div>
-      <div className="mb-2 flex justify-between text-[8px] text-black/28">
+      <div className="mb-2 flex justify-between text-[8px] text-black/55">
         <span>{label}</span>
         <span className="shadow-num font-mono text-[#52685d]">{formatNumber(value, step < 1 ? 2 : 0)}{unit}</span>
       </div>
@@ -282,7 +282,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`shadow-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -537,7 +537,7 @@ export default function TextShadowGen() {
 
         <header className="shadow-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">TEXT SHADOW STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">TEXT SHADOW STUDIO</div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               给文字，
               <br />
@@ -549,7 +549,7 @@ export default function TextShadowGen() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               可视化生成 CSS text-shadow，支持多层阴影、透明度、预设、实时预览、Tailwind arbitrary value 和完整 CSS 导出。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{layers.length} LAYERS</span>
               <span>CSS TEXT-SHADOW</span>
               <span>TAILWIND VALUE</span>
@@ -561,13 +561,13 @@ export default function TextShadowGen() {
         <section className="shadow-intro mt-7 grid gap-7 xl:grid-cols-[.66fr_1.34fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">PRESETS</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">PRESETS</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">快速风格。</h2>
 
               <div className="shadow-scroll mt-6 grid max-h-[360px] gap-2 overflow-auto pr-1 sm:grid-cols-2">
                 {PRESETS.map((preset) => (
                   <button key={preset.id} type="button" onClick={() => applyPreset(preset)} className="rounded-[20px] border border-black/[.08] bg-white/22 p-4 text-left transition hover:bg-white/48">
-                    <div className="font-mono text-[8px] font-semibold text-black/24">{preset.id.toUpperCase()}</div>
+                    <div className="font-mono text-[8px] font-semibold text-black/55">{preset.id.toUpperCase()}</div>
                     <div className="mt-2 text-[14px] font-semibold tracking-[-.03em] text-black/70">{preset.name}</div>
                     <p className="mt-2 text-[8px] leading-4 text-black/30">{preset.desc}</p>
                   </button>
@@ -577,7 +577,7 @@ export default function TextShadowGen() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SHADOW PROFILE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SHADOW PROFILE</div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">多层 text-shadow 会按顺序叠加。硬边阴影适合复古 3D，模糊阴影适合发光和柔和投影。</p>
               </div>
 
@@ -592,7 +592,7 @@ export default function TextShadowGen() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">QUICK ACTIONS</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">QUICK ACTIONS</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="button" onClick={addLayer} className="rounded-full bg-[#22231f] px-5 py-3 text-[9px] font-semibold text-white">新增阴影层</button>
                 <button type="button" onClick={duplicateLayer} disabled={!activeLayer} className="rounded-full border border-black/[.09] px-4 py-3 text-[9px] font-semibold text-black/38 transition hover:bg-white/40 disabled:opacity-30">复制当前层</button>
@@ -605,25 +605,25 @@ export default function TextShadowGen() {
             <div className="grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.92fr_1.08fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">CONTROLS</span>
-                  <span className="text-[8px] text-black/22">{activeLayer?.name ?? "NO LAYER"}</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">CONTROLS</span>
+                  <span className="text-[8px] text-black/55">{activeLayer?.name ?? "NO LAYER"}</span>
                 </div>
 
                 <div className="shadow-scroll h-[640px] overflow-auto p-5 sm:p-6">
                   <div className="space-y-6">
                     <label>
-                      <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">PREVIEW TEXT</span>
+                      <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">PREVIEW TEXT</span>
                       <input value={text} onChange={(event) => setText(event.target.value)} spellCheck={false} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 text-[10px] text-black/68 outline-none transition focus:border-black/25" />
                     </label>
 
                     <div className="grid grid-cols-2 gap-3">
                       <label>
-                        <span className="mb-2 block text-[8px] text-black/24">文字颜色</span>
+                        <span className="mb-2 block text-[8px] text-black/55">文字颜色</span>
                         <input type="color" value={textColor} onChange={(event) => setTextColor(event.target.value)} className="h-12 w-full cursor-pointer rounded-[16px] border border-black/[.08] bg-transparent p-1" />
                       </label>
 
                       <div>
-                        <span className="mb-2 block text-[8px] text-black/24">背景</span>
+                        <span className="mb-2 block text-[8px] text-black/55">背景</span>
                         <div className="flex flex-wrap gap-1.5">
                           {(["paper", "dark", "poster", "transparent"] as PreviewMode[]).map((mode) => (
                             <button key={mode} type="button" onClick={() => setPreviewMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${previewMode === mode ? "bg-[#52685d] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{mode}</button>
@@ -640,16 +640,16 @@ export default function TextShadowGen() {
 
                     <div>
                       <div className="mb-3 flex items-center justify-between gap-3">
-                        <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">LAYERS</div>
-                        <span className="text-[8px] text-black/24">点击选择要编辑的层</span>
+                        <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">LAYERS</div>
+                        <span className="text-[8px] text-black/55">点击选择要编辑的层</span>
                       </div>
 
                       <div className="space-y-2">
                         {layers.map((layer, index) => (
                           <button key={layer.id} type="button" onClick={() => setActiveLayerId(layer.id)} className={`w-full rounded-[18px] border p-4 text-left transition ${activeLayerId === layer.id ? "border-[#22231f]/15 bg-[#22231f] text-white" : "border-black/[.08] bg-white/22 hover:bg-white/48"}`}>
                             <div className="flex items-center justify-between gap-3">
-                              <span className={`font-mono text-[8px] ${activeLayerId === layer.id ? "text-white/26" : "text-black/24"}`}>#{index + 1}</span>
-                              <span className={`text-[8px] ${activeLayerId === layer.id ? "text-white/30" : "text-black/28"}`}>{layer.x}px {layer.y}px {layer.blur}px · {Math.round(layer.alpha * 100)}%</span>
+                              <span className={`font-mono text-[8px] ${activeLayerId === layer.id ? "text-white/55" : "text-black/55"}`}>#{index + 1}</span>
+                              <span className={`text-[8px] ${activeLayerId === layer.id ? "text-white/30" : "text-black/55"}`}>{layer.x}px {layer.y}px {layer.blur}px · {Math.round(layer.alpha * 100)}%</span>
                             </div>
                             <div className={`mt-2 text-[13px] font-semibold ${activeLayerId === layer.id ? "text-white" : "text-black/67"}`}>{layer.name}</div>
                             <div className="mt-3 h-2 rounded-full" style={{ background: rgba(layer.color, layer.alpha) }} />
@@ -661,7 +661,7 @@ export default function TextShadowGen() {
                     {activeLayer && (
                       <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-5">
                         <div className="mb-4 flex items-center justify-between gap-3">
-                          <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">ACTIVE LAYER</div>
+                          <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">ACTIVE LAYER</div>
                           <div className="flex gap-1.5">
                             <button type="button" onClick={() => moveLayer(activeLayer.id, -1)} className="rounded-full border border-black/[.08] px-3 py-1.5 text-[8px] text-black/34">上移</button>
                             <button type="button" onClick={() => moveLayer(activeLayer.id, 1)} className="rounded-full border border-black/[.08] px-3 py-1.5 text-[8px] text-black/34">下移</button>
@@ -671,7 +671,7 @@ export default function TextShadowGen() {
 
                         <div className="space-y-4">
                           <label>
-                            <span className="mb-2 block text-[8px] text-black/24">层名称</span>
+                            <span className="mb-2 block text-[8px] text-black/55">层名称</span>
                             <input value={activeLayer.name} onChange={(event) => updateLayer(activeLayer.id, { name: event.target.value })} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 text-[10px] outline-none" />
                           </label>
 
@@ -683,7 +683,7 @@ export default function TextShadowGen() {
 
                           <div className="grid gap-4 sm:grid-cols-[90px_1fr] sm:items-end">
                             <label>
-                              <span className="mb-2 block text-[8px] text-black/24">颜色</span>
+                              <span className="mb-2 block text-[8px] text-black/55">颜色</span>
                               <input type="color" value={activeLayer.color} onChange={(event) => updateLayer(activeLayer.id, { color: event.target.value })} className="h-12 w-full cursor-pointer rounded-[16px] border border-black/[.08] bg-transparent p-1" />
                             </label>
                             <Slider label="透明度" value={activeLayer.alpha} min={0} max={1} step={0.01} unit="" onChange={(value) => updateLayer(activeLayer.id, { alpha: clamp(value, 0, 1) })} />
@@ -697,8 +697,8 @@ export default function TextShadowGen() {
 
               <div className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">LIVE PREVIEW</span>
-                  <span className="text-[8px] text-white/18">{shadowValue === "none" ? "NONE" : "READY"}</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">LIVE PREVIEW</span>
+                  <span className="text-[8px] text-white/55">{shadowValue === "none" ? "NONE" : "READY"}</span>
                 </div>
 
                 <div className="p-4 sm:p-5">
@@ -716,8 +716,8 @@ export default function TextShadowGen() {
                     ].map((item) => (
                       <div key={item.label} className="group rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
                         <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">{item.label}</span>
-                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/25 transition hover:text-white">{copied === item.key ? "✓ COPIED" : "COPY"}</button>
+                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">{item.label}</span>
+                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === item.key ? "✓ 已复制" : "复制"}</button>
                         </div>
                         <pre className="shadow-dark-scroll max-h-[144px] overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{item.value}</pre>
                       </div>
@@ -731,7 +731,7 @@ export default function TextShadowGen() {
 
         <section className="shadow-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">REPORT</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">REPORT</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               阴影参数，
               <br />
@@ -748,8 +748,8 @@ export default function TextShadowGen() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">CSS PROFILE</span>
-              <span className="text-[8px] text-white/17">LOCAL GENERATOR</span>
+              <span className="text-[8px] tracking-[.13em] text-white/55">CSS PROFILE</span>
+              <span className="text-[8px] text-white/55">LOCAL GENERATOR</span>
             </div>
             <pre className="shadow-dark-scroll max-h-[390px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[11px] leading-7 text-[#c7d3c7] sm:p-6">{report}</pre>
           </div>
@@ -757,15 +757,15 @@ export default function TextShadowGen() {
 
         <section className="shadow-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">MULTI LAYER</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">MULTI LAYER</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">text-shadow 支持逗号分隔的多层阴影。多个硬阴影可以做 3D 字，多个模糊阴影可以做发光。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">ALPHA FIX</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">ALPHA FIX</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">颜色选择器只保存 6 位 Hex，透明度单独控制，最终输出 rgba，避免 8 位 Hex 在 input color 中失效。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">DESIGN NOTE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">DESIGN NOTE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">阴影越强越容易降低可读性。正文建议使用轻阴影，海报标题才适合长投影和高亮发光。</p>
           </div>
         </section>

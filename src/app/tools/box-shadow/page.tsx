@@ -337,8 +337,8 @@ function OutputBlock({
   return (
     <article className="border-t border-white/[.07] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.14em] text-white/22">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/28 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.14em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="shadow-dark-scroll max-h-44 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{value}</pre>
     </article>
@@ -361,13 +361,13 @@ function LayerMini({
   return (
     <article className={`rounded-[20px] border p-4 transition ${active ? "border-[#22231f]/15 bg-[#22231f] text-white" : "border-black/[.08] bg-white/24 hover:bg-white/50"}`}>
       <button type="button" onClick={onClick} className="block w-full text-left">
-        <div className={`text-[8px] font-semibold tracking-[.13em] ${active ? "text-white/30" : "text-black/24"}`}>{layer.inset ? "INSET" : "OUTER"} · {layer.enabled ? "ON" : "OFF"}</div>
+        <div className={`text-[8px] font-semibold tracking-[.13em] ${active ? "text-white/30" : "text-black/55"}`}>{layer.inset ? "INSET" : "OUTER"} · {layer.enabled ? "ON" : "OFF"}</div>
         <div className={`mt-2 text-[13px] font-semibold tracking-[-.03em] ${active ? "text-white" : "text-black/68"}`}>{layer.name}</div>
-        <div className={`shadow-num mt-2 font-mono text-[8px] ${active ? "text-white/35" : "text-black/28"}`}>{layer.x}px {layer.y}px {layer.blur}px {layer.spread}px</div>
+        <div className={`shadow-num mt-2 font-mono text-[8px] ${active ? "text-white/35" : "text-black/55"}`}>{layer.x}px {layer.y}px {layer.blur}px {layer.spread}px</div>
       </button>
 
       <div className="mt-3 flex gap-2">
-        <button type="button" onClick={onToggle} className={`rounded-full px-3 py-1.5 text-[8px] font-semibold transition ${active ? "bg-white/10 text-white/50 hover:text-white" : "bg-black/[.04] text-black/28 hover:text-black"}`}>{layer.enabled ? "禁用" : "启用"}</button>
+        <button type="button" onClick={onToggle} className={`rounded-full px-3 py-1.5 text-[8px] font-semibold transition ${active ? "bg-white/10 text-white/50 hover:text-white" : "bg-black/[.04] text-black/55 hover:text-black"}`}>{layer.enabled ? "禁用" : "启用"}</button>
         <button type="button" onClick={onRemove} className={`rounded-full px-3 py-1.5 text-[8px] font-semibold transition ${active ? "bg-white/10 text-[#ffb2a4]" : "bg-[#965744]/8 text-[#965744]"}`}>删除</button>
       </div>
     </article>
@@ -577,7 +577,7 @@ export default function BoxShadowPage() {
 
         <header className="shadow-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.76fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">BOX SHADOW STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">BOX SHADOW STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">
               阴影不是一层，
               <br />
@@ -603,7 +603,7 @@ export default function BoxShadowPage() {
             <div className="rounded-[30px] border border-black/[.075] bg-white/24 p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">LAYERS</div>
+                  <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">LAYERS</div>
                   <p className="mt-2 text-[8px] leading-4 text-black/30">{formatNumber(enabledCount)} / {formatNumber(layers.length)} 层启用</p>
                 </div>
                 <button type="button" onClick={addLayer} className="rounded-full bg-[#22231f] px-4 py-3 text-[9px] font-semibold text-white">添加</button>
@@ -624,19 +624,19 @@ export default function BoxShadowPage() {
 
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[22px] border border-black/[.075] bg-black/[.06]">
               <div className="bg-[#f3f0e8]/92 p-4">
-                <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">LAYERS</div>
+                <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">LAYERS</div>
                 <div className="shadow-num mt-3 font-mono text-[13px] font-semibold text-[#52685d]">{layers.length}</div>
               </div>
               <div className="bg-[#f3f0e8]/92 p-4">
-                <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">ENABLED</div>
+                <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">ENABLED</div>
                 <div className="shadow-num mt-3 font-mono text-[13px] font-semibold text-[#9b7542]">{enabledCount}</div>
               </div>
               <div className="bg-[#f3f0e8]/92 p-4">
-                <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">SHAPE</div>
+                <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">SHAPE</div>
                 <div className="mt-3 font-mono text-[13px] font-semibold text-black/61">{shape}</div>
               </div>
               <div className="bg-[#f3f0e8]/92 p-4">
-                <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">RADIUS</div>
+                <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">RADIUS</div>
                 <div className="shadow-num mt-3 font-mono text-[13px] font-semibold text-black/61">{radius}px</div>
               </div>
             </div>
@@ -646,13 +646,13 @@ export default function BoxShadowPage() {
             <div className="overflow-hidden rounded-[32px] border border-black/[.08] bg-[#151714]">
               <div className="flex flex-col gap-3 border-b border-white/[.065] px-5 py-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.13em] text-white/24">LIVE SHADOW STAGE</div>
-                  <p className="mt-2 text-[8px] text-white/28">预览真实 box-shadow 叠加效果。</p>
+                  <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">LIVE SHADOW STAGE</div>
+                  <p className="mt-2 text-[8px] text-white/55">预览真实 box-shadow 叠加效果。</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                   {(["paper", "grid", "dark", "checker"] as StageMode[]).map((mode) => (
-                    <button key={mode} type="button" onClick={() => setStageMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${stageMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>{mode.toUpperCase()}</button>
+                    <button key={mode} type="button" onClick={() => setStageMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${stageMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>{mode.toUpperCase()}</button>
                   ))}
                 </div>
               </div>
@@ -682,7 +682,7 @@ export default function BoxShadowPage() {
                         </div>
                       ) : (
                         <div className="text-center">
-                          <div className="font-mono text-[10px] font-semibold text-black/28">BOX SHADOW</div>
+                          <div className="font-mono text-[10px] font-semibold text-black/55">BOX SHADOW</div>
                           <div className="mt-3 text-[24px] font-semibold tracking-[-.045em] text-black/70">Layered</div>
                         </div>
                       )}
@@ -698,7 +698,7 @@ export default function BoxShadowPage() {
                     ["OPACITY", activeLayer ? `${activeLayer.opacity}%` : "—"],
                   ].map(([label, value]) => (
                     <div key={label} className="bg-[#151714] p-4">
-                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/18">{label}</div>
+                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{label}</div>
                       <div className="shadow-num mt-2 font-mono text-[10px] font-semibold text-[#cbd8cd]">{value}</div>
                     </div>
                   ))}
@@ -710,14 +710,14 @@ export default function BoxShadowPage() {
               <div className="mt-5 border-y border-black/[.09] bg-white/18">
                 <div className="grid lg:grid-cols-3">
                   <div className="border-b border-black/[.07] p-5 lg:border-b-0 lg:border-r">
-                    <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/24">POSITION</div>
+                    <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/55">POSITION</div>
                     <Slider label="X 偏移" value={activeLayer.x} min={-160} max={160} unit="px" onChange={(x) => updateLayer(activeLayer.id, { x })} />
                     <Slider label="Y 偏移" value={activeLayer.y} min={-160} max={160} unit="px" onChange={(y) => updateLayer(activeLayer.id, { y })} />
                     <Slider label="扩散" value={activeLayer.spread} min={-120} max={120} unit="px" onChange={(spread) => updateLayer(activeLayer.id, { spread })} />
                   </div>
 
                   <div className="border-b border-black/[.07] p-5 lg:border-b-0 lg:border-r">
-                    <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/24">SOFTNESS</div>
+                    <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/55">SOFTNESS</div>
                     <Slider label="模糊" value={activeLayer.blur} min={0} max={240} unit="px" onChange={(blur) => updateLayer(activeLayer.id, { blur })} />
                     <Slider label="不透明度" value={activeLayer.opacity} min={0} max={100} unit="%" onChange={(opacity) => updateLayer(activeLayer.id, { opacity })} />
                     <div className="border-b border-black/[.07] py-4 last:border-b-0">
@@ -730,7 +730,7 @@ export default function BoxShadowPage() {
                   </div>
 
                   <div className="p-5">
-                    <div className="mb-4 text-[8px] font-semibold tracking-[.13em] text-black/24">SURFACE</div>
+                    <div className="mb-4 text-[8px] font-semibold tracking-[.13em] text-black/55">SURFACE</div>
                     <div className="flex flex-wrap gap-2">
                       <TogglePill active={activeLayer.inset} label="Inset 内阴影" onClick={() => updateLayer(activeLayer.id, { inset: !activeLayer.inset })} />
                       <TogglePill active={activeLayer.enabled} label={activeLayer.enabled ? "当前层启用" : "当前层禁用"} onClick={() => updateLayer(activeLayer.id, { enabled: !activeLayer.enabled })} />
@@ -738,19 +738,19 @@ export default function BoxShadowPage() {
 
                     <div className="mt-5 grid gap-4">
                       <label>
-                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">Layer name</span>
+                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">Layer name</span>
                         <input value={activeLayer.name} onChange={(event) => updateLayer(activeLayer.id, { name: event.target.value })} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 text-[10px] outline-none" />
                       </label>
 
                       <label>
-                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">Surface color</span>
+                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">Surface color</span>
                         <input type="color" value={surfaceColor} onChange={(event) => setSurfaceColor(event.target.value)} className="h-12 w-full cursor-pointer rounded-[16px] border border-black/[.08] bg-transparent p-1" />
                       </label>
 
                       <Slider label="圆角" value={radius} min={0} max={80} unit="px" onChange={setRadius} />
 
                       <div>
-                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">形状</div>
+                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">形状</div>
                         <div className="flex flex-wrap gap-2">
                           {(["card", "button", "modal", "tile"] as PreviewShape[]).map((item) => (
                             <TogglePill key={item} active={shape === item} label={item} onClick={() => setShape(item)} />
@@ -767,7 +767,7 @@ export default function BoxShadowPage() {
           <aside className="min-w-0">
             <div className="sticky top-6 overflow-hidden rounded-[28px] border border-black/[.08] bg-[#151714]">
               <div className="border-b border-white/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-white/22">OUTPUT</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">OUTPUT</div>
               </div>
 
               <div className="shadow-dark-scroll max-h-[790px] overflow-auto px-5">
@@ -790,15 +790,15 @@ export default function BoxShadowPage() {
 
         <section className="shadow-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LAYERED SHADOW</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LAYERED SHADOW</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">真实 UI 里常用多层阴影：一层负责环境光，一层负责接触阴影，比单层更自然。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">INSET / GLOW</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">INSET / GLOW</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">同一个编辑器可处理外阴影、内阴影、光晕和硬阴影，适合按钮、卡片、弹窗和特殊视觉元素。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">CSS READY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">CSS READY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">输出包含原始 box-shadow、完整 CSS、CSS 变量和 Tailwind arbitrary value，便于直接粘进项目。</p>
           </div>
         </section>

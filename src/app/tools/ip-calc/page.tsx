@@ -358,14 +358,14 @@ export default function IPCalcPage() {
       <div className="relative z-10 mx-auto max-w-[1480px] px-5 pb-10 pt-6 sm:px-8">
         <div className="ip-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">
             IPV4 / CIDR · LIVE CALCULATION
           </div>
         </div>
 
         <header className="ip-intro mt-12 grid gap-8 border-b border-black/10 pb-9 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               IP SUBNET CALCULATOR
             </div>
             <h1 className="mt-4 max-w-[850px] text-[clamp(48px,6.7vw,96px)] font-semibold leading-[.9] tracking-[-.073em]">
@@ -383,7 +383,7 @@ export default function IPCalcPage() {
         <section className="ip-intro py-7">
           <div className="grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <div className="mb-3 text-[9px] font-semibold tracking-[.14em] text-black/27">
+              <div className="mb-3 text-[9px] font-semibold tracking-[.14em] text-black/55">
                 ADDRESS
               </div>
 
@@ -394,11 +394,11 @@ export default function IPCalcPage() {
                   spellCheck={false}
                   inputMode="decimal"
                   aria-label="IPv4 地址"
-                  className="ip-num min-w-0 flex-1 bg-transparent font-mono text-[clamp(28px,5vw,66px)] font-medium tracking-[-.055em] outline-none placeholder:text-black/16"
+                  className="ip-num min-w-0 flex-1 bg-transparent font-mono text-[clamp(28px,5vw,66px)] font-medium tracking-[-.055em] outline-none placeholder:text-black/55"
                   placeholder="192.168.1.10"
                 />
 
-                <span className="mx-2 text-[clamp(28px,5vw,62px)] font-light text-black/18">
+                <span className="mx-2 text-[clamp(28px,5vw,62px)] font-light text-black/55">
                   /
                 </span>
 
@@ -409,7 +409,7 @@ export default function IPCalcPage() {
                   }
                   inputMode="numeric"
                   aria-label="CIDR 前缀"
-                  className="ip-num w-[1.7em] bg-transparent font-mono text-[clamp(28px,5vw,66px)] font-medium tracking-[-.055em] outline-none placeholder:text-black/16"
+                  className="ip-num w-[1.7em] bg-transparent font-mono text-[clamp(28px,5vw,66px)] font-medium tracking-[-.055em] outline-none placeholder:text-black/55"
                   placeholder="24"
                 />
               </div>
@@ -433,7 +433,7 @@ export default function IPCalcPage() {
             </div>
 
             <div className="min-w-[260px]">
-              <div className="mb-3 flex items-center justify-between text-[9px] text-black/28">
+              <div className="mb-3 flex items-center justify-between text-[9px] text-black/55">
                 <span>NETWORK</span>
                 <span>HOST</span>
               </div>
@@ -447,7 +447,7 @@ export default function IPCalcPage() {
                 className="ip-range block w-full"
               />
 
-              <div className="mt-2 flex justify-between text-[8px] text-black/22">
+              <div className="mt-2 flex justify-between text-[8px] text-black/55">
                 <span>/0</span>
                 <span>/16</span>
                 <span>/32</span>
@@ -468,7 +468,7 @@ export default function IPCalcPage() {
               <div>
                 <div className="flex flex-wrap items-end justify-between gap-5">
                   <div>
-                    <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+                    <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                       NETWORK IDENTITY
                     </div>
 
@@ -478,13 +478,13 @@ export default function IPCalcPage() {
                   </div>
 
                   <div className="text-right">
-                    <div className="text-[8px] text-black/24">
+                    <div className="text-[8px] text-black/55">
                       ADDRESS TYPE
                     </div>
                     <div className="mt-1 text-sm font-semibold">
                       {result.category}
                     </div>
-                    <div className="mt-1 text-[8px] text-black/28">
+                    <div className="mt-1 text-[8px] text-black/55">
                       {result.categoryDetail}
                     </div>
                   </div>
@@ -518,7 +518,7 @@ export default function IPCalcPage() {
                     </span>
                   </div>
 
-                  <div className="mt-1 flex items-center justify-between gap-4 text-[8px] text-black/24">
+                  <div className="mt-1 flex items-center justify-between gap-4 text-[8px] text-black/55">
                     <span>NETWORK</span>
                     <span>当前 IP 在网段中的位置</span>
                     <span>END</span>
@@ -528,7 +528,7 @@ export default function IPCalcPage() {
 
               <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[24px] bg-black/[.075]">
                 <div className="bg-[#f2f0e9] p-5">
-                  <div className="text-[8px] tracking-[.12em] text-black/25">
+                  <div className="text-[8px] tracking-[.12em] text-black/55">
                     TOTAL IPS
                   </div>
                   <div className="ip-num mt-3 text-3xl font-semibold tracking-[-.05em]">
@@ -537,7 +537,7 @@ export default function IPCalcPage() {
                 </div>
 
                 <div className="bg-[#f2f0e9] p-5">
-                  <div className="text-[8px] tracking-[.12em] text-black/25">
+                  <div className="text-[8px] tracking-[.12em] text-black/55">
                     USABLE HOSTS
                   </div>
                   <div className="ip-num mt-3 text-3xl font-semibold tracking-[-.05em]">
@@ -546,7 +546,7 @@ export default function IPCalcPage() {
                 </div>
 
                 <div className="bg-[#f2f0e9] p-5">
-                  <div className="text-[8px] tracking-[.12em] text-black/25">
+                  <div className="text-[8px] tracking-[.12em] text-black/55">
                     NETWORK BITS
                   </div>
                   <div className="ip-num mt-3 text-3xl font-semibold tracking-[-.05em]">
@@ -555,7 +555,7 @@ export default function IPCalcPage() {
                 </div>
 
                 <div className="bg-[#f2f0e9] p-5">
-                  <div className="text-[8px] tracking-[.12em] text-black/25">
+                  <div className="text-[8px] tracking-[.12em] text-black/55">
                     HOST BITS
                   </div>
                   <div className="ip-num mt-3 text-3xl font-semibold tracking-[-.05em]">
@@ -568,7 +568,7 @@ export default function IPCalcPage() {
             <section className="ip-result-reveal mt-12 border-t border-black/10 pt-6">
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+                  <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                     RANGE
                   </div>
                   <h2 className="mt-1 text-2xl font-semibold tracking-[-.04em]">
@@ -594,7 +594,7 @@ export default function IPCalcPage() {
                     className="group grid grid-cols-[1fr_auto] items-center gap-4 border-b border-black/[.075] py-4 text-left"
                   >
                     <div>
-                      <div className="text-[8px] font-semibold tracking-[.1em] text-black/26">
+                      <div className="text-[8px] font-semibold tracking-[.1em] text-black/55">
                         {label}
                       </div>
                       <div className="ip-num mt-2 break-all font-mono text-[clamp(16px,2vw,23px)] font-medium tracking-[-.03em]">
@@ -602,8 +602,8 @@ export default function IPCalcPage() {
                       </div>
                     </div>
 
-                    <span className="text-[9px] text-black/20 transition group-hover:text-black/55">
-                      {copied === label ? "✓" : "COPY"}
+                    <span className="text-[9px] text-black/55 transition group-hover:text-black/55">
+                      {copied === label ? "✓" : "复制"}
                     </span>
                   </button>
                 ))}
@@ -620,7 +620,7 @@ export default function IPCalcPage() {
 
             <section className="ip-result-reveal mt-12 grid gap-10 border-t border-black/10 pt-7 lg:grid-cols-[.72fr_1.28fr]">
               <div>
-                <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+                <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                   SUBNET DETAILS
                 </div>
                 <h2 className="mt-2 max-w-[380px] text-[clamp(30px,4vw,48px)] font-semibold leading-[.98] tracking-[-.055em]">
@@ -644,11 +644,11 @@ export default function IPCalcPage() {
                       className="group border-b border-black/[.075] py-4 text-left"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-[8px] font-semibold tracking-[.1em] text-black/25">
+                        <span className="text-[8px] font-semibold tracking-[.1em] text-black/55">
                           {label}
                         </span>
-                        <span className="text-[8px] text-black/18 group-hover:text-black/45">
-                          {copied === label ? "✓" : "COPY"}
+                        <span className="text-[8px] text-black/55 group-hover:text-black/45">
+                          {copied === label ? "✓" : "复制"}
                         </span>
                       </div>
                       <div className="ip-num mt-2 break-all font-mono text-sm font-medium">
@@ -659,7 +659,7 @@ export default function IPCalcPage() {
                 </div>
 
                 <div className="mt-7">
-                  <div className="mb-3 flex items-center justify-between text-[8px] text-black/25">
+                  <div className="mb-3 flex items-center justify-between text-[8px] text-black/55">
                     <span>IP · BINARY</span>
                     <span>
                       {result.prefix} NETWORK / {result.hostBits} HOST
@@ -677,7 +677,7 @@ export default function IPCalcPage() {
                     </div>
                   </div>
 
-                  <div className="mt-3 grid gap-2 text-[8px] text-black/28 sm:grid-cols-2">
+                  <div className="mt-3 grid gap-2 text-[8px] text-black/55 sm:grid-cols-2">
                     <span className="font-mono">IP&nbsp;&nbsp;&nbsp; {result.ipBinary}</span>
                     <span className="font-mono">MASK&nbsp; {result.maskBinary}</span>
                   </div>
@@ -688,7 +688,7 @@ export default function IPCalcPage() {
             <section className="ip-result-reveal mt-12 border-t border-black/10 pt-6">
               <div className="grid gap-6 md:grid-cols-3">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.1em] text-black/25">
+                  <div className="text-[8px] font-semibold tracking-[.1em] text-black/55">
                     /31
                   </div>
                   <p className="mt-2 text-[9px] leading-5 text-black/35">
@@ -697,7 +697,7 @@ export default function IPCalcPage() {
                 </div>
 
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.1em] text-black/25">
+                  <div className="text-[8px] font-semibold tracking-[.1em] text-black/55">
                     /32
                   </div>
                   <p className="mt-2 text-[9px] leading-5 text-black/35">
@@ -706,7 +706,7 @@ export default function IPCalcPage() {
                 </div>
 
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.1em] text-black/25">
+                  <div className="text-[8px] font-semibold tracking-[.1em] text-black/55">
                     /0–/30
                   </div>
                   <p className="mt-2 text-[9px] leading-5 text-black/35">

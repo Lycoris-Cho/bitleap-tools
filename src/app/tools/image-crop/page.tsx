@@ -269,7 +269,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`crop-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -619,7 +619,7 @@ export default function ImageCrop() {
 
         <header className="crop-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.75fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">IMAGE CROP STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">图像裁剪工作室</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">
               裁一张图，
               <br />
@@ -642,7 +642,7 @@ export default function ImageCrop() {
         <section className="crop-intro mt-7 grid gap-7 xl:grid-cols-[.68fr_1.32fr]">
           <aside className="min-w-0 space-y-4">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">SOURCE IMAGE</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">原图</div>
               <div onDragOver={(event) => event.preventDefault()} onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} className={`mt-4 rounded-[22px] border border-dashed p-5 text-center transition ${isDragging ? "border-[#52685d] bg-[#52685d]/8" : "border-black/[.13] bg-white/20"}`}>
                 <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
                 <button type="button" onClick={() => fileRef.current?.click()} className="rounded-full bg-[#22231f] px-5 py-3 text-[9px] font-semibold text-white transition hover:scale-[1.01] active:scale-[.98]">选择图片</button>
@@ -658,13 +658,13 @@ export default function ImageCrop() {
             </div>
 
             <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">CROP PRESETS</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">CROP PRESETS</div>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {PRESETS.map((preset) => (
                   <button key={preset.name} type="button" onClick={() => applyPreset(preset)} className="rounded-[18px] border border-black/[.08] bg-white/22 p-4 text-left transition hover:bg-white/48">
                     <div className="text-[13px] font-semibold text-black/68">{preset.name}</div>
                     <p className="mt-2 text-[8px] leading-4 text-black/30">{preset.desc}</p>
-                    <div className="crop-num mt-2 font-mono text-[8px] text-black/24">{preset.width}×{preset.height}</div>
+                    <div className="crop-num mt-2 font-mono text-[8px] text-black/55">{preset.width}×{preset.height}</div>
                   </button>
                 ))}
               </div>
@@ -679,14 +679,14 @@ export default function ImageCrop() {
             <div className="grid gap-px overflow-hidden rounded-[32px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.92fr_1.08fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">CROP CONTROLS</span>
-                  <span className="crop-num text-[8px] text-black/22">{width}×{height}</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">裁剪控制</span>
+                  <span className="crop-num text-[8px] text-black/55">{width}×{height}</span>
                 </div>
 
                 <div className="crop-scroll h-[720px] overflow-auto p-5 sm:p-6">
                   <div className="space-y-6">
                     <div>
-                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">RATIO</div>
+                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">比例</div>
                       <div className="flex flex-wrap gap-2">
                         {RATIO_OPTIONS.map((item) => (
                           <button key={item.key} type="button" onClick={() => applyRatio(item.key)} className={`rounded-full px-3.5 py-2 text-[8px] font-semibold transition ${ratioKey === item.key ? "bg-[#22231f] text-white" : "border border-black/[.08] text-black/34 hover:bg-white/50 hover:text-black"}`}>{item.label}</button>
@@ -700,7 +700,7 @@ export default function ImageCrop() {
                     </div>
 
                     <div>
-                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">FIT MODE</div>
+                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">适配方式</div>
                       <div className="flex flex-wrap gap-2">
                         <TogglePill active={fitMode === "cover"} label="cover 裁切填满" onClick={() => setFitMode("cover")} />
                         <TogglePill active={fitMode === "contain"} label="contain 完整留白" onClick={() => setFitMode("contain")} />
@@ -713,7 +713,7 @@ export default function ImageCrop() {
                     )}
 
                     <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-5">
-                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">FOCUS POINT</div>
+                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">焦点位置</div>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <Slider label="横向焦点" value={focusX} min={0} max={100} unit="%" onChange={setFocusX} />
                         <Slider label="纵向焦点" value={focusY} min={0} max={100} unit="%" onChange={setFocusY} />
@@ -738,16 +738,16 @@ export default function ImageCrop() {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <Slider label="圆角" value={radius} min={0} max={260} unit="px" onChange={setRadius} />
                       <label>
-                        <span className="mb-2 block text-[8px] text-black/24">背景色</span>
+                        <span className="mb-2 block text-[8px] text-black/55">背景色</span>
                         <input type="color" value={backgroundColor} onChange={(event) => setBackgroundColor(event.target.value)} className="h-12 w-full cursor-pointer rounded-[16px] border border-black/[.08] bg-transparent p-1" />
                       </label>
                     </div>
 
                     <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-5">
-                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">EXPORT</div>
+                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">导出</div>
                       <div className="grid gap-4 sm:grid-cols-3">
                         <label>
-                          <span className="mb-2 block text-[8px] text-black/24">格式</span>
+                          <span className="mb-2 block text-[8px] text-black/55">格式</span>
                           <select value={exportFormat} onChange={(event) => setExportFormat(event.target.value as ExportFormat)} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] outline-none">
                             <option value="png">PNG</option>
                             <option value="jpeg">JPG</option>
@@ -769,7 +769,7 @@ export default function ImageCrop() {
 
               <div className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">LIVE CANVAS</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">LIVE CANVAS</span>
                   <span className="crop-num text-[8px] text-[#8fb69b]">{outputSize.w}×{outputSize.h}</span>
                 </div>
 
@@ -788,16 +788,16 @@ export default function ImageCrop() {
                   <div className="mt-4 grid gap-3">
                     <div className="rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
                       <div className="mb-2 flex items-center justify-between gap-3">
-                        <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">CSS object-fit reference</span>
-                        <button type="button" onClick={() => copy(cssCode, "css")} className="text-[8px] font-semibold text-white/25 transition hover:text-white">{copied === "css" ? "✓ COPIED" : "COPY"}</button>
+                        <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">CSS object-fit reference</span>
+                        <button type="button" onClick={() => copy(cssCode, "css")} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === "css" ? "✓ 已复制" : "复制"}</button>
                       </div>
                       <pre className="crop-dark-scroll max-h-[132px] overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{cssCode}</pre>
                     </div>
 
                     <div className="rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
                       <div className="mb-2 flex items-center justify-between gap-3">
-                        <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">Report</span>
-                        <button type="button" onClick={() => copy(report, "report")} className="text-[8px] font-semibold text-white/25 transition hover:text-white">{copied === "report" ? "✓ COPIED" : "COPY"}</button>
+                        <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">Report</span>
+                        <button type="button" onClick={() => copy(report, "report")} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === "report" ? "✓ 已复制" : "复制"}</button>
                       </div>
                       <pre className="crop-dark-scroll max-h-[162px] overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{report}</pre>
                     </div>
@@ -812,15 +812,15 @@ export default function ImageCrop() {
 
         <section className="crop-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL CANVAS</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL CANVAS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">图片通过浏览器本地读取并绘制到 canvas，不上传服务器。导出时直接从当前画布生成文件。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">FOCUS CROP</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">FOCUS CROP</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">Cover 裁切时可以调焦点位置，避免头像、主体或关键内容被默认居中裁掉。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">EXPORT SCALE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">EXPORT SCALE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">导出倍率会改变最终像素。大图或 4x 导出会占用更多内存，移动端建议适度使用。</p>
           </div>
         </section>

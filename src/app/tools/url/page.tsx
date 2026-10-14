@@ -249,14 +249,14 @@ export default function UrlPage() {
       <div className="relative z-10 mx-auto max-w-[1500px] px-5 pb-10 pt-6 sm:px-8">
         <div className="url-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">
             URL CODEC · PERCENT ENCODING
           </div>
         </div>
 
         <header className="url-intro mt-11 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               URL ENCODE / DECODE
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.8vw,96px)] font-semibold leading-[.9] tracking-[-.073em]">
@@ -352,11 +352,11 @@ export default function UrlPage() {
             <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-[#52685d]" />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/27">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   INPUT
                 </span>
               </div>
-              <span className="url-num text-[8px] text-black/22">
+              <span className="url-num text-[8px] text-black/55">
                 {stats.inputChars} chars · {stats.inputBytes} bytes
               </span>
             </div>
@@ -373,7 +373,7 @@ export default function UrlPage() {
                     : "输入参数值、路径片段或文本…"
                   : "输入带有 %XX 的 URL 编码字符串…"
               }
-              className="url-scroll block h-[440px] w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+              className="url-scroll block h-[440px] w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
             />
           </div>
 
@@ -389,12 +389,12 @@ export default function UrlPage() {
                         : "bg-black/15"
                   }`}
                 />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/27">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   OUTPUT
                 </span>
               </div>
 
-              <span className="url-num text-[8px] text-black/22">
+              <span className="url-num text-[8px] text-black/55">
                 {output
                   ? `${stats.outputChars} chars · ${stats.escapes} escapes`
                   : "WAITING"}
@@ -421,7 +421,7 @@ export default function UrlPage() {
                   {output}
                 </div>
               ) : (
-                <div className="grid h-full place-items-center text-[9px] tracking-[.12em] text-black/14">
+                <div className="grid h-full place-items-center text-[9px] tracking-[.12em] text-black/55">
                   OUTPUT WILL APPEAR HERE
                 </div>
               )}
@@ -466,7 +466,7 @@ export default function UrlPage() {
             </button>
           </div>
 
-          <div className="text-[8px] text-black/25">
+          <div className="text-[8px] text-black/55">
             {scope === "component"
               ? "encodeURIComponent / decodeURIComponent"
               : "encodeURI / decodeURI"}
@@ -476,7 +476,7 @@ export default function UrlPage() {
         {inspection.valid && (
           <section className="url-intro mt-12 grid gap-10 border-t border-black/10 pt-7 lg:grid-cols-[.62fr_1.38fr]">
             <div>
-              <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+              <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                 URL INSPECTOR
               </div>
               <h2 className="mt-2 text-[clamp(30px,4vw,48px)] font-semibold leading-[.98] tracking-[-.055em]">
@@ -499,7 +499,7 @@ export default function UrlPage() {
                   ["Hash", inspection.hash || "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="min-w-0 bg-[#f2f0e9] p-5">
-                    <div className="text-[8px] font-semibold tracking-[.1em] text-black/24">
+                    <div className="text-[8px] font-semibold tracking-[.1em] text-black/55">
                       {label}
                     </div>
                     <div className="mt-3 break-all font-mono text-[11px] font-medium">
@@ -511,10 +511,10 @@ export default function UrlPage() {
 
               <div className="mt-6 border-t border-black/10 pt-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-[8px] font-semibold tracking-[.1em] text-black/24">
+                  <span className="text-[8px] font-semibold tracking-[.1em] text-black/55">
                     QUERY PARAMETERS
                   </span>
-                  <span className="url-num text-[8px] text-black/22">
+                  <span className="url-num text-[8px] text-black/55">
                     {inspection.params.length}
                   </span>
                 </div>
@@ -536,7 +536,7 @@ export default function UrlPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="py-8 text-center text-[9px] text-black/24">
+                  <div className="py-8 text-center text-[9px] text-black/55">
                     没有查询参数
                   </div>
                 )}
@@ -547,7 +547,7 @@ export default function UrlPage() {
 
         <section className="url-intro mt-12 grid gap-7 border-t border-black/10 pt-6 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               COMPONENT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -556,7 +556,7 @@ export default function UrlPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               FULL URL
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -565,7 +565,7 @@ export default function UrlPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               + SPACE
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

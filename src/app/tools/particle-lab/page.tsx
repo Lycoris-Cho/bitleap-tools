@@ -280,7 +280,7 @@ export default function ParticleLab() {
               </button>
             )
           })}
-          <span className="ml-1 text-[11px] text-white/25">把鼠标移到预览上，效果会跟着动</span>
+          <span className="ml-1 text-[11px] text-white/55">把鼠标移到预览上，效果会跟着动</span>
         </div>
 
         <section className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -303,7 +303,7 @@ export default function ParticleLab() {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <Sparkles className="h-5 w-5 text-white/15" />
+                      <Sparkles className="h-5 w-5 text-white/55" />
                     </div>
                   )}
 

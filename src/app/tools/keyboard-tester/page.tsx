@@ -232,7 +232,7 @@ function Metric({
 
   return (
     <div className="rounded-[20px] border border-white/[.08] bg-white/[.035] p-4">
-      <div className="text-[8px] font-semibold tracking-[.15em] text-white/25">{label}</div>
+      <div className="text-[8px] font-semibold tracking-[.15em] text-white/55">{label}</div>
       <div className={`keyboard-num mt-3 truncate font-mono text-[15px] font-semibold ${color}`}>{value}</div>
     </div>
   )
@@ -268,8 +268,8 @@ function CopyBlock({
   return (
     <article className="border-t border-white/[.07] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.15em] text-white/22">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/30 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.15em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/30 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="keyboard-scroll max-h-44 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#CAD8CF]">{value}</pre>
     </article>
@@ -284,7 +284,7 @@ function ModifierBadge({
   active: boolean
 }) {
   return (
-    <span className={`rounded-full border px-3.5 py-2 text-[8px] font-semibold transition ${active ? "border-[#8FE6AE]/25 bg-[#8FE6AE] text-[#10120F] shadow-[0_0_24px_rgba(143,230,174,.22)]" : "border-white/[.09] bg-white/[.03] text-white/28"}`}>
+    <span className={`rounded-full border px-3.5 py-2 text-[8px] font-semibold transition ${active ? "border-[#8FE6AE]/25 bg-[#8FE6AE] text-[#10120F] shadow-[0_0_24px_rgba(143,230,174,.22)]" : "border-white/[.09] bg-white/[.03] text-white/55"}`}>
       {label}
     </span>
   )
@@ -502,7 +502,7 @@ export default function KeyboardTester() {
           <main className="min-w-0 overflow-hidden rounded-[34px] border border-white/[.09] bg-[#10120F]/95 shadow-[0_40px_120px_rgba(0,0,0,.32)]">
             <div className="flex flex-col gap-3 border-b border-white/[.07] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-white/24">SIGNAL DISPLAY</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">SIGNAL DISPLAY</div>
                 <p className="mt-2 text-[8px] text-white/30">点击页面后按任意键，观察键值、物理码和组合状态。</p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -520,7 +520,7 @@ export default function KeyboardTester() {
                     <div className={`mx-auto mb-5 h-3 w-3 rounded-full ${listening ? "bg-[#8FE6AE] shadow-[0_0_30px_rgba(143,230,174,.58)]" : "bg-white/18"}`} />
                     <div className="max-w-[520px] break-all px-5 font-mono text-[clamp(54px,8vw,120px)] font-semibold leading-none tracking-[-.09em] text-white">{shortKey(info.key)}</div>
                     <div className="keyboard-num mt-5 font-mono text-[12px] text-[#8FE6AE]/58">{info.code}</div>
-                    <div className="mt-4 text-[9px] font-semibold uppercase tracking-[.18em] text-white/22">{info.phase === "down" ? "KEY DOWN" : info.phase === "up" ? "KEY UP" : "WAITING"}</div>
+                    <div className="mt-4 text-[9px] font-semibold uppercase tracking-[.18em] text-white/55">{info.phase === "down" ? "KEY DOWN" : info.phase === "up" ? "KEY UP" : "WAITING"}</div>
                   </div>
                 </div>
 
@@ -535,10 +535,10 @@ export default function KeyboardTester() {
               <div className="bg-[#0C0E0C] p-5 sm:p-7">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-[8px] font-semibold tracking-[.14em] text-white/24">PHYSICAL KEYBOARD</div>
-                    <p className="mt-2 text-[8px] text-white/26">按下时显示绿色，刚释放显示金色。</p>
+                    <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">PHYSICAL KEYBOARD</div>
+                    <p className="mt-2 text-[8px] text-white/55">按下时显示绿色，刚释放显示金色。</p>
                   </div>
-                  <span className="keyboard-num rounded-full border border-white/[.08] px-3 py-2 text-[8px] text-white/28">{pressedCodes.length} pressed</span>
+                  <span className="keyboard-num rounded-full border border-white/[.08] px-3 py-2 text-[8px] text-white/55">{pressedCodes.length} pressed</span>
                 </div>
 
                 <div className="keyboard-scroll overflow-auto rounded-[26px] border border-white/[.07] bg-white/[.025] p-4">
@@ -560,7 +560,7 @@ export default function KeyboardTester() {
                     ["TIME", info.time],
                   ].map(([label, value]) => (
                     <div key={label} className="bg-[#0C0E0C] p-4">
-                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/18">{label}</div>
+                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{label}</div>
                       <div className="keyboard-num mt-2 truncate font-mono text-[10px] font-semibold text-[#CAD8CF]">{value}</div>
                     </div>
                   ))}
@@ -572,7 +572,7 @@ export default function KeyboardTester() {
           <aside className="min-w-0 overflow-hidden rounded-[30px] border border-white/[.09] bg-[#10120F]/95">
             <div className="flex h-14 items-center gap-2 border-b border-white/[.07] px-4">
               {(["event", "shortcut", "history"] as PanelMode[]).map((mode) => (
-                <button key={mode} type="button" onClick={() => setPanelMode(mode)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${panelMode === mode ? "bg-white text-[#10120F]" : "text-white/28 hover:bg-white/[.06]"}`}>{mode}</button>
+                <button key={mode} type="button" onClick={() => setPanelMode(mode)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${panelMode === mode ? "bg-white text-[#10120F]" : "text-white/55 hover:bg-white/[.06]"}`}>{mode}</button>
               ))}
             </div>
 
@@ -587,7 +587,7 @@ export default function KeyboardTester() {
               {panelMode === "shortcut" && (
                 <>
                   <article className="py-5">
-                    <div className="text-[8px] font-semibold tracking-[.15em] text-white/22">CURRENT SHORTCUT</div>
+                    <div className="text-[8px] font-semibold tracking-[.15em] text-white/55">CURRENT SHORTCUT</div>
                     <div className="mt-4 rounded-[22px] border border-[#8FE6AE]/12 bg-[#8FE6AE]/8 p-5 font-mono text-[18px] font-semibold text-[#8FE6AE]">{currentCombo}</div>
                     <p className="mt-3 text-[9px] leading-5 text-white/32">推荐在业务逻辑里优先判断 event.code；需要受键盘布局影响时再判断 event.key。</p>
                   </article>
@@ -598,8 +598,8 @@ export default function KeyboardTester() {
               {panelMode === "history" && (
                 <article className="py-5">
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="text-[8px] font-semibold tracking-[.15em] text-white/22">KEY HISTORY</span>
-                    <button type="button" onClick={() => copy(historyText, "history")} className="text-[8px] font-semibold text-white/30 transition hover:text-white">{copied === "history" ? "✓ COPIED" : "COPY"}</button>
+                    <span className="text-[8px] font-semibold tracking-[.15em] text-white/55">KEY HISTORY</span>
+                    <button type="button" onClick={() => copy(historyText, "history")} className="text-[8px] font-semibold text-white/30 transition hover:text-white">{copied === "history" ? "✓ 已复制" : "复制"}</button>
                   </div>
 
                   {history.length ? (
@@ -608,14 +608,14 @@ export default function KeyboardTester() {
                         <div key={`${item.time}-${item.code}-${index}`} className="rounded-[18px] border border-white/[.07] bg-white/[.035] p-3">
                           <div className="flex items-center justify-between gap-3">
                             <span className="font-mono text-[13px] font-semibold text-white/76">{comboFromInfo(item)}</span>
-                            <span className="font-mono text-[8px] text-white/24">{item.time}</span>
+                            <span className="font-mono text-[8px] text-white/55">{item.time}</span>
                           </div>
                           <div className="mt-2 font-mono text-[8px] text-white/30">{item.key} · {item.code} · {item.repeat ? "repeat" : "single"}</div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="grid h-64 place-items-center rounded-[20px] border border-white/[.07] bg-white/[.025] text-center text-[10px] text-white/22">还没有按键记录</div>
+                    <div className="grid h-64 place-items-center rounded-[20px] border border-white/[.07] bg-white/[.025] text-center text-[10px] text-white/55">还没有按键记录</div>
                   )}
                 </article>
               )}
@@ -632,15 +632,15 @@ export default function KeyboardTester() {
 
         <section className="keyboard-intro mt-12 grid gap-8 border-t border-white/[.09] pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.13em] text-white/25">KEY VS CODE</div>
+            <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">KEY VS CODE</div>
             <p className="mt-2 text-[9px] leading-5 text-white/34">key 代表用户输入的字符或语义，code 代表物理键位。做快捷键时通常 code 更稳定。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.13em] text-white/25">KEYDOWN / KEYUP</div>
+            <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">KEYDOWN / KEYUP</div>
             <p className="mt-2 text-[9px] leading-5 text-white/34">页面同时监听按下和释放，因此可以观察组合键是否被按住，也能看到 repeat 状态。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.13em] text-white/25">LOCAL ONLY</div>
+            <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">LOCAL ONLY</div>
             <p className="mt-2 text-[9px] leading-5 text-white/34">测试只发生在当前浏览器页面，不会上传输入内容。关闭监听后不会继续记录按键。</p>
           </div>
         </section>

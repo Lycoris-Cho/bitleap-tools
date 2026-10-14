@@ -453,7 +453,7 @@ function ResultCard({
           <div className="font-mono text-[11px] font-semibold text-white/72">
             {item.name}
           </div>
-          <div className="mt-1 text-[7px] tracking-[.12em] text-white/20">
+          <div className="mt-1 text-[7px] tracking-[.12em] text-white/55">
             {item.bits} BIT
           </div>
         </div>
@@ -470,9 +470,9 @@ function ResultCard({
         <button
           type="button"
           onClick={onCopy}
-          className="w-fit rounded-full border border-white/[.08] px-3 py-2 text-[8px] font-semibold text-white/33 transition hover:bg-white hover:text-[#171916] sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+          className="w-fit rounded-full border border-white/[.08] px-3 py-2 text-[8px] font-semibold text-white/33 transition hover:bg-white hover:text-[#171916] "
         >
-          {copied ? "✓ COPIED" : "COPY"}
+          {copied ? "✓ 已复制" : "复制"}
         </button>
       </div>
     </article>
@@ -846,7 +846,7 @@ export default function HashPage() {
 
         <header className="hash-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               HASH STUDIO
             </div>
             <h1 className="mt-4 max-w-[870px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
@@ -860,7 +860,7 @@ export default function HashPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               本地计算文本和文件的 MD5 / SHA 摘要，也可以生成 HMAC。适合校验文件、比对内容和生成接口签名测试值。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>LOCAL ONLY</span>
               <span>WEBCRYPTO SHA</span>
               <span>FILE DIGEST</span>
@@ -911,11 +911,11 @@ export default function HashPage() {
               <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-[#a8754b]" />
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     TEXT INPUT
                   </span>
                 </div>
-                <span className="hash-num font-mono text-[8px] text-black/22">
+                <span className="hash-num font-mono text-[8px] text-black/55">
                   {humanBytes(textBytes)}
                 </span>
               </div>
@@ -925,7 +925,7 @@ export default function HashPage() {
                 onChange={(event) => setInputText(event.target.value)}
                 spellCheck={false}
                 placeholder="在此输入需要计算哈希的文本……"
-                className="hash-scroll block h-[470px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+                className="hash-scroll block h-[470px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
               />
 
               <div className="flex flex-wrap gap-2 border-t border-black/[.06] px-5 py-4">
@@ -960,10 +960,10 @@ export default function HashPage() {
 
             <div ref={outputRef} className="min-w-0 bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                   DIGEST OUTPUT
                 </span>
-                <span className="text-[8px] text-white/18">
+                <span className="text-[8px] text-white/55">
                   {status || "READY"}
                 </span>
               </div>
@@ -971,7 +971,7 @@ export default function HashPage() {
               <div className="hash-dark-scroll h-[530px] overflow-auto">
                 {!results.length ? (
                   <div className="grid h-full place-items-center px-6 text-center">
-                    <p className="text-[9px] leading-5 text-white/25">
+                    <p className="text-[9px] leading-5 text-white/55">
                       输入文本后自动计算哈希。
                     </p>
                   </div>
@@ -1035,7 +1035,7 @@ export default function HashPage() {
                   <div className="break-all font-mono text-[10px] text-black/58">
                     {fileInfo.name}
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[8px] text-black/28">
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[8px] text-black/55">
                     <span>{humanBytes(fileInfo.size)}</span>
                     <span>{fileInfo.type}</span>
                   </div>
@@ -1045,10 +1045,10 @@ export default function HashPage() {
 
             <div ref={outputRef} className="overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                   FILE DIGESTS
                 </span>
-                <span className="text-[8px] text-white/18">
+                <span className="text-[8px] text-white/55">
                   {status || "WAITING"}
                 </span>
               </div>
@@ -1056,7 +1056,7 @@ export default function HashPage() {
               <div className="hash-dark-scroll max-h-[560px] overflow-auto">
                 {!fileResults.length ? (
                   <div className="grid min-h-[360px] place-items-center px-6 text-center">
-                    <p className="text-[9px] leading-5 text-white/25">
+                    <p className="text-[9px] leading-5 text-white/55">
                       选择文件后显示 MD5 和 SHA 摘要。
                     </p>
                   </div>
@@ -1079,13 +1079,13 @@ export default function HashPage() {
         {tab === "hmac" && (
           <section className="hash-intro mt-7 grid gap-7 lg:grid-cols-[.82fr_1.18fr]">
             <div className="rounded-[30px] border border-black/[.075] bg-white/24 p-6">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 HMAC INPUT
               </div>
 
               <div className="mt-5 grid gap-4">
                 <label>
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                     SECRET
                   </span>
                   <input
@@ -1097,7 +1097,7 @@ export default function HashPage() {
                 </label>
 
                 <label>
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                     MESSAGE
                   </span>
                   <textarea
@@ -1138,16 +1138,16 @@ export default function HashPage() {
 
             <div className="overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                   HMAC OUTPUT
                 </span>
                 <button
                   type="button"
                   onClick={() => copy(applyOutputCase(hmacResult, outputCase), "hmac")}
                   disabled={!hmacResult}
-                  className="text-[8px] font-semibold text-white/27 transition hover:text-white disabled:opacity-20"
+                  className="text-[8px] font-semibold text-white/55 transition hover:text-white disabled:opacity-20"
                 >
-                  {copied === "hmac" ? "✓ COPIED" : "COPY"}
+                  {copied === "hmac" ? "✓ 已复制" : "复制"}
                 </button>
               </div>
 
@@ -1161,7 +1161,7 @@ export default function HashPage() {
         )}
 
         <section className="hash-intro mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
             <span>{ALL_ALGORITHMS.length} algorithms</span>
             <span>{tab === "file" && fileInfo ? humanBytes(fileInfo.size) : humanBytes(textBytes)}</span>
             <span>{status || "local digest"}</span>
@@ -1190,7 +1190,7 @@ export default function HashPage() {
 
         <section className="hash-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               SHA BY WEBCRYPTO
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1198,7 +1198,7 @@ export default function HashPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               MD5 FOR CHECKSUM
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1206,7 +1206,7 @@ export default function HashPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LOCAL ONLY
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

@@ -329,7 +329,7 @@ function StatBox({
 
   return (
     <div className="rounded-[20px] border border-white/[.075] bg-white/[.035] p-4">
-      <div className="text-[7px] font-semibold tracking-[.15em] text-white/21">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.15em] text-white/55">{label}</div>
       <div className={`url-num mt-3 truncate font-mono text-[13px] font-semibold ${color}`}>{value}</div>
     </div>
   )
@@ -365,8 +365,8 @@ function DarkCopyBlock({
   return (
     <article className="border-t border-white/[.07] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.14em] text-white/22">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/28 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.14em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="url-dark-scroll max-h-44 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#CBD8CD]">{value || "—"}</pre>
     </article>
@@ -549,7 +549,7 @@ export default function UrlParser() {
 
         <header className="url-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.74fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">URL INTELLIGENCE STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">URL INTELLIGENCE STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.01] tracking-[-.058em]">
               拆开 URL，
               <br />
@@ -576,7 +576,7 @@ export default function UrlParser() {
           <aside className="min-w-0">
             <div className="sticky top-6 overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
               <div className="border-b border-white/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.14em] text-white/22">WORKSPACE</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">WORKSPACE</div>
               </div>
 
               <div className="p-3">
@@ -588,7 +588,7 @@ export default function UrlParser() {
                 ].map((item) => (
                   <button key={item.id} type="button" onClick={() => setActiveTab(item.id as TabId)} className={`mb-2 block w-full rounded-[20px] border p-4 text-left transition ${activeTab === item.id ? "border-white/[.12] bg-white text-[#151714]" : "border-white/[.06] bg-white/[.03] text-white/48 hover:bg-white/[.07] hover:text-white"}`}>
                     <div className="text-[11px] font-semibold tracking-[-.02em]">{item.label}</div>
-                    <div className={`mt-1 text-[8px] ${activeTab === item.id ? "text-black/36" : "text-white/24"}`}>{item.desc}</div>
+                    <div className={`mt-1 text-[8px] ${activeTab === item.id ? "text-black/36" : "text-white/55"}`}>{item.desc}</div>
                   </button>
                 ))}
               </div>
@@ -607,11 +607,11 @@ export default function UrlParser() {
               <div className="grid gap-5">
                 <section className="overflow-hidden rounded-[34px] border border-black/[.08] bg-[#151714]">
                   <div className="border-b border-white/[.06] px-5 py-4">
-                    <div className="text-[8px] font-semibold tracking-[.13em] text-white/22">URL COMMAND LINE</div>
+                    <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">URL COMMAND LINE</div>
                   </div>
                   <div className="p-5">
                     <div className="flex flex-col gap-3 lg:flex-row">
-                      <input value={input} onChange={(event) => { setInput(event.target.value); setManualParsed(null); setParseError("") }} onKeyDown={(event) => event.key === "Enter" && parseNow()} placeholder="https://example.com/path?name=value" className="min-w-0 flex-1 rounded-[24px] border border-white/[.08] bg-white/[.04] px-5 py-4 font-mono text-[12px] text-white outline-none transition placeholder:text-white/18 focus:border-[#8FB69B]/40" />
+                      <input value={input} onChange={(event) => { setInput(event.target.value); setManualParsed(null); setParseError("") }} onKeyDown={(event) => event.key === "Enter" && parseNow()} placeholder="https://example.com/path?name=value" className="min-w-0 flex-1 rounded-[24px] border border-white/[.08] bg-white/[.04] px-5 py-4 font-mono text-[12px] text-white outline-none transition placeholder:text-white/55 focus:border-[#8FB69B]/40" />
                       <div className="flex gap-2">
                         <button type="button" onClick={parseNow} className="rounded-full bg-white px-5 py-3 text-[9px] font-semibold text-[#151714] transition hover:scale-[1.01] active:scale-[.98]">解析</button>
                         <button type="button" onClick={resetParser} className="rounded-full border border-white/[.08] px-4 py-3 text-[9px] font-semibold text-white/32 transition hover:bg-white hover:text-[#151714]">重置</button>
@@ -629,26 +629,26 @@ export default function UrlParser() {
                     <section className="min-w-0 overflow-hidden rounded-[34px] border border-black/[.08] bg-[#F4F1E9]">
                       <div className="grid gap-px bg-black/[.07] md:grid-cols-4">
                         <div className="bg-[#F4F1E9] p-5">
-                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">PROTOCOL</div>
+                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">PROTOCOL</div>
                           <div className="url-num mt-3 font-mono text-[16px] font-semibold text-[#52685D]">{activeParsed.protocol}</div>
                         </div>
                         <div className="bg-[#F4F1E9] p-5">
-                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">HOST</div>
+                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">HOST</div>
                           <div className="url-num mt-3 truncate font-mono text-[16px] font-semibold text-black/70">{activeParsed.host}</div>
                         </div>
                         <div className="bg-[#F4F1E9] p-5">
-                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">PATH SEGMENTS</div>
+                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">PATH SEGMENTS</div>
                           <div className="url-num mt-3 font-mono text-[16px] font-semibold text-[#9B7542]">{activeParsed.segments.length}</div>
                         </div>
                         <div className="bg-[#F4F1E9] p-5">
-                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">PARAMS</div>
+                          <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">PARAMS</div>
                           <div className="url-num mt-3 font-mono text-[16px] font-semibold text-[#965744]">{activeParsed.params.length}</div>
                         </div>
                       </div>
 
                       <div className="p-5 sm:p-6">
                         <div className="rounded-[28px] border border-black/[.075] bg-white/25 p-5">
-                          <div className="mb-4 text-[8px] font-semibold tracking-[.14em] text-black/24">ROUTE MAP</div>
+                          <div className="mb-4 text-[8px] font-semibold tracking-[.14em] text-black/55">ROUTE MAP</div>
                           <div className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
                             <span className="rounded-full bg-[#22231F] px-3 py-2 text-white">{activeParsed.protocol}://</span>
                             <span className="rounded-full border border-black/[.08] bg-white/38 px-3 py-2 text-black/62">{activeParsed.hostname}</span>
@@ -663,8 +663,8 @@ export default function UrlParser() {
                         <div className="mt-5 overflow-hidden rounded-[28px] border border-black/[.075] bg-white/25">
                           <div className="flex items-center justify-between border-b border-black/[.07] px-5 py-4">
                             <div>
-                              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">QUERY PARAMETERS</div>
-                              <p className="mt-1 text-[8px] text-black/28">保留 raw value，并显示已解码值。</p>
+                              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">QUERY PARAMETERS</div>
+                              <p className="mt-1 text-[8px] text-black/55">保留 raw value，并显示已解码值。</p>
                             </div>
                             <button type="button" onClick={importRowsFromParsed} className="rounded-full border border-black/[.08] px-3.5 py-2 text-[8px] font-semibold text-black/34 transition hover:bg-[#22231F] hover:text-white">导入 Builder</button>
                           </div>
@@ -674,12 +674,12 @@ export default function UrlParser() {
                               {activeParsed.params.map((param) => (
                                 <article key={param.id} className="grid gap-3 border-b border-black/[.06] px-5 py-4 last:border-b-0 xl:grid-cols-[180px_1fr_auto]">
                                   <div className="min-w-0">
-                                    <div className="url-num font-mono text-[8px] text-black/24">#{param.index + 1}</div>
+                                    <div className="url-num font-mono text-[8px] text-black/55">#{param.index + 1}</div>
                                     <code className="mt-1 block truncate font-mono text-[12px] font-semibold text-[#52685D]">{param.key || "(empty key)"}</code>
                                   </div>
                                   <div className="min-w-0">
                                     <code className="block break-all font-mono text-[11px] leading-5 text-black/67">{param.decoded || "(空)"}</code>
-                                    {param.rawValue !== param.decoded && <code className="mt-2 block break-all font-mono text-[8px] leading-4 text-black/28">raw: {param.rawValue || "(empty)"}</code>}
+                                    {param.rawValue !== param.decoded && <code className="mt-2 block break-all font-mono text-[8px] leading-4 text-black/55">raw: {param.rawValue || "(empty)"}</code>}
                                     {param.warnings.length > 0 && (
                                       <div className="mt-3 flex flex-wrap gap-2">
                                         {param.warnings.map((warning, index) => (
@@ -688,12 +688,12 @@ export default function UrlParser() {
                                       </div>
                                     )}
                                   </div>
-                                  <button type="button" onClick={() => copy(param.decoded, `param-${param.index}`)} className="h-fit rounded-full border border-black/[.08] px-3 py-2 text-[8px] font-semibold text-black/31 transition hover:bg-[#22231F] hover:text-white">{copied === `param-${param.index}` ? "✓" : "COPY"}</button>
+                                  <button type="button" onClick={() => copy(param.decoded, `param-${param.index}`)} className="h-fit rounded-full border border-black/[.08] px-3 py-2 text-[8px] font-semibold text-black/31 transition hover:bg-[#22231F] hover:text-white">{copied === `param-${param.index}` ? "✓" : "复制"}</button>
                                 </article>
                               ))}
                             </div>
                           ) : (
-                            <div className="grid h-44 place-items-center text-center text-[10px] text-black/28">没有查询参数</div>
+                            <div className="grid h-44 place-items-center text-center text-[10px] text-black/55">没有查询参数</div>
                           )}
                         </div>
 
@@ -715,7 +715,7 @@ export default function UrlParser() {
 
                     <aside className="min-w-0 overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
                       <div className="border-b border-white/[.06] px-5 py-4">
-                        <div className="text-[8px] font-semibold tracking-[.14em] text-white/22">EXPORT</div>
+                        <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">EXPORT</div>
                       </div>
                       <div className="url-dark-scroll max-h-[760px] overflow-auto px-5">
                         <DarkCopyBlock label="FULL URL" value={activeParsed.href} copied={copied === "url"} onCopy={() => copy(activeParsed.href, "url")} />
@@ -742,7 +742,7 @@ export default function UrlParser() {
                   <div className="bg-[#F4F1E9] p-5 sm:p-6">
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">CODEC INPUT</div>
+                        <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">CODEC INPUT</div>
                         <p className="mt-2 text-[8px] text-black/30">快速比较 encodeURI、encodeURIComponent 与 + 空格规则。</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -756,7 +756,7 @@ export default function UrlParser() {
                   </div>
 
                   <div className="bg-[#151714] p-5 sm:p-6">
-                    <div className="mb-4 text-[8px] font-semibold tracking-[.14em] text-white/22">RESULTS</div>
+                    <div className="mb-4 text-[8px] font-semibold tracking-[.14em] text-white/55">RESULTS</div>
                     <div className="url-dark-scroll max-h-[540px] overflow-auto rounded-[28px] border border-white/[.07] px-5">
                       <DarkCopyBlock label="ENCODED" value={codec.encoded} copied={copied === "codec-encoded"} onCopy={() => copy(codec.encoded, "codec-encoded")} />
                       <DarkCopyBlock label="DECODED" value={codec.decoded} copied={copied === "codec-decoded"} onCopy={() => copy(codec.decoded, "codec-decoded")} />
@@ -771,29 +771,29 @@ export default function UrlParser() {
               <section className="grid gap-5 2xl:grid-cols-[1fr_360px]">
                 <div className="overflow-hidden rounded-[34px] border border-black/[.08] bg-[#F4F1E9]">
                   <div className="border-b border-black/[.07] px-5 py-4">
-                    <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">QUERY BUILDER</div>
+                    <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">QUERY BUILDER</div>
                   </div>
                   <div className="p-5 sm:p-6">
                     <div className="grid gap-4 lg:grid-cols-[1fr_180px]">
                       <label>
-                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">BASE URL</span>
+                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">BASE URL</span>
                         <input value={builderBase} onChange={(event) => setBuilderBase(event.target.value)} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none" />
                       </label>
                       <label>
-                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">HASH</span>
+                        <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">HASH</span>
                         <input value={builderHash} onChange={(event) => setBuilderHash(event.target.value)} placeholder="#section" className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none" />
                       </label>
                     </div>
 
                     <div className="mt-5 overflow-hidden rounded-[28px] border border-black/[.075] bg-white/25">
                       <div className="flex items-center justify-between border-b border-black/[.07] px-5 py-4">
-                        <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">PARAM ROWS</div>
+                        <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">PARAM ROWS</div>
                         <button type="button" onClick={addRow} className="rounded-full bg-[#22231F] px-3.5 py-2 text-[8px] font-semibold text-white">添加参数</button>
                       </div>
                       <div className="url-scroll max-h-[520px] overflow-auto">
                         {builderRows.map((row, index) => (
                           <div key={row.id} className="grid gap-3 border-b border-black/[.06] px-5 py-4 last:border-b-0 lg:grid-cols-[42px_1fr_1fr_auto] lg:items-center">
-                            <button type="button" onClick={() => patchRow(row.id, { enabled: !row.enabled })} className={`h-8 w-8 rounded-full border text-[8px] font-semibold ${row.enabled ? "border-[#52685D]/20 bg-[#52685D] text-white" : "border-black/[.08] text-black/24"}`}>{index + 1}</button>
+                            <button type="button" onClick={() => patchRow(row.id, { enabled: !row.enabled })} className={`h-8 w-8 rounded-full border text-[8px] font-semibold ${row.enabled ? "border-[#52685D]/20 bg-[#52685D] text-white" : "border-black/[.08] text-black/55"}`}>{index + 1}</button>
                             <input value={row.key} onChange={(event) => patchRow(row.id, { key: event.target.value })} placeholder="key" className="rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] outline-none" />
                             <input value={row.value} onChange={(event) => patchRow(row.id, { value: event.target.value })} placeholder="value" className="rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] outline-none" />
                             <button type="button" onClick={() => removeRow(row.id)} className="rounded-full border border-[#965744]/12 px-3 py-2 text-[8px] font-semibold text-[#965744]">删除</button>
@@ -806,7 +806,7 @@ export default function UrlParser() {
 
                 <aside className="overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
                   <div className="border-b border-white/[.06] px-5 py-4">
-                    <div className="text-[8px] font-semibold tracking-[.14em] text-white/22">BUILT URL</div>
+                    <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">BUILT URL</div>
                   </div>
                   <div className="px-5">
                     <DarkCopyBlock label="URL" value={builderUrl} copied={copied === "builder"} onCopy={() => copy(builderUrl, "builder")} />
@@ -825,10 +825,10 @@ export default function UrlParser() {
               <section className="overflow-hidden rounded-[34px] border border-black/[.08] bg-[#151714]">
                 <div className="border-b border-white/[.06] p-5">
                   <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
-                    <input value={statusSearch} onChange={handleStatusImport} placeholder="搜索 404 / redirect / 缓存 / 权限..." className="w-full rounded-full border border-white/[.08] bg-white/[.04] px-5 py-3 font-mono text-[11px] text-white outline-none placeholder:text-white/18" />
+                    <input value={statusSearch} onChange={handleStatusImport} placeholder="搜索 404 / redirect / 缓存 / 权限..." className="w-full rounded-full border border-white/[.08] bg-white/[.04] px-5 py-3 font-mono text-[11px] text-white outline-none placeholder:text-white/55" />
                     <div className="flex flex-wrap gap-2">
                       {statusCategories.map((category) => (
-                        <button key={category} type="button" onClick={() => setStatusFilter(category)} className={`rounded-full px-3.5 py-2 text-[8px] font-semibold transition ${statusFilter === category ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>{category}</button>
+                        <button key={category} type="button" onClick={() => setStatusFilter(category)} className={`rounded-full px-3.5 py-2 text-[8px] font-semibold transition ${statusFilter === category ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>{category}</button>
                       ))}
                     </div>
                   </div>
@@ -856,15 +856,15 @@ export default function UrlParser() {
 
         <section className="url-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.12em] text-black/25">RAW + DECODED</div>
+            <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">RAW + DECODED</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">参数表同时保留 raw value 和 decoded value，方便排查二次编码、空格加号和特殊字符问题。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.12em] text-black/25">RISK NOTES</div>
+            <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">RISK NOTES</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">风险提示只做本地静态标记，用于提醒 token、redirect、脚本片段等常见 URL 参数问题。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.12em] text-black/25">HTTP ATLAS</div>
+            <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">HTTP ATLAS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">状态码速查仍复用项目本地 data 数据，支持分类筛选和关键词搜索。</p>
           </div>
         </section>

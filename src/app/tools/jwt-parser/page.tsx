@@ -443,7 +443,7 @@ export default function JwtParser() {
 
         <header className="jwt-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               JWT INSPECTOR
             </div>
 
@@ -459,7 +459,7 @@ export default function JwtParser() {
               解码 JWT Header、Payload 与 Signature，识别 alg、iss、sub、aud、iat、nbf、exp，并实时判断时间状态。这里只做解码，不验证签名。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>BASE64URL</span>
               <span>CLAIM INSPECTOR</span>
               <span>LOCAL ONLY</span>
@@ -471,7 +471,7 @@ export default function JwtParser() {
         <section className="jwt-intro mt-7">
           <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 JWT TOKEN
               </div>
               <p className="mt-2 text-[9px] text-black/31">
@@ -515,7 +515,7 @@ export default function JwtParser() {
             }
             spellCheck={false}
             placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-            className="jwt-scroll mt-5 block h-[145px] w-full resize-none bg-transparent font-mono text-[11px] leading-6 text-black/67 outline-none placeholder:text-black/16"
+            className="jwt-scroll mt-5 block h-[145px] w-full resize-none bg-transparent font-mono text-[11px] leading-6 text-black/67 outline-none placeholder:text-black/55"
           />
 
           {token.trim() && (
@@ -528,7 +528,7 @@ export default function JwtParser() {
                     {part}
                   </span>
                   {index < tokenParts.length - 1 && (
-                    <span className="text-black/18">
+                    <span className="text-black/55">
                       .
                     </span>
                   )}
@@ -575,7 +575,7 @@ export default function JwtParser() {
                   key={label}
                   className="bg-[#f3f0e8]/92 p-4"
                 >
-                  <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+                  <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
                     {label}
                   </div>
                   <div className="jwt-num mt-3 break-all font-mono text-[11px] font-semibold text-black/61">
@@ -607,7 +607,7 @@ export default function JwtParser() {
                     key={item.label}
                     className="rounded-[22px] border border-black/[.075] bg-white/24 p-4"
                   >
-                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/23">
+                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">
                       {item.label}
                     </div>
                     <div className="mt-3 font-mono text-[10px] text-black/58">
@@ -615,7 +615,7 @@ export default function JwtParser() {
                         ? formatTime(item.value)
                         : "—"}
                     </div>
-                    <div className="mt-2 text-[8px] text-black/27">
+                    <div className="mt-2 text-[8px] text-black/55">
                       {item.value !== null
                         ? relativeUnix(
                             item.value,
@@ -654,7 +654,7 @@ export default function JwtParser() {
                     className="min-w-0 bg-[#151714]"
                   >
                     <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                      <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                      <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                         {item.label}
                       </span>
                       <button
@@ -665,11 +665,11 @@ export default function JwtParser() {
                             item.key,
                           )
                         }
-                        className="text-[8px] font-semibold text-white/27 transition hover:text-white"
+                        className="text-[8px] font-semibold text-white/55 transition hover:text-white"
                       >
                         {copied === item.key
-                          ? "✓ COPIED"
-                          : "COPY"}
+                          ? "✓ 已复制"
+                          : "复制"}
                       </button>
                     </div>
 
@@ -683,7 +683,7 @@ export default function JwtParser() {
 
             <div className="mt-5 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="flex items-center justify-between border-b border-black/[.06] px-5 py-4">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   SIGNATURE SEGMENT
                 </span>
                 <button
@@ -697,8 +697,8 @@ export default function JwtParser() {
                   className="text-[8px] font-semibold text-black/30 transition hover:text-black"
                 >
                   {copied === "signature"
-                    ? "✓ COPIED"
-                    : "COPY"}
+                    ? "✓ 已复制"
+                    : "复制"}
                 </button>
               </div>
 
@@ -742,7 +742,7 @@ export default function JwtParser() {
 
         <section className="jwt-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               BASE64URL
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -751,7 +751,7 @@ export default function JwtParser() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               CLAIM STATUS
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -760,7 +760,7 @@ export default function JwtParser() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               DECODE ≠ VERIFY
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

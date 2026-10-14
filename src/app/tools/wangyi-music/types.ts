@@ -8,6 +8,8 @@ export interface MusicResult {
     /** 毫秒，来自上游接口 */
     duration: number
     pay: string
+    /** 直链的解析时刻（毫秒）。直链是 CDN 现签的临时地址，会过期，切歌时按它判断要不要重取 */
+    resolvedAt?: number
 }
 
 export interface LyricLine {

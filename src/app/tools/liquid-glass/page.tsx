@@ -378,7 +378,7 @@ export default function LiquidGlassPage() {
 
         <header className="mt-6 flex flex-col gap-5 border-b border-black/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-[10px] font-medium tracking-[0.18em] text-black/28">CSS 工具 / 视觉实验</div>
+            <div className="text-[10px] font-medium tracking-[0.18em] text-black/55">CSS 工具 / 视觉实验</div>
             <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] sm:text-[42px]">
               Liquid Glass
             </h1>
@@ -409,7 +409,7 @@ export default function LiquidGlassPage() {
           <aside className="space-y-4">
             <section className="border border-black/10 bg-[#faf9f5] p-4">
               <div className="mb-4">
-                <div className="text-[10px] font-medium tracking-[0.15em] text-black/28">质感预设</div>
+                <div className="text-[10px] font-medium tracking-[0.15em] text-black/55">质感预设</div>
                 <div className="mt-1 text-sm font-semibold">先选择一个方向</div>
               </div>
 
@@ -435,7 +435,7 @@ export default function LiquidGlassPage() {
 
             <section className="border border-black/10 bg-[#faf9f5] p-4">
               <div className="mb-5">
-                <div className="text-[10px] font-medium tracking-[0.15em] text-black/28">细节参数</div>
+                <div className="text-[10px] font-medium tracking-[0.15em] text-black/55">细节参数</div>
                 <div className="mt-1 text-sm font-semibold">玻璃层次</div>
               </div>
 
@@ -451,7 +451,7 @@ export default function LiquidGlassPage() {
             </section>
 
             <section className="border border-black/10 bg-[#faf9f5] p-4">
-              <div className="text-[10px] font-medium tracking-[0.15em] text-black/28">材质选项</div>
+              <div className="text-[10px] font-medium tracking-[0.15em] text-black/55">材质选项</div>
 
               <div className="mt-4 divide-y divide-black/[0.07]">
                 <label className="flex cursor-pointer items-center justify-between gap-4 py-3 first:pt-0">
@@ -487,7 +487,7 @@ export default function LiquidGlassPage() {
             <section className="overflow-hidden border border-black/10 bg-[#faf9f5]">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-black/10 px-4 py-3">
                 <div>
-                  <div className="text-[10px] font-medium tracking-[0.15em] text-black/28">实时预览</div>
+                  <div className="text-[10px] font-medium tracking-[0.15em] text-black/55">实时预览</div>
                   <div className="mt-1 text-sm font-semibold">换一个背景，看玻璃真正的层次</div>
                 </div>
 
@@ -520,7 +520,7 @@ export default function LiquidGlassPage() {
 
                 <div className="pointer-events-none absolute left-[8%] top-[13%] h-28 w-28 rounded-full border border-white/18 bg-white/10 backdrop-blur-[2px]" />
                 <div className="pointer-events-none absolute bottom-[12%] right-[9%] h-40 w-40 rounded-full border border-white/12 bg-black/[0.05]" />
-                <div className="pointer-events-none absolute right-[18%] top-[18%] text-[clamp(58px,8vw,126px)] font-semibold tracking-[-0.08em] text-white/14">
+                <div className="pointer-events-none absolute right-[18%] top-[18%] text-[clamp(58px,8vw,126px)] font-semibold tracking-[-0.08em] text-white/18">
                   26
                 </div>
 
@@ -592,7 +592,7 @@ export default function LiquidGlassPage() {
               </div>
 
               <div className="border border-black/10 bg-[#e7e4dc] p-4">
-                <div className="text-[10px] font-medium tracking-[0.15em] text-black/28">说明</div>
+                <div className="text-[10px] font-medium tracking-[0.15em] text-black/55">说明</div>
                 <div className="mt-4 space-y-4 text-[11px] leading-5 text-black/45">
                   <p>使用 backdrop-filter、color-mix 与多层 inset shadow 构建玻璃质感。</p>
                   <p>如果浏览器启用了“减少透明度”，CSS 会自动降级成不透明背景。</p>
@@ -600,7 +600,7 @@ export default function LiquidGlassPage() {
                 </div>
 
                 <div className="mt-7 border-t border-black/10 pt-4">
-                  <div className="text-[10px] text-black/28">推荐</div>
+                  <div className="text-[10px] text-black/55">推荐</div>
                   <div className="mt-2 text-xs font-medium">不要把所有元素都做成玻璃。</div>
                   <p className="mt-2 text-[10px] leading-5 text-black/34">把它留给导航、浮层和少量重点组件，质感会更干净。</p>
                 </div>

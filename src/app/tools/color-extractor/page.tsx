@@ -374,7 +374,7 @@ export default function ColorExtractorPro() {
       <section className="relative mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
         <header className="cep-reveal flex flex-col gap-4 border-b border-black/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-black/28"><Breadcrumb /></div>
+            <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-black/55"><Breadcrumb /></div>
             <h1 className="mt-2 text-[30px] font-medium tracking-[-0.045em] sm:text-[40px]">配色提取器</h1>
             <p className="mt-2 max-w-[620px] text-[10px] font-medium leading-5 text-black/42">从图片中自动提取主色、生成色阶、检查文字对比度，并导出为设计变量。</p>
           </div>
@@ -428,7 +428,7 @@ export default function ColorExtractorPro() {
               <div className="overflow-hidden border border-black/10 bg-[#f8f7f2]">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3">
                   <div>
-                    <div className="text-[7px] font-semibold tracking-[0.1em] text-black/28">原图</div>
+                    <div className="text-[7px] font-semibold tracking-[0.1em] text-black/55">原图</div>
                     <div className="mt-1 max-w-[60vw] truncate text-[10px] font-semibold">{file?.name}</div>
                   </div>
                   <div className="text-[8px] font-semibold text-black/30">{processing ? "正在分析颜色…" : `已提取 ${palette.length} 个颜色`}</div>
@@ -479,7 +479,7 @@ export default function ColorExtractorPro() {
                   <div className="border border-black/10 bg-[#faf9f5]">
                     <div className="grid grid-cols-[minmax(0,1fr)_112px] border-b border-black/10">
                       <div className="p-4">
-                        <div className="text-[7px] font-semibold tracking-[0.12em] text-black/26">当前颜色</div>
+                        <div className="text-[7px] font-semibold tracking-[0.12em] text-black/55">当前颜色</div>
                         <div className="mt-2 text-[22px] font-medium tracking-[-0.035em]">{active.name}</div>
                       </div>
                       <div style={{ backgroundColor: active.hex }} />
@@ -487,26 +487,26 @@ export default function ColorExtractorPro() {
 
                     <div className="divide-y divide-black/[0.07]">
                       <button type="button" onClick={() => copy(active.hex, "已复制 HEX")} className="grid w-full grid-cols-[50px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left hover:bg-black/[0.025]">
-                        <span className="text-[7px] font-semibold text-black/28">HEX</span>
+                        <span className="text-[7px] font-semibold text-black/55">HEX</span>
                         <span className="font-mono text-[10px] font-semibold">{active.hex}</span>
-                        <span className="text-[6px] font-semibold text-black/24">复制</span>
+                        <span className="text-[6px] font-semibold text-black/55">复制</span>
                       </button>
                       <button type="button" onClick={() => copy(`rgb(${Math.round(active.r)} ${Math.round(active.g)} ${Math.round(active.b)})`, "已复制 RGB")} className="grid w-full grid-cols-[50px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left hover:bg-black/[0.025]">
-                        <span className="text-[7px] font-semibold text-black/28">RGB</span>
+                        <span className="text-[7px] font-semibold text-black/55">RGB</span>
                         <span className="truncate font-mono text-[9px]">rgb({Math.round(active.r)} {Math.round(active.g)} {Math.round(active.b)})</span>
-                        <span className="text-[6px] font-semibold text-black/24">复制</span>
+                        <span className="text-[6px] font-semibold text-black/55">复制</span>
                       </button>
                       <button type="button" onClick={() => copy(active.hsl, "已复制 HSL")} className="grid w-full grid-cols-[50px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left hover:bg-black/[0.025]">
-                        <span className="text-[7px] font-semibold text-black/28">HSL</span>
+                        <span className="text-[7px] font-semibold text-black/55">HSL</span>
                         <span className="truncate font-mono text-[9px]">{active.hsl}</span>
-                        <span className="text-[6px] font-semibold text-black/24">复制</span>
+                        <span className="text-[6px] font-semibold text-black/55">复制</span>
                       </button>
                     </div>
                   </div>
 
                   <div className="border border-black/10 bg-[#faf9f5]">
                     <div className="border-b border-black/10 px-4 py-3">
-                      <div className="text-[7px] font-semibold tracking-[0.12em] text-black/26">文字对比度</div>
+                      <div className="text-[7px] font-semibold tracking-[0.12em] text-black/55">文字对比度</div>
                       <div className="mt-1 text-[10px] font-semibold">查看黑字与白字的可读性</div>
                     </div>
 
@@ -529,10 +529,10 @@ export default function ColorExtractorPro() {
                   <div className="border border-black/10 bg-[#faf9f5]">
                     <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
                       <div>
-                        <div className="text-[7px] font-semibold tracking-[0.12em] text-black/26">设计色阶</div>
+                        <div className="text-[7px] font-semibold tracking-[0.12em] text-black/55">设计色阶</div>
                         <div className="mt-1 text-[10px] font-semibold">50 → 950</div>
                       </div>
-                      <span className="text-[7px] font-semibold text-black/24">点击复制</span>
+                      <span className="text-[7px] font-semibold text-black/55">点击复制</span>
                     </div>
 
                     <div className="grid grid-cols-2">

@@ -383,7 +383,7 @@ export default function YamlJsonPage() {
 
         <header className="yaml-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               YAML ↔ JSON STUDIO
             </div>
 
@@ -399,7 +399,7 @@ export default function YamlJsonPage() {
               JSON 与 YAML 双向实时转换，带格式校验、缩进控制、键名排序、统计和导出。所有数据只在当前浏览器中处理。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>JS-YAML</span>
               <span>LIVE CONVERT</span>
               <span>LOCAL ONLY</span>
@@ -476,7 +476,7 @@ export default function YamlJsonPage() {
           <aside className="min-w-0">
             <div className="overflow-hidden rounded-[26px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   STRUCTURE PROFILE
                 </div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">
@@ -501,7 +501,7 @@ export default function YamlJsonPage() {
                     key={label}
                     className="bg-[#f3f0e8]/92 p-4"
                   >
-                    <div className="text-[8px] text-black/24">
+                    <div className="text-[8px] text-black/55">
                       {label}
                     </div>
                     <div className="yaml-num mt-2 break-all font-mono text-[13px] font-semibold text-black/61">
@@ -524,7 +524,7 @@ export default function YamlJsonPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                 QUICK ACTIONS
               </div>
 
@@ -566,12 +566,12 @@ export default function YamlJsonPage() {
             <div className="grid gap-px overflow-hidden rounded-[30px] border border-black/[.075] bg-black/[.07] lg:grid-cols-2">
               <div className="min-w-0 bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     {mode === "json2yaml"
                       ? "JSON INPUT"
                       : "YAML INPUT"}
                   </span>
-                  <span className="yaml-num font-mono text-[8px] text-black/22">
+                  <span className="yaml-num font-mono text-[8px] text-black/55">
                     {formatNumber(stats.inputChars)} chars
                   </span>
                 </div>
@@ -582,7 +582,7 @@ export default function YamlJsonPage() {
                     setInput(event.target.value)
                   }
                   spellCheck={false}
-                  className="yaml-scroll block h-[570px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+                  className="yaml-scroll block h-[570px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
                   placeholder={
                     mode === "json2yaml"
                       ? "粘贴 JSON…"
@@ -596,12 +596,12 @@ export default function YamlJsonPage() {
                 className="min-w-0 bg-[#151714]"
               >
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                     {mode === "json2yaml"
                       ? "YAML OUTPUT"
                       : "JSON OUTPUT"}
                   </span>
-                  <span className="text-[8px] text-white/18">
+                  <span className="text-[8px] text-white/55">
                     {result.error
                       ? "INVALID"
                       : "LIVE"}
@@ -618,7 +618,7 @@ export default function YamlJsonPage() {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-[8px] text-black/25">
+              <div className="text-[8px] text-black/55">
                 {clientDuration !== null
                   ? `${clientDuration.toFixed(2)}ms`
                   : "live conversion"}
@@ -680,7 +680,7 @@ export default function YamlJsonPage() {
 
         <section className="yaml-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
               REPORT
             </div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
@@ -720,7 +720,7 @@ export default function YamlJsonPage() {
           </div>
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
-            <div className="border-b border-white/[.07] px-5 py-3 text-[8px] tracking-[.13em] text-white/25">
+            <div className="border-b border-white/[.07] px-5 py-3 text-[8px] tracking-[.13em] text-white/55">
               STRUCTURE REPORT
             </div>
 

@@ -439,8 +439,8 @@ function OutputBlock({
   return (
     <article className="border-t border-white/[.07] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.14em] text-white/22">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/28 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.14em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="enhance-dark-scroll max-h-44 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{value}</pre>
     </article>
@@ -460,7 +460,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`enhance-num mt-3 break-all font-mono text-[12px] font-semibold ${color}`}>{value}</div>
     </div>
   )
@@ -829,7 +829,7 @@ export default function ImageEnhance() {
 
         <header className="enhance-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">IMAGE ENHANCE STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">图像增强工作室</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,90px)] font-semibold leading-[1.01] tracking-[-.06em]">
               高清增强，
               <br />
@@ -855,7 +855,7 @@ export default function ImageEnhance() {
         <section className="enhance-intro mt-7 grid gap-5 xl:grid-cols-[340px_1fr_340px]">
           <aside className="min-w-0 space-y-4">
             <div className="rounded-[30px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">SOURCE</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">原图</div>
 
               <input ref={fileRef} type="file" accept="image/*" onChange={handleSelectFile} className="hidden" />
 
@@ -886,7 +886,7 @@ export default function ImageEnhance() {
             </div>
 
             <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">PRESETS</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">预设</div>
               <div className="mt-4 grid gap-2">
                 {PRESETS.map((preset) => (
                   <button key={preset.id} type="button" onClick={() => applyPreset(preset)} className="rounded-[18px] border border-black/[.08] bg-white/22 p-4 text-left transition hover:bg-white/50">
@@ -901,14 +901,14 @@ export default function ImageEnhance() {
           <main className="min-w-0 overflow-hidden rounded-[34px] border border-black/[.08] bg-[#151714]">
             <div className="flex flex-col gap-3 border-b border-white/[.065] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-white/24">DETAIL PREVIEW</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">DETAIL PREVIEW</div>
                 {/* 状态行是这个工具唯一的进度反馈，原来的 8px/28% 白在实际屏幕上几乎读不到 */}
                 <p className="mt-2 text-[11px] leading-5 text-white/55">{status}</p>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {(["split", "before", "after", "side"] as PreviewMode[]).map((mode) => (
-                  <button key={mode} type="button" onClick={() => setPreviewMode(mode)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${previewMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>
+                  <button key={mode} type="button" onClick={() => setPreviewMode(mode)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${previewMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>
                     {mode}
                   </button>
                 ))}
@@ -922,11 +922,11 @@ export default function ImageEnhance() {
                     {previewMode === "side" ? (
                       <div className="grid gap-4 lg:grid-cols-2">
                         <div className="overflow-hidden rounded-[24px] border border-black/[.08] bg-white/35 p-3">
-                          <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/28">BEFORE</div>
+                          <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/55">处理前</div>
                           <img src={sourceUrl} alt="原图预览" className="mx-auto max-h-[520px] max-w-full object-contain" />
                         </div>
                         <div className="overflow-hidden rounded-[24px] border border-black/[.08] bg-white/35 p-3">
-                          <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/28">AFTER</div>
+                          <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/55">处理后</div>
                           {outputUrl ? <img src={outputUrl} alt="增强结果预览" className="mx-auto max-h-[520px] max-w-full object-contain" /> : <div className="grid h-[360px] place-items-center text-[10px] text-black/30">执行增强后显示结果</div>}
                         </div>
                       </div>
@@ -944,8 +944,8 @@ export default function ImageEnhance() {
                             </div>
                           )}
                           <div className="pointer-events-none absolute inset-y-0 bg-white/80" style={{ left: `${split}%`, width: 1 }} />
-                          <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-[#22231f] px-3 py-1.5 text-[7px] font-semibold text-white">AFTER</div>
-                          <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-white px-3 py-1.5 text-[7px] font-semibold text-black/50">BEFORE</div>
+                          <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-[#22231f] px-3 py-1.5 text-[7px] font-semibold text-white">处理后</div>
+                          <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-white px-3 py-1.5 text-[7px] font-semibold text-black/50">处理前</div>
                         </div>
                         <input type="range" min={0} max={100} value={split} onChange={(event) => setSplit(Number(event.target.value))} className="mt-4 w-full accent-[#52685d]" />
                       </div>
@@ -968,7 +968,7 @@ export default function ImageEnhance() {
                   ["FORMAT", settings.exportFormat.toUpperCase()],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-[#151714] p-4">
-                    <div className="text-[7px] font-semibold tracking-[.12em] text-white/18">{label}</div>
+                    <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{label}</div>
                     <div className="enhance-num mt-2 font-mono text-[10px] font-semibold text-[#cbd8cd]">{value}</div>
                   </div>
                 ))}
@@ -978,11 +978,11 @@ export default function ImageEnhance() {
 
           <aside className="min-w-0 space-y-4">
             <div className="rounded-[30px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">ENHANCE</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">ENHANCE</div>
 
               <div className="mt-5 space-y-5">
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">放大倍数</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">放大倍数</div>
                   <div className="flex flex-wrap gap-2">
                     {[1, 1.5, 2, 3, 4].map((item) => (
                       <Toggle key={item} active={settings.scale === item} label={`${item}x`} onClick={() => patchSettings({ scale: item })} />
@@ -1000,7 +1000,7 @@ export default function ImageEnhance() {
             </div>
 
             <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">EXPORT</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">导出</div>
 
               <div className="mt-5 space-y-5">
                 <div className="flex flex-wrap gap-2">
@@ -1012,7 +1012,7 @@ export default function ImageEnhance() {
                 {settings.exportFormat !== "png" && <Slider label="输出质量" value={settings.quality} min={0.1} max={1} step={0.02} unit="" onChange={(quality) => patchSettings({ quality })} />}
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">背景铺底</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">背景铺底</div>
                   <div className="flex items-center gap-3">
                     <input type="color" value={settings.background} onChange={(event) => patchSettings({ background: event.target.value })} className="h-11 w-12 cursor-pointer rounded-[14px] border border-black/[.08] bg-transparent p-1" />
                     <Toggle active={settings.flattenTransparent || settings.exportFormat === "jpeg"} label={settings.exportFormat === "jpeg" ? "JPEG 自动铺底" : "铺底透明区域"} onClick={() => patchSettings({ flattenTransparent: !settings.flattenTransparent })} />
@@ -1029,7 +1029,7 @@ export default function ImageEnhance() {
 
             <div className="overflow-hidden rounded-[24px] border border-black/[.075] bg-[#151714]">
               <div className="border-b border-white/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-white/22">OUTPUT</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">OUTPUT</div>
               </div>
 
               <div className="px-5">
@@ -1047,15 +1047,15 @@ export default function ImageEnhance() {
 
         <section className="enhance-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL CANVAS</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL CANVAS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">所有处理都在当前浏览器 Canvas 中完成，不上传图片；大图会受浏览器内存和 Canvas 尺寸限制影响。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">USM SHARPEN</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">USM SHARPEN</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">增强算法使用高质量缩放、轻量降噪和 unsharp mask，不等同于云端 AI 超分，但更适合纯前端工具。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">EXPORT READY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">EXPORT READY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">支持 PNG、JPEG、WebP 输出；JPEG 会自动使用背景色铺底透明区域。</p>
           </div>
         </section>

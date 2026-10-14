@@ -354,8 +354,8 @@ function OutputBlock({
   return (
     <article className="rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.13em] text-white/24">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/26 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="lab-dark-scroll max-h-44 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{value}</pre>
     </article>
@@ -651,7 +651,7 @@ export default function LabPage() {
 
         <header className="lab-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.75fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">BROWSER LAB STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">BROWSER LAB STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">
               前端实验，
               <br />
@@ -679,7 +679,7 @@ export default function LabPage() {
             <div className="min-w-0 overflow-hidden rounded-[32px] border border-black/[.08] bg-[#151714]">
               <div className="flex flex-col gap-4 border-b border-white/[.065] px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.13em] text-white/24">{activeMeta.label.toUpperCase()}</div>
+                  <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">{activeMeta.label.toUpperCase()}</div>
                   <p className="mt-2 text-[9px] leading-5 text-white/34">{activeMeta.description}</p>
                 </div>
 
@@ -693,8 +693,8 @@ export default function LabPage() {
               <div className="grid gap-px bg-white/[.06] xl:grid-cols-[1fr_.85fr]">
                 <main className="min-w-0 bg-[#f4f1e9]">
                   <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                    <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">EDITOR</span>
-                    <span className="lab-num font-mono text-[8px] text-black/24">{code.split(/\r?\n/).length} lines</span>
+                    <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">EDITOR</span>
+                    <span className="lab-num font-mono text-[8px] text-black/55">{code.split(/\r?\n/).length} lines</span>
                   </div>
 
                   <div className="p-4 sm:p-5">
@@ -715,7 +715,7 @@ export default function LabPage() {
 
                 <aside className="min-w-0 bg-[#151714]">
                   <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                    <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">CONSOLE</span>
+                    <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">CONSOLE</span>
                     <span className={`text-[8px] ${runStatus === "error" ? "text-[#ffb2a4]" : runStatus === "running" ? "text-[#f2c779]" : "text-[#8fb69b]"}`}>{runStatus.toUpperCase()}</span>
                   </div>
 
@@ -723,13 +723,13 @@ export default function LabPage() {
                     {logs.length ? (
                       logs.map((log) => (
                         <div key={log.id} className="mb-2 grid grid-cols-[70px_54px_1fr] gap-2">
-                          <span className="text-white/18">{log.time}</span>
+                          <span className="text-white/55">{log.time}</span>
                           <span className={levelClass(log.level)}>{log.level}</span>
                           <span className={`whitespace-pre-wrap break-all ${levelClass(log.level)}`}>{log.text}</span>
                         </div>
                       ))
                     ) : (
-                      <div className="grid h-full place-items-center text-center text-white/20">
+                      <div className="grid h-full place-items-center text-center text-white/55">
                         <div>
                           <div className="text-[28px]">▻</div>
                           <p className="mt-3 text-[10px]">运行代码后在这里查看输出。</p>
@@ -745,7 +745,7 @@ export default function LabPage() {
                       ["DURATION", lastDuration === null ? "—" : `${lastDuration}ms`],
                     ].map(([label, value]) => (
                       <div key={label} className="bg-[#151714] p-4">
-                        <div className="text-[7px] font-semibold tracking-[.12em] text-white/18">{label}</div>
+                        <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{label}</div>
                         <div className="lab-num mt-2 font-mono text-[10px] font-semibold text-[#cbd8cd]">{value}</div>
                       </div>
                     ))}
@@ -756,8 +756,8 @@ export default function LabPage() {
               {previewVisible && (
                 <div className="border-t border-white/[.06] bg-[#151714] p-5">
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <span className="text-[8px] font-semibold tracking-[.13em] text-white/24">SANDBOX PREVIEW</span>
-                    <span className="text-[8px] text-white/18">iframe · allow-scripts</span>
+                    <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">SANDBOX PREVIEW</span>
+                    <span className="text-[8px] text-white/55">iframe · allow-scripts</span>
                   </div>
                   <iframe key={runId || "idle"} title="Browser Lab Sandbox" sandbox="allow-scripts" srcDoc={runnerHtml || "<!doctype html><html><body style='margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f1e9;color:rgba(0,0,0,.35);font-family:system-ui'>Run code to render preview</body></html>"} className="h-[300px] w-full rounded-[24px] border border-white/[.065] bg-[#f4f1e9]" />
                 </div>
@@ -766,11 +766,11 @@ export default function LabPage() {
 
             <aside className="min-w-0 space-y-4">
               <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SETTINGS</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SETTINGS</div>
 
                 <div className="mt-5 space-y-5">
                   <div>
-                    <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">EDITOR HEIGHT</div>
+                    <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">EDITOR HEIGHT</div>
                     <div className="flex flex-wrap gap-2">
                       <TogglePill active={editorSize === "compact"} label="紧凑" onClick={() => setEditorSize("compact")} />
                       <TogglePill active={editorSize === "comfortable"} label="舒适" onClick={() => setEditorSize("comfortable")} />
@@ -789,11 +789,11 @@ export default function LabPage() {
               </div>
 
               <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">TEMPLATES</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">TEMPLATES</div>
                 <div className="mt-4 grid gap-2">
                   {(Object.keys(TEMPLATES) as LabTemplate[]).map((template) => (
                     <button key={template} type="button" onClick={() => switchTemplate(template)} className={`rounded-[18px] border p-4 text-left transition ${activeTemplate === template ? "border-[#22231f]/15 bg-[#22231f] text-white" : "border-black/[.08] bg-white/22 hover:bg-white/48"}`}>
-                      <div className={`font-mono text-[8px] font-semibold ${activeTemplate === template ? "text-white/35" : "text-black/25"}`}>{TEMPLATES[template].short}</div>
+                      <div className={`font-mono text-[8px] font-semibold ${activeTemplate === template ? "text-white/35" : "text-black/55"}`}>{TEMPLATES[template].short}</div>
                       <div className={`mt-2 text-[13px] font-semibold ${activeTemplate === template ? "text-white" : "text-black/70"}`}>{TEMPLATES[template].label}</div>
                       <p className={`mt-2 text-[8px] leading-4 ${activeTemplate === template ? "text-white/35" : "text-black/30"}`}>{TEMPLATES[template].description}</p>
                     </button>
@@ -802,7 +802,7 @@ export default function LabPage() {
               </div>
 
               <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">FILES</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">FILES</div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="button" onClick={() => copy(code, "code")} className="rounded-full bg-[#22231f] px-4 py-3 text-[9px] font-semibold text-white">{copied === "code" ? "✓ 代码" : "复制代码"}</button>
                   <button type="button" onClick={() => downloadText(code, "bitleap-lab-snippet.js")} className="rounded-full border border-black/[.09] px-4 py-3 text-[9px] font-semibold text-black/38 transition hover:bg-white/40">导出代码</button>
@@ -814,7 +814,7 @@ export default function LabPage() {
               </div>
 
               <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SAFETY NOTE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SAFETY NOTE</div>
                 <p className="mt-3 text-[9px] leading-5 text-black/34">
                   代码在 sandbox iframe 中运行，不使用 allow-same-origin，不能直接访问父页面。不要运行不可信代码；无限循环仍可能卡住浏览器主线程。
                 </p>
@@ -825,7 +825,7 @@ export default function LabPage() {
 
         <section className="lab-intro mt-12 grid gap-9 border-t border-black/10 pt-8 xl:grid-cols-[.62fr_1.38fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">EXPORT</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">EXPORT</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               试验过程，
               <br />
@@ -846,15 +846,15 @@ export default function LabPage() {
 
         <section className="lab-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">SANDBOX RUNNER</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">SANDBOX RUNNER</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">不在 React 页面上下文直接 eval，而是把代码放进独立 iframe 运行并用 postMessage 回传日志。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">ASYNC CONSOLE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">ASYNC CONSOLE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">可设置异步日志捕获窗口，短延迟 Promise、setTimeout 输出也能进入内置 Console。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL DRAFT</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL DRAFT</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">当前代码和设置会保存到 localStorage，刷新页面后可以继续上一次草稿。</p>
           </div>
         </section>

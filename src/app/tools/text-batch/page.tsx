@@ -241,12 +241,12 @@ function TextInput({
               readonly ? "bg-[#52685d]" : "bg-[#a8754b]"
             }`}
           />
-          <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+          <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
             {label}
           </span>
         </div>
 
-        <span className="batch-num font-mono text-[8px] text-black/22">
+        <span className="batch-num font-mono text-[8px] text-black/55">
           {formatNumber(value.length)} chars
         </span>
       </div>
@@ -257,7 +257,7 @@ function TextInput({
         onChange={(event) => onChange?.(event.target.value)}
         spellCheck={false}
         placeholder={placeholder}
-        className="batch-scroll block h-[430px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+        className="batch-scroll block h-[430px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
       />
     </div>
   )
@@ -922,7 +922,7 @@ export default function TextBatch() {
 
         <header className="batch-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               TEXT BATCH STUDIO
             </div>
 
@@ -938,7 +938,7 @@ export default function TextBatch() {
               合并行去重、空行清理、查找替换、前缀后缀、编号、大小写和排序。所有处理都在浏览器本地完成。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>LOCAL ONLY</span>
               <span>LINE TOOLS</span>
               <span>BATCH REPLACE</span>
@@ -963,7 +963,7 @@ export default function TextBatch() {
                 className={`text-[7px] font-semibold tracking-[.13em] ${
                   operation === item.key
                     ? "text-white/33"
-                    : "text-black/22"
+                    : "text-black/55"
                 }`}
               >
                 {item.eyebrow}
@@ -989,7 +989,7 @@ export default function TextBatch() {
         <section className="batch-intro mt-7 grid gap-7 xl:grid-cols-[.68fr_1.32fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 CURRENT ACTION
               </div>
 
@@ -1077,7 +1077,7 @@ export default function TextBatch() {
                 {operation === "replace" && (
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                         FIND
                       </label>
                       <input
@@ -1092,7 +1092,7 @@ export default function TextBatch() {
                     </div>
 
                     <div>
-                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                         REPLACE WITH
                       </label>
                       <input
@@ -1141,7 +1141,7 @@ export default function TextBatch() {
                 {operation === "wrap" && (
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                         PREFIX
                       </label>
                       <input
@@ -1156,7 +1156,7 @@ export default function TextBatch() {
                     </div>
 
                     <div>
-                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                         SUFFIX
                       </label>
                       <input
@@ -1183,7 +1183,7 @@ export default function TextBatch() {
                 {operation === "number" && (
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                      <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                         FORMAT
                       </label>
                       <input
@@ -1195,14 +1195,14 @@ export default function TextBatch() {
                         className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none transition focus:border-black/25"
                         placeholder="{n}. "
                       />
-                      <p className="mt-2 text-[8px] leading-5 text-black/28">
+                      <p className="mt-2 text-[8px] leading-5 text-black/55">
                         支持 {"{n}"}、{"{line}"}、{"{index}"}。
                       </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="mb-2 block text-[8px] text-black/24">
+                        <label className="mb-2 block text-[8px] text-black/55">
                           起始值
                         </label>
                         <input
@@ -1218,7 +1218,7 @@ export default function TextBatch() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-[8px] text-black/24">
+                        <label className="mb-2 block text-[8px] text-black/55">
                           补零位数
                         </label>
                         <input
@@ -1333,7 +1333,7 @@ export default function TextBatch() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   SUMMARY
                 </div>
 
@@ -1358,7 +1358,7 @@ export default function TextBatch() {
                       key={item.label}
                       className="bg-[#f3f0e8]/92 p-4"
                     >
-                      <div className="text-[8px] text-black/24">
+                      <div className="text-[8px] text-black/55">
                         {item.label}
                       </div>
 
@@ -1390,7 +1390,7 @@ export default function TextBatch() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                   WORKSPACE
                 </div>
 
@@ -1445,7 +1445,7 @@ export default function TextBatch() {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
                 <span>{formatNumber(inputStats.lines)} 输入行</span>
                 <span>{formatNumber(inputStats.nonEmpty)} 非空行</span>
                 <span>{formatNumber(outputLines)} 输出行</span>
@@ -1486,7 +1486,7 @@ export default function TextBatch() {
 
         <section className="batch-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
               REPORT
             </div>
 
@@ -1525,11 +1525,11 @@ export default function TextBatch() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">
+              <span className="text-[8px] tracking-[.13em] text-white/55">
                 PROCESS PROFILE
               </span>
 
-              <span className="text-[8px] text-white/17">
+              <span className="text-[8px] text-white/55">
                 LOCAL BATCH
               </span>
             </div>
@@ -1544,7 +1544,7 @@ export default function TextBatch() {
 
         <section className="batch-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               ONE WORKSPACE
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1553,7 +1553,7 @@ export default function TextBatch() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               MORE ACTIONS
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1562,7 +1562,7 @@ export default function TextBatch() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LOCAL ONLY
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

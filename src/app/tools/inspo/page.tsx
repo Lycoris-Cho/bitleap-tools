@@ -212,7 +212,7 @@ export default function InspoDirectoryPage() {
 
             <div className="inspo-enter mt-10 grid gap-3 rounded-[34px] border border-[#dedfd6]/90 bg-white/64 p-3 shadow-[0_40px_120px_-92px_rgba(31,33,28,.45)] backdrop-blur-2xl xl:grid-cols-[minmax(0,1fr)_190px_150px_120px]">
               <label className="relative block">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#989c91]">Search</span>
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#989c91]">搜索</span>
                 <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索站点、描述、标签、学习方向..." className="h-14 w-full rounded-[24px] border border-[#dedfd6] bg-[#f8f6f0]/78 py-4 pl-[78px] pr-4 text-sm text-[#30332c] outline-none transition placeholder:text-[#b6b9ae] focus:border-[#7f9b8c] focus:bg-white" />
               </label>
 

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type SyntheticEvent } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
 import Drawer from './components/Drawer'
 import LyricPanel from './components/LyricPanel'
+import LyricsStage from './components/LyricsStage'
 import QueuePanel from './components/QueuePanel'
 import SearchPanel from './components/SearchPanel'
 import Slider from './components/Slider'
@@ -42,6 +43,8 @@ import {
     parseLRC,
 } from './utils'
 import type { LyricLine, MusicResult, PlayMode, SearchSong } from './types'
+import type { StageLyricData } from './lyrics/types'
+import { buildStageLyrics } from './lyrics/parse'
 
 /** 组件内自用的关键帧，避免污染全局样式 */
 const KEYFRAMES = `
@@ -63,10 +66,14 @@ const MODE_META: Record<PlayMode, { label: string; hint: string }> = {
 const RATE_OPTIONS = [1, 1.25, 1.5, 2, 0.75]
 const EXAMPLE_KEYWORDS = ['周杰伦', '海阔天空', '五月天']
 const EMPTY_LYRICS: LyricLine[] = []
+const EMPTY_STAGE_LINES: StageLyricData['lines'] = []
 
 interface SongAssets {
     id: string
+    /** 逐行歌词：给左侧滚动列表用 */
     lyrics: LyricLine[]
+    /** 逐词歌词：给全屏歌词舞台用（YRC 优先，LRC 摊开兜底） */
+    stage: StageLyricData
     /** 封面提取出的两种主色，用于背景渐变 */
     colors: [string, string]
 }
@@ -91,7 +98,11 @@ interface PersistedState {
     rate?: number
     songs?: MusicResult[]
     index?: number
+    /** 歌词呈现方式：经典滚动列表 / 音频可视化动画 */
+    lyricMode?: LyricMode
 }
+
+type LyricMode = 'list' | 'stage'
 
 /** 随机挑一个不同于 exclude 的下标（放在组件外，保持渲染函数纯净） */
 function pickRandomIndex(length: number, exclude: number) {
@@ -133,6 +144,8 @@ export default function WangyiMusicPage() {
     const [copied, setCopied] = useState(false)
     /** 小屏下：false 显示封面与歌曲信息，true 显示歌词（仿网易云移动端，点封面切换） */
     const [mobileLyrics, setMobileLyrics] = useState(false)
+    /** 歌词区域呈现方式：滚动列表（默认）或音频可视化动画舞台 */
+    const [lyricMode, setLyricMode] = useState<LyricMode>('list')
     /** 本地设置读取完成后才允许回写 localStorage */
     const [hydrated, setHydrated] = useState(false)
 
@@ -142,6 +155,9 @@ export default function WangyiMusicPage() {
     const searchAbortRef = useRef<AbortController | null>(null)
     const nextLoadingRef = useRef(false)
     const shouldAutoPlayRef = useRef(false)
+    /** 这一次播放是用户主动点出来的（点歌 / 按播放 / 按下一首），还是自动续播 */
+    const userPlayRef = useRef(false)
+    /** 已经为哪些歌重新解析过一次直链（防止失败后无限重试） */
     const retriedRef = useRef<Set<string>>(new Set())
 
     const currentSong = queue.index >= 0 ? queue.songs[queue.index] ?? null : null
@@ -149,6 +165,7 @@ export default function WangyiMusicPage() {
     const songCover = currentSong?.cover ?? ''
     const assets = songAssets && songAssets.id === songId ? songAssets : null
     const lyrics = assets ? assets.lyrics : EMPTY_LYRICS
+    const stageLines = assets ? assets.stage.lines : EMPTY_STAGE_LINES
     const lyricsLoading = songId !== null && assets === null
     const bgColors = assets ? assets.colors : null
     /**
@@ -156,6 +173,17 @@ export default function WangyiMusicPage() {
      * 这样刚进页面、暂停中、拖动进度时也能正确高亮当前句。
      */
     const currentLyricIndex = lyrics.length > 0 ? findLyricIndex(lyrics, currentTime) : -1
+
+    /* 歌词只在拉取时整体写入。解析 LRC 最后一行要用到整首时长，但拉取那一刻音频时长还没就绪，
+       所以把它放进 ref：解析时读一次当前值，避免把时长塞进 effect 依赖里导致反复重拉。 */
+    const durationRef = useRef(0)
+    useEffect(() => {
+        durationRef.current = audioDuration || (currentSong ? currentSong.duration / 1000 : 0)
+    }, [audioDuration, currentSong])
+
+    /* 动画舞台的取数口子。用函数而不用值：舞台每帧在 rAF 里取一次，
+       这样不会因为 currentTime 每 200ms 更新一次就把 60fps 的循环拽回 React 渲染。 */
+    const getStageTime = () => audioRef.current?.currentTime ?? 0
 
     /* ==================== 小工具 ==================== */
 
@@ -169,7 +197,9 @@ export default function WangyiMusicPage() {
         const res = await fetch(`/api/wangyi-music?id=${encodeURIComponent(id)}`, { cache: 'no-store' })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
-        if (data.code === 200 && data.data && typeof data.data === 'object') return normalizeSong(data.data)
+        if (data.code === 200 && data.data && typeof data.data === 'object') {
+            return { ...normalizeSong(data.data), resolvedAt: Date.now() }
+        }
         return null
     }
 
@@ -177,7 +207,7 @@ export default function WangyiMusicPage() {
         const res = await fetch('/api/wangyi-random', { cache: 'no-store' })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
-        if (data.code === 200 && data.data) return normalizeSong(data.data)
+        if (data.code === 200 && data.data) return { ...normalizeSong(data.data), resolvedAt: Date.now() }
         return null
     }
 
@@ -197,14 +227,49 @@ export default function WangyiMusicPage() {
         })
     }
 
+    /*
+     * 直链是 CDN 现签的**临时地址**，实测签发后一两个小时内必定失效（8 分钟前的还能用，
+     * 165 分钟前的全部 403）。而队列是持久化的，里面躺着的直链早就过期了。
+     * 所以切歌时先看手上的直链是不是旧的：旧了就重新解析一条再切过去。
+     * 不这么做的话，点歌会先加载失败、报一次错、再自愈 —— 观感就是"点了歌先没声音"。
+     */
+    const URL_TTL_MS = 10 * 60 * 1000
+    const isUrlStale = (song: MusicResult) => !song.url || Date.now() - (song.resolvedAt ?? 0) > URL_TTL_MS
+
+    /** 切到队列里的第 index 首：直链还新就直接切，过期了先换一条新的再切 */
+    const switchTo = (index: number) => {
+        const target = queue.songs[index]
+        if (!target) return
+        shouldAutoPlayRef.current = true
+        // 用户每切一次都是新的意图，重新给它一次"自动重新解析"的机会
+        retriedRef.current.delete(target.id)
+        if (!isUrlStale(target)) {
+            setQueue((q) => ({ ...q, index }))
+            return
+        }
+        setCoverLoading(true)
+        resolveSongById(target.id)
+            .then((fresh) => {
+                setQueue((q) => {
+                    const songs = q.songs.slice()
+                    const at = songs.findIndex((item) => item.id === target.id)
+                    if (at >= 0 && fresh?.url) songs[at] = { ...songs[at], ...fresh }
+                    return { songs, index: at >= 0 ? at : index }
+                })
+            })
+            // 解析失败也照样切过去：播放失败会走 handleAudioError 去报错，比卡在原地好
+            .catch(() => setQueue((q) => ({ ...q, index })))
+            .finally(() => setCoverLoading(false))
+    }
+
     const goTo = (index: number) => {
         if (index < 0 || index >= queue.songs.length) return
         if (index === queue.index) {
             togglePlay()
             return
         }
-        shouldAutoPlayRef.current = true
-        setQueue((q) => ({ ...q, index }))
+        userPlayRef.current = true
+        switchTo(index)
     }
 
     const removeAt = (index: number) => {
@@ -225,9 +290,14 @@ export default function WangyiMusicPage() {
         const audio = audioRef.current
         if (!audio || !currentSong?.url) return
         if (!audio.paused) {
+            // 用户主动暂停：把"待自动播放"的标记也清掉，
+            // 否则下面的换歌兜底会一直想把声音抢回来
+            shouldAutoPlayRef.current = false
+            userPlayRef.current = false
             audio.pause()
             return
         }
+        userPlayRef.current = true
         audio.play().catch((err: unknown) => {
             // 区分失败原因：浏览器拦截 / 后台标签被省电策略中断 / 其它
             const name = (err as Error)?.name
@@ -284,8 +354,7 @@ export default function WangyiMusicPage() {
         }
 
         if (next < songs.length) {
-            shouldAutoPlayRef.current = true
-            setQueue((q) => ({ ...q, index: next }))
+            switchTo(next)
             return
         }
 
@@ -324,8 +393,7 @@ export default function WangyiMusicPage() {
             seekTo(0)
             return
         }
-        shouldAutoPlayRef.current = true
-        setQueue((q) => ({ ...q, index: prev }))
+        switchTo(prev)
     }
 
     const playRandom = async () => {
@@ -337,6 +405,7 @@ export default function WangyiMusicPage() {
                 setError('获取推荐失败，请稍后再试')
                 return
             }
+            userPlayRef.current = true
             playFromLibrary(song)
         } catch {
             setError('网络请求失败，请稍后再试')
@@ -397,6 +466,7 @@ export default function WangyiMusicPage() {
                 setError(`「${song.name}」没有可用的播放直链，可能受版权或付费限制`)
                 return
             }
+            userPlayRef.current = true
             playFromLibrary(full)
             flashNotice(`已加入播放：${full.name}`)
         } catch {
@@ -435,6 +505,7 @@ export default function WangyiMusicPage() {
                 setError(`「${song.name}」暂时没有可用的播放直链，可能受版权或付费限制`)
                 return
             }
+            userPlayRef.current = true
             playFromLibrary(song)
             flashNotice(`已加入播放：${song.name}`)
         } catch {
@@ -477,9 +548,38 @@ export default function WangyiMusicPage() {
 
     const handleCanPlay = () => {
         setCoverLoading(false)
-        if (shouldAutoPlayRef.current) {
-            shouldAutoPlayRef.current = false
-            audioRef.current?.play().catch(() => setError('浏览器拦截了自动播放，请点击播放按钮'))
+        if (!shouldAutoPlayRef.current) return
+        const audio = audioRef.current
+        if (!audio) return
+        // 成功起播才清掉这个标记：清早了的话，中途失败一次就再也没人补播
+        audio
+            .play()
+            .then(() => {
+                shouldAutoPlayRef.current = false
+            })
+            .catch(() => setError('浏览器拦截了自动播放，请点击播放按钮'))
+    }
+
+    /*
+     * 「点歌之后在播、却没声音」在代码里其实只有两种成因：音量是 0，或者被静音。
+     * 这两种都不会报任何错、进度条也照样在走，用户只能对着那个小喇叭图标猜，
+     * 而且都会被持久化 —— 下次打开页面还是这样，于是每一首都没声音。
+     *
+     * 所以用户主动点播（点歌 / 按播放 / 按下一首）的那一刻检查一次：听不见就恢复并明确告知。
+     * 只对"用户主动"的播放这么做 —— 用户按 M 静音是有意的，自动续播时不去动它。
+     */
+    const handlePlayStart = () => {
+        setIsPlaying(true)
+        if (!userPlayRef.current) return
+        userPlayRef.current = false
+        if (muted) {
+            setMuted(false)
+            flashNotice('此前是静音状态，已取消静音')
+            return
+        }
+        if (volume <= 0) {
+            setVolume(0.8)
+            flashNotice('音量之前是 0，已自动恢复')
         }
     }
 
@@ -488,6 +588,7 @@ export default function WangyiMusicPage() {
         const song = currentSong
         if (!song) return
         setIsPlaying(false)
+
         if (retriedRef.current.has(song.id)) {
             setError(`「${song.name}」播放失败，直链可能已失效，换一首试试`)
             return
@@ -522,6 +623,7 @@ export default function WangyiMusicPage() {
                 if (typeof saved.volume === 'number') setVolume(Math.min(1, Math.max(0, saved.volume)))
                 if (typeof saved.muted === 'boolean') setMuted(saved.muted)
                 if (saved.mode === 'list' || saved.mode === 'single' || saved.mode === 'shuffle') setMode(saved.mode)
+                if (saved.lyricMode === 'list' || saved.lyricMode === 'stage') setLyricMode(saved.lyricMode)
                 if (typeof saved.rate === 'number' && RATE_OPTIONS.includes(saved.rate)) setPlaybackRate(saved.rate)
                 if (Array.isArray(saved.songs) && saved.songs.length > 0) {
                     const songs = saved.songs.filter(
@@ -553,12 +655,12 @@ export default function WangyiMusicPage() {
         try {
             localStorage.setItem(
                 STORAGE_KEY,
-                JSON.stringify({ volume, muted, mode, rate: playbackRate, songs: queue.songs, index: queue.index })
+                JSON.stringify({ volume, muted, mode, rate: playbackRate, songs: queue.songs, index: queue.index, lyricMode })
             )
         } catch {
             /* 超出配额时忽略 */
         }
-    }, [hydrated, volume, muted, mode, playbackRate, queue])
+    }, [hydrated, volume, muted, mode, playbackRate, queue, lyricMode])
 
     /* 播放中用更细的时钟刷新进度：
        timeupdate 只有 ~250ms 精度，会让歌词高亮、滚动、进度条都慢半拍 */
@@ -580,6 +682,67 @@ export default function WangyiMusicPage() {
         audio.playbackRate = playbackRate
     }, [volume, muted, playbackRate, songId])
 
+    /*
+     * 这里刻意**不再**把 <audio> 接进 WebAudio 分析图。
+     *
+     * createMediaElementSource 会把元素的输出整个改道进 AudioContext —— 接进去之后，
+     * 那声音就只从这张图里出来；而图一旦被浏览器挂起（页面转后台、系统休眠、自动播放策略），
+     * 元素照样"在播"、进度条照样走，**却完全没有声音**，还不报任何错。
+     * 这是"点了歌、在播放、没声音"最隐蔽的一种成因。
+     *
+     * 而这张图现在没有任何消费者了：逐词动画按歌词时刻走，不需要音频能量
+     * （Folia 的 classic 模式本身也不用频谱驱动的画面）。留着它只剩坏处，
+     * 所以整条链路（分析图、crossOrigin、以及为它服务的 CORS 降级）一起去掉。
+     * lib/audio.ts 保留着，将来要做随音乐呼吸的画面时再接回来。
+     */
+
+    /*
+     * 换歌兜底。
+     * 正常路径是：换源 → loadstart → canplay → 自动播放。
+     * 但 canplay 有时不会来：preload="metadata" 只取元数据、重新解析出来的直链字符串和
+     * 上一首一字不差（React 发现 src 没变，干脆不重新加载）、或者播放请求被紧接着的一次
+     * 换源打断。表现就是"点了歌，进度条不走"或者"走起来了却没声音"。
+     * 所以点名播放之后的几秒里盯着：还没真正开始播就先强制重新加载一次，再重试播放。
+     */
+    useEffect(() => {
+        if (!songId) return
+        const audio = audioRef.current
+        if (!audio) return
+        let ticks = 0
+        let reloaded = false
+        const timer = setInterval(() => {
+            if (!shouldAutoPlayRef.current) {
+                clearInterval(timer)
+                return
+            }
+            if (++ticks > 20) {
+                shouldAutoPlayRef.current = false
+                clearInterval(timer)
+                return
+            }
+            if (!audio.paused) {
+                shouldAutoPlayRef.current = false
+                clearInterval(timer)
+                return
+            }
+            if (audio.readyState < 2) return // 还在取数据，再等等
+            if (!reloaded && ticks >= 4) {
+                // 约 1.2 秒还没动静：多半是 src 没变、浏览器根本没重新加载
+                reloaded = true
+                audio.load()
+                return
+            }
+            audio
+                .play()
+                .then(() => {
+                    shouldAutoPlayRef.current = false
+                    clearInterval(timer)
+                })
+                .catch(() => {})
+        }, 300)
+        return () => clearInterval(timer)
+    }, [songId])
+
     /* 切歌：并行拉取歌词与封面主色，完成前由 id 判断为加载中 */
     useEffect(() => {
         if (!songId) return
@@ -591,16 +754,27 @@ export default function WangyiMusicPage() {
             cache: 'no-store',
         })
             .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
-            .then((data) => (data.code === 200 && data.data?.lyric ? parseLRC(data.data.lyric) : []))
-            .catch(() => [] as LyricLine[])
+            .then((data) => {
+                if (data.code !== 200) return { list: EMPTY_LYRICS, stage: { lines: EMPTY_STAGE_LINES, isWordByWord: false } as StageLyricData }
+                // 左侧列表始终用整行 LRC；舞台优先用带逐字时刻的 YRC。
+                const list = data.lrc ? parseLRC(data.lrc) : EMPTY_LYRICS
+                const stage = buildStageLyrics({
+                    yrc: data.yrc,
+                    lrc: data.lrc,
+                    translation: data.tlyric,
+                    duration: durationRef.current,
+                })
+                return { list, stage }
+            })
+            .catch(() => ({ list: EMPTY_LYRICS, stage: { lines: EMPTY_STAGE_LINES, isWordByWord: false } as StageLyricData }))
 
         const colorTask = songCover
             ? extractDominantColors(songCover)
             : Promise.resolve<[string, string]>(['#3a1414', '#0d0d12'])
 
-        Promise.all([lyricTask, colorTask]).then(([nextLyrics, nextColors]) => {
+        Promise.all([lyricTask, colorTask]).then(([{ list, stage }, nextColors]) => {
             if (cancelled) return
-            setSongAssets({ id: songId, lyrics: nextLyrics, colors: nextColors })
+            setSongAssets({ id: songId, lyrics: list, stage, colors: nextColors })
         })
 
         return () => {
@@ -642,8 +816,12 @@ export default function WangyiMusicPage() {
                 audioRef.current?.play().catch(() => {})
             },
             pause: () => audioRef.current?.pause(),
-            prev: playPrev,
+            prev: () => {
+                userPlayRef.current = true
+                playPrev()
+            },
             next: () => {
+                userPlayRef.current = true
                 void advance()
             },
             seek: (time: number) => seekTo(time),
@@ -959,14 +1137,42 @@ export default function WangyiMusicPage() {
                                         <span className="font-mono">{formatTime(audioDuration || currentSong.duration / 1000)}</span>
                                         {currentSong.pay && (
                                             <>
-                                                <span className="text-white/15">·</span>
+                                                <span className="text-white/55">·</span>
                                                 <span className="truncate">{currentSong.pay}</span>
                                             </>
                                         )}
+
+                                        {/* 歌词呈现方式：滚动列表 / 动画舞台。
+                                            放在状态行里而不是塞进歌词面板——小屏切换歌词时
+                                            这一行始终可见，不会出现"切进去就切不回来"。 */}
+                                        <div className="ml-auto flex shrink-0 items-center rounded-full border border-white/12 bg-white/[0.06] p-0.5">
+                                            {(['list', 'stage'] as const).map((m) => (
+                                                <button
+                                                    key={m}
+                                                    type="button"
+                                                    onClick={() => setLyricMode(m)}
+                                                    aria-pressed={lyricMode === m}
+                                                    title={m === 'list' ? '经典滚动歌词' : '跟着音乐跳动的歌词动画'}
+                                                    className={`inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[12px] transition ${
+                                                        lyricMode === m
+                                                            ? 'bg-white/18 text-white'
+                                                            : 'text-white/50 hover:text-white/80'
+                                                    }`}
+                                                >
+                                                    {m === 'list' ? (
+                                                        <IconList className="h-3.5 w-3.5" />
+                                                    ) : (
+                                                        <IconSparkles className="h-3.5 w-3.5" />
+                                                    )}
+                                                    {m === 'list' ? '歌词' : '动画'}
+                                                </button>
+                                            ))}
+                                        </div>
+
                                         <button
                                             onClick={() => setMobileLyrics((v) => !v)}
                                             aria-label={mobileLyrics ? '显示封面' : '显示歌词'}
-                                            className="ml-auto inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.08] px-3 text-[12px] text-white/70 transition hover:bg-white/15 hover:text-white md:hidden"
+                                            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.08] px-3 text-[12px] text-white/70 transition hover:bg-white/15 hover:text-white md:hidden"
                                         >
                                             {mobileLyrics ? <IconDisc className="h-3.5 w-3.5" /> : <IconMusic className="h-3.5 w-3.5" />}
                                             {mobileLyrics ? '封面' : '歌词'}
@@ -1033,9 +1239,9 @@ export default function WangyiMusicPage() {
                                         与左侧唱片对齐；面板内那份只在移动端显示。 */}
                                     {!lyricsLoading && lyrics.length === 0 && (
                                         <div className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-center text-center md:flex">
-                                            <IconMusic className="h-7 w-7 text-white/20" />
+                                            <IconMusic className="h-7 w-7 text-white/55" />
                                             <p className="mt-3 text-sm text-white/45">暂无歌词</p>
-                                            <p className="mt-1 text-xs text-white/25">纯音乐，或该歌曲暂未提供歌词</p>
+                                            <p className="mt-1 text-xs text-white/55">纯音乐，或该歌曲暂未提供歌词</p>
                                         </div>
                                     )}
                                 </div>
@@ -1049,7 +1255,7 @@ export default function WangyiMusicPage() {
                                     style={{ animation: 'wy-spin 26s linear infinite' }}
                                 />
                                 <div className="relative flex h-48 w-48 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-xl sm:h-60 sm:w-60">
-                                    <IconDisc className="h-20 w-20 text-white/20" />
+                                    <IconDisc className="h-20 w-20 text-white/55" />
                                 </div>
                             </div>
                             <h2 className="mt-8 text-lg font-semibold text-white/85">开始你的播放</h2>
@@ -1205,11 +1411,37 @@ export default function WangyiMusicPage() {
 
                 {/* ============ 底部：一行极简快捷键提示（小屏隐藏，避免拥挤） ============ */}
                 <div className="hidden shrink-0 pt-1.5 text-center md:order-1 md:block">
-                    <p className="mx-auto max-w-[860px] truncate text-[11px] text-white/20">
+                    <p className="mx-auto max-w-[860px] truncate text-[11px] text-white/55">
                         空格 播放/暂停 · ← → 快进退 5 秒 · ↑ ↓ 音量 · M 静音 · N/P 切歌 · 仅供个人试听
                     </p>
                 </div>
             </div>
+
+            {/* ============ 全屏歌词动画 ============
+                做成整屏覆盖层（而不是塞在歌词面板里）：这样它才是一块"幕布"，
+                封面糊成底、音浪铺满、歌词在正中间逐字亮起。Esc / 右上角关闭。 */}
+            {lyricMode === 'stage' && currentSong && (
+                <LyricsStage
+                    lines={stageLines}
+                    playing={isPlaying}
+                    getTime={getStageTime}
+                    colors={bgColors}
+                    songName={currentSong.name}
+                    artist={currentSong.artist}
+                    duration={audioDuration || currentSong.duration / 1000}
+                    onSeek={seekTo}
+                    onToggle={togglePlay}
+                    onPrev={() => {
+                        userPlayRef.current = true
+                        playPrev()
+                    }}
+                    onNext={() => {
+                        userPlayRef.current = true
+                        void advance({ auto: true })
+                    }}
+                    onClose={() => setLyricMode('list')}
+                />
+            )}
 
             {/* ============ 抽屉面板 ============ */}
             {panel === 'search' && (
@@ -1249,10 +1481,13 @@ export default function WangyiMusicPage() {
             )}
 
             {/* ============ 隐藏的原生 audio ============ */}
+            {/* 隐藏的原生 audio。
+                刻意不带 crossOrigin：那只是为了读波形才需要的，而读波形那套已经拆掉（见上方注释）。
+                不带它，跨域音源按普通媒体加载即可，少一层出错的可能。 */}
             <audio
                 ref={audioRef}
                 src={currentSong?.url || undefined}
-                onPlay={() => setIsPlaying(true)}
+                onPlay={handlePlayStart}
                 onPause={() => setIsPlaying(false)}
                 onEnded={() => void advance({ auto: true })}
                 onLoadStart={handleLoadStart}

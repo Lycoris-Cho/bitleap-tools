@@ -284,10 +284,10 @@ export default function WorldLensPage(){
     </div>
 
     <div className="relative z-10 mx-auto max-w-[1580px] px-4 pb-8 pt-6 sm:px-7 lg:px-9">
-      <div className="world-intro flex items-center justify-between gap-4"><Breadcrumb/><div className="hidden text-[9px] tracking-[.13em] text-black/27 sm:block">WORLD BANK · INDICATORS API V2</div></div>
+      <div className="world-intro flex items-center justify-between gap-4"><Breadcrumb/><div className="hidden text-[9px] tracking-[.13em] text-black/55 sm:block">WORLD BANK · INDICATORS API V2</div></div>
 
       <header className="world-intro mt-12 grid gap-8 lg:grid-cols-[1fr_.74fr] lg:items-end">
-        <div><div className="text-[9px] font-semibold tracking-[.2em] text-black/26">WORLD LENS / 全球数据观察台</div><h1 className="mt-4 max-w-[850px] text-[clamp(52px,7vw,105px)] font-semibold leading-[.9] tracking-[-.073em]">全球<br/>国家数据监测</h1></div>
+        <div><div className="text-[9px] font-semibold tracking-[.2em] text-black/55">WORLD LENS / 全球数据观察台</div><h1 className="mt-4 max-w-[850px] text-[clamp(52px,7vw,105px)] font-semibold leading-[.9] tracking-[-.073em]">全球<br/>国家数据监测</h1></div>
         <div className="border-t border-black/12 pt-5"><p className="max-w-lg text-[11px] leading-6 text-black/40">世界银行负责提供时间序列，BitLeap 把它变成可拖动、可比较、可导出的长期变化视图。最多同时观察 5 个国家。</p></div>
       </header>
 
@@ -297,7 +297,7 @@ export default function WorldLensPage(){
             {selectedCountries.map((c,i)=><div key={c.id} className="flex shrink-0 items-center gap-3 rounded-full border border-black/10 bg-white/28 py-1.5 pl-2 pr-3">
               <span className="h-5 w-5 rounded-full" style={{backgroundColor:COUNTRY_COLORS[i]}}/>
               <span className="text-[10px] font-semibold">{countryZh(c)}</span>
-              {selectedCodes.length>1&&<button onClick={()=>removeCountry(c.id)} className="text-[10px] text-black/25 hover:text-black">×</button>}
+              {selectedCodes.length>1&&<button onClick={()=>removeCountry(c.id)} className="text-[10px] text-black/55 hover:text-black">×</button>}
             </div>)}
             {selectedCodes.length<5&&<button onClick={()=>setPickerOpen(true)} className="shrink-0 rounded-full border border-dashed border-black/16 px-4 py-2 text-[9px] text-black/35 hover:border-black/30 hover:text-black">＋ 添加国家</button>}
           </div>
@@ -312,18 +312,18 @@ export default function WorldLensPage(){
       <section className="mt-7">
         <div className="world-scroll flex gap-2 overflow-x-auto pb-2">
           {PRESETS.map(p=><button key={p.code} onClick={()=>setIndicator(p.code)} className={`min-w-[145px] rounded-[20px] border p-4 text-left transition ${indicator===p.code?"border-[#20231f] bg-[#20231f] text-white":"border-black/[.08] bg-white/22 hover:bg-white/50"}`}>
-            <span className={`text-[8px] ${indicator===p.code?"text-white/35":"text-black/25"}`}>{p.code}</span><b className="mt-3 block text-sm">{p.zh}</b><span className={`mt-1 block text-[8px] ${indicator===p.code?"text-white/38":"text-black/28"}`}>{p.short}</span>
+            <span className={`text-[8px] ${indicator===p.code?"text-white/35":"text-black/55"}`}>{p.code}</span><b className="mt-3 block text-sm">{p.zh}</b><span className={`mt-1 block text-[8px] ${indicator===p.code?"text-white/38":"text-black/55"}`}>{p.short}</span>
           </button>)}
-          <div className="min-w-[205px] rounded-[20px] border border-dashed border-black/13 p-4"><span className="text-[8px] text-black/25">CUSTOM INDICATOR</span><input value={customCode} onChange={e=>setCustomCode(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")applyCustom()}} placeholder="例如 SE.ADT.LITR.ZS" className="mt-3 w-full bg-transparent font-mono text-[10px] outline-none placeholder:text-black/20"/><button onClick={applyCustom} className="mt-3 text-[9px] font-semibold">载入 →</button></div>
+          <div className="min-w-[205px] rounded-[20px] border border-dashed border-black/13 p-4"><span className="text-[8px] text-black/55">CUSTOM INDICATOR</span><input value={customCode} onChange={e=>setCustomCode(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")applyCustom()}} placeholder="例如 SE.ADT.LITR.ZS" className="mt-3 w-full bg-transparent font-mono text-[10px] outline-none placeholder:text-black/55"/><button onClick={applyCustom} className="mt-3 text-[9px] font-semibold">载入 →</button></div>
         </div>
       </section>
 
       <section className="mt-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-[9px] tracking-[.15em] text-black/25">{indicator}</div>
+            <div className="text-[9px] tracking-[.15em] text-black/55">{indicator}</div>
             <h2 className="mt-1 text-[clamp(30px,4vw,55px)] font-semibold tracking-[-.055em]">{preset.zh}</h2>
-            <div className="mt-2 text-[9px] text-black/28">{meta?.source?.value||"World Bank Indicators"} · {meta?.unit||"latest available observations"}</div>
+            <div className="mt-2 text-[9px] text-black/55">{meta?.source?.value||"World Bank Indicators"} · {meta?.unit||"latest available observations"}</div>
           </div>
           <div className="flex flex-wrap gap-3 text-[9px] text-black/34">
             <label>从 <input type="number" min={1960} max={endYear} value={startYear} onChange={e=>setStartYear(Math.min(endYear,Math.max(1960,Number(e.target.value)||2000)))} className="w-14 border-b border-black/15 bg-transparent text-center font-semibold outline-none"/></label>
@@ -350,7 +350,7 @@ export default function WorldLensPage(){
 
           <div className="absolute bottom-5 left-6 right-6">
             <input type="range" min={startYear} max={latestYear} value={Math.min(selectedYear,latestYear)} onChange={e=>setSelectedYear(Number(e.target.value))} className="w-full accent-[#20231f]"/>
-            <div className="mt-1 flex justify-between text-[8px] text-black/25"><span>{startYear}</span><span>{latestYear}</span></div>
+            <div className="mt-1 flex justify-between text-[8px] text-black/55"><span>{startYear}</span><span>{latestYear}</span></div>
           </div>
         </div>
       </section>
@@ -359,28 +359,28 @@ export default function WorldLensPage(){
         {currentRanking.map((item,rank)=>{
           const originalIndex=selectedCountries.findIndex(c=>c.id===item.country.id)
           return <div key={item.country.id} className="world-stat bg-[#efede5] p-5">
-            <div className="flex items-center justify-between"><span className="text-[8px] text-black/27">#{rank+1} · {selectedYear}</span><span className="h-2.5 w-2.5 rounded-full" style={{backgroundColor:COUNTRY_COLORS[originalIndex]}}/></div>
+            <div className="flex items-center justify-between"><span className="text-[8px] text-black/55">#{rank+1} · {selectedYear}</span><span className="h-2.5 w-2.5 rounded-full" style={{backgroundColor:COUNTRY_COLORS[originalIndex]}}/></div>
             <b className="mt-4 block text-lg">{countryZh(item.country)}</b>
             <div className="world-num mt-2 text-2xl font-semibold tracking-[-.04em]">{formatValue(item.value,preset)}</div>
-            <div className="mt-3 text-[8px] text-black/28">{item.country.region.value} · {item.country.incomeLevel.value}</div>
+            <div className="mt-3 text-[8px] text-black/55">{item.country.region.value} · {item.country.incomeLevel.value}</div>
           </div>
         })}
       </section>
 
       <section className="mt-14 grid gap-10 border-t border-black/10 pt-7 lg:grid-cols-[.74fr_1.26fr]">
         <div>
-          <div className="text-[9px] font-semibold tracking-[.15em] text-black/26">LATEST GLOBAL RANK</div>
+          <div className="text-[9px] font-semibold tracking-[.15em] text-black/55">LATEST GLOBAL RANK</div>
           <h2 className="mt-2 text-3xl font-semibold tracking-[-.045em]">这个指标，世界排成什么样。</h2>
           <p className="mt-4 max-w-md text-[10px] leading-5 text-black/34">排名使用 World Bank API 返回的最近非空观测值。不同国家的“最新年份”可能并不完全相同，因此右侧同时显示数据年份。</p>
           <div className="mt-6 flex gap-5 border-y border-black/10 py-4 text-[9px]">
-            <div><span className="block text-black/25">国家数</span><b className="mt-1 block text-lg">{ranking.length||"—"}</b></div>
-            <div><span className="block text-black/25">状态</span><b className="mt-1 block text-sm">{rankLoading?"读取中":"最近非空值"}</b></div>
+            <div><span className="block text-black/55">国家数</span><b className="mt-1 block text-lg">{ranking.length||"—"}</b></div>
+            <div><span className="block text-black/55">状态</span><b className="mt-1 block text-sm">{rankLoading?"读取中":"最近非空值"}</b></div>
           </div>
         </div>
 
         <div className="world-scroll max-h-[520px] overflow-auto">
           {ranking.slice(0,30).map((row,index)=><button key={row.code} onClick={()=>{if(!selectedCodes.includes(row.code)){selectedCodes.length<5?setSelectedCodes(v=>[...v,row.code]):setSelectedCodes(v=>[...v.slice(1),row.code])}}} className="grid w-full grid-cols-[42px_1fr_auto_48px] items-center gap-3 border-b border-black/[.07] py-3 text-left transition hover:bg-white/25">
-            <span className="world-num text-[10px] text-black/26">{String(index+1).padStart(2,"0")}</span><span className="text-[11px] font-medium">{row.name}</span><b className="world-num text-[11px]">{formatValue(row.value,preset)}</b><span className="text-right text-[8px] text-black/24">{row.year}</span>
+            <span className="world-num text-[10px] text-black/55">{String(index+1).padStart(2,"0")}</span><span className="text-[11px] font-medium">{row.name}</span><b className="world-num text-[11px]">{formatValue(row.value,preset)}</b><span className="text-right text-[8px] text-black/55">{row.year}</span>
           </button>)}
           {!ranking.length&&!rankLoading&&<div className="py-12 text-center text-[10px] text-black/30">这个指标暂时没有可用的全球排名数据</div>}
         </div>
@@ -388,21 +388,21 @@ export default function WorldLensPage(){
 
       {meta&&<section className="mt-14 border-t border-black/10 pt-7">
         <div className="grid gap-8 lg:grid-cols-[.5fr_1.5fr]">
-          <div><div className="text-[9px] tracking-[.15em] text-black/25">INDICATOR NOTE</div><h2 className="mt-2 text-xl font-semibold">{meta.name}</h2><div className="mt-2 text-[9px] text-black/29">{meta.source.value}</div></div>
-          <div><p className="text-[10px] leading-6 text-black/40">{meta.sourceNote||"World Bank API 没有为该指标返回说明。"}</p>{meta.sourceOrganization&&<p className="mt-4 text-[9px] leading-5 text-black/27">来源：{meta.sourceOrganization}</p>}</div>
+          <div><div className="text-[9px] tracking-[.15em] text-black/55">INDICATOR NOTE</div><h2 className="mt-2 text-xl font-semibold">{meta.name}</h2><div className="mt-2 text-[9px] text-black/55">{meta.source.value}</div></div>
+          <div><p className="text-[10px] leading-6 text-black/40">{meta.sourceNote||"World Bank API 没有为该指标返回说明。"}</p>{meta.sourceOrganization&&<p className="mt-4 text-[9px] leading-5 text-black/55">来源：{meta.sourceOrganization}</p>}</div>
         </div>
       </section>}
 
-      <div className="mt-14 border-t border-black/10 pt-5 text-[9px] leading-5 text-black/25">数据来自 World Bank Indicators API v2。API 无需 API Key。不同指标的数据更新周期、统计口径和可用年份不同；“最近值”不应自动理解为同一个统计年份。</div>
+      <div className="mt-14 border-t border-black/10 pt-5 text-[9px] leading-5 text-black/55">数据来自 World Bank Indicators API v2。API 无需 API Key。不同指标的数据更新周期、统计口径和可用年份不同；“最近值”不应自动理解为同一个统计年份。</div>
       <div className="mt-5 border-t border-black/[.07] pt-5"><FooterNote/></div>
     </div>
 
     {pickerOpen&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-black/20 backdrop-blur-sm sm:items-center sm:p-5" onClick={()=>setPickerOpen(false)}>
       <div className="w-full max-w-[650px] rounded-t-[30px] bg-[#f1eee6] p-6 shadow-2xl sm:rounded-[30px] sm:p-8" onClick={e=>e.stopPropagation()}>
-        <div className="flex items-start justify-between"><div><div className="text-[8px] tracking-[.15em] text-black/25">COUNTRY PICKER</div><h2 className="mt-2 text-2xl font-semibold tracking-[-.04em]">添加一个国家</h2></div><button onClick={()=>setPickerOpen(false)} className="text-[10px] text-black/35">关闭</button></div>
-        <input autoFocus value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜索 中国 / Japan / BRA…" className="mt-6 w-full border-b border-black/15 bg-transparent py-3 text-sm outline-none placeholder:text-black/20"/>
+        <div className="flex items-start justify-between"><div><div className="text-[8px] tracking-[.15em] text-black/55">COUNTRY PICKER</div><h2 className="mt-2 text-2xl font-semibold tracking-[-.04em]">添加一个国家</h2></div><button onClick={()=>setPickerOpen(false)} className="text-[10px] text-black/35">关闭</button></div>
+        <input autoFocus value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜索 中国 / Japan / BRA…" className="mt-6 w-full border-b border-black/15 bg-transparent py-3 text-sm outline-none placeholder:text-black/55"/>
         <div className="world-scroll mt-4 max-h-[430px] overflow-auto">
-          {pickerResults.map(c=><button key={c.id} onClick={()=>addCountry(c.id)} className="flex w-full items-center justify-between border-b border-black/[.07] py-3 text-left"><div><b className="text-xs">{countryZh(c)}</b><span className="ml-2 text-[9px] text-black/28">{c.name}</span></div><span className="font-mono text-[9px] text-black/28">{c.id}</span></button>)}
+          {pickerResults.map(c=><button key={c.id} onClick={()=>addCountry(c.id)} className="flex w-full items-center justify-between border-b border-black/[.07] py-3 text-left"><div><b className="text-xs">{countryZh(c)}</b><span className="ml-2 text-[9px] text-black/55">{c.name}</span></div><span className="font-mono text-[9px] text-black/55">{c.id}</span></button>)}
         </div>
       </div>
     </div>}

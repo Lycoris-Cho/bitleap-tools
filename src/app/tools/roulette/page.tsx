@@ -504,14 +504,14 @@ export default function Roulette() {
       <div className="relative z-10 mx-auto max-w-[1500px] px-5 pb-10 pt-6 sm:px-8">
         <div className="roulette-reveal flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">
             DECISION STUDIO · SPACE TO SPIN
           </div>
         </div>
 
         <section className="grid min-h-[720px] items-center gap-10 py-10 lg:grid-cols-[.78fr_1.22fr] lg:py-6">
           <div className="roulette-reveal order-2 lg:order-1">
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               随机决定转盘
             </div>
 
@@ -557,7 +557,7 @@ export default function Roulette() {
               </button>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[9px] text-black/28">
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[9px] text-black/55">
               <span>空格键开始</span>
               <span>{activeOptions.length} 个可抽候选</span>
               <span>最多 24 项</span>
@@ -567,7 +567,7 @@ export default function Roulette() {
               <label className="flex cursor-pointer items-center justify-between gap-5">
                 <span>
                   <b className="block text-[10px] font-semibold">不重复抽取</b>
-                  <span className="mt-1 block text-[9px] text-black/29">
+                  <span className="mt-1 block text-[9px] text-black/55">
                     抽中过的选项会暂时退出下一轮
                   </span>
                 </span>
@@ -638,7 +638,7 @@ export default function Roulette() {
         <section className="roulette-reveal border-t border-black/10 pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-[9px] font-semibold tracking-[.15em] text-black/26">
+              <div className="text-[9px] font-semibold tracking-[.15em] text-black/55">
                 OPTIONS
               </div>
               <h2 className="mt-1 text-2xl font-semibold tracking-[-.04em]">
@@ -647,7 +647,7 @@ export default function Roulette() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[9px] text-black/28">
+              <span className="text-[9px] text-black/55">
                 {validOptions.length}/24
               </span>
               <button
@@ -689,14 +689,14 @@ export default function Roulette() {
                     }
                     placeholder={`选项 ${index + 1}`}
                     disabled={spinning}
-                    className="min-w-0 bg-transparent py-2 text-sm font-medium outline-none placeholder:text-black/20 disabled:opacity-50"
+                    className="min-w-0 bg-transparent py-2 text-sm font-medium outline-none placeholder:text-black/55 disabled:opacity-50"
                   />
 
                   <button
                     type="button"
                     onClick={() => removeOption(option.id)}
                     disabled={spinning || options.length <= 2}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-black/22 transition hover:bg-black/[.045] hover:text-[#a45643] disabled:opacity-20"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-black/55 transition hover:bg-black/[.045] hover:text-[#a45643] disabled:opacity-20"
                     aria-label={`删除 ${option.text}`}
                   >
                     ×
@@ -720,7 +720,7 @@ export default function Roulette() {
         {(winner || history.length > 0) && (
           <section className="mt-14 grid gap-10 border-t border-black/10 pt-7 lg:grid-cols-[.85fr_1.15fr]">
             <div ref={resultRef}>
-              <div className="text-[9px] font-semibold tracking-[.15em] text-black/26">
+              <div className="text-[9px] font-semibold tracking-[.15em] text-black/55">
                 RESULT
               </div>
 
@@ -758,7 +758,7 @@ export default function Roulette() {
                   </div>
                 </>
               ) : (
-                <div className="mt-4 text-2xl font-semibold text-black/28">
+                <div className="mt-4 text-2xl font-semibold text-black/55">
                   等待下一次决定
                 </div>
               )}
@@ -767,7 +767,7 @@ export default function Roulette() {
             <div>
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <div className="text-[9px] font-semibold tracking-[.15em] text-black/26">
+                  <div className="text-[9px] font-semibold tracking-[.15em] text-black/55">
                     RECENT PICKS
                   </div>
                   <h3 className="mt-1 text-lg font-semibold tracking-[-.03em]">
@@ -779,7 +779,7 @@ export default function Roulette() {
                   <button
                     type="button"
                     onClick={() => setHistory([])}
-                    className="text-[9px] text-black/28 transition hover:text-black"
+                    className="text-[9px] text-black/55 transition hover:text-black"
                   >
                     清空记录
                   </button>
@@ -793,7 +793,7 @@ export default function Roulette() {
                     className="min-w-[155px] rounded-[20px] border border-black/[.08] bg-white/25 p-4"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[8px] text-black/25">
+                      <span className="text-[8px] text-black/55">
                         #{String(index + 1).padStart(2, "0")}
                       </span>
                       <span
@@ -804,7 +804,7 @@ export default function Roulette() {
                     <b className="mt-4 block truncate text-sm">
                       {item.text}
                     </b>
-                    <span className="mt-1 block text-[8px] text-black/25">
+                    <span className="mt-1 block text-[8px] text-black/55">
                       {toDisplayTime(item.at)}
                     </span>
                   </div>
@@ -830,7 +830,7 @@ export default function Roulette() {
           >
             <div className="flex items-start justify-between gap-5">
               <div>
-                <div className="text-[8px] tracking-[.15em] text-black/24">
+                <div className="text-[8px] tracking-[.15em] text-black/55">
                   BULK INPUT
                 </div>
                 <h2 className="mt-2 text-2xl font-semibold tracking-[-.04em]">
@@ -857,11 +857,11 @@ export default function Roulette() {
               onChange={(event) => setBulkText(event.target.value)}
               rows={10}
               placeholder={"火锅\n日料\n烧烤\n披萨\n在家做饭"}
-              className="roulette-scroll mt-6 w-full resize-none rounded-[22px] border border-black/[.08] bg-white/30 p-4 text-sm leading-7 outline-none placeholder:text-black/18"
+              className="roulette-scroll mt-6 w-full resize-none rounded-[22px] border border-black/[.08] bg-white/30 p-4 text-sm leading-7 outline-none placeholder:text-black/55"
             />
 
             <div className="mt-5 flex items-center justify-between gap-4">
-              <span className="text-[9px] text-black/27">
+              <span className="text-[9px] text-black/55">
                 已识别 {sanitizeImported(bulkText).length} 项
               </span>
 

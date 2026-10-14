@@ -448,7 +448,7 @@ export default function HolidayOptimizerPage() {
         <section className="pt-12 sm:pt-16">
           <div className="grid gap-10 lg:grid-cols-[1fr_.85fr] lg:items-end">
             <div>
-              <div className="holiday-intro text-[10px] font-semibold tracking-[.2em] text-black/27">LIFE / HOLIDAY OPTIMIZER</div>
+              <div className="holiday-intro text-[10px] font-semibold tracking-[.2em] text-black/55">LIFE / HOLIDAY OPTIMIZER</div>
               <h1 className="holiday-intro mt-5 max-w-[850px] text-[clamp(50px,7vw,104px)] font-semibold leading-[.91] tracking-[-.07em]">
                 把 <span className="text-[#a95740]">{leaveBudget}</span> 天年假，
                 <br />
@@ -463,7 +463,7 @@ export default function HolidayOptimizerPage() {
 
               <div className="mt-6 grid gap-4 sm:grid-cols-[1.3fr_.7fr_.8fr]">
                 <label>
-                  <span className="block text-[9px] font-medium tracking-[.11em] text-black/28">国家 / 地区</span>
+                  <span className="block text-[9px] font-medium tracking-[.11em] text-black/55">国家 / 地区</span>
                   <select value={countryCode} onChange={(event) => setCountryCode(event.target.value)} className="mt-2 w-full border-b border-black/13 bg-transparent pb-2 text-sm font-semibold outline-none">
                     {countries
                       .slice()
@@ -477,14 +477,14 @@ export default function HolidayOptimizerPage() {
                 </label>
 
                 <label>
-                  <span className="block text-[9px] font-medium tracking-[.11em] text-black/28">年份</span>
+                  <span className="block text-[9px] font-medium tracking-[.11em] text-black/55">年份</span>
                   <select value={year} onChange={(event) => setYear(Number(event.target.value))} className="mt-2 w-full border-b border-black/13 bg-transparent pb-2 text-sm font-semibold outline-none">
                     {Array.from({ length: 9 }, (_, index) => CURRENT_YEAR - 2 + index).map((value) => <option key={value} value={value}>{value}</option>)}
                   </select>
                 </label>
 
                 <label>
-                  <span className="block text-[9px] font-medium tracking-[.11em] text-black/28">可用年假</span>
+                  <span className="block text-[9px] font-medium tracking-[.11em] text-black/55">可用年假</span>
                   <select value={leaveBudget} onChange={(event) => setLeaveBudget(Number(event.target.value))} className="mt-2 w-full border-b border-black/13 bg-transparent pb-2 text-sm font-semibold outline-none">
                     {Array.from({ length: 11 }, (_, index) => index).map((value) => <option key={value} value={value}>{value} 天</option>)}
                   </select>
@@ -513,7 +513,7 @@ export default function HolidayOptimizerPage() {
             <>
               <div className="grid gap-9 lg:grid-cols-[.78fr_1.22fr] lg:items-center">
                 <div>
-                  <div className="holiday-result-copy text-[9px] font-semibold tracking-[.15em] text-black/27">BEST WINDOW / 方案 {selectedIndex + 1}</div>
+                  <div className="holiday-result-copy text-[9px] font-semibold tracking-[.15em] text-black/55">BEST WINDOW / 方案 {selectedIndex + 1}</div>
 
                   <div className="holiday-result-copy mt-3 flex items-end gap-3">
                     <span ref={numberRef} className="text-[clamp(82px,13vw,180px)] font-semibold leading-[.78] tracking-[-.085em]">{selectedPlan.totalDays}</span>
@@ -521,9 +521,9 @@ export default function HolidayOptimizerPage() {
                   </div>
 
                   <div className="holiday-result-copy mt-8 flex flex-wrap gap-x-6 gap-y-3">
-                    <div><span className="block text-[9px] text-black/27">需要请假</span><b className="mt-1 block text-lg">{selectedPlan.leaveDays.length} 天</b></div>
-                    <div><span className="block text-[9px] text-black/27">休假倍率</span><b className="mt-1 block text-lg">{selectedPlan.leaveDays.length ? `${selectedPlan.efficiency.toFixed(1)}×` : "无需请假"}</b></div>
-                    <div><span className="block text-[9px] text-black/27">时间</span><b className="mt-1 block text-sm">{shortDate(selectedPlan.start)} — {shortDate(selectedPlan.end)}</b></div>
+                    <div><span className="block text-[9px] text-black/55">需要请假</span><b className="mt-1 block text-lg">{selectedPlan.leaveDays.length} 天</b></div>
+                    <div><span className="block text-[9px] text-black/55">休假倍率</span><b className="mt-1 block text-lg">{selectedPlan.leaveDays.length ? `${selectedPlan.efficiency.toFixed(1)}×` : "无需请假"}</b></div>
+                    <div><span className="block text-[9px] text-black/55">时间</span><b className="mt-1 block text-sm">{shortDate(selectedPlan.start)} — {shortDate(selectedPlan.end)}</b></div>
                   </div>
 
                   <div className="holiday-result-copy mt-8 flex flex-wrap gap-2">
@@ -535,10 +535,10 @@ export default function HolidayOptimizerPage() {
                 <div>
                   <div className="holiday-result-copy flex items-center justify-between gap-4 border-b border-black/10 pb-3">
                     <div>
-                      <div className="text-[9px] text-black/25">这段假期怎么组成</div>
+                      <div className="text-[9px] text-black/55">这段假期怎么组成</div>
                       <div className="mt-1 text-sm font-semibold">{shortDate(selectedPlan.start)} {weekday(selectedPlan.start)} → {shortDate(selectedPlan.end)} {weekday(selectedPlan.end)}</div>
                     </div>
-                    <div className="text-right text-[9px] leading-4 text-black/28">
+                    <div className="text-right text-[9px] leading-4 text-black/55">
                       绿色 = 公众假日
                       <br />
                       红色 = 建议请假
@@ -552,10 +552,10 @@ export default function HolidayOptimizerPage() {
                       const weekend = isWeekend(date)
                       return (
                         <div key={date} className="holiday-day-dot min-w-[68px] flex-1 border-r border-black/[.07] pr-2 last:border-0">
-                          <div className="text-[9px] text-black/27">{weekday(date)}</div>
+                          <div className="text-[9px] text-black/55">{weekday(date)}</div>
                           <div className="mt-1 text-2xl font-semibold tracking-[-.04em]">{Number(date.slice(-2))}</div>
                           <div className="mt-3 min-h-8 text-[8px] leading-4">
-                            {leave ? <span className="font-semibold text-[#a95740]">请假</span> : holiday ? <span className="font-semibold text-[#58705d]">{holiday.localName}</span> : weekend ? <span className="text-black/26">周末</span> : <span className="text-black/18">工作日</span>}
+                            {leave ? <span className="font-semibold text-[#a95740]">请假</span> : holiday ? <span className="font-semibold text-[#58705d]">{holiday.localName}</span> : weekend ? <span className="text-black/55">周末</span> : <span className="text-black/55">工作日</span>}
                           </div>
                         </div>
                       )
@@ -564,7 +564,7 @@ export default function HolidayOptimizerPage() {
 
                   {selectedPlan.leaveDays.length > 0 && (
                     <div className="holiday-result-copy mt-5 border-t border-black/10 pt-4">
-                      <span className="text-[9px] text-black/27">建议请假：</span>
+                      <span className="text-[9px] text-black/55">建议请假：</span>
                       <span className="ml-2 text-[10px] font-medium text-[#98503d]">{selectedPlan.leaveDays.map((date) => `${monthDay(date)} ${weekday(date)}`).join(" · ")}</span>
                     </div>
                   )}
@@ -573,14 +573,14 @@ export default function HolidayOptimizerPage() {
 
               <div className="mt-12">
                 <div className="flex items-end justify-between gap-4">
-                  <div><div className="text-[9px] font-semibold tracking-[.15em] text-black/27">ALTERNATIVES</div><h2 className="mt-1 text-xl font-semibold tracking-[-.035em]">还有这些值得请。</h2></div>
-                  <div className="text-[9px] text-black/25">按连续天数、用假效率和公众假日组合评分</div>
+                  <div><div className="text-[9px] font-semibold tracking-[.15em] text-black/55">ALTERNATIVES</div><h2 className="mt-1 text-xl font-semibold tracking-[-.035em]">还有这些值得请。</h2></div>
+                  <div className="text-[9px] text-black/55">按连续天数、用假效率和公众假日组合评分</div>
                 </div>
 
                 <div className="holiday-scroll mt-5 flex gap-2 overflow-x-auto pb-2">
                   {plans.map((plan, index) => (
                     <button key={plan.id} type="button" onClick={() => setSelectedIndex(index)} className={`min-w-[190px] rounded-[22px] border p-4 text-left transition ${selectedIndex === index ? "border-[#23221d] bg-[#23221d] text-white" : "border-black/[.08] bg-white/25 hover:bg-white/52"}`}>
-                      <div className={`text-[8px] ${selectedIndex === index ? "text-white/38" : "text-black/27"}`}>方案 {String(index + 1).padStart(2, "0")}</div>
+                      <div className={`text-[8px] ${selectedIndex === index ? "text-white/38" : "text-black/55"}`}>方案 {String(index + 1).padStart(2, "0")}</div>
                       <div className="mt-3 flex items-end gap-1"><b className="text-3xl tracking-[-.055em]">{plan.totalDays}</b><span className="pb-1 text-[10px]">天</span></div>
                       <div className={`mt-3 text-[9px] ${selectedIndex === index ? "text-white/48" : "text-black/35"}`}>请 {plan.leaveDays.length} 天 · {shortDate(plan.start)} 起</div>
                     </button>
@@ -602,7 +602,7 @@ export default function HolidayOptimizerPage() {
           <section className="mt-16 border-t border-black/12 pt-7">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[9px] font-semibold tracking-[.15em] text-black/27">YEAR AT A GLANCE</div>
+                <div className="text-[9px] font-semibold tracking-[.15em] text-black/55">YEAR AT A GLANCE</div>
                 <h2 className="mt-1 text-2xl font-semibold tracking-[-.04em]">{countryLabel(selectedCountry || { countryCode, name: countryCode })} · {year} 全年休息地图</h2>
               </div>
               <div className="flex flex-wrap gap-4 text-[9px] text-black/30">
@@ -637,22 +637,22 @@ export default function HolidayOptimizerPage() {
           <section className="mt-16 border-t border-black/12 pt-7">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_.9fr]">
               <div>
-                <div className="text-[9px] font-semibold tracking-[.15em] text-black/27">PUBLIC HOLIDAYS</div>
+                <div className="text-[9px] font-semibold tracking-[.15em] text-black/55">PUBLIC HOLIDAYS</div>
                 <h2 className="mt-1 text-xl font-semibold tracking-[-.035em]">{filteredHolidays.length} 个 API 假日</h2>
 
                 <div className="mt-5 divide-y divide-black/[.075]">
                   {filteredHolidays.map((holiday) => (
                     <div key={`${holiday.date}-${holiday.localName}`} className="grid grid-cols-[78px_1fr_auto] gap-3 py-3">
-                      <div><b className="text-xs">{monthDay(holiday.date)}</b><span className="ml-1 text-[9px] text-black/27">{weekday(holiday.date)}</span></div>
-                      <div><div className="text-xs font-medium">{holiday.localName}</div><div className="mt-1 text-[9px] text-black/29">{holiday.name}</div></div>
-                      <div className="text-right text-[8px] text-black/24">{holiday.types.map(typeLabel).join(" · ")}</div>
+                      <div><b className="text-xs">{monthDay(holiday.date)}</b><span className="ml-1 text-[9px] text-black/55">{weekday(holiday.date)}</span></div>
+                      <div><div className="text-xs font-medium">{holiday.localName}</div><div className="mt-1 text-[9px] text-black/55">{holiday.name}</div></div>
+                      <div className="text-right text-[8px] text-black/55">{holiday.types.map(typeLabel).join(" · ")}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="lg:border-l lg:border-black/10 lg:pl-8">
-                <div className="text-[9px] font-semibold tracking-[.15em] text-black/27">NAGER.DATE LONG WEEKENDS</div>
+                <div className="text-[9px] font-semibold tracking-[.15em] text-black/55">NAGER.DATE LONG WEEKENDS</div>
                 <h2 className="mt-1 text-xl font-semibold tracking-[-.035em]">API 自带长周末参考</h2>
                 <p className="mt-3 text-[10px] leading-5 text-black/34">这里展示 Nager.Date 自身返回的 LongWeekend 数据；上面的“拼假方案”则是 BitLeap 额外根据你的年假额度重新计算。</p>
 
@@ -663,14 +663,14 @@ export default function HolidayOptimizerPage() {
                       <div className="text-right"><b className="text-lg">{item.dayCount}</b><span className="ml-1 text-[9px] text-black/30">天</span></div>
                     </div>
                   ))}
-                  {!apiWeekends.length && <div className="py-8 text-center text-[10px] text-black/28">API 没有返回额外长周末数据</div>}
+                  {!apiWeekends.length && <div className="py-8 text-center text-[10px] text-black/55">API 没有返回额外长周末数据</div>}
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        <div className="mt-14 border-t border-black/10 pt-5 text-[9px] leading-5 text-black/25">
+        <div className="mt-14 border-t border-black/10 pt-5 text-[9px] leading-5 text-black/55">
           假日数据来自 Nager.Date。不同国家对地区性假日、补班、调休和实际休假制度的定义可能不同；本工具按“周六、周日休息”的常见工作周计算，请假建议用于规划参考。
         </div>
 

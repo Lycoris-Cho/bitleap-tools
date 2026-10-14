@@ -490,7 +490,7 @@ export default function JsonPage() {
 
         <header className="json-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               JSON WORKBENCH
             </div>
 
@@ -506,7 +506,7 @@ export default function JsonPage() {
               实时校验 JSON，格式化、压缩、排序键名并查看结构统计。文件不会离开当前浏览器。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>LOCAL ONLY</span>
               <span>UTF-8</span>
               <span>NO UPLOAD</span>
@@ -624,7 +624,7 @@ export default function JsonPage() {
           {dragging && (
             <div className="pointer-events-none absolute inset-0 z-30 grid place-items-center bg-[#eeece5]/82 backdrop-blur-sm">
               <div className="text-center">
-                <div className="text-[9px] font-semibold tracking-[.16em] text-black/26">
+                <div className="text-[9px] font-semibold tracking-[.16em] text-black/55">
                   DROP JSON FILE
                 </div>
                 <div className="mt-3 text-2xl font-semibold tracking-[-.04em]">
@@ -648,7 +648,7 @@ export default function JsonPage() {
                     }`}
                   />
 
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     JSON INPUT
                   </span>
                 </div>
@@ -657,7 +657,7 @@ export default function JsonPage() {
                   <button
                     type="button"
                     onClick={paste}
-                    className="text-[8px] font-semibold text-black/24 transition hover:text-black"
+                    className="text-[8px] font-semibold text-black/55 transition hover:text-black"
                   >
                     PASTE
                   </button>
@@ -667,7 +667,7 @@ export default function JsonPage() {
                     onClick={() =>
                       fileInputRef.current?.click()
                     }
-                    className="text-[8px] font-semibold text-black/24 transition hover:text-black"
+                    className="text-[8px] font-semibold text-black/55 transition hover:text-black"
                   >
                     OPEN .JSON
                   </button>
@@ -703,7 +703,7 @@ export default function JsonPage() {
                 }}
                 spellCheck={false}
                 placeholder='例如：{"name":"BitLeap","version":"2.0"}'
-                className="json-scroll block h-[600px] w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+                className="json-scroll block h-[600px] w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
               />
             </div>
 
@@ -720,14 +720,14 @@ export default function JsonPage() {
                     }`}
                   />
 
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                     {mode === "pretty"
                       ? "FORMATTED OUTPUT"
                       : "MINIFIED OUTPUT"}
                   </span>
                 </div>
 
-                <span className="json-range font-mono text-[8px] text-white/18">
+                <span className="json-range font-mono text-[8px] text-white/55">
                   {output
                     ? `${outputLines} lines · ${humanBytes(
                         stats.outputBytes,
@@ -740,10 +740,10 @@ export default function JsonPage() {
                 {!input.trim() ? (
                   <div className="grid h-full place-items-center px-6 text-center">
                     <div>
-                      <div className="text-[9px] tracking-[.13em] text-white/14">
+                      <div className="text-[9px] tracking-[.13em] text-white/55">
                         JSON OUTPUT
                       </div>
-                      <p className="mt-3 text-[9px] leading-5 text-white/18">
+                      <p className="mt-3 text-[9px] leading-5 text-white/55">
                         输入、粘贴或拖入一个 JSON 文件。
                       </p>
                     </div>
@@ -839,7 +839,7 @@ export default function JsonPage() {
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-[8px] text-black/24">
+          <div className="flex items-center gap-2 text-[8px] text-black/55">
             <span>⌘ / Ctrl + Enter</span>
             <span>·</span>
             <span>格式化</span>
@@ -859,7 +859,7 @@ export default function JsonPage() {
               key={label}
               className="bg-[#f3f0e8] p-4 sm:p-5"
             >
-              <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+              <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
                 {label}
               </div>
 
@@ -882,7 +882,7 @@ export default function JsonPage() {
 
         <section className="json-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               VALIDATE
             </div>
 
@@ -892,7 +892,7 @@ export default function JsonPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               TRANSFORM
             </div>
 
@@ -902,7 +902,7 @@ export default function JsonPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               INSPECT
             </div>
 

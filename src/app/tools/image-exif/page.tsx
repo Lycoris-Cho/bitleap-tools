@@ -341,7 +341,7 @@ export default function ImageExifPage() {
                   <button type="button" className="mt-6 bg-[#caff82] px-5 py-3 text-xs font-semibold text-black">
                     选择图片
                   </button>
-                  <p className="mt-4 text-[11px] text-black/28">文件仅在浏览器本地读取，不会上传到服务器</p>
+                  <p className="mt-4 text-[11px] text-black/55">文件仅在浏览器本地读取，不会上传到服务器</p>
                 </div>
               </div>
 
@@ -372,7 +372,7 @@ export default function ImageExifPage() {
                 <div className="overflow-hidden border border-black/10 bg-[#faf9f5]">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3">
                     <div>
-                      <div className="text-[10px] font-medium tracking-[0.12em] text-black/28">原图预览</div>
+                      <div className="text-[10px] font-medium tracking-[0.12em] text-black/55">原图预览</div>
                       <div className="mt-1 max-w-[60vw] truncate text-sm font-medium">{file?.name}</div>
                     </div>
                     <div className="text-[11px] text-black/35">{file ? formatFileSize(file.size) : ""}</div>
@@ -386,7 +386,7 @@ export default function ImageExifPage() {
                 <div className="border border-black/10 bg-[#faf9f5]">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3">
                     <div>
-                      <div className="text-[10px] font-medium tracking-[0.12em] text-black/28">参数边框</div>
+                      <div className="text-[10px] font-medium tracking-[0.12em] text-black/55">参数边框</div>
                       <div className="mt-1 text-sm font-medium">生成可直接保存的摄影信息边框</div>
                     </div>
 
@@ -432,7 +432,7 @@ export default function ImageExifPage() {
                 <div className="border border-black/10 bg-[#faf9f5]">
                   <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
                     <div>
-                      <div className="text-[10px] font-medium tracking-[0.12em] text-black/28">拍摄信息</div>
+                      <div className="text-[10px] font-medium tracking-[0.12em] text-black/55">拍摄信息</div>
                       <div className="mt-1 text-sm font-medium">常用参数摘要</div>
                     </div>
                     {exifInfo && (
@@ -448,7 +448,7 @@ export default function ImageExifPage() {
                         <button key={label} onClick={() => copyValue(label, value)} className="grid w-full grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left transition hover:bg-black/[0.025]">
                           <span className="text-[11px] text-black/35">{label}</span>
                           <span className="truncate text-sm font-medium text-black/75">{value}</span>
-                          <span className="text-[10px] text-black/20">复制</span>
+                          <span className="text-[10px] text-black/55">复制</span>
                         </button>
                       ))}
                     </div>
@@ -476,7 +476,7 @@ export default function ImageExifPage() {
 
                 <div className="border border-black/10 bg-[#faf9f5]">
                   <div className="border-b border-black/10 px-4 py-3">
-                    <div className="text-[10px] font-medium tracking-[0.12em] text-black/28">完整 EXIF</div>
+                    <div className="text-[10px] font-medium tracking-[0.12em] text-black/55">完整 EXIF</div>
                     <div className="mt-1 text-sm font-medium">{exifInfo ? `${Object.keys(exifInfo).length} 项元数据` : "暂无数据"}</div>
                   </div>
 

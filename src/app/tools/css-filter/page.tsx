@@ -306,7 +306,7 @@ function Slider({
         <input type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} className="min-w-0 flex-1 accent-[#52685d]" />
         <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => onChange(clamp(Number(event.target.value) || 0, min, max))} className="w-20 rounded-full border border-black/[.08] bg-white/36 px-3 py-2 font-mono text-[10px] outline-none focus:border-black/22" />
       </div>
-      <p className="mt-2 text-[8px] leading-4 text-black/28">{desc}</p>
+      <p className="mt-2 text-[8px] leading-4 text-black/55">{desc}</p>
     </div>
   )
 }
@@ -340,7 +340,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`filter-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -582,7 +582,7 @@ export default function CssFilterPage() {
 
         <header className="filter-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">CSS FILTER STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">CSS FILTER STUDIO</div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               给画面，
               <br />
@@ -594,7 +594,7 @@ export default function CssFilterPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               可视化生成 CSS filter，支持预设、图片上传、本地预览、before / after 对比、精简输出、Tailwind arbitrary value 和完整报告导出。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{activeCount} ACTIVE FILTERS</span>
               <span>LOCAL IMAGE</span>
               <span>BEFORE / AFTER</span>
@@ -606,13 +606,13 @@ export default function CssFilterPage() {
         <section className="filter-intro mt-7 grid gap-7 xl:grid-cols-[.66fr_1.34fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">PRESETS</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">PRESETS</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">快速色调。</h2>
 
               <div className="filter-scroll mt-6 grid max-h-[360px] gap-2 overflow-auto pr-1 sm:grid-cols-2">
                 {PRESETS.map((preset) => (
                   <button key={preset.id} type="button" onClick={() => applyPreset(preset)} className="rounded-[20px] border border-black/[.08] bg-white/22 p-4 text-left transition hover:bg-white/48">
-                    <div className="font-mono text-[8px] font-semibold text-black/24">{preset.id.toUpperCase()}</div>
+                    <div className="font-mono text-[8px] font-semibold text-black/55">{preset.id.toUpperCase()}</div>
                     <div className="mt-2 text-[14px] font-semibold tracking-[-.03em] text-black/70">{preset.name}</div>
                     <p className="mt-2 text-[8px] leading-4 text-black/30">{preset.desc}</p>
                   </button>
@@ -621,7 +621,7 @@ export default function CssFilterPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SOURCE IMAGE</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SOURCE IMAGE</div>
 
               <div onDragOver={(event) => event.preventDefault()} onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} className={`mt-4 rounded-[22px] border border-dashed p-5 text-center transition ${isDragging ? "border-[#52685d] bg-[#52685d]/8" : "border-black/[.13] bg-white/20"}`}>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -637,14 +637,14 @@ export default function CssFilterPage() {
                 )}
               </div>
 
-              <p className="mt-3 break-all text-[8px] leading-4 text-black/28">
+              <p className="mt-3 break-all text-[8px] leading-4 text-black/55">
                 {uploadedImage ? `${uploadedImage.name} · ${formatBytes(uploadedImage.size)}` : "当前使用内置 SVG 样张。"}
               </p>
             </div>
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">FILTER PROFILE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">FILTER PROFILE</div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">精简输出只保留非默认滤镜；完整输出会列出全部 filter 函数。</p>
               </div>
 
@@ -668,8 +668,8 @@ export default function CssFilterPage() {
             <div className="grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.92fr_1.08fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">FILTER CONTROLS</span>
-                  <span className="text-[8px] text-black/22">{activeCount} active</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">FILTER CONTROLS</span>
+                  <span className="text-[8px] text-black/55">{activeCount} active</span>
                 </div>
 
                 <div className="filter-scroll h-[690px] overflow-auto p-5 sm:p-6">
@@ -680,7 +680,7 @@ export default function CssFilterPage() {
                   </div>
 
                   <div className="mt-5 rounded-[22px] border border-black/[.075] bg-white/24 p-5">
-                    <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">VIEW OPTIONS</div>
+                    <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">VIEW OPTIONS</div>
                     <div className="flex flex-wrap gap-2">
                       <TogglePill active={compactOutput} label="精简 CSS" onClick={() => setCompactOutput((value) => !value)} />
                       <TogglePill active={showBeforeAfter} label="前后对比" onClick={() => setShowBeforeAfter((value) => !value)} />
@@ -689,7 +689,7 @@ export default function CssFilterPage() {
 
                     {showBeforeAfter && (
                       <div className="mt-4">
-                        <div className="mb-2 flex justify-between text-[8px] text-black/28">
+                        <div className="mb-2 flex justify-between text-[8px] text-black/55">
                           <span>对比线</span>
                           <span className="filter-num font-mono text-[#52685d]">{split}%</span>
                         </div>
@@ -698,7 +698,7 @@ export default function CssFilterPage() {
                     )}
 
                     <div className="mt-4">
-                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">BACKGROUND</div>
+                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">BACKGROUND</div>
                       <div className="flex flex-wrap gap-1.5">
                         {(["editorial", "dark", "checker", "plain"] as BackgroundMode[]).map((mode) => (
                           <button key={mode} type="button" onClick={() => setBackgroundMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${backgroundMode === mode ? "bg-[#52685d] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{mode}</button>
@@ -716,7 +716,7 @@ export default function CssFilterPage() {
 
               <div className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">LIVE PREVIEW</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">LIVE PREVIEW</span>
                   <span className="text-[8px] text-[#8fb69b]">READY</span>
                 </div>
 
@@ -745,8 +745,8 @@ export default function CssFilterPage() {
                     ].map((item) => (
                       <div key={item.label} className="group rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
                         <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">{item.label}</span>
-                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/25 transition hover:text-white">{copied === item.key ? "✓ COPIED" : "COPY"}</button>
+                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">{item.label}</span>
+                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === item.key ? "✓ 已复制" : "复制"}</button>
                         </div>
                         <pre className="filter-dark-scroll max-h-[132px] overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{item.value}</pre>
                       </div>
@@ -760,7 +760,7 @@ export default function CssFilterPage() {
 
         <section className="filter-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">REPORT</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">REPORT</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               滤镜参数，
               <br />
@@ -777,8 +777,8 @@ export default function CssFilterPage() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">FILTER PROFILE</span>
-              <span className="text-[8px] text-white/17">LOCAL GENERATOR</span>
+              <span className="text-[8px] tracking-[.13em] text-white/55">FILTER PROFILE</span>
+              <span className="text-[8px] text-white/55">LOCAL GENERATOR</span>
             </div>
             <pre className="filter-dark-scroll max-h-[390px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[11px] leading-7 text-[#c7d3c7] sm:p-6">{report}</pre>
           </div>
@@ -786,15 +786,15 @@ export default function CssFilterPage() {
 
         <section className="filter-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">ORDER MATTERS</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">ORDER MATTERS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">CSS filter 函数会按顺序执行。这里固定顺序输出，便于结果稳定复现。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL IMAGE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL IMAGE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">上传图片使用 object URL 本地预览，不会上传服务器；移除或离开页面会释放资源。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">CSS NOTE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">CSS NOTE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">blur 和高强度 filter 可能影响性能，移动端大面积背景滤镜建议谨慎使用。</p>
           </div>
         </section>

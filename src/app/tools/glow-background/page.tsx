@@ -343,12 +343,12 @@ export default function GlowBackgroundPage() {
             <div className="relative z-10 mx-auto max-w-[1500px] px-5 pb-10 pt-6 sm:px-8">
                 <div className="glow-intro flex items-center justify-between gap-4">
                     <Breadcrumb />
-                    <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">CSS GLOW STUDIO · LIVE PREVIEW</div>
+                    <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">CSS GLOW STUDIO · LIVE PREVIEW</div>
                 </div>
 
                 <header className="glow-intro mt-11 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
                     <div>
-                        <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">GRADIENT GLOW BACKGROUND</div>
+                        <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">GRADIENT GLOW BACKGROUND</div>
                         <h1 className="mt-4 max-w-[880px] text-[clamp(48px,6.8vw,98px)] font-semibold leading-[.9] tracking-[-.073em]">渐变色背景</h1>
                     </div>
                     <p className="max-w-[520px] text-[11px] leading-6 text-black/39">用两种颜色生成柔和渐变光晕。调整角度、模糊、偏移、缩放和圆角，预览与 CSS 会同步更新。</p>
@@ -356,8 +356,8 @@ export default function GlowBackgroundPage() {
 
                 <section className="glow-intro pt-8">
                     <div ref={previewRef} className="glow-grid relative flex min-h-[560px] items-center justify-center overflow-hidden rounded-[34px] border border-black/[.075] bg-white/24 p-7 sm:p-12">
-                        <div className="absolute left-5 top-5 text-[8px] tracking-[.14em] text-black/22">LIVE CANVAS</div>
-                        <div className="absolute right-5 top-5 text-[8px] text-black/24">{safeColor1} → {safeColor2}</div>
+                        <div className="absolute left-5 top-5 text-[8px] tracking-[.14em] text-black/55">LIVE CANVAS</div>
+                        <div className="absolute right-5 top-5 text-[8px] text-black/55">{safeColor1} → {safeColor2}</div>
                         <div className="relative mx-auto w-full max-w-[760px]">
                             {/* 光晕层：和盒子同尺寸 */}
                             <div className="pointer-events-none absolute inset-0">
@@ -425,7 +425,7 @@ export default function GlowBackgroundPage() {
 
                 <section className="glow-intro mt-8 grid gap-10 lg:grid-cols-[.72fr_1.28fr]">
                     <div>
-                        <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">COLOR</div>
+                        <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">COLOR</div>
                         <h2 className="mt-2 text-3xl font-semibold tracking-[-.05em]">光的颜色。</h2>
                         <p className="mt-4 max-w-[360px] text-[10px] leading-5 text-black/34">建议让光晕颜色更饱和，让内容表面保持相对克制，这样层次会更稳定。</p>
 
@@ -436,7 +436,7 @@ export default function GlowBackgroundPage() {
                                 ["内容表面", surface, setSurface, "#FFFDFC"],
                             ].map(([label, value, setter, fallback]) => (
                                 <div key={label as string}>
-                                    <label className="text-[8px] font-semibold tracking-[.1em] text-black/25">{label as string}</label>
+                                    <label className="text-[8px] font-semibold tracking-[.1em] text-black/55">{label as string}</label>
                                     <div className="mt-2 flex items-center gap-3 border-b border-black/10 pb-3">
                                         <input type="color" value={normalizeHex(value as string, fallback as string)} onChange={(event) => (setter as (value: string) => void)(event.target.value)} className="h-8 w-8 cursor-pointer rounded-full border-0 bg-transparent p-0" />
                                         <input value={value as string} onChange={(event) => (setter as (value: string) => void)(event.target.value)} onBlur={() => (setter as (value: string) => void)(normalizeHex(value as string, fallback as string))} className="min-w-0 flex-1 bg-transparent font-mono text-[11px] uppercase outline-none" />
@@ -466,7 +466,7 @@ export default function GlowBackgroundPage() {
 
                 <section className="glow-intro mt-14 grid gap-9 border-t border-black/10 pt-7 lg:grid-cols-[.58fr_1.42fr]">
                     <div>
-                        <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">EXPORT</div>
+                        <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">EXPORT</div>
                         <h2 className="mt-2 text-[clamp(30px,4vw,48px)] font-semibold leading-[.98] tracking-[-.055em]">可直接用的<br />CSS 结构。</h2>
                         <p className="mt-5 max-w-[360px] text-[10px] leading-5 text-black/34">这一版不再把光晕塞进卡片背景里，而是用外层负责光、内层负责内容，避免被 `overflow` 或负层级吃掉。</p>
 
@@ -479,23 +479,23 @@ export default function GlowBackgroundPage() {
                     <div>
                         <div className="overflow-hidden rounded-[26px] border border-black/[.08] bg-[#171916]">
                             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-                                <span className="text-[8px] tracking-[.12em] text-white/28">CSS</span>
-                                <span className="text-[8px] text-white/20">LIVE OUTPUT</span>
+                                <span className="text-[8px] tracking-[.12em] text-white/55">CSS</span>
+                                <span className="text-[8px] text-white/55">LIVE OUTPUT</span>
                             </div>
                             <pre className="glow-scroll max-h-[480px] overflow-auto p-5 font-mono text-[10px] leading-6 text-[#c9d4c9] sm:p-6">{cssCode}</pre>
                         </div>
 
                         <div className="mt-3 overflow-hidden rounded-[20px] border border-black/[.08] bg-white/26">
-                            <div className="border-b border-black/[.06] px-4 py-2.5 text-[8px] tracking-[.12em] text-black/24">HTML</div>
+                            <div className="border-b border-black/[.06] px-4 py-2.5 text-[8px] tracking-[.12em] text-black/55">HTML</div>
                             <pre className="glow-scroll overflow-x-auto p-4 font-mono text-[10px] leading-5 text-black/48">{htmlCode}</pre>
                         </div>
                     </div>
                 </section>
 
                 <section className="glow-intro mt-12 grid gap-7 border-t border-black/10 pt-6 md:grid-cols-3">
-                    <div><div className="text-[8px] font-semibold tracking-[.1em] text-black/25">BLUR</div><p className="mt-2 text-[9px] leading-5 text-black/34">模糊越高，边缘越柔，但范围也会向外扩散更多。</p></div>
-                    <div><div className="text-[8px] font-semibold tracking-[.1em] text-black/25">OFFSET</div><p className="mt-2 text-[9px] leading-5 text-black/34">轻微向下偏移会更像环境光，而不是规则描边。</p></div>
-                    <div><div className="text-[8px] font-semibold tracking-[.1em] text-black/25">LAYERING</div><p className="mt-2 text-[9px] leading-5 text-black/34">外层产生光晕，内层保持不透明表面，CSS 更稳定也更容易复用。</p></div>
+                    <div><div className="text-[8px] font-semibold tracking-[.1em] text-black/55">BLUR</div><p className="mt-2 text-[9px] leading-5 text-black/34">模糊越高，边缘越柔，但范围也会向外扩散更多。</p></div>
+                    <div><div className="text-[8px] font-semibold tracking-[.1em] text-black/55">OFFSET</div><p className="mt-2 text-[9px] leading-5 text-black/34">轻微向下偏移会更像环境光，而不是规则描边。</p></div>
+                    <div><div className="text-[8px] font-semibold tracking-[.1em] text-black/55">LAYERING</div><p className="mt-2 text-[9px] leading-5 text-black/34">外层产生光晕，内层保持不透明表面，CSS 更稳定也更容易复用。</p></div>
                 </section>
 
                 <div className="mt-12 border-t border-black/[.08] pt-5">

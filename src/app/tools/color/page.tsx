@@ -425,8 +425,8 @@ function OutputRow({
   return (
     <div className="group rounded-[18px] border border-black/[.075] bg-white/24 p-4 transition hover:bg-white/45">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.13em] text-black/24">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-black/28 transition hover:text-black">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-black/55 transition hover:text-black">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <code className="block break-all font-mono text-[11px] leading-5 text-black/68">{value}</code>
     </div>
@@ -446,7 +446,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`color-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -679,7 +679,7 @@ export default function ColorPage() {
 
         <header className="color-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.75fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">COLOR STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">COLOR STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">
               颜色转换，
               <br />
@@ -732,7 +732,7 @@ export default function ColorPage() {
             </div>
 
             <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">HISTORY</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">HISTORY</div>
               <div className="mt-4 grid grid-cols-6 gap-2">
                 {[color, ...history].slice(0, 12).map((item, index) => (
                   <button key={`${colorToHexa(item)}-${index}`} type="button" onClick={() => updateColor(item, colorToHexa(item))} className="color-checker h-10 rounded-[14px] border border-black/[.08]">
@@ -747,8 +747,8 @@ export default function ColorPage() {
             <div className="grid gap-px overflow-hidden rounded-[32px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.92fr_1.08fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">CHANNEL CONTROLS</span>
-                  <span className="text-[8px] text-black/22">{channelMode.toUpperCase()}</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">CHANNEL CONTROLS</span>
+                  <span className="text-[8px] text-black/55">{channelMode.toUpperCase()}</span>
                 </div>
 
                 <div className="color-scroll h-[750px] overflow-auto p-5 sm:p-6">
@@ -784,7 +784,7 @@ export default function ColorPage() {
                     )}
 
                     <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-5">
-                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">HARMONY</div>
+                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">HARMONY</div>
                       <div className="flex flex-wrap gap-2">
                         {([
                           ["complementary", "互补"],
@@ -808,7 +808,7 @@ export default function ColorPage() {
                     </div>
 
                     <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-5">
-                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">SCALE</div>
+                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">SCALE</div>
                       <div className="grid grid-cols-2 gap-2">
                         {scale.map((item) => (
                           <button key={item.label} type="button" onClick={() => updateColor(item.color, colorToHexa(item.color))} className="flex items-center overflow-hidden rounded-[14px] border border-black/[.08] bg-white/28 text-left">
@@ -829,7 +829,7 @@ export default function ColorPage() {
 
               <div className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">PREVIEW & OUTPUT</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">PREVIEW & OUTPUT</span>
                   <span className="text-[8px] text-[#8fb69b]">{hexa}</span>
                 </div>
 
@@ -883,8 +883,8 @@ export default function ColorPage() {
                     ].map((item) => (
                       <div key={item.label} className="rounded-[18px] border border-white/[.065] bg-white/[.035] p-4">
                         <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">{item.label}</span>
-                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/25 transition hover:text-white">{copied === item.key ? "✓ COPIED" : "COPY"}</button>
+                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">{item.label}</span>
+                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === item.key ? "✓ 已复制" : "复制"}</button>
                         </div>
                         <code className="block break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{item.value}</code>
                       </div>
@@ -904,7 +904,7 @@ export default function ColorPage() {
 
         <section className="color-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">GRADIENT PAIRS</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">GRADIENT PAIRS</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               颜色不是孤立的。
             </h2>
@@ -927,15 +927,15 @@ export default function ColorPage() {
 
         <section className="color-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">FORMAT PARSER</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">FORMAT PARSER</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">输入框支持 #RGB、#RGBA、#RRGGBB、#RRGGBBAA、rgb()、rgba()、hsl() 和 hsla()。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">ALPHA SAFE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">ALPHA SAFE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">颜色选择器只处理 6 位 HEX，透明度单独管理，避免 input[type=color] 不兼容 8 位 HEX。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL ONLY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL ONLY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">所有转换、色阶和报告都在浏览器本地计算，不依赖外部接口。</p>
           </div>
         </section>

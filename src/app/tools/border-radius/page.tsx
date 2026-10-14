@@ -129,7 +129,7 @@ function RangeControl({
           </span>
           <div>
             <div className="text-[10px] font-semibold">{corner.label}</div>
-            <div className="mt-0.5 text-[8px] text-black/28">
+            <div className="mt-0.5 text-[8px] text-black/55">
               {advanced ? "horizontal / vertical" : "radius"}
             </div>
           </div>
@@ -139,11 +139,11 @@ function RangeControl({
           <span>{horizontal}</span>
           {advanced && (
             <>
-              <span className="text-black/20">/</span>
+              <span className="text-black/55">/</span>
               <span>{vertical}</span>
             </>
           )}
-          <span className="text-[8px] font-normal text-black/25">{unit}</span>
+          <span className="text-[8px] font-normal text-black/55">{unit}</span>
         </div>
       </div>
 
@@ -489,7 +489,7 @@ export default function BorderRadiusGen() {
 
         <header className="radius-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               BORDER RADIUS STUDIO
             </div>
 
@@ -508,11 +508,11 @@ export default function BorderRadiusGen() {
         <section className="radius-intro mt-8 grid gap-10 lg:grid-cols-[1.18fr_.82fr] lg:items-start">
           <div className="lg:sticky lg:top-24">
             <div className="radius-grid relative flex min-h-[620px] items-center justify-center overflow-hidden rounded-[34px] border border-black/[.075] bg-white/24 p-7 sm:p-12">
-              <div className="absolute left-5 top-5 text-[8px] font-semibold tracking-[.14em] text-black/22">
+              <div className="absolute left-5 top-5 text-[8px] font-semibold tracking-[.14em] text-black/55">
                 LIVE SHAPE
               </div>
 
-              <div className="absolute right-5 top-5 font-mono text-[8px] text-black/24">
+              <div className="absolute right-5 top-5 font-mono text-[8px] text-black/55">
                 {advanced ? "ELLIPTICAL" : "STANDARD"}
               </div>
 
@@ -534,11 +534,11 @@ export default function BorderRadiusGen() {
 
                   <div className="relative z-10 flex h-full flex-col justify-between p-7 sm:p-9">
                     <div className="flex items-center justify-between">
-                      <span className="text-[8px] font-semibold tracking-[.14em] text-black/24">
+                      <span className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                         BITLEAP / SHAPE
                       </span>
 
-                      <span className="rounded-full border border-black/[.07] px-2.5 py-1 font-mono text-[7px] text-black/29">
+                      <span className="rounded-full border border-black/[.07] px-2.5 py-1 font-mono text-[7px] text-black/55">
                         {unit}
                       </span>
                     </div>
@@ -568,7 +568,7 @@ export default function BorderRadiusGen() {
                   return (
                     <div
                       key={corner.key}
-                      className={`absolute hidden font-mono text-[8px] text-black/24 sm:block ${classes[corner.key]}`}
+                      className={`absolute hidden font-mono text-[8px] text-black/55 sm:block ${classes[corner.key]}`}
                     >
                       {corner.short} · {horizontal[corner.key]}
                       {advanced ? `/${vertical[corner.key]}` : ""}
@@ -602,7 +602,7 @@ export default function BorderRadiusGen() {
                     <b className="block text-left text-[8px] font-semibold">
                       {preset.name}
                     </b>
-                    <span className="block text-left text-[7px] text-black/25">
+                    <span className="block text-left text-[7px] text-black/55">
                       {preset.note}
                     </span>
                   </span>
@@ -700,11 +700,11 @@ export default function BorderRadiusGen() {
 
             <div className="mt-8 overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
               <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-                <span className="text-[8px] tracking-[.13em] text-white/28">
+                <span className="text-[8px] tracking-[.13em] text-white/55">
                   CSS OUTPUT
                 </span>
 
-                <span className="text-[8px] text-white/18">
+                <span className="text-[8px] text-white/55">
                   {advanced ? "ELLIPTICAL RADIUS" : "STANDARD RADIUS"}
                 </span>
               </div>
@@ -736,16 +736,16 @@ export default function BorderRadiusGen() {
 
             <div className="mt-3 overflow-hidden rounded-[20px] border border-black/[.075] bg-white/24">
               <div className="flex items-center justify-between border-b border-black/[.06] px-4 py-2.5">
-                <span className="text-[8px] tracking-[.11em] text-black/23">
+                <span className="text-[8px] tracking-[.11em] text-black/55">
                   TAILWIND
                 </span>
 
                 <button
                   type="button"
                   onClick={() => copy(tailwind, "tailwind")}
-                  className="text-[8px] font-semibold text-black/28 transition hover:text-black"
+                  className="text-[8px] font-semibold text-black/55 transition hover:text-black"
                 >
-                  {copied === "tailwind" ? "✓ COPIED" : "COPY"}
+                  {copied === "tailwind" ? "✓ 已复制" : "复制"}
                 </button>
               </div>
 
@@ -758,7 +758,7 @@ export default function BorderRadiusGen() {
 
         <section className="radius-intro mt-14 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               4 CORNERS
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -767,7 +767,7 @@ export default function BorderRadiusGen() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               ELLIPTICAL
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -776,7 +776,7 @@ export default function BorderRadiusGen() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               EXPORT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

@@ -157,7 +157,7 @@ function StatChip({
 
   return (
     <div className="rounded-2xl border border-black/[0.06] bg-white/60 px-4 py-3">
-      <div className="text-[8px] font-semibold uppercase tracking-[0.16em] text-black/25">{label}</div>
+      <div className="text-[8px] font-semibold uppercase tracking-[0.16em] text-black/55">{label}</div>
       <div className={`b64-num mt-1.5 truncate font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -360,7 +360,7 @@ export default function ImgToBase64() {
               <section className="bg-[#fbf8f1] p-4 sm:p-5 lg:p-6">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-black/28">Preview</div>
+                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-black/55">预览</div>
                     <div className="mt-1 max-w-[520px] truncate text-sm font-semibold tracking-[-0.03em] text-[#211a14]">{info?.name || "等待选择图片"}</div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -421,7 +421,7 @@ export default function ImgToBase64() {
               <section className="bg-[#171812] p-4 text-white sm:p-5 lg:p-6">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/25">Output</div>
+                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">输出</div>
                     <div className="mt-1 font-mono text-[11px] text-emerald-100/62">{dataUrl ? `${rawLength} chars · ${info?.type || "image/*"}` : "等待转换结果"}</div>
                   </div>
                   <PillButton active={wrapOutput} onClick={() => setWrapOutput(!wrapOutput)}>{wrapOutput ? "自动换行" : "横向滚动"}</PillButton>
@@ -437,13 +437,13 @@ export default function ImgToBase64() {
 
                 <div className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0f100c]">
                   <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
-                    <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/28">{OUTPUT_TABS.find((tab) => tab.key === outputMode)?.label}</span>
+                    <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">{OUTPUT_TABS.find((tab) => tab.key === outputMode)?.label}</span>
                     <button type="button" disabled={!activeOutput} onClick={() => void copy(activeOutput, outputMode)} className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] px-3 py-1.5 text-[9px] font-semibold text-white/45 transition hover:bg-white/[0.08] hover:text-white disabled:opacity-30">
                       <CopyIcon />
                       {copied === outputMode ? "已复制" : "复制"}
                     </button>
                   </div>
-                  <textarea readOnly value={activeOutput || ""} onClick={(event) => event.currentTarget.select()} className={`b64-dark-scroll h-[486px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-5 text-emerald-100/78 outline-none placeholder:text-white/18 ${wrapOutput ? "whitespace-pre-wrap" : "whitespace-pre"}`} placeholder="转换后将在这里显示可复制内容…" />
+                  <textarea readOnly value={activeOutput || ""} onClick={(event) => event.currentTarget.select()} className={`b64-dark-scroll h-[486px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-5 text-emerald-100/78 outline-none placeholder:text-white/55 ${wrapOutput ? "whitespace-pre-wrap" : "whitespace-pre"}`} placeholder="转换后将在这里显示可复制内容…" />
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -456,7 +456,7 @@ export default function ImgToBase64() {
                 </div>
 
                 <div className="mt-5 rounded-[24px] border border-white/[0.08] bg-white/[0.045] p-4 text-[11px] leading-6 text-white/34">
-                  <div className="mb-2 text-[8px] font-semibold uppercase tracking-[0.18em] text-white/22">Note</div>
+                  <div className="mb-2 text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">说明</div>
                   Base64 更适合小图标、占位图、邮件模板和少量内联资源。大图内联会增加文档体积，也不利于浏览器缓存复用。
                 </div>
               </section>
@@ -467,17 +467,17 @@ export default function ImgToBase64() {
         <section className="b64-enter mt-8 grid gap-4 md:grid-cols-3">
           <div className="rounded-[26px] border border-black/[0.06] bg-white/38 p-5 backdrop-blur-xl">
             <div className="b64-line h-px w-16 bg-black/18" />
-            <div className="mt-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-black/25">Data URL</div>
+            <div className="mt-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-black/55">Data URL</div>
             <p className="mt-2 text-[10px] leading-5 text-black/36">带有 MIME 前缀，适合直接放进 img src、CSS url 或 JSON 配置。</p>
           </div>
           <div className="rounded-[26px] border border-black/[0.06] bg-white/38 p-5 backdrop-blur-xl">
             <div className="b64-line h-px w-16 bg-black/18" />
-            <div className="mt-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-black/25">Raw Base64</div>
+            <div className="mt-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-black/55">Raw Base64</div>
             <p className="mt-2 text-[10px] leading-5 text-black/36">只保留逗号后的编码正文，适合接口字段、数据库字段或后端处理。</p>
           </div>
           <div className="rounded-[26px] border border-black/[0.06] bg-white/38 p-5 backdrop-blur-xl">
             <div className="b64-line h-px w-16 bg-black/18" />
-            <div className="mt-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-black/25">Local only</div>
+            <div className="mt-4 text-[9px] font-semibold uppercase tracking-[0.16em] text-black/55">仅本地</div>
             <p className="mt-2 text-[10px] leading-5 text-black/36">读取、预览和转换都在当前浏览器完成，不会上传图片。</p>
           </div>
         </section>

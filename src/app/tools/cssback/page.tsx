@@ -365,10 +365,16 @@ export default function Page() {
       </div>
 
       {/* ===== 前景文字 ===== */}
-      <div className="relative z-10 flex items-center justify-center w-full h-full pointer-events-none select-none">
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-5 pointer-events-none select-none">
+        <div className="rounded-full border border-white/25 bg-black/25 px-4 py-1.5 text-[12px] tracking-[0.2em] text-white/85">
+          气泡流体背景 · 可下载 HTML
+        </div>
         <h1 className="text-white text-6xl md:text-8xl lg:text-9xl font-bold opacity-80 drop-shadow-sm">
         Bubbles
         </h1>
+        <p className="max-w-md px-6 text-center text-[13px] leading-6 text-white/75">
+          一层缓慢流动的气泡背景。点右下角「下载背景 HTML」，即可拿走一个能直接嵌进网页的成品。
+        </p>
       </div>
 
       {/* ===== 下载按钮 ===== */}

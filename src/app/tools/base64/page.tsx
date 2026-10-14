@@ -242,14 +242,14 @@ export default function Base64Page() {
       <div className="relative z-10 mx-auto max-w-[1500px] px-5 pb-10 pt-6 sm:px-8">
         <div className="b64-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-white/23 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-white/55 sm:block">
             BASE64 STUDIO · UTF-8 SAFE
           </div>
         </div>
 
         <header className="b64-intro mt-11 grid gap-7 border-b border-white/[.08] pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-white/25">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-white/55">
               BASE64 ENCODE / DECODE
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.8vw,96px)] font-semibold leading-[.9] tracking-[-.073em]">
@@ -331,11 +331,11 @@ export default function Base64Page() {
             <div className="flex h-12 items-center justify-between border-b border-white/[.06] px-5">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-[#7d9a86]" />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/26">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                   {mode === "encode" ? "UTF-8 TEXT" : variant === "standard" ? "BASE64 INPUT" : "BASE64 URL INPUT"}
                 </span>
               </div>
-              <span className="b64-num text-[8px] text-white/20">
+              <span className="b64-num text-[8px] text-white/55">
                 {stats.inputChars} chars · {stats.inputBytes} bytes
               </span>
             </div>
@@ -352,7 +352,7 @@ export default function Base64Page() {
                     ? "输入 Base64 字符串…"
                     : "输入 Base64 URL 字符串…"
               }
-              className="b64-scroll block h-[440px] w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#e4e3dc] outline-none placeholder:text-white/14 sm:p-6"
+              className="b64-scroll block h-[440px] w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#e4e3dc] outline-none placeholder:text-white/55 sm:p-6"
             />
           </div>
 
@@ -360,12 +360,12 @@ export default function Base64Page() {
             <div className="flex h-12 items-center justify-between border-b border-white/[.06] px-5">
               <div className="flex items-center gap-2">
                 <span className={`h-2 w-2 rounded-full ${conversion.error ? "bg-[#c76e59]" : output ? "bg-[#c5a56b]" : "bg-white/20"}`} />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/26">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                   {mode === "encode" ? "BASE64 OUTPUT" : "UTF-8 OUTPUT"}
                 </span>
               </div>
 
-              <span className="b64-num text-[8px] text-white/20">
+              <span className="b64-num text-[8px] text-white/55">
                 {output ? `${stats.outputChars} chars` : "WAITING"}
               </span>
             </div>
@@ -390,7 +390,7 @@ export default function Base64Page() {
                   {output}
                 </div>
               ) : (
-                <div className="grid h-full place-items-center text-[9px] tracking-[.12em] text-white/16">
+                <div className="grid h-full place-items-center text-[9px] tracking-[.12em] text-white/55">
                   OUTPUT WILL APPEAR HERE
                 </div>
               )}
@@ -434,7 +434,7 @@ export default function Base64Page() {
           </div>
 
           {output && (
-            <div className="b64-num text-[8px] text-white/22">
+            <div className="b64-num text-[8px] text-white/55">
               {mode === "encode"
                 ? `输出约为输入字节的 ${stats.ratio.toFixed(2)}×`
                 : `${stats.inputChars} → ${stats.outputChars} chars`}
@@ -444,7 +444,7 @@ export default function Base64Page() {
 
         <section className="b64-intro mt-10 grid gap-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-white/22">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-white/55">
               UTF-8 CORRECT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-white/30">
@@ -453,7 +453,7 @@ export default function Base64Page() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-white/22">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-white/55">
               BASE64 URL
             </div>
             <p className="mt-2 text-[9px] leading-5 text-white/30">
@@ -462,7 +462,7 @@ export default function Base64Page() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-white/22">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-white/55">
               LOCAL ONLY
             </div>
             <p className="mt-2 text-[9px] leading-5 text-white/30">

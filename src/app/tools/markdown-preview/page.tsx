@@ -446,14 +446,14 @@ export default function MarkdownPreviewPage() {
       <div className="relative z-10 mx-auto max-w-[1560px] px-5 pb-10 pt-6 sm:px-8">
         <div className="md-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">
             MARKDOWN STUDIO · LOCAL PREVIEW
           </div>
         </div>
 
         <header className="md-intro mt-10 grid gap-7 border-b border-black/10 pb-7 lg:grid-cols-[1fr_.74fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               MARKDOWN PREVIEW
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(46px,6.4vw,92px)] font-semibold leading-[.9] tracking-[-.073em]">
@@ -468,7 +468,7 @@ export default function MarkdownPreviewPage() {
               实时渲染、HTML 净化、本地草稿、格式工具栏与导出都放在同一个工作区。输入不会发送到服务器。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/26">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{stats.lines} 行</span>
               <span>{stats.words} 字 / 词</span>
               <span>{stats.chars} 字符</span>
@@ -544,12 +544,12 @@ export default function MarkdownPreviewPage() {
               <div className="flex h-12 items-center justify-between border-b border-black/[.07] px-4 sm:px-5">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-[#52685d]" />
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/28">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     MARKDOWN
                   </span>
                 </div>
 
-                <span className="text-[8px] text-black/22">
+                <span className="text-[8px] text-black/55">
                   自动保存 · {savedText}
                 </span>
               </div>
@@ -560,7 +560,7 @@ export default function MarkdownPreviewPage() {
                 onChange={(event) => setMd(event.target.value)}
                 spellCheck={false}
                 placeholder="开始输入 Markdown…"
-                className={`md-scroll block w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/18 sm:p-6 ${
+                className={`md-scroll block w-full resize-none bg-transparent p-5 font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6 ${
                   viewMode === "split"
                     ? "h-[620px]"
                     : "h-[720px] lg:h-[760px]"
@@ -574,12 +574,12 @@ export default function MarkdownPreviewPage() {
               <div className="flex h-12 items-center justify-between border-b border-black/[.07] px-4 sm:px-5">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-[#b28d48]" />
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/28">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     PREVIEW
                   </span>
                 </div>
 
-                <span className="text-[8px] text-black/22">
+                <span className="text-[8px] text-black/55">
                   SANITIZED HTML
                 </span>
               </div>
@@ -659,7 +659,7 @@ export default function MarkdownPreviewPage() {
 
         <section className="md-intro mt-9 grid gap-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LIVE
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -668,7 +668,7 @@ export default function MarkdownPreviewPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               SAFE OUTPUT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -677,7 +677,7 @@ export default function MarkdownPreviewPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LOCAL DRAFT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

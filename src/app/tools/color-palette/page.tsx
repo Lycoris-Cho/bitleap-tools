@@ -567,7 +567,7 @@ export default function ColorPalettePage() {
                         aria-label={`复制 ${color}`}
                       >
                         <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-2 py-1 font-mono text-[8px] text-white opacity-0 backdrop-blur transition group-hover/color:opacity-100">
-                          {copiedKey === `color-${palette.name}-${color}` ? 'COPIED' : color}
+                          {copiedKey === `color-${palette.name}-${color}` ? '已复制' : color}
                         </span>
                       </button>
                     ))}

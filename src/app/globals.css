@@ -396,3 +396,114 @@ body::-webkit-scrollbar-corner {
 @media (prefers-reduced-motion: reduce) {
   .gpt-caret { animation: none !important; }
 }
+
+/* =========================================================
+   全站最小可读字号
+   ---------------------------------------------------------
+   工具页里大量把「按钮 / 表单标签 / 说明文字 / 错误提示」写成 7–10px，
+   再叠上 20–30% 的透明度，实际就是看不清。这里给全站立一个字号下限：
+   凡是 Tailwind 的 text-[7px] ~ text-[10px]，一律抬到 11px。
+
+   这段规则写在所有 @layer 之外，所以优先于 Tailwind 的 utilities 层，
+   不需要 !important 也不会和别处打架。只改字号，颜色的透明度仍由各页自己控制。
+   ========================================================= */
+[class*="text-[7px]"],
+[class*="text-[8px]"],
+[class*="text-[9px]"],
+[class*="text-[10px]"] {
+  font-size: 11px;
+}
+
+/* =========================================================
+   首页：入场与滚动动画（纯 CSS 版）
+   ---------------------------------------------------------
+   原先首页用 gsap + ScrollTrigger 做入场和卡片滚动出现，这会让每个访问者
+   多下载几十 KB 的 JS 并等待水合。下面用 @keyframes 复刻同样的观感：
+   - 首屏元素用一次性的进入动画（带延迟，形成错落）；
+   - 列表区与卡片用 scroll-driven animation（animation-timeline: view()），
+     滚动到视口内才出现、滚出去会回退，与原来的 toggleActions 行为一致。
+   - 浏览器不支持 animation-timeline 时，动画退化为「加载时播放一次」，
+     观感仍然正常；开启「减少动态效果」时全部不动、直接显示。
+   ========================================================= */
+@keyframes bl-rise {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes bl-rise-big {
+  from { opacity: 0; transform: translate3d(0, 48px, 0) rotate(1.2deg); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes bl-figure {
+  from { opacity: 0; transform: translate3d(0, 56px, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes bl-orb-a {
+  from { transform: none; }
+  to { transform: translate3d(44px, 28px, 0); }
+}
+@keyframes bl-orb-b {
+  from { transform: none; }
+  to { transform: translate3d(-40px, 48px, 0); }
+}
+@keyframes bl-orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes bl-float {
+  0%, 100% { transform: none; }
+  50% { transform: translate3d(0, -10px, 0); }
+}
+@keyframes bl-reveal {
+  from { opacity: 0; transform: translate3d(var(--bl-dx, 0), 48px, 0) rotate(var(--bl-rot, 0deg)); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-kicker { animation: bl-rise 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .home-title-line { animation: bl-rise-big 0.78s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .home-copy { animation: bl-rise 0.48s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both; }
+  .home-search { animation: bl-rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both; }
+  .home-stat { animation: bl-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.72s both; }
+  .home-figure { animation: bl-figure 1.15s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  .home-orb-a { animation: bl-orb-a 15s ease-in-out infinite alternate; }
+  .home-orb-b { animation: bl-orb-b 19s ease-in-out infinite alternate; }
+  .home-orbit { animation: bl-orbit 42s linear infinite; }
+  .home-figure-float { animation: bl-float 9s ease-in-out 1.6s infinite; }
+
+  .section-reveal {
+    animation: bl-reveal 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 6% cover 26%;
+  }
+  .tool-card-shell {
+    --bl-dx: -14px;
+    --bl-rot: -0.6deg;
+    animation: bl-reveal 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 2% cover 22%;
+  }
+  .tool-card-shell:nth-child(even) {
+    --bl-dx: 14px;
+    --bl-rot: 0.6deg;
+  }
+}
+
+/* 收藏星标（由 HomeUtils 切换 is-fav） */
+.card-fav {
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: #d4d4d8;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.card-fav:hover { color: #f59e0b; transform: scale(1.12); }
+.card-fav.is-fav { color: #f59e0b; }
+
+/* 侧栏「当前分类」高亮（HomeUtils 的滚动高亮写入） */
+[data-cat-link].is-current {
+  background: #fff;
+  color: #18181b;
+  box-shadow: 0 14px 35px -28px rgba(0, 0, 0, 0.35);
+}
+[data-cat-link].is-current .cat-dot { background: #8b5cf6; }

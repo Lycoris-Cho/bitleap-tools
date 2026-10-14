@@ -311,7 +311,7 @@ function HighlightedText({
 }) {
   if (!text) {
     return (
-      <span className="text-white/16">
+      <span className="text-white/55">
         Match preview will appear here.
       </span>
     )
@@ -838,7 +838,7 @@ export default function RegexTestPage() {
 
         <header className="regex-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               REGEX WORKBENCH
             </div>
 
@@ -854,7 +854,7 @@ export default function RegexTestPage() {
               编写 JavaScript 正则表达式，实时查看匹配位置、捕获组与替换结果。正则执行放在独立线程，并带超时保护。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>JAVASCRIPT REGEXP</span>
               <span>LOCAL ONLY</span>
               <span>WORKER SAFE</span>
@@ -866,12 +866,12 @@ export default function RegexTestPage() {
         <section className="regex-intro mt-7">
           <div className="flex flex-col gap-4 border-b border-black/10 pb-5 xl:flex-row xl:items-end">
             <div className="min-w-0 flex-1">
-              <label className="mb-2 block text-[8px] font-semibold tracking-[.13em] text-black/25">
+              <label className="mb-2 block text-[8px] font-semibold tracking-[.13em] text-black/55">
                 PATTERN
               </label>
 
               <div className="flex min-h-12 items-center overflow-hidden rounded-full border border-black/[.085] bg-white/32 px-4 transition focus-within:border-black/20 focus-within:bg-white/48">
-                <span className="select-none font-mono text-[18px] text-black/18">
+                <span className="select-none font-mono text-[18px] text-black/55">
                   /
                 </span>
 
@@ -890,11 +890,11 @@ export default function RegexTestPage() {
                     }
                   }}
                   spellCheck={false}
-                  className="min-w-0 flex-1 bg-transparent px-2 font-mono text-[13px] text-black/72 outline-none placeholder:text-black/16"
+                  className="min-w-0 flex-1 bg-transparent px-2 font-mono text-[13px] text-black/72 outline-none placeholder:text-black/55"
                   placeholder="\\d+"
                 />
 
-                <span className="select-none font-mono text-[18px] text-black/18">
+                <span className="select-none font-mono text-[18px] text-black/55">
                   /
                 </span>
 
@@ -905,7 +905,7 @@ export default function RegexTestPage() {
             </div>
 
             <div>
-              <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/25">
+              <div className="mb-2 text-[8px] font-semibold tracking-[.13em] text-black/55">
                 FLAGS
               </div>
 
@@ -960,7 +960,7 @@ export default function RegexTestPage() {
                 <span className="text-[8px] font-semibold text-black/46">
                   {preset.name}
                 </span>
-                <span className="font-mono text-[7px] text-black/20">
+                <span className="font-mono text-[7px] text-black/55">
                   {preset.note}
                 </span>
               </button>
@@ -969,7 +969,7 @@ export default function RegexTestPage() {
             <button
               type="button"
               onClick={() => copy(regexLiteral, "regex")}
-              className="ml-auto rounded-full px-3 py-2.5 text-[8px] font-semibold text-black/28 transition hover:bg-white/45 hover:text-black"
+              className="ml-auto rounded-full px-3 py-2.5 text-[8px] font-semibold text-black/55 transition hover:bg-white/45 hover:text-black"
             >
               {copied === "regex"
                 ? "✓ 已复制表达式"
@@ -992,12 +992,12 @@ export default function RegexTestPage() {
                         : "bg-[#52685d]"
                   }`}
                 />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   TEST TEXT
                 </span>
               </div>
 
-              <span className="regex-num font-mono text-[8px] text-black/22">
+              <span className="regex-num font-mono text-[8px] text-black/55">
                 {humanNumber(text.length)} chars
               </span>
             </div>
@@ -1018,7 +1018,7 @@ export default function RegexTestPage() {
               }}
               spellCheck={false}
               placeholder="输入或粘贴待测试文本…"
-              className="regex-scroll block h-[470px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+              className="regex-scroll block h-[470px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
             />
           </div>
 
@@ -1036,12 +1036,12 @@ export default function RegexTestPage() {
                   }`}
                 />
 
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                   MATCH PREVIEW
                 </span>
               </div>
 
-              <span className="regex-num font-mono text-[8px] text-white/18">
+              <span className="regex-num font-mono text-[8px] text-white/55">
                 {statusLabel}
               </span>
             </div>
@@ -1071,7 +1071,7 @@ export default function RegexTestPage() {
                     </p>
 
                     {status === "timeout" && (
-                      <p className="mt-5 text-[9px] leading-5 text-white/27">
+                      <p className="mt-5 text-[9px] leading-5 text-white/55">
                         可以尝试减少嵌套量词、避免模糊的重复分支，或缩小测试文本。
                       </p>
                     )}
@@ -1102,7 +1102,7 @@ export default function RegexTestPage() {
               key={label}
               className="bg-[#f3f0e8] p-4"
             >
-              <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+              <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
                 {label}
               </div>
 
@@ -1128,7 +1128,7 @@ export default function RegexTestPage() {
           <div>
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                   MATCH INSPECTOR
                 </div>
 
@@ -1165,10 +1165,10 @@ export default function RegexTestPage() {
             <div className="regex-scroll mt-4 max-h-[490px] overflow-auto border-y border-black/[.065]">
               {!matches.length ? (
                 <div className="py-16 text-center">
-                  <div className="text-[8px] tracking-[.14em] text-black/20">
+                  <div className="text-[8px] tracking-[.14em] text-black/55">
                     NO MATCHES
                   </div>
-                  <p className="mt-3 text-[9px] text-black/26">
+                  <p className="mt-3 text-[9px] text-black/55">
                     修改表达式或测试文本后查看结果。
                   </p>
                 </div>
@@ -1187,14 +1187,14 @@ export default function RegexTestPage() {
                       key={`${match.index}-${match.end}-${index}`}
                       className="grid gap-3 border-b border-black/[.06] py-4 last:border-b-0 sm:grid-cols-[60px_1fr_auto]"
                     >
-                      <div className="font-mono text-[8px] text-black/23">
+                      <div className="font-mono text-[8px] text-black/55">
                         #{String(index + 1).padStart(2, "0")}
                       </div>
 
                       <div className="min-w-0">
                         <div className="whitespace-pre-wrap break-all font-mono text-[11px] leading-5 text-black/68">
                           {match.full || (
-                            <span className="italic text-black/27">
+                            <span className="italic text-black/55">
                               zero-width match
                             </span>
                           )}
@@ -1230,7 +1230,7 @@ export default function RegexTestPage() {
                         )}
                       </div>
 
-                      <div className="regex-num flex gap-3 whitespace-nowrap font-mono text-[7px] text-black/22">
+                      <div className="regex-num flex gap-3 whitespace-nowrap font-mono text-[7px] text-black/55">
                         <span>
                           L{position.line}:C
                           {position.column}
@@ -1254,7 +1254,7 @@ export default function RegexTestPage() {
 
           <div>
             <div className="border-b border-black/10 pb-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 REPLACE LAB
               </div>
 
@@ -1264,7 +1264,7 @@ export default function RegexTestPage() {
             </div>
 
             <div className="mt-5">
-              <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+              <label className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                 REPLACEMENT
               </label>
 
@@ -1278,7 +1278,7 @@ export default function RegexTestPage() {
                 placeholder="例如：[$&]、$1、$<name>"
               />
 
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[7px] text-black/23">
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[7px] text-black/55">
                 <span>$& = 整个匹配</span>
                 <span>$1 = 捕获组</span>
                 <span>$` / $' = 前后文本</span>
@@ -1288,7 +1288,7 @@ export default function RegexTestPage() {
 
             <div className="mt-6 overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
               <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-                <span className="text-[8px] tracking-[.13em] text-white/25">
+                <span className="text-[8px] tracking-[.13em] text-white/55">
                   REPLACEMENT PREVIEW
                 </span>
 
@@ -1301,11 +1301,11 @@ export default function RegexTestPage() {
                     )
                   }
                   disabled={!replacementOutput}
-                  className="text-[8px] font-semibold text-white/26 transition hover:text-white disabled:opacity-20"
+                  className="text-[8px] font-semibold text-white/55 transition hover:text-white disabled:opacity-20"
                 >
                   {copied === "replacement"
-                    ? "✓ COPIED"
-                    : "COPY"}
+                    ? "✓ 已复制"
+                    : "复制"}
                 </button>
               </div>
 
@@ -1315,7 +1315,7 @@ export default function RegexTestPage() {
             </div>
 
             <div className="mt-5 rounded-[20px] border border-black/[.075] bg-white/22 p-4">
-              <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">
                 CURRENT REGEX
               </div>
 
@@ -1328,7 +1328,7 @@ export default function RegexTestPage() {
 
         <section className="regex-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               INSPECT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1337,7 +1337,7 @@ export default function RegexTestPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               SAFE RUN
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1346,7 +1346,7 @@ export default function RegexTestPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               REPLACE
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

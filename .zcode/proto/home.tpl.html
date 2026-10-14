@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BitLeap · 工具站（首页改造原型）</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --ink:#151515; --bg:#f7f7f5; --line:rgba(0,0,0,.07); --mut:#71717a; --faint:#a1a1aa;
+  --violet:#8b5cf6; --sky:#0ea5e9; --amber:#f59e0b;
+}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--ink);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+button{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+.hide{display:none !important}
+
+/* 背景与站娘 */
+.orbs{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.orbs i{position:absolute;border-radius:50%;filter:blur(150px)}
+.orbs i:nth-child(1){left:-18rem;top:-18rem;width:44rem;height:44rem;background:rgba(196,181,253,.30)}
+.orbs i:nth-child(2){right:-18rem;top:12%;width:42rem;height:42rem;background:rgba(186,230,253,.28)}
+.orbs i:nth-child(3){bottom:-18rem;left:30%;width:38rem;height:38rem;background:rgba(254,215,170,.35)}
+.figure{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.figure i{
+  position:absolute;right:-3%;bottom:0;height:76%;aspect-ratio:1696/2560;
+  background:url(/image/BitLeap-l.png) bottom right/contain no-repeat;
+  opacity:.15;
+  -webkit-mask-image:linear-gradient(180deg,#000 0 55%,transparent 92%);
+  mask-image:linear-gradient(180deg,#000 0 55%,transparent 92%);
+}
+
+/* 顶栏 */
+header{
+  position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;
+  padding:0 18px;border-bottom:1px solid var(--line);
+  background:rgba(247,247,245,.82);backdrop-filter:blur(14px) saturate(140%);
+}
+header .logo{font-weight:650;letter-spacing:-.04em;font-size:16px}
+header .logo em{font-style:normal;color:var(--faint);font-weight:400}
+header nav{margin-left:auto;display:flex;gap:4px}
+header nav a{padding:7px 12px;border-radius:999px;color:var(--mut);font-size:12.5px}
+header nav a:hover,header nav a.on{background:#fff;color:var(--ink);box-shadow:0 8px 22px -18px rgba(0,0,0,.4)}
+
+/* 桌面侧栏 */
+aside{
+  position:fixed;left:0;top:56px;bottom:0;width:208px;z-index:30;
+  padding:22px 12px 16px;border-right:1px solid var(--line);
+  background:rgba(247,247,245,.86);backdrop-filter:blur(14px);overflow:auto;
+}
+aside .cap{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--faint);padding:0 8px 10px}
+aside a{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:14px;
+  color:var(--mut);font-size:13px;transition:.2s;
+}
+aside a .n{font-size:9px;color:#d4d4d8;font-variant-numeric:tabular-nums}
+aside a .d{width:6px;height:6px;border-radius:50%;background:#e4e4e7;transition:.2s}
+aside a:hover{background:#fff;color:var(--ink)}
+aside a.on{background:#fff;color:var(--ink);box-shadow:0 14px 34px -30px rgba(0,0,0,.5)}
+aside a.on .d{background:var(--violet)}
+aside .cnt{margin-left:auto;font-size:10px;color:var(--faint)}
+main{position:relative;z-index:10;padding:18px 14px 90px}
+@media(min-width:900px){ main{margin-left:208px} }
+@media(max-width:899px){ aside{display:none} }
+
+/* Hero */
+.hero{
+  position:relative;overflow:hidden;border:1px solid var(--line);background:#fff;
+  border-radius:34px 14px 34px 34px;padding:18px 20px 16px;
+  box-shadow:0 36px 110px -78px rgba(20,20,30,.3);
+}
+.hero .glow{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.hero .glow i{position:absolute;border-radius:50%;filter:blur(90px)}
+.hero .glow i:nth-child(1){right:-9rem;top:-11rem;width:30rem;height:30rem;background:rgba(237,233,254,.9)}
+.hero .glow i:nth-child(2){bottom:-13rem;left:18%;width:26rem;height:26rem;background:rgba(224,242,254,.85)}
+.hero .kick{position:relative;display:flex;align-items:center;gap:14px;font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--faint)}
+.hero .kick .dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 0 4px rgba(16,185,129,.15)}
+.hero h1{
+  position:relative;margin:10px 0 0;font-size:clamp(1.9rem,3.4vw,2.9rem);font-weight:550;
+  letter-spacing:-.05em;line-height:1.05;
+}
+.hero h1 span{background:linear-gradient(90deg,#8b5cf6,#e879f9 45%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{position:relative;margin:8px 0 0;color:var(--mut);font-size:12.5px;max-width:560px}
+.stats{position:relative;display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
+.stats b{display:block;font-size:19px;font-weight:550;letter-spacing:-.05em}
+.stats span{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+
+/* 搜索 */
+.searchwrap{position:relative;margin-top:14px;max-width:760px;z-index:35}
+.search{
+  display:flex;align-items:center;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.94);
+  border-radius:24px 10px 24px 24px;padding:6px;backdrop-filter:blur(12px);
+  box-shadow:0 24px 70px -48px rgba(15,23,42,.45);transition:.25s;
+}
+.search:focus-within{border-color:#ddd6fe;box-shadow:0 28px 80px -44px rgba(124,58,237,.32)}
+.search .mag{margin:0 10px;color:var(--faint);flex:0 0 auto}
+.search input{flex:1;min-width:0;height:42px;border:0;outline:none;background:transparent;font-size:15px}
+.search input::placeholder{color:#d4d4d8}
+.search kbd{font:inherit;font-size:10px;color:var(--faint);border:1px solid var(--line);background:#fafafa;border-radius:8px;padding:5px 7px;margin-right:6px}
+.search .cnt{font-size:11px;color:var(--faint);margin-right:10px;white-space:nowrap}
+.search .clr{width:34px;height:34px;border:0;border-radius:50%;background:#f4f4f5;color:var(--faint);cursor:pointer}
+.search .clr:hover{background:#151515;color:#fff}
+
+.drop{
+  position:absolute;left:0;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--line);
+  border-radius:20px;box-shadow:0 34px 80px -46px rgba(15,23,42,.5);overflow:hidden;max-height:min(60vh,430px);overflow-y:auto;
+}
+.drop .lbl{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);padding:12px 14px 6px}
+.drop .row{display:flex;align-items:center;gap:11px;padding:9px 13px;cursor:pointer;border-radius:12px;margin:0 5px}
+.drop .row:hover,.drop .row.act{background:#f6f4ff}
+.drop .row .ic{width:28px;height:28px;border-radius:9px;background:#f4f4f5;display:grid;place-items:center;color:#52525b;flex:0 0 auto}
+.drop .row .ic svg{width:15px;height:15px}
+.drop .row .tx{min-width:0;flex:1}
+.drop .row .tx b{display:block;font-size:13px;font-weight:550;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drop .row .tx i{display:block;font-style:normal;font-size:11px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drop .row .tag{font-size:9px;color:var(--violet);background:#f5f3ff;border-radius:6px;padding:3px 6px;flex:0 0 auto}
+.drop .row .go{font-size:10px;color:var(--faint);flex:0 0 auto}
+.drop .chips{display:flex;flex-wrap:wrap;gap:6px;padding:2px 13px 14px}
+.drop .chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-size:11.5px;color:var(--mut);cursor:pointer}
+.drop .chips button:hover{border-color:#ddd6fe;background:#f5f3ff;color:#6d28d9}
+.drop .empty{padding:10px 16px 16px;font-size:12.5px;color:var(--mut)}
+mark{background:#fde68a;color:inherit;border-radius:3px;padding:0 1px}
+
+/* 常用 / 最近 */
+.quick{margin-top:16px}
+.quick .hd{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 9px}
+.quick .hd b{font-size:13px;font-weight:600;letter-spacing:-.02em}
+.quick .hd span{font-size:10px;color:var(--faint)}
+.quick .row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.quick .row::-webkit-scrollbar{display:none}
+.qcard{
+  flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:9px 13px 9px 10px;border:1px solid var(--line);
+  background:#fff;border-radius:16px;cursor:pointer;box-shadow:0 18px 44px -40px rgba(0,0,0,.4);transition:.18s;
+}
+.qcard:hover{transform:translateY(-2px);border-color:#ddd6fe}
+.qcard .ic{width:26px;height:26px;border-radius:8px;background:#f4f4f5;display:grid;place-items:center;color:#52525b}
+.qcard .ic svg{width:14px;height:14px}
+.qcard b{font-size:12.5px;font-weight:550;white-space:nowrap}
+
+/* 分类 chips */
+.chipbar{
+  position:sticky;top:56px;z-index:32;margin:16px -14px 0;padding:10px 14px;
+  background:rgba(247,247,245,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+}
+.chipbar .in{display:flex;align-items:center;gap:7px;overflow-x:auto;scrollbar-width:none}
+.chipbar .in::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;
+  font-size:12px;color:var(--mut);cursor:pointer;display:flex;gap:7px;align-items:center;transition:.16s;
+}
+.chip i{font-style:normal;font-size:9.5px;color:var(--faint)}
+.chip:hover{border-color:#ddd6fe;color:#6d28d9}
+.chip.on{background:#151515;border-color:#151515;color:#fff}
+.chip.on i{color:rgba(255,255,255,.55)}
+.chipbar .tools{margin-left:auto;display:flex;gap:6px;flex:0 0 auto;padding-left:8px}
+.chipbar .tools button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-size:11.5px;color:var(--mut);cursor:pointer;white-space:nowrap}
+.chipbar .tools button:hover{border-color:#ddd6fe;color:#6d28d9}
+
+/* 列表 */
+.sec{margin-top:26px}
+.sec > .hd{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+.sec > .hd .n{font-size:9px;letter-spacing:.24em;color:var(--violet)}
+.sec > .hd h2{margin:6px 0 0;font-size:22px;font-weight:550;letter-spacing:-.04em}
+.sec > .hd .m{font-size:11.5px;color:var(--faint)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(178px,1fr))}
+.card{
+  position:relative;border:1px solid var(--line);background:#fff;border-radius:20px;padding:10px;
+  box-shadow:0 18px 55px -48px rgba(15,23,42,.5);transition:transform .22s,box-shadow .22s,border-color .22s;
+}
+.card:hover{transform:translateY(-3px);box-shadow:0 30px 70px -48px rgba(15,23,42,.6);border-color:#e9e9ff}
+.card-link{position:absolute;inset:0;z-index:1;border-radius:20px}
+.card-top{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.icon-tile{width:34px;height:34px;border-radius:11px;background:#f4f4f5;display:grid;place-items:center;color:#52525b;transition:.2s}
+.icon-tile svg{width:17px;height:17px}
+.card:hover .icon-tile{transform:rotate(-4deg) scale(1.06)}
+.card.v0 .icon-tile{background:#f5f3ff;color:#7c3aed}
+.card.v1 .icon-tile{background:#f0f9ff;color:#0284c7}
+.card.v2 .icon-tile{background:#fff7ed;color:#ea580c}
+.card.v3 .icon-tile{background:#ecfdf5;color:#059669}
+.thumb{width:100%;height:70px;border-radius:13px;overflow:hidden;position:relative;border:1px solid var(--line);display:grid;place-items:center;background-size:cover}
+.thumb > *{grid-area:1/1}
+.badge{position:absolute;right:0;top:0;font-size:8.5px;letter-spacing:.12em;font-weight:600;color:#7c3aed;background:#f5f3ff;border:1px solid #ede9fe;border-radius:999px;padding:3px 7px;z-index:2}
+.card h3{margin:9px 0 0;font-size:13.5px;font-weight:600;letter-spacing:-.02em}
+.card p{margin:5px 0 0;font-size:10.5px;line-height:1.5;color:var(--mut);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:31px}
+.card-foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:9px;padding-top:8px}
+.card-foot .cat{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-foot .sp{margin-left:auto}
+.fav{position:relative;z-index:2;width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:50%;cursor:pointer;color:#d4d4d8;font-size:12px;line-height:1}
+.fav:hover{color:#f59e0b;border-color:#fde68a}
+.fav.on{color:#f59e0b;border-color:#fde68a;background:#fffbeb}
+.empty-card{border:1px solid var(--line);background:#fff;border-radius:34px 14px 34px 34px;padding:44px 26px;text-align:center}
+.empty-card b{display:block;font-size:20px;font-weight:550;letter-spacing:-.03em}
+.empty-card p{margin:8px 0 16px;color:var(--mut);font-size:12.5px}
+.empty-card .sug{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.empty-card .sug button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-size:12px;color:var(--mut);cursor:pointer}
+.cta{margin-top:52px;border-radius:44px 16px 44px 44px;background:#171717;color:#fff;padding:40px 34px;position:relative;overflow:hidden}
+.cta h2{margin:10px 0 0;font-size:clamp(1.6rem,3.4vw,2.6rem);font-weight:550;letter-spacing:-.05em;line-height:1.1}
+.cta h2 span{color:#71717a}
+.cta p{color:#a1a1aa;font-size:12.5px;max-width:520px;margin:16px 0 0}
+.cta .glow i{position:absolute;border-radius:50%;filter:blur(90px)}
+.cta .glow i:nth-child(1){right:-7rem;top:-7rem;width:24rem;height:24rem;background:rgba(139,92,246,.22)}
+.cta .glow i:nth-child(2){bottom:-10rem;left:20%;width:20rem;height:20rem;background:rgba(14,165,233,.1)}
+
+/* 缩略图里的小道具 */
+.mini-card{width:56%;height:38%;border-radius:8px;background:#fff;box-shadow:0 14px 30px -10px rgba(30,41,59,.45)}
+.mini-blob{width:52%;height:56%;background:conic-gradient(from 40deg,#a5b4fc,#fbcfe8,#bae6fd,#a5b4fc);border-radius:14px 34px 12px 30px}
+.mini-glass{width:62%;height:60%;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border:1px solid rgba(255,255,255,.7);box-shadow:0 12px 30px -12px rgba(0,0,0,.35)}
+.mini-dots{display:flex;gap:7px}
+.mini-dots i{width:15px;height:15px;border-radius:50%;display:block}
+.mini-swatches{display:flex;height:56%;width:76%;border-radius:9px;overflow:hidden}
+.mini-swatches i{flex:1;display:block}
+.mini-text{font-weight:700;font-size:21px;color:#312e81;text-shadow:2px 3px 0 #c7d2fe}
+.mini-move{width:11px;height:11px;border-radius:50%;background:#8b5cf6;box-shadow:0 0 16px #8b5cf6}
+.mini-spin{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff}
+.mini-clip{width:60%;height:60%;background:linear-gradient(135deg,#fda4af,#a78bfa);clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)}
+.mini-rot{width:34%;height:52%;background:linear-gradient(135deg,#fdba74,#f472b6);border-radius:7px;transform:rotate(-18deg)}
+.mini-btn{font-size:10px;font-weight:600;color:#fff;background:linear-gradient(135deg,#8b5cf6,#ec4899);border-radius:999px;padding:6px 12px}
+</style>
+</head>
+<body>
+<div class="orbs"><i></i><i></i><i></i></div>
+<div class="figure"><i></i></div>
+
+<header>
+  <div class="logo">BitLeap <em>/ 工具站</em></div>
+  <nav>
+    <a class="on" href="/">工具站</a>
+    <a href="/community">BL社区</a>
+    <a href="/about">关于</a>
+  </nav>
+</header>
+
+<aside id="side">
+  <div class="cap">工具目录 · <span id="sideCount">0</span></div>
+  <div id="sideList"></div>
+</aside>
+
+<main>
+  <section class="hero">
+    <div class="glow"><i></i><i></i></div>
+    <div class="kick"><span class="dot"></span> Local-first utility lab</div>
+    <h1>BitLeap <span>小工具库</span></h1>
+    <p class="sub">一组真正为了日常使用而做的小工具。全部本地运行、无需注册、打开就能用。</p>
+    <div class="stats">
+      <div><b id="statTools">0</b><span>Tools</span></div>
+      <div><b id="statCats">0</b><span>Categories</span></div>
+      <div><b>0</b><span>上传 / 全部本地</span></div>
+    </div>
+
+    <div class="searchwrap">
+      <div class="search">
+        <span class="mag"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg></span>
+        <input id="q" type="text" placeholder="搜索工具、功能或分类…  支持拼音/首字母，如 zhengze、ewm" autocomplete="off" spellcheck="false">
+        <span class="cnt" id="qcnt"></span>
+        <button class="clr hide" id="qclr" aria-label="清空">×</button>
+        <kbd>Ctrl / ⌘ K</kbd>
+      </div>
+      <div class="drop hide" id="drop"></div>
+    </div>
+  </section>
+
+  <section class="quick hide" id="quick">
+    <div class="hd"><b id="quickTitle">常用</b><span id="quickNote"></span></div>
+    <div class="row" id="quickRow"></div>
+  </section>
+
+  <div class="chipbar">
+    <div class="in">
+      <div id="chips" style="display:flex;gap:7px"></div>
+      <div class="tools">
+        <button id="sortBtn" title="切换排序">排序：默认</button>
+        <button id="randBtn" title="随机打开一个工具">🎲 随机来一个</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="list"></div>
+
+  <section class="cta">
+    <div class="glow"><i></i><i></i></div>
+    <h2>More tiny tools,<br><span>one useful leap at a time.</span></h2>
+    <p id="ctaText"></p>
+  </section>
+</main>
+
+<script>
+const TOOLS = __TOOLS__;
+const ICONS = __ICONS__;
+const CATS = [];
+TOOLS.forEach(t => { if (CATS.indexOf(t.category) < 0) CATS.push(t.category); });
+const NEW_IDS = {};
+TOOLS.slice(-12).forEach(t => { NEW_IDS[t.id] = 1; });
+
+/* 缩略图：给视觉型工具一张小预览，其余仍用图标 */
+const THUMB = {
+  gradient: "linear-gradient(135deg,#c084fc,#f0abfc 45%,#7dd3fc)",
+  "glow-background": "radial-gradient(circle at 28% 68%,#c4b5fd,transparent 58%),radial-gradient(circle at 74% 28%,#bae6fd,transparent 58%),#0b1020",
+  "box-shadow": "<span class='mini-card'></span>",
+  "border-radius": "<span class='mini-blob'></span>",
+  "liquid-glass": "<span class='mini-glass'></span>",
+  color: "<span class='mini-dots'><i style='background:#8b5cf6'></i><i style='background:#0ea5e9'></i><i style='background:#f59e0b'></i></span>",
+  "color-palette": "<span class='mini-swatches'><i style='background:#f43f5e'></i><i style='background:#fb923c'></i><i style='background:#34d399'></i><i style='background:#38bdf8'></i><i style='background:#a78bfa'></i></span>",
+  "text-shadow": "<span class='mini-text'>Aa</span>",
+  keyframes: "<span class='mini-move'></span>",
+  "css-loaders": "background:#111827|<span class='mini-spin'></span>",
+  "css-filter": "linear-gradient(120deg,#fda4af,#fcd34d,#86efac)",
+  "clip-path": "<span class='mini-clip'></span>",
+  "character-poster": "linear-gradient(180deg,#fbcfe8,#a5b4fc 58%,#1e1b4b)",
+  weiguang: "radial-gradient(circle at 30% 40%,rgba(254,243,199,.7),transparent 55%),radial-gradient(circle at 70% 70%,#a78bfa,transparent 55%),#05070f",
+  rongtu: "radial-gradient(circle at 50% 26%,#fff7ed,transparent 55%),linear-gradient(180deg,#bfdbfe,#fca5a5)",
+  "day-night": "linear-gradient(90deg,#fde68a 0 50%,#1e293b 50% 100%)",
+  "css-transform": "<span class='mini-rot'></span>",
+  "button-anim": "linear-gradient(135deg,#f5f3ff,#eef2ff)|<span class='mini-btn'>按钮</span>"
+};
+
+const LS = { fav:"bl.fav", recent:"bl.recent", hist:"bl.hist", clicks:"bl.clicks", sort:"bl.sort" };
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+let fav = load(LS.fav, []);
+let recent = load(LS.recent, []);
+let hist = load(LS.hist, []);
+let clicks = load(LS.clicks, {});
+let sort = load(LS.sort, "默认");
+let q = "";
+let act = -1;
+let dropRows = [];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const iconSVG = n => "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'>" + (ICONS[n] || ICONS.Square || "") + "</svg>";
+const byId = id => TOOLS.filter(t => t.id === id)[0];
+
+/* 命中高亮：纯 indexOf，不用正则 */
+function hl(text){
+  if(!q) return esc(text);
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if(i < 0) return esc(text);
+  return esc(text.slice(0,i)) + "<mark>" + esc(text.slice(i, i+q.length)) + "</mark>" + esc(text.slice(i+q.length));
+}
+
+/* 打分：标题 > 首字母 > 全拼 > 英文名 > 描述/分类 */
+function score(t, terms){
+  let s = 0;
+  for(const k of terms){
+    const inTitle = t.title.toLowerCase().indexOf(k) >= 0;
+    const abbrHit = t.abbr.toLowerCase().indexOf(k) === 0;
+    const pyHit = t.py.toLowerCase().indexOf(k) === 0;
+    const pyAny = t.py.toLowerCase().indexOf(k) >= 0;
+    const idHit = t.id.toLowerCase().indexOf(k) >= 0;
+    const any = t.search.indexOf(k) >= 0;
+    if(!(inTitle || abbrHit || pyHit || pyAny || idHit || any)) return -1;
+    s += (inTitle?100:0) + (abbrHit?88:0) + (pyHit?80:0) + (pyAny?60:0) + (idHit?50:0) + (any?30:0);
+  }
+  return s;
+}
+function kindOf(t, term){
+  const k = term.toLowerCase();
+  if(t.title.toLowerCase().indexOf(k) >= 0) return "";
+  if(t.abbr.toLowerCase().indexOf(k) === 0) return "首字母";
+  if(t.py.toLowerCase().indexOf(k) >= 0) return "拼音";
+  if(t.id.toLowerCase().indexOf(k) >= 0) return "英文名";
+  return "相关";
+}
+function search(term){
+  const terms = term.toLowerCase().trim().split(" ").filter(Boolean);
+  if(!terms.length) return [];
+  const out = [];
+  TOOLS.forEach(t => { const s = score(t, terms); if(s >= 0) out.push({ t: t, s: s, kind: kindOf(t, terms[0]) }); });
+  out.sort((a,b) => b.s - a.s);
+  return out;
+}
+
+function order(list){
+  const arr = list.slice();
+  if(sort === "名称") arr.sort((a,b) => a.title.localeCompare(b.title, "zh-Hans-CN"));
+  else if(sort === "最近添加") arr.reverse();
+  return arr;
+}
+
+function cardHTML(t){
+  const v = Math.abs(t.id.length + t.title.length) % 4;
+  const th = THUMB[t.id];
+  let top;
+  if(th && th.charAt(0) === "<"){
+    top = "<div class='thumb'>" + th + "</div>";
+  } else if(th){
+    const parts = th.split("|");
+    top = "<div class='thumb' style='" + parts[0] + "'>" + (parts[1] || "") + "</div>";
+  } else {
+    top = "<div class='icon-tile'>" + iconSVG(t.icon) + "</div>";
+  }
+  return "<article class='card v" + v + "'>" +
+    "<a class='card-link' href='" + t.href + "' data-id='" + t.id + "'" + (t.external ? " data-ext='1'" : "") + " aria-label='" + esc(t.title) + "'></a>" +
+    "<div class='card-top'>" + top + (NEW_IDS[t.id] ? "<span class='badge'>NEW</span>" : "") + "</div>" +
+    "<h3>" + hl(t.title) + "</h3>" +
+    "<p>" + hl(t.description) + "</p>" +
+    "<div class='card-foot'><span class='cat'>" + esc(t.category) + "</span><span class='sp'></span>" +
+      "<button class='fav" + (fav.indexOf(t.id) >= 0 ? " on" : "") + "' data-fav='" + t.id + "' title='收藏'>★</button>" +
+    "</div>" +
+  "</article>";
+}
+
+function renderList(){
+  const box = $("#list");
+  const term = q.trim();
+  if(term){
+    const found = search(term);
+    const list = order(found.map(f => f.t));
+    if(!list.length){
+      const hot = Object.keys(clicks).sort((a,b) => clicks[b]-clicks[a]).slice(0,4).map(byId).filter(Boolean);
+      const sug = hot.length ? hot : TOOLS.slice(0,4);
+      box.innerHTML = "<div class='empty-card'><b>没有找到匹配的工具</b><p>换个关键词，或者试试下面这几个：</p><div class='sug'>" +
+        sug.map(t => "<button data-sug='" + esc(t.title) + "'>" + esc(t.title) + "</button>").join("") + "</div></div>";
+    } else {
+      box.innerHTML = "<section class='sec'><div class='hd'><div><div class='n'>Search</div><h2>搜索「" + esc(term) + "」</h2></div>" +
+        "<div class='m'>" + list.length + " 个结果" + (found[0].kind ? " · 命中方式：" + found[0].kind : "") + "</div></div>" +
+        "<div class='grid'>" + list.map(cardHTML).join("") + "</div></section>";
+    }
+  } else {
+    box.innerHTML = CATS.map(function(c, i){
+      const list = order(TOOLS.filter(t => t.category === c));
+      return "<section class='sec' id='cat-" + i + "' data-cat='" + esc(c) + "'>" +
+        "<div class='hd'><div><div class='n'>" + String(i+1).padStart(2,"0") + " / Tool collection</div><h2>" + esc(c) + "</h2></div>" +
+        "<div class='m'>" + list.length + " tools</div></div>" +
+        "<div class='grid'>" + list.map(cardHTML).join("") + "</div></section>";
+    }).join("");
+  }
+  observe();
+}
+
+function renderChips(){
+  $("#chips").innerHTML = CATS.map(function(c, i){
+    return "<button class='chip' data-chip='" + i + "'>" + esc(c) + " <i>" + TOOLS.filter(t => t.category === c).length + "</i></button>";
+  }).join("");
+}
+function renderSide(){
+  $("#sideList").innerHTML = CATS.map(function(c, i){
+    return "<a href='#cat-" + i + "' data-side='" + i + "'><span class='n'>" + String(i+1).padStart(2,"0") + "</span><span class='d'></span><span>" + esc(c) + "</span><span class='cnt'>" + TOOLS.filter(t => t.category === c).length + "</span></a>";
+  }).join("");
+}
+
+function renderQuick(){
+  const box = $("#quick");
+  const items = fav.slice(0, 8).map(byId).filter(Boolean);
+  const rec = recent.map(byId).filter(Boolean).filter(t => fav.indexOf(t.id) < 0).slice(0, 6);
+  const list = items.concat(rec);
+  if(!list.length){ box.classList.add("hide"); return; }
+  box.classList.remove("hide");
+  $("#quickTitle").textContent = items.length ? "常用与最近" : "最近打开";
+  $("#quickNote").textContent = "点卡片右下角 ★ 收藏，常用工具会固定在这里";
+  $("#quickRow").innerHTML = list.map(function(t){
+    return "<button class='qcard' data-id='" + t.id + "'><span class='ic'>" + iconSVG(t.icon) + "</span><b>" + esc(t.title) + "</b></button>";
+  }).join("");
+}
+
+function dropdown(){
+  const d = $("#drop");
+  const term = q.trim();
+  if(!term){
+    const h = hist.slice(0, 5);
+    const hot = Object.keys(clicks).sort((a,b) => clicks[b]-clicks[a]).slice(0,6).map(byId).map(t => t ? t.title : "").filter(Boolean);
+    if(!h.length && !hot.length){ d.classList.add("hide"); return; }
+    d.innerHTML =
+      (h.length ? "<div class='lbl'>搜索历史</div><div class='chips'>" + h.map(function(x){ return "<button data-hist='" + esc(x) + "'>" + esc(x) + "</button>"; }).join("") + "</div>" : "") +
+      (hot.length ? "<div class='lbl'>热门</div><div class='chips'>" + hot.map(function(x){ return "<button data-sug='" + esc(x) + "'>" + esc(x) + "</button>"; }).join("") + "</div>" : "");
+    dropRows = [];
+    d.classList.remove("hide");
+    return;
+  }
+  const found = search(term).slice(0, 8);
+  dropRows = found.map(f => f.t);
+  act = dropRows.length ? 0 : -1;
+  if(found.length){
+    d.innerHTML = "<div class='lbl'>结果 · " + found.length + "（↑↓ 选择，回车打开）</div>" + found.map(function(f, i){
+      return "<div class='row" + (i === 0 ? " act" : "") + "' data-row='" + i + "'>" +
+        "<span class='ic'>" + iconSVG(f.t.icon) + "</span>" +
+        "<span class='tx'><b>" + hl(f.t.title) + "</b><i>" + hl(f.t.description) + "</i></span>" +
+        (f.kind ? "<span class='tag'>" + f.kind + "</span>" : "") +
+        "<span class='go'>↵</span></div>";
+    }).join("");
+  } else {
+    d.innerHTML = "<div class='lbl'>结果</div><div class='empty'>没有匹配的工具，试试别的关键词。</div>";
+  }
+  d.classList.remove("hide");
+}
+function closeDrop(){ $("#drop").classList.add("hide"); }
+
+function go(t){
+  clicks[t.id] = (clicks[t.id] || 0) + 1;
+  save(LS.clicks, clicks);
+  recent = [t.id].concat(recent.filter(x => x !== t.id)).slice(0, 12);
+  save(LS.recent, recent);
+  if(t.external) window.open(t.href, "_blank", "noopener,noreferrer");
+  else window.location.href = t.href;
+}
+function markActive(){
+  const rows = document.querySelectorAll("#drop .row");
+  rows.forEach(function(r, i){ r.classList.toggle("act", i === act); });
+  const el = rows[act];
+  if(el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+}
+
+/* 滚动高亮 */
+let spy = null;
+function observe(){
+  if(spy) spy.disconnect();
+  spy = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting || q.trim()) return;
+      const i = Number(e.target.id.replace("cat-",""));
+      document.querySelectorAll("#chips .chip").forEach(function(c, ci){ c.classList.toggle("on", ci === i); });
+      document.querySelectorAll("#sideList a").forEach(function(a, ai){ a.classList.toggle("on", ai === i); });
+    });
+  }, { rootMargin: "-70px 0px -70% 0px", threshold: 0 });
+  document.querySelectorAll(".sec[id^=cat-]").forEach(function(s){ spy.observe(s); });
+}
+
+function onInput(){
+  q = $("#q").value;
+  $("#qclr").classList.toggle("hide", !q);
+  const term = q.trim();
+  $("#qcnt").textContent = term ? (search(term).length + " 个结果") : "";
+  dropdown();
+  renderList();
+}
+function remember(term){
+  if(!term) return;
+  hist = [term].concat(hist.filter(x => x !== term)).slice(0, 6);
+  save(LS.hist, hist);
+}
+
+document.addEventListener("click", function(e){
+  const favBtn = e.target.closest("[data-fav]");
+  if(favBtn){
+    e.preventDefault();
+    const id = favBtn.getAttribute("data-fav");
+    const i = fav.indexOf(id);
+    if(i >= 0) fav.splice(i,1); else fav.unshift(id);
+    save(LS.fav, fav);
+    favBtn.classList.toggle("on", fav.indexOf(id) >= 0);
+    renderQuick();
+    return;
+  }
+  const sug = e.target.closest("[data-sug]");
+  if(sug){ $("#q").value = sug.getAttribute("data-sug"); onInput(); return; }
+  const his = e.target.closest("[data-hist]");
+  if(his){ $("#q").value = his.getAttribute("data-hist"); onInput(); return; }
+  const row = e.target.closest("[data-row]");
+  if(row){ go(dropRows[Number(row.getAttribute("data-row"))]); return; }
+  const link = e.target.closest(".card-link");
+  if(link){
+    const t = byId(link.getAttribute("data-id"));
+    if(t){ e.preventDefault(); go(t); }
+    return;
+  }
+  const qc = e.target.closest(".qcard");
+  if(qc){ const t = byId(qc.getAttribute("data-id")); if(t) go(t); return; }
+  const chip = e.target.closest("[data-chip]");
+  if(chip){
+    const idx = Number(chip.getAttribute("data-chip"));
+    if(q){ $("#q").value = ""; onInput(); }
+    closeDrop();
+    const sec = document.getElementById("cat-" + idx);
+    if(sec) window.scrollTo({ top: sec.offsetTop - 96, behavior: "smooth" });
+    document.querySelectorAll("#chips .chip").forEach(function(c, ci){ c.classList.toggle("on", ci === idx); });
+    document.querySelectorAll("#sideList a").forEach(function(a, ai){ a.classList.toggle("on", ai === idx); });
+    return;
+  }
+  if(!e.target.closest(".searchwrap")) closeDrop();
+});
+
+document.addEventListener("keydown", function(e){
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); $("#q").focus(); dropdown(); }
+});
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){ if(q){ $("#q").value = ""; onInput(); } else closeDrop(); }
+});
+
+$("#q").addEventListener("input", onInput);
+$("#q").addEventListener("focus", dropdown);
+$("#q").addEventListener("keydown", function(e){
+  if(e.key === "ArrowDown" || e.key === "ArrowUp"){
+    if(!dropRows.length) return;
+    e.preventDefault();
+    act = e.key === "ArrowDown" ? (act + 1) % dropRows.length : (act - 1 + dropRows.length) % dropRows.length;
+    markActive();
+  } else if(e.key === "Enter"){
+    const term = q.trim();
+    if(act >= 0 && dropRows[act]){ e.preventDefault(); remember(term); go(dropRows[act]); }
+    else if(term){
+      const r = search(term);
+      if(r.length){ e.preventDefault(); remember(term); go(r[0].t); }
+    }
+  }
+});
+$("#qclr").addEventListener("click", function(){ $("#q").value = ""; onInput(); $("#q").focus(); });
+
+$("#sortBtn").addEventListener("click", function(){
+  const modes = ["默认","名称","最近添加"];
+  sort = modes[(modes.indexOf(sort) + 1) % modes.length];
+  save(LS.sort, sort);
+  $("#sortBtn").textContent = "排序：" + sort;
+  renderList();
+});
+$("#randBtn").addEventListener("click", function(){
+  go(TOOLS[Math.floor(Math.random() * TOOLS.length)]);
+});
+
+$("#statTools").textContent = TOOLS.length;
+$("#statCats").textContent = CATS.length;
+$("#sideCount").textContent = TOOLS.length;
+$("#sortBtn").textContent = "排序：" + sort;
+$("#ctaText").textContent = "目前 BitLeap 已收录 " + TOOLS.length + " 款工具，覆盖 " + CATS.length + " 个分类。更多真正有用的小功能，还会继续往这里放。";
+renderChips(); renderSide(); renderQuick(); renderList();
+</script>
+</body>
+</html>

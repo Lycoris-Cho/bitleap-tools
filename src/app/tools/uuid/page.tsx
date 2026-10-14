@@ -320,7 +320,7 @@ export default function UuidPage() {
 
         <header className="uuid-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               ID GENERATOR
             </div>
             <h1 className="mt-4 max-w-[870px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
@@ -334,7 +334,7 @@ export default function UuidPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               生成 UUID v4、紧凑时间型 ID、128 位随机 Hex 和 Nano 风格 ID。适合前端 key、配置标识、临时数据和测试样本。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>CRYPTO RANDOM</span>
               <span>BATCH GENERATE</span>
               <span>FORMAT OPTIONS</span>
@@ -346,7 +346,7 @@ export default function UuidPage() {
         <section className="uuid-intro mt-7 grid gap-7 lg:grid-cols-[.62fr_1.38fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 GENERATOR
               </div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">
@@ -355,7 +355,7 @@ export default function UuidPage() {
 
               <div className="mt-6 grid gap-4">
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">
                     TYPE
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -374,14 +374,14 @@ export default function UuidPage() {
                       </button>
                     ))}
                   </div>
-                  <p className="mt-3 text-[8px] leading-5 text-black/29">
+                  <p className="mt-3 text-[8px] leading-5 text-black/55">
                     {entropyLabel(kind)}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-[1fr_auto] gap-3">
                   <label>
-                    <span className="mb-2 block text-[8px] text-black/24">
+                    <span className="mb-2 block text-[8px] text-black/55">
                       数量
                     </span>
                     <input
@@ -429,7 +429,7 @@ export default function UuidPage() {
             </div>
 
             <div className="mt-4 rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 FORMAT
               </div>
 
@@ -479,7 +479,7 @@ export default function UuidPage() {
                 </div>
 
                 <label>
-                  <span className="mb-2 block text-[8px] text-black/24">
+                  <span className="mb-2 block text-[8px] text-black/55">
                     前缀
                   </span>
                   <input
@@ -491,7 +491,7 @@ export default function UuidPage() {
                 </label>
 
                 <label>
-                  <span className="mb-2 block text-[8px] text-black/24">
+                  <span className="mb-2 block text-[8px] text-black/55">
                     后缀
                   </span>
                   <input
@@ -508,7 +508,7 @@ export default function UuidPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                   GENERATED IDS
                 </div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">
@@ -550,7 +550,7 @@ export default function UuidPage() {
                 ["CHARS", formatNumber(stats.chars)],
               ].map(([label, value]) => (
                 <div key={label} className="bg-[#f3f0e8]/92 p-4">
-                  <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+                  <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
                     {label}
                   </div>
                   <div className="uuid-num mt-3 break-all font-mono text-[13px] font-semibold text-black/61">
@@ -567,10 +567,10 @@ export default function UuidPage() {
               {!formattedList.length ? (
                 <div className="grid min-h-[360px] place-items-center px-6 text-center">
                   <div>
-                    <div className="text-[8px] tracking-[.14em] text-black/20">
+                    <div className="text-[8px] tracking-[.14em] text-black/55">
                       EMPTY
                     </div>
-                    <p className="mt-3 text-[9px] text-black/28">
+                    <p className="mt-3 text-[9px] text-black/55">
                       点击生成按钮创建 ID。
                     </p>
                   </div>
@@ -581,7 +581,7 @@ export default function UuidPage() {
                     key={item.id}
                     className="group grid gap-3 border-b border-black/[.055] px-5 py-4 last:border-b-0 sm:grid-cols-[56px_1fr_auto] sm:items-center"
                   >
-                    <div className="uuid-num font-mono text-[8px] text-black/22">
+                    <div className="uuid-num font-mono text-[8px] text-black/55">
                       #{String(index + 1).padStart(2, "0")}
                     </div>
 
@@ -593,7 +593,7 @@ export default function UuidPage() {
                       <button
                         type="button"
                         onClick={() => copy(item.display, item.id)}
-                        className="rounded-full border border-black/[.085] px-3 py-2 text-[8px] font-semibold text-black/31 transition hover:bg-[#22231f] hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+                        className="rounded-full border border-black/[.085] px-3 py-2 text-[8px] font-semibold text-black/31 transition hover:bg-[#22231f] hover:text-white "
                       >
                         {copied === item.id ? "✓" : "复制"}
                       </button>
@@ -615,7 +615,7 @@ export default function UuidPage() {
 
         <section className="uuid-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               UUID V4
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -623,7 +623,7 @@ export default function UuidPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               OTHER IDS
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -631,7 +631,7 @@ export default function UuidPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               NOT TOKENS
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

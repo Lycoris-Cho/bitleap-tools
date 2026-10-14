@@ -177,7 +177,7 @@ function MetricCard({
       <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-black/[.025] blur-xl transition duration-300 group-hover:scale-125" />
 
       <div className="relative z-10">
-        <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+        <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
           {label}
         </div>
 
@@ -194,7 +194,7 @@ function MetricCard({
         <button
           type="button"
           onClick={onCopy}
-          className="mt-5 rounded-full border border-black/[.085] px-3 py-2 text-[8px] font-semibold text-black/31 opacity-100 transition hover:bg-[#22231f] hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+          className="mt-5 rounded-full border border-black/[.085] px-3 py-2 text-[8px] font-semibold text-black/31 opacity-100 transition hover:bg-[#22231f] hover:text-white "
         >
           {copied ? "✓ 已复制" : "复制数值"}
         </button>
@@ -491,7 +491,7 @@ export default function CounterPage() {
 
         <header className="counter-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               TEXT COUNTER STUDIO
             </div>
 
@@ -507,7 +507,7 @@ export default function CounterPage() {
               实时统计中文、英文和混合文本。除了字符、字数和行数，也会计算段落、句子、标点、空白、UTF-8 体积、阅读与朗读时长，并支持常见文案长度目标。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>LOCAL ONLY</span>
               <span>MIXED CJK / LATIN</span>
               <span>LIVE STATS</span>
@@ -520,7 +520,7 @@ export default function CounterPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/25">
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   TEXT INPUT
                 </div>
                 <p className="mt-2 text-[9px] text-black/31">
@@ -561,7 +561,7 @@ export default function CounterPage() {
               onChange={(event) => setText(event.target.value)}
               spellCheck={false}
               placeholder="粘贴或输入需要统计的文本..."
-              className="counter-scroll mt-5 block h-[570px] w-full resize-none bg-transparent font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/16"
+              className="counter-scroll mt-5 block h-[570px] w-full resize-none bg-transparent font-mono text-[12px] leading-7 text-[#292b26] outline-none placeholder:text-black/55"
             />
           </div>
 
@@ -612,11 +612,11 @@ export default function CounterPage() {
 
             <div className="counter-grid mt-4 overflow-hidden rounded-[26px] border border-black/[.075] bg-white/22">
               <div className="flex items-center justify-between border-b border-black/[.06] px-5 py-4">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   DETAIL METRICS
                 </span>
 
-                <span className="counter-num font-mono text-[8px] text-black/22">
+                <span className="counter-num font-mono text-[8px] text-black/55">
                   {humanBytes(stats.bytes)}
                 </span>
               </div>
@@ -638,7 +638,7 @@ export default function CounterPage() {
                     key={label}
                     className="bg-[#f3f0e8]/92 p-4"
                   >
-                    <div className="text-[8px] text-black/25">
+                    <div className="text-[8px] text-black/55">
                       {label}
                     </div>
 
@@ -652,11 +652,11 @@ export default function CounterPage() {
 
             <div className="mt-4 flex flex-col gap-3 rounded-[24px] border border-black/[.075] bg-white/24 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   READING SPEED
                 </div>
 
-                <div className="mt-1 text-[8px] text-black/25">
+                <div className="mt-1 text-[8px] text-black/55">
                   中文 / 英文分别估算
                 </div>
               </div>
@@ -684,10 +684,10 @@ export default function CounterPage() {
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-4">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                  <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     WRITING TARGET
                   </div>
-                  <div className="mt-1 text-[8px] text-black/25">
+                  <div className="mt-1 text-[8px] text-black/55">
                     给文案设置一个长度目标
                   </div>
                 </div>
@@ -712,7 +712,7 @@ export default function CounterPage() {
 
               {target === "custom" && (
                 <div className="mt-4 flex items-center gap-3 border-t border-black/[.06] pt-4">
-                  <span className="text-[8px] text-black/28">字符上限</span>
+                  <span className="text-[8px] text-black/55">字符上限</span>
                   <input
                     type="number"
                     min={1}
@@ -726,7 +726,7 @@ export default function CounterPage() {
               {activeLimit && targetProgress !== null && (
                 <div className="mt-4 border-t border-black/[.06] pt-4">
                   <div className="mb-2 flex items-center justify-between gap-3 text-[8px]">
-                    <span className="text-black/27">
+                    <span className="text-black/55">
                       {stats.characters} / {activeLimit}
                     </span>
                     <span className={targetRemaining !== null && targetRemaining < 0 ? "font-semibold text-[#965744]" : "text-black/32"}>
@@ -754,7 +754,7 @@ export default function CounterPage() {
 
         <section className="counter-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
               REPORT
             </div>
 
@@ -793,11 +793,11 @@ export default function CounterPage() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">
+              <span className="text-[8px] tracking-[.13em] text-white/55">
                 TEXT PROFILE
               </span>
 
-              <span className="text-[8px] text-white/17">
+              <span className="text-[8px] text-white/55">
                 LOCAL ANALYSIS
               </span>
             </div>
@@ -812,7 +812,7 @@ export default function CounterPage() {
 
         <section className="counter-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               MIXED COUNT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -821,7 +821,7 @@ export default function CounterPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               READING TIME
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -830,7 +830,7 @@ export default function CounterPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LOCAL ONLY
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

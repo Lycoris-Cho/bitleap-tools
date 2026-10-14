@@ -487,7 +487,7 @@ export default function ImageCompressPage() {
 
         <header className="compress-enter mt-8 grid gap-8 border-b border-black/[0.07] pb-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-black/32">Local Image Compressor</div>
+            <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-black/32">本地图片压缩</div>
             <h1 className="mt-4 max-w-[980px] text-[clamp(42px,6.1vw,92px)] font-semibold leading-[1.04] tracking-[-0.04em]">
               <span className="block">图片压缩</span>
               <span className="mt-1 block text-[0.72em] leading-[1.1] tracking-[-0.025em] text-[#46392e]">清晰对比后再下载</span>
@@ -535,7 +535,7 @@ export default function ImageCompressPage() {
 
             <div className="rounded-[34px] border border-black/[0.06] bg-white/44 p-5 backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">Presets</div>
+                <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">预设</div>
                 <PillButton active={autoRun} onClick={() => setAutoRun(!autoRun)}>{autoRun ? "自动压缩开" : "自动压缩关"}</PillButton>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
@@ -549,7 +549,7 @@ export default function ImageCompressPage() {
             </div>
 
             <div className="rounded-[34px] border border-black/[0.06] bg-white/44 p-5 backdrop-blur-xl">
-              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">Output</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">输出</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {FORMAT_OPTIONS.map((item) => (
                   <PillButton key={item.value} active={format === item.value} onClick={() => setFormat(item.value)}>
@@ -587,7 +587,7 @@ export default function ImageCompressPage() {
                 <div className="absolute inset-0 grid place-items-center p-8 text-center">
                   <div>
                     <div className="mx-auto mb-7 h-px w-24 bg-white/18" />
-                    <h2 className="text-[clamp(32px,5vw,72px)] font-semibold leading-[0.9] tracking-[-0.07em] text-white">Drop image here</h2>
+                    <h2 className="text-[clamp(32px,5vw,72px)] font-semibold leading-[0.9] tracking-[-0.07em] text-white">把图片拖到这里</h2>
                     <p className="mx-auto mt-5 max-w-[420px] text-xs leading-6 text-white/38">上传后会在这里显示大图预览。压缩完成后可切换分屏、原图和压缩图。</p>
                   </div>
                 </div>
@@ -656,7 +656,7 @@ export default function ImageCompressPage() {
             </div>
 
             <div className="rounded-[34px] border border-black/[0.06] bg-white/46 p-5 backdrop-blur-xl">
-              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">Actions</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">操作</div>
               <div className="mt-5 grid gap-3">
                 <button type="button" disabled={!canCompress} onClick={() => void compress()} className="h-12 rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-35">
                   {status === "processing" ? "压缩中…" : outputStale ? "参数已变化，重新压缩" : output ? "重新压缩" : "压缩图片"}

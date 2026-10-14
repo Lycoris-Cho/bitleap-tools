@@ -212,7 +212,7 @@ function ControlSlider({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-[8px] font-bold uppercase tracking-[.13em] text-white/28">{label}</span>
+        <span className="text-[8px] font-bold uppercase tracking-[.13em] text-white/55">{label}</span>
         <span className="font-mono text-[10px] text-[#0ae448]">{fmt(value, 2)}</span>
       </div>
       <input type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full accent-[#0ae448]" />
@@ -234,8 +234,8 @@ function OutputBlock({
   return (
     <article className="border-t border-white/[.08] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-bold uppercase tracking-[.16em] text-white/22">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-bold uppercase tracking-[.12em] text-white/28 transition hover:text-[#0ae448]">{copied ? "Copied" : "Copy"}</button>
+        <span className="text-[8px] font-bold uppercase tracking-[.16em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-bold uppercase tracking-[.12em] text-white/55 transition hover:text-[#0ae448]">{copied ? "Copied" : "Copy"}</button>
       </div>
       <pre className="ease-scroll max-h-52 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#d7ffe2]">{value}</pre>
     </article>
@@ -255,7 +255,7 @@ function StatBox({
 
   return (
     <div className="rounded-[22px] border border-white/[.08] bg-white/[.045] p-4">
-      <div className="text-[8px] font-bold uppercase tracking-[.15em] text-white/24">{label}</div>
+      <div className="text-[8px] font-bold uppercase tracking-[.15em] text-white/55">{label}</div>
       <div className={`ease-num mt-3 truncate font-mono text-[15px] font-bold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -590,7 +590,7 @@ export default function EasingGenerator() {
               <div className="bg-[#111412] p-5 sm:p-7">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-[8px] font-bold uppercase tracking-[.16em] text-white/24">Curve Editor</div>
+                    <div className="text-[8px] font-bold uppercase tracking-[.16em] text-white/55">Curve Editor</div>
                     <div className="mt-2 font-mono text-[10px] text-[#0ae448]">{ease}</div>
                   </div>
                   <button type="button" onClick={play} className="rounded-full bg-[#0ae448] px-4 py-3 text-[9px] font-bold uppercase tracking-[.12em] text-[#0e100f] transition hover:-translate-y-0.5 hover:bg-[#7cff95]">Play</button>
@@ -651,7 +651,7 @@ export default function EasingGenerator() {
               <div className="bg-[#171a18] p-5 sm:p-7">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-[8px] font-bold uppercase tracking-[.16em] text-white/24">Motion Preview</div>
+                    <div className="text-[8px] font-bold uppercase tracking-[.16em] text-white/55">Motion Preview</div>
                     <p className="mt-2 text-[9px] leading-4 text-white/31">用同一条曲线驱动位移、透明度和缩放，方便判断真实 UI 体感。</p>
                   </div>
                   <span className="rounded-full border border-white/[.08] px-3 py-2 font-mono text-[8px] text-white/30">{duration}ms</span>
@@ -659,7 +659,7 @@ export default function EasingGenerator() {
 
                 <div className="relative h-[350px] overflow-hidden rounded-[30px] border border-white/[.08] bg-[#0e100f] p-6">
                   <div className="absolute inset-0 ease-grid opacity-55" />
-                  <div className="pointer-events-none absolute left-6 right-6 top-[calc(50%+2px)] flex items-center justify-between font-mono text-[7px] uppercase tracking-[.12em] text-white/20">
+                  <div className="pointer-events-none absolute left-6 right-6 top-[calc(50%+2px)] flex items-center justify-between font-mono text-[7px] uppercase tracking-[.12em] text-white/55">
                     <span>start</span>
                     <span>{resolvedDistance}px</span>
                     <span>end</span>
@@ -689,7 +689,7 @@ export default function EasingGenerator() {
                       ["mode", previewMode],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-2xl border border-white/[.07] bg-white/[.035] p-3">
-                        <div className="text-[7px] font-bold uppercase tracking-[.14em] text-white/20">{label}</div>
+                        <div className="text-[7px] font-bold uppercase tracking-[.14em] text-white/55">{label}</div>
                         <div className="mt-1 truncate font-mono text-[9px] text-[#d7ffe2]/70">{value}</div>
                       </div>
                     ))}
@@ -699,7 +699,7 @@ export default function EasingGenerator() {
                 <div className="mt-6 grid gap-5">
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-white/[.08] bg-white/[.035] p-3">
                     <div>
-                      <div className="text-[8px] font-bold uppercase tracking-[.14em] text-white/24">Preview travel</div>
+                      <div className="text-[8px] font-bold uppercase tracking-[.14em] text-white/55">Preview travel</div>
                       <div className="mt-1 text-[9px] text-white/31">{fitPreview ? "自动计算轨道宽度，目标滑到最右端。" : "使用自定义距离，但不会超出轨道。"}</div>
                     </div>
                     <div className="flex gap-2">
@@ -723,7 +723,7 @@ export default function EasingGenerator() {
           <aside className="min-w-0">
             <div className="sticky top-6 overflow-hidden rounded-[34px] border border-white/[.09] bg-[#111412]/90 shadow-[0_32px_110px_-70px_rgba(0,0,0,.9)] backdrop-blur-xl">
               <div className="border-b border-white/[.08] px-5 py-4">
-                <div className="text-[8px] font-bold uppercase tracking-[.16em] text-white/24">Export Stack</div>
+                <div className="text-[8px] font-bold uppercase tracking-[.16em] text-white/55">Export Stack</div>
                 <div className="mt-2 text-[11px] leading-5 text-white/38">{activePreset?.desc ?? "自定义曲线，适合继续微调。"}</div>
               </div>
               <div className="ease-scroll max-h-[720px] overflow-auto px-5">
@@ -735,9 +735,9 @@ export default function EasingGenerator() {
               </div>
               <div className="border-t border-white/[.08] p-5">
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={reset} className="rounded-full border border-white/[.09] px-4 py-3 text-[9px] font-bold uppercase tracking-[.1em] text-white/34 transition hover:bg-white/[.07] hover:text-white">Reset</button>
+                  <button type="button" onClick={reset} className="rounded-full border border-white/[.09] px-4 py-3 text-[9px] font-bold uppercase tracking-[.1em] text-white/34 transition hover:bg-white/[.07] hover:text-white">重置</button>
                   <button type="button" onClick={() => copy(report, "report")} className="rounded-full bg-[#0ae448] px-4 py-3 text-[9px] font-bold uppercase tracking-[.1em] text-[#0e100f]">{copied === "report" ? "Copied" : "Copy Report"}</button>
-                  <button type="button" onClick={() => downloadText(report, "bitleap-easing-report.txt")} className="rounded-full border border-white/[.09] px-4 py-3 text-[9px] font-bold uppercase tracking-[.1em] text-white/34 transition hover:bg-white/[.07] hover:text-white">Export</button>
+                  <button type="button" onClick={() => downloadText(report, "bitleap-easing-report.txt")} className="rounded-full border border-white/[.09] px-4 py-3 text-[9px] font-bold uppercase tracking-[.1em] text-white/34 transition hover:bg-white/[.07] hover:text-white">导出</button>
                 </div>
               </div>
             </div>
@@ -767,15 +767,15 @@ export default function EasingGenerator() {
 
         <section className="ease-intro mt-12 grid gap-8 border-t border-white/[.09] pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-bold uppercase tracking-[.13em] text-white/24">Drag the curve</div>
+            <div className="text-[8px] font-bold uppercase tracking-[.13em] text-white/55">Drag the curve</div>
             <p className="mt-2 text-[9px] leading-5 text-white/34">SVG 控制点支持鼠标和触控拖拽，X 被限制在 0–1，Y 允许轻微越界来制作 back / pop 效果。</p>
           </div>
           <div>
-            <div className="text-[8px] font-bold uppercase tracking-[.13em] text-white/24">Preview modes</div>
+            <div className="text-[8px] font-bold uppercase tracking-[.13em] text-white/55">Preview modes</div>
             <p className="mt-2 text-[9px] leading-5 text-white/34">Single 看单个目标，Stagger 看序列节奏，Compare 用线性运动对照当前曲线。</p>
           </div>
           <div>
-            <div className="text-[8px] font-bold uppercase tracking-[.13em] text-white/24">Copy ready</div>
+            <div className="text-[8px] font-bold uppercase tracking-[.13em] text-white/55">Copy ready</div>
             <p className="mt-2 text-[9px] leading-5 text-white/34">同时输出 CSS、Tailwind、WAAPI、设计 Token 和 GSAP CustomEase 注释片段。</p>
           </div>
         </section>

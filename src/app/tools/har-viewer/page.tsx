@@ -677,7 +677,7 @@ export default function HarViewerPage() {
                 <div className="har-scan pointer-events-none absolute inset-y-0 left-[-35%] w-1/3 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)] opacity-50" />
                 <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/24">Request Waterfall</div>
+                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">Request Waterfall</div>
                     <div className="mt-2 font-mono text-[12px] text-emerald-100/82">{filtered.length} / {entries.length} requests</div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -714,7 +714,7 @@ export default function HarViewerPage() {
                             <div className="truncate font-mono text-[11px] text-white/75">{entry.path || entry.url}</div>
                             <div className="mt-1 flex flex-wrap items-center gap-2">
                               <span className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold ${contentTypeTone(type)}`}>{type}</span>
-                              <span className="truncate font-mono text-[9px] text-white/27">{entry.host}</span>
+                              <span className="truncate font-mono text-[9px] text-white/55">{entry.host}</span>
                             </div>
                           </div>
                           <div className="flex items-center">
@@ -820,7 +820,7 @@ export default function HarViewerPage() {
                     ["Transfer", formatSize(selected.transferSize)],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-[22px] border border-white/[0.08] bg-white/[0.045] p-4">
-                      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/24">{label}</div>
+                      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">{label}</div>
                       <div className="mt-3 break-all font-mono text-[11px] leading-5 text-emerald-100/76">{value}</div>
                     </div>
                   ))}
@@ -830,19 +830,19 @@ export default function HarViewerPage() {
               {bodyTab === "headers" && (
                 <div className="grid gap-5 lg:grid-cols-2">
                   <section>
-                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/28">请求头</h3>
+                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/55">请求头</h3>
                     <HeaderList items={selected.requestHeaders} />
                   </section>
                   <section>
-                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/28">响应头</h3>
+                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/55">响应头</h3>
                     <HeaderList items={selected.responseHeaders} />
                   </section>
                   <section>
-                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/28">Query String</h3>
+                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/55">Query String</h3>
                     <HeaderList items={selected.queryString} />
                   </section>
                   <section>
-                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/28">Cookies</h3>
+                    <h3 className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/55">Cookies</h3>
                     <HeaderList items={selected.cookies} />
                   </section>
                 </div>

@@ -186,7 +186,7 @@ export default function NasaSpaceMonitorPage(){
       </div>
 
       <header className="space-intro mt-10 flex flex-col gap-7 border-b border-white/[.08] pb-6 lg:flex-row lg:items-end lg:justify-between">
-        <div><div className="text-[9px] font-semibold tracking-[.22em] text-white/24">BITLEAP / SPACE MONITOR</div><h1 className="mt-3 text-[clamp(42px,6vw,84px)] font-semibold leading-[.92] tracking-[-.065em]">把 NASA 的天空，<br className="hidden sm:block"/>变成一块实时仪表。</h1></div>
+        <div><div className="text-[9px] font-semibold tracking-[.22em] text-white/55">BITLEAP / SPACE MONITOR</div><h1 className="mt-3 text-[clamp(42px,6vw,84px)] font-semibold leading-[.92] tracking-[-.065em]">把 NASA 的天空，<br className="hidden sm:block"/>变成一块实时仪表。</h1></div>
         <nav className="flex flex-wrap gap-1">
           {[["apod","今日宇宙"],["neo","近地天体"],["weather","空间天气"]].map(([id,label])=><button key={id} type="button" onClick={()=>setView(id as View)} className={`rounded-full px-4 py-2.5 text-[10px] font-semibold transition ${view===id?"bg-[#f1eee5] text-[#111316]":"text-white/35 hover:bg-white/[.05] hover:text-white/65"}`}>{label}</button>)}
         </nav>
@@ -203,7 +203,7 @@ export default function NasaSpaceMonitorPage(){
               <div className="absolute bottom-5 left-5 text-[8px] tracking-[.14em] text-white/48">{apod?.copyright?`© ${apod.copyright}`:"NASA / PUBLIC DATA"}</div>
             </div>
             <div className="flex flex-col p-5 sm:p-7 lg:p-8">
-              <div className="flex items-center justify-between gap-4"><span className="text-[9px] tracking-[.16em] text-white/24">ASTRONOMY PICTURE OF THE DAY</span><input type="date" max={today} value={apodDate} onChange={e=>setApodDate(e.target.value)} className="bg-transparent text-[10px] text-white/48 outline-none"/></div>
+              <div className="flex items-center justify-between gap-4"><span className="text-[9px] tracking-[.16em] text-white/55">ASTRONOMY PICTURE OF THE DAY</span><input type="date" max={today} value={apodDate} onChange={e=>setApodDate(e.target.value)} className="bg-transparent text-[10px] text-white/48 outline-none"/></div>
               <div className="mt-auto pt-12">
                 <div className="space-num text-[10px] text-white/30">{apod?.date||apodDate}</div>
                 <h2 className="mt-3 text-[clamp(30px,4vw,54px)] font-semibold leading-[.97] tracking-[-.055em]">{apod?.title||"正在接收宇宙图像"}</h2>
@@ -220,7 +220,7 @@ export default function NasaSpaceMonitorPage(){
 
         {view==="neo"&&<section className="pt-7">
           <div className="view-reveal flex flex-col gap-5 border-b border-white/[.08] pb-5 sm:flex-row sm:items-end sm:justify-between">
-            <div><div className="text-[9px] tracking-[.16em] text-white/24">NEAR EARTH OBJECTS / NeoWs</div><div className="mt-2 flex flex-wrap items-baseline gap-4"><h2 className="text-3xl font-semibold tracking-[-.045em]">{feed?`${feed.element_count} 个近地天体`:"近地天体雷达"}</h2><span className="text-[10px] text-[#ff856e]">{hazards.length} 个潜在危险标记</span></div></div>
+            <div><div className="text-[9px] tracking-[.16em] text-white/55">NEAR EARTH OBJECTS / NeoWs</div><div className="mt-2 flex flex-wrap items-baseline gap-4"><h2 className="text-3xl font-semibold tracking-[-.045em]">{feed?`${feed.element_count} 个近地天体`:"近地天体雷达"}</h2><span className="text-[10px] text-[#ff856e]">{hazards.length} 个潜在危险标记</span></div></div>
             <div className="flex flex-wrap items-end gap-3 text-[9px] text-white/30">
               <label>起始 <input type="date" value={neoStart} onChange={e=>setNeoStart(e.target.value)} className="ml-1 bg-transparent text-white/60 outline-none"/></label>
               <label>范围 <select value={neoDays} onChange={e=>setNeoDays(Number(e.target.value))} className="ml-1 bg-[#090b0d] text-white/60 outline-none">{[1,2,3,4,5,6,7].map(x=><option key={x}>{x}</option>)}</select> 天</label>
@@ -231,7 +231,7 @@ export default function NasaSpaceMonitorPage(){
 
           <div className="view-reveal grid min-h-[650px] gap-6 pt-6 lg:grid-cols-[1.12fr_.88fr]">
             <div className="relative min-h-[520px] overflow-hidden rounded-[30px] border border-white/[.07] bg-[#0d1013]">
-              <div className="absolute left-5 top-5 z-20 text-[8px] tracking-[.16em] text-white/24">DISTANCE FIELD · NOT TO SCALE</div>
+              <div className="absolute left-5 top-5 z-20 text-[8px] tracking-[.16em] text-white/55">DISTANCE FIELD · NOT TO SCALE</div>
               <div className="absolute left-1/2 top-1/2 h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#7ea1bb]/20 bg-[radial-gradient(circle_at_34%_30%,#7f9eb6,#294155_28%,#14232e_58%,#0c1116_72%)] shadow-[0_0_100px_rgba(83,126,156,.16)] sm:h-[230px] sm:w-[230px]">
                 <div className="absolute left-1/2 top-1/2 h-[155%] w-[155%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.045]"/>
                 <div className="absolute left-1/2 top-1/2 h-[230%] w-[230%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.035]"/>
@@ -243,8 +243,8 @@ export default function NasaSpaceMonitorPage(){
 
             <div className="flex min-h-[520px] flex-col">
               {selected?<><div className="border-b border-white/10 pb-5">
-                <div className="flex items-center justify-between gap-4"><span className="text-[9px] tracking-[.14em] text-white/25">SELECTED OBJECT</span><span className={`rounded-full px-2.5 py-1 text-[8px] font-semibold ${selected.is_potentially_hazardous_asteroid?"bg-[#ff7a62]/12 text-[#ff856e]":"bg-white/[.05] text-white/35"}`}>{selected.is_potentially_hazardous_asteroid?"POTENTIALLY HAZARDOUS":"NORMAL PASS"}</span></div>
-                <h3 className="mt-3 text-[clamp(30px,4vw,52px)] font-semibold tracking-[-.055em]">{selected.name.replace(/[()]/g,"")}</h3><div className="mt-2 text-[9px] text-white/26">JPL ID · {selected.id}</div>
+                <div className="flex items-center justify-between gap-4"><span className="text-[9px] tracking-[.14em] text-white/55">SELECTED OBJECT</span><span className={`rounded-full px-2.5 py-1 text-[8px] font-semibold ${selected.is_potentially_hazardous_asteroid?"bg-[#ff7a62]/12 text-[#ff856e]":"bg-white/[.05] text-white/35"}`}>{selected.is_potentially_hazardous_asteroid?"POTENTIALLY HAZARDOUS":"NORMAL PASS"}</span></div>
+                <h3 className="mt-3 text-[clamp(30px,4vw,52px)] font-semibold tracking-[-.055em]">{selected.name.replace(/[()]/g,"")}</h3><div className="mt-2 text-[9px] text-white/55">JPL ID · {selected.id}</div>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-[22px] bg-white/[.07]">
                 {[
@@ -252,48 +252,48 @@ export default function NasaSpaceMonitorPage(){
                   ["月球距离",`${fmt(Number(approach(selected)?.miss_distance.lunar||0),2)} LD`],
                   ["相对速度",`${fmt(Number(approach(selected)?.relative_velocity.kilometers_per_hour||0))} km/h`],
                   ["估计直径",`${fmt(diameter(selected))} m`]
-                ].map(([l,v])=><div key={l} className="bg-[#0e1012] p-4"><div className="text-[8px] text-white/24">{l}</div><div className="space-num mt-2 text-sm font-semibold">{v}</div></div>)}
+                ].map(([l,v])=><div key={l} className="bg-[#0e1012] p-4"><div className="text-[8px] text-white/55">{l}</div><div className="space-num mt-2 text-sm font-semibold">{v}</div></div>)}
               </div>
-              <div className="mt-5 border-t border-white/[.08] pt-4"><span className="text-[8px] text-white/24">CLOSE APPROACH</span><div className="mt-2 text-xl font-semibold">{shortDate(approach(selected)?.close_approach_date)}</div></div>
+              <div className="mt-5 border-t border-white/[.08] pt-4"><span className="text-[8px] text-white/55">CLOSE APPROACH</span><div className="mt-2 text-xl font-semibold">{shortDate(approach(selected)?.close_approach_date)}</div></div>
               <div className="space-scroll mt-5 flex-1 overflow-auto border-t border-white/[.08] pt-2">
                 {asteroids.slice(0,18).map(n=><button key={n.id} onClick={()=>setSelectedId(n.id)} className={`flex w-full items-center justify-between gap-3 border-b border-white/[.055] py-3 text-left ${selected.id===n.id?"text-white":"text-white/38 hover:text-white/70"}`}><span className="truncate text-[10px]">{n.name}</span><span className="space-num text-[9px]">{fmt(Number(approach(n)?.miss_distance.lunar||0),2)} LD</span></button>)}
-              </div></>:<div className="grid h-full place-items-center text-[10px] text-white/28">没有符合当前筛选的天体</div>}
+              </div></>:<div className="grid h-full place-items-center text-[10px] text-white/55">没有符合当前筛选的天体</div>}
             </div>
           </div>
 
           <div className="grid gap-px overflow-hidden rounded-[22px] bg-white/[.07] sm:grid-cols-4">
-            {[["总计",allNeo.length||"—"],["危险标记",hazards.length],["最近",nearest?`${fmt(Number(approach(nearest)?.miss_distance.lunar||0),2)} LD`:"—"],["最大估算直径",largest?`${fmt(diameter(largest))} m`:"—"]].map(([l,v],i)=><div key={l} className="bg-[#0d0f11] p-4"><div className="text-[8px] text-white/23">{l}</div><b className={`space-num mt-2 block text-lg ${i===1?"text-[#ff806b]":""}`}>{v}</b></div>)}
+            {[["总计",allNeo.length||"—"],["危险标记",hazards.length],["最近",nearest?`${fmt(Number(approach(nearest)?.miss_distance.lunar||0),2)} LD`:"—"],["最大估算直径",largest?`${fmt(diameter(largest))} m`:"—"]].map(([l,v],i)=><div key={l} className="bg-[#0d0f11] p-4"><div className="text-[8px] text-white/55">{l}</div><b className={`space-num mt-2 block text-lg ${i===1?"text-[#ff806b]":""}`}>{v}</b></div>)}
           </div>
         </section>}
 
         {view==="weather"&&<section className="pt-7">
           <div className="view-reveal grid min-h-[620px] gap-8 lg:grid-cols-[.68fr_1.32fr] lg:items-center">
-            <div><div className="text-[9px] tracking-[.18em] text-white/24">DONKI / LAST 7 DAYS</div><h2 className="mt-3 text-[clamp(45px,6vw,78px)] font-semibold leading-[.9] tracking-[-.065em]">太阳并不安静。</h2><p className="mt-6 max-w-md text-[11px] leading-6 text-white/35">把过去 7 天的太阳耀斑、日冕物质抛射和地磁暴放在同一条空间天气脉冲里。</p>
-              <div className="mt-9 grid grid-cols-3 gap-5 border-y border-white/[.08] py-5"><div><span className="text-[8px] text-white/24">太阳耀斑</span><b className="space-num mt-2 block text-2xl">{flares.length}</b></div><div><span className="text-[8px] text-white/24">CME</span><b className="space-num mt-2 block text-2xl">{cmes.length}</b></div><div><span className="text-[8px] text-white/24">最大 Kp</span><b className="space-num mt-2 block text-2xl">{maxKp||"—"}</b></div></div>
+            <div><div className="text-[9px] tracking-[.18em] text-white/55">DONKI / LAST 7 DAYS</div><h2 className="mt-3 text-[clamp(45px,6vw,78px)] font-semibold leading-[.9] tracking-[-.065em]">太阳并不安静。</h2><p className="mt-6 max-w-md text-[11px] leading-6 text-white/35">把过去 7 天的太阳耀斑、日冕物质抛射和地磁暴放在同一条空间天气脉冲里。</p>
+              <div className="mt-9 grid grid-cols-3 gap-5 border-y border-white/[.08] py-5"><div><span className="text-[8px] text-white/55">太阳耀斑</span><b className="space-num mt-2 block text-2xl">{flares.length}</b></div><div><span className="text-[8px] text-white/55">CME</span><b className="space-num mt-2 block text-2xl">{cmes.length}</b></div><div><span className="text-[8px] text-white/55">最大 Kp</span><b className="space-num mt-2 block text-2xl">{maxKp||"—"}</b></div></div>
             </div>
             <div className="relative min-h-[520px] overflow-hidden rounded-[32px] border border-white/[.07] bg-[#0e1011]">
               <div className="absolute left-1/2 top-1/2 h-[190px] w-[190px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_34%_31%,#fff3c9,#f6ad52_22%,#b74928_48%,#38170e_72%)] shadow-[0_0_120px_rgba(222,99,38,.22)] sm:h-[240px] sm:w-[240px]"><div className="orbit-a absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#ed9f55]/14"/><div className="orbit-b absolute left-1/2 top-1/2 h-[250%] w-[250%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.035]"/></div>
-              <div className="absolute left-5 top-5 text-[8px] tracking-[.14em] text-white/24">SOLAR ACTIVITY FIELD</div>
+              <div className="absolute left-5 top-5 text-[8px] tracking-[.14em] text-white/55">SOLAR ACTIVITY FIELD</div>
               {flares.slice(0,9).map((f,i)=>{const a=(i*73+18)*Math.PI/180,r=28+(i%3)*8;return <div key={f.flrID||i} className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#ffb26c]/35 bg-[#ff9b54]/10 px-2 py-1 text-[8px] font-semibold text-[#ffc182]" style={{left:`${50+Math.cos(a)*r}%`,top:`${50+Math.sin(a)*r*.7}%`}}>{f.classType||"FLR"}</div>})}
               {weatherLoading&&<div className="absolute inset-0 grid place-items-center bg-[#0e1011]/60 text-[9px] tracking-[.15em] text-white/30 backdrop-blur-sm">READING DONKI…</div>}
             </div>
           </div>
           {weatherError&&<div className="mb-5 text-[10px] text-[#d98270]">{weatherError}</div>}
           <div className="view-reveal grid gap-px overflow-hidden rounded-[26px] bg-white/[.07] lg:grid-cols-3">
-            <div className="bg-[#0d0f10] p-5"><span className="text-[8px] text-white/23">STRONGEST FLARE</span><div className="mt-4 text-4xl font-semibold text-[#ffc081]">{strongestFlare?.classType||"—"}</div><div className="mt-3 text-[9px] text-white/31">{strongestFlare?`${shortDate(strongestFlare.peakTime)} · ${strongestFlare.sourceLocation||"source unavailable"}`:"过去 7 天没有返回记录"}</div></div>
-            <div className="bg-[#0d0f10] p-5"><span className="text-[8px] text-white/23">FASTEST CME</span><div className="space-num mt-4 text-4xl font-semibold">{fastestCme?.a.speed?`${fmt(fastestCme.a.speed)} km/s`:"—"}</div><div className="mt-3 text-[9px] text-white/31">{fastestCme?`${shortDate(fastestCme.c.startTime)} · ${fastestCme.a.type||"analysis"}`:"过去 7 天没有返回速度分析"}</div></div>
-            <div className="bg-[#0d0f10] p-5"><span className="text-[8px] text-white/23">GEOMAGNETIC INDEX</span><div className={`space-num mt-4 text-4xl font-semibold ${maxKp>=5?"text-[#ff806b]":"text-[#91b29b]"}`}>{maxKp?`Kp ${maxKp}`:"—"}</div><div className="mt-3 text-[9px] text-white/31">{storms.length?`${storms.length} 次地磁暴事件`:"过去 7 天没有返回地磁暴"}</div></div>
+            <div className="bg-[#0d0f10] p-5"><span className="text-[8px] text-white/55">STRONGEST FLARE</span><div className="mt-4 text-4xl font-semibold text-[#ffc081]">{strongestFlare?.classType||"—"}</div><div className="mt-3 text-[9px] text-white/31">{strongestFlare?`${shortDate(strongestFlare.peakTime)} · ${strongestFlare.sourceLocation||"source unavailable"}`:"过去 7 天没有返回记录"}</div></div>
+            <div className="bg-[#0d0f10] p-5"><span className="text-[8px] text-white/55">FASTEST CME</span><div className="space-num mt-4 text-4xl font-semibold">{fastestCme?.a.speed?`${fmt(fastestCme.a.speed)} km/s`:"—"}</div><div className="mt-3 text-[9px] text-white/31">{fastestCme?`${shortDate(fastestCme.c.startTime)} · ${fastestCme.a.type||"analysis"}`:"过去 7 天没有返回速度分析"}</div></div>
+            <div className="bg-[#0d0f10] p-5"><span className="text-[8px] text-white/55">GEOMAGNETIC INDEX</span><div className={`space-num mt-4 text-4xl font-semibold ${maxKp>=5?"text-[#ff806b]":"text-[#91b29b]"}`}>{maxKp?`Kp ${maxKp}`:"—"}</div><div className="mt-3 text-[9px] text-white/31">{storms.length?`${storms.length} 次地磁暴事件`:"过去 7 天没有返回地磁暴"}</div></div>
           </div>
         </section>}
       </div>
 
-      <div className="mt-12 border-t border-white/[.08] pt-5 text-[9px] leading-5 text-white/22">数据来自 NASA Open APIs：APOD、NeoWs 与 DONKI。默认使用 DEMO_KEY，正式部署建议使用自己的 NASA 开发者 Key 或服务器代理。近地天体的“潜在危险”是 NASA 数据字段，不代表即将撞击地球。</div>
+      <div className="mt-12 border-t border-white/[.08] pt-5 text-[9px] leading-5 text-white/55">数据来自 NASA Open APIs：APOD、NeoWs 与 DONKI。默认使用 DEMO_KEY，正式部署建议使用自己的 NASA 开发者 Key 或服务器代理。近地天体的“潜在危险”是 NASA 数据字段，不代表即将撞击地球。</div>
       <div className="mt-5 border-t border-white/[.055] pt-5"><FooterNote/></div>
     </div>
 
     {keyOpen&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 backdrop-blur-sm sm:items-center sm:p-5" onClick={()=>setKeyOpen(false)}>
       <div className="w-full max-w-[560px] rounded-t-[30px] border border-white/10 bg-[#111417] p-6 shadow-2xl sm:rounded-[30px] sm:p-8" onClick={e=>e.stopPropagation()}>
-        <div className="flex justify-between"><div><div className="text-[8px] tracking-[.16em] text-white/24">NASA API ACCESS</div><h2 className="mt-2 text-2xl font-semibold">API Key</h2></div><button onClick={()=>setKeyOpen(false)} className="text-[10px] text-white/35">关闭</button></div>
+        <div className="flex justify-between"><div><div className="text-[8px] tracking-[.16em] text-white/55">NASA API ACCESS</div><h2 className="mt-2 text-2xl font-semibold">API Key</h2></div><button onClick={()=>setKeyOpen(false)} className="text-[10px] text-white/35">关闭</button></div>
         <p className="mt-5 text-[10px] leading-5 text-white/34">不填就使用 DEMO_KEY。自定义 Key 只保存在当前浏览器会话的 sessionStorage，并直接用于 NASA API 请求。</p>
         <input value={keyDraft} onChange={e=>setKeyDraft(e.target.value)} placeholder="DEMO_KEY" className="mt-6 w-full border-b border-white/15 bg-transparent py-3 font-mono text-sm outline-none"/>
         <div className="mt-6 flex justify-end gap-2"><button onClick={()=>{setKeyDraft("DEMO_KEY");setKey("DEMO_KEY");try{sessionStorage.removeItem(KEY_SESSION)}catch{}setKeyOpen(false)}} className="rounded-full border border-white/10 px-4 py-2.5 text-[9px] text-white/38">使用 DEMO_KEY</button><button onClick={saveKey} className="rounded-full bg-[#f1eee6] px-5 py-2.5 text-[9px] font-semibold text-[#111316]">保存并刷新</button></div>

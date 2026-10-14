@@ -73,6 +73,7 @@ export const tools: Tool[] = [
   { id: 'photopea', title: 'Photopea', description: '在线图片编辑器', icon: 'Image', category: '媒体工具', href: 'https://www.photopea.com', target: '_blank' },
   { id: 'lab', title: '前端实验工作台', description: '浏览器本地实验', href: '/tools/lab', icon: 'FlaskConical', category: '前端实验' },
   { id: 'CssBack', title: 'css液态背景', description: '前端液态气泡背景', href: '/tools/cssback', icon: 'Droplets', category: '前端实验' },
+  { id: 'flight-path', title: 'SVG 航线动画', description: '按住小飞机拖出虚线航线，飞机沿轨迹飞行，导出带 SMIL 动画的 SVG', href: '/tools/flight-path', icon: 'Plane', category: '前端实验' },
   { id: 'pomodoro', title: '番茄时钟 & 任务看板', description: '番茄计时 + 任务管理', href: '/tools/pomodoro', icon: 'TimerReset', category: '日常工具' },
   { id: 'Echarts', title: 'ECharts 图表生成', description: '粘贴数据，可视化配置图表', href: '/tools/data-visualizer', icon: 'ChartLine', category: '前端实验' },
   { id: 'terminal', title: '终端命令生成器', description: '可视化选择操作，生成终端命令', href: '/tools/terminal', icon: 'Terminal', category: '开发辅助' },
@@ -198,6 +199,13 @@ export const tools: Tool[] = [
     description: "上传喜欢的人物图片，自定义配色/文字，打造只属于自己的人物海报",
     href: "/tools/character-poster",
     icon: "Cannabis",
+    category: "趣味工具",  },
+  {
+    id: "character-lineup",
+    title: "人物合集海报",
+    description: "把多张人物图合成一张整体群像：主角居中、两翼渐小，立绘/画框可选，导出 16:9 大图",
+    href: "/tools/character-lineup",
+    icon: "Users",
     category: "趣味工具",
   },
   {

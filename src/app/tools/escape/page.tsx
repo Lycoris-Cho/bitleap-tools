@@ -444,7 +444,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`escape-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -471,13 +471,13 @@ function ResultBlock({
     <article className={`group rounded-[22px] border p-4 transition ${active ? "border-[#22231f]/20 bg-[#22231f] text-white" : "border-black/[.075] bg-white/24 hover:bg-white/45"}`}>
       <button type="button" onClick={onClick} className="block w-full text-left">
         <div className="flex items-center justify-between gap-3">
-          <span className={`text-[8px] font-semibold tracking-[.13em] ${active ? "text-white/28" : "text-black/24"}`}>{label}</span>
+          <span className={`text-[8px] font-semibold tracking-[.13em] ${active ? "text-white/55" : "text-black/55"}`}>{label}</span>
           <span className={`text-[8px] ${error ? "text-[#d49a88]" : active ? "text-[#8fb69b]" : "text-[#52685d]"}`}>{error ? "ERROR" : "READY"}</span>
         </div>
         <pre className={`mt-3 max-h-[122px] overflow-auto whitespace-pre-wrap break-all rounded-[16px] p-3 font-mono text-[10px] leading-5 ${active ? "bg-white/[.055] text-[#cbd8cd]" : "bg-[#151714] text-[#cbd8cd]"}`}>{error || value || "（空）"}</pre>
       </button>
       <div className="mt-3 flex justify-end">
-        <button type="button" onClick={onCopy} disabled={!value || Boolean(error)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition disabled:opacity-25 ${active ? "border border-white/[.08] text-white/30 hover:bg-white hover:text-[#151714]" : "border border-black/[.08] text-black/31 hover:bg-[#22231f] hover:text-white"}`}>{copied ? "✓ COPIED" : "COPY"}</button>
+        <button type="button" onClick={onCopy} disabled={!value || Boolean(error)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition disabled:opacity-25 ${active ? "border border-white/[.08] text-white/30 hover:bg-white hover:text-[#151714]" : "border border-black/[.08] text-black/31 hover:bg-[#22231f] hover:text-white"}`}>{copied ? "✓ 已复制" : "复制"}</button>
       </div>
     </article>
   )
@@ -667,7 +667,7 @@ export default function EscapeToolPage() {
 
         <header className="escape-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">STRING ESCAPE STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">STRING ESCAPE STUDIO</div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               把字符串，
               <br />
@@ -679,7 +679,7 @@ export default function EscapeToolPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               HTML、JavaScript、JSON、URL、CSS、Regex、Unicode、Base64、CSV、SQL 常用转义与反转义。实时处理，本地完成，适合调试复制、模板拼接和数据清洗。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{OPERATIONS.length} OPERATIONS</span>
               <span>{stats.categories} CATEGORIES</span>
               <span>LIVE TRANSFORM</span>
@@ -691,7 +691,7 @@ export default function EscapeToolPage() {
         <section className="escape-intro mt-7 grid gap-7 xl:grid-cols-[.66fr_1.34fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">OPERATIONS</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">OPERATIONS</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">选择转换。</h2>
 
               <div className="mt-6 flex flex-wrap gap-1.5">
@@ -704,8 +704,8 @@ export default function EscapeToolPage() {
                 {visibleOperations.map((operation) => (
                   <button key={operation.id} type="button" onClick={() => setActiveOperationId(operation.id)} className={`w-full rounded-[20px] border p-4 text-left transition ${activeOperationId === operation.id ? "border-[#22231f]/15 bg-[#22231f] text-white" : "border-black/[.08] bg-white/22 hover:bg-white/48"}`}>
                     <div className="flex items-center justify-between gap-3">
-                      <span className={`font-mono text-[8px] font-semibold ${activeOperationId === operation.id ? "text-white/32" : "text-black/25"}`}>{operation.category}</span>
-                      <span className={`text-[8px] ${activeOperationId === operation.id ? "text-white/24" : "text-black/23"}`}>{operation.id}</span>
+                      <span className={`font-mono text-[8px] font-semibold ${activeOperationId === operation.id ? "text-white/32" : "text-black/55"}`}>{operation.category}</span>
+                      <span className={`text-[8px] ${activeOperationId === operation.id ? "text-white/55" : "text-black/55"}`}>{operation.id}</span>
                     </div>
                     <div className={`mt-2 text-[14px] font-semibold tracking-[-.03em] ${activeOperationId === operation.id ? "text-white" : "text-black/70"}`}>{operation.label}</div>
                     <p className={`mt-2 text-[8px] leading-4 ${activeOperationId === operation.id ? "text-white/32" : "text-black/30"}`}>{operation.desc}</p>
@@ -716,7 +716,7 @@ export default function EscapeToolPage() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">TEXT PROFILE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">TEXT PROFILE</div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">{activeResult.error ? "当前转换失败，请检查输入格式。" : activeOperation.desc}</p>
               </div>
 
@@ -736,7 +736,7 @@ export default function EscapeToolPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SAMPLES</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SAMPLES</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {QUICK_INPUTS.map((item) => (
                   <button key={item.label} type="button" onClick={() => setInput(item.value)} className="rounded-full border border-black/[.085] px-3.5 py-2 text-[8px] font-semibold text-black/35 transition hover:bg-white/45 hover:text-black">{item.label}</button>
@@ -748,7 +748,7 @@ export default function EscapeToolPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">WORKBENCH</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">WORKBENCH</div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">{activeOperation.label}</h2>
               </div>
 
@@ -761,11 +761,11 @@ export default function EscapeToolPage() {
             <div className="mt-5 grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.92fr_1.08fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">INPUT</span>
-                  <span className="escape-num font-mono text-[8px] text-black/22">{formatNumber(stats.inputChars)} chars</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">INPUT</span>
+                  <span className="escape-num font-mono text-[8px] text-black/55">{formatNumber(stats.inputChars)} 字符</span>
                 </div>
 
-                <textarea value={input} onChange={(event) => setInput(event.target.value)} spellCheck={false} className="escape-scroll block h-[520px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6" placeholder="输入待处理文本..." />
+                <textarea value={input} onChange={(event) => setInput(event.target.value)} spellCheck={false} className="escape-scroll block h-[520px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6" placeholder="输入待处理文本..." />
 
                 <div className="flex flex-wrap items-center gap-2 border-t border-black/[.06] px-5 py-4">
                   <button type="button" onClick={() => copy(input, "input")} disabled={!input} className="rounded-full border border-black/[.085] px-3.5 py-2.5 text-[8px] font-semibold text-black/35 transition hover:bg-white/45 disabled:opacity-30">{copied === "input" ? "✓ 已复制输入" : "复制输入"}</button>
@@ -775,15 +775,15 @@ export default function EscapeToolPage() {
 
               <div ref={outputRef} className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">ACTIVE OUTPUT</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">ACTIVE OUTPUT</span>
                   <span className={`text-[8px] ${activeResult.error ? "text-[#d49a88]" : "text-[#8fb69b]"}`}>{activeResult.error ? "ERROR" : "READY"}</span>
                 </div>
 
                 <pre className="escape-dark-scroll h-[520px] overflow-auto whitespace-pre-wrap break-all p-5 font-mono text-[11px] leading-6 text-[#cbd8cd] sm:p-6">{activeResult.error || activeResult.value || "（空）"}</pre>
 
                 <div className="flex flex-wrap items-center gap-2 border-t border-white/[.06] px-5 py-4">
-                  <button type="button" onClick={() => copy(activeResult.value, "operation")} disabled={!activeResult.value || Boolean(activeResult.error)} className="rounded-full bg-white px-4 py-2.5 text-[8px] font-semibold text-[#151714] transition disabled:opacity-30">{copied === "operation" ? "✓ COPIED" : "COPY"}</button>
-                  <span className="text-[8px] text-white/18">{activeOperation.desc}</span>
+                  <button type="button" onClick={() => copy(activeResult.value, "operation")} disabled={!activeResult.value || Boolean(activeResult.error)} className="rounded-full bg-white px-4 py-2.5 text-[8px] font-semibold text-[#151714] transition disabled:opacity-30">{copied === "operation" ? "✓ 已复制" : "复制"}</button>
+                  <span className="text-[8px] text-white/55">{activeOperation.desc}</span>
                 </div>
               </div>
             </div>
@@ -792,7 +792,7 @@ export default function EscapeToolPage() {
 
         <section className="escape-intro mt-12 grid gap-7 border-t border-black/10 pt-8 lg:grid-cols-[.56fr_1.44fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">ALL RESULTS</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">ALL RESULTS</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               同一段文本，
               <br />
@@ -814,7 +814,7 @@ export default function EscapeToolPage() {
 
         <section className="escape-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">REPORT</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">REPORT</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               输入、输出，
               <br />
@@ -828,8 +828,8 @@ export default function EscapeToolPage() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">ESCAPE PROFILE</span>
-              <span className="text-[8px] text-white/17">LOCAL TRANSFORM</span>
+              <span className="text-[8px] tracking-[.13em] text-white/55">ESCAPE PROFILE</span>
+              <span className="text-[8px] text-white/55">LOCAL TRANSFORM</span>
             </div>
             <pre className="escape-dark-scroll max-h-[390px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[11px] leading-7 text-[#c7d3c7] sm:p-6">{report}</pre>
           </div>
@@ -837,15 +837,15 @@ export default function EscapeToolPage() {
 
         <section className="escape-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">HTML ORDER</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">HTML ORDER</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">HTML 转义会先处理 &，反转义会支持命名实体和数字实体，避免 &amp;lt; 这类嵌套内容被错误提前还原。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">CONTEXT MATTERS</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">CONTEXT MATTERS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">HTML、JS、URL、CSS、Regex 的“安全字符”并不相同。复制前先确认字符串最终会放进哪个语境。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">SQL NOTE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">SQL NOTE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">SQL 字符串转义只适合展示普通字面量。真实数据库写入请优先使用参数化查询，不要拼接用户输入。</p>
           </div>
         </section>

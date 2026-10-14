@@ -461,7 +461,7 @@ function Slider({
 }) {
   return (
     <div>
-      <div className="mb-2 flex justify-between text-[8px] text-black/28">
+      <div className="mb-2 flex justify-between text-[8px] text-black/55">
         <span>{label}</span>
         <span className="wm-num font-mono text-[#52685d]">{value.toFixed(step < 1 ? 2 : 0)}{unit}</span>
       </div>
@@ -499,7 +499,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`wm-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -971,7 +971,7 @@ export default function ImageWatermarkPage() {
 
         <header className="wm-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">IMAGE WATERMARK STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">图片加水印</div>
             <h1 className="mt-4 max-w-[930px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               给图片，
               <br />
@@ -983,7 +983,7 @@ export default function ImageWatermarkPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               浏览器本地给图片添加文字或 Logo 水印，支持单点定位、全图平铺、描边、背景底片、混合模式、导出格式和高清倍率。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>LOCAL CANVAS</span>
               <span>TEXT / LOGO</span>
               <span>TILE MODE</span>
@@ -995,7 +995,7 @@ export default function ImageWatermarkPage() {
         <section className="wm-intro mt-7 grid gap-7 xl:grid-cols-[.66fr_1.34fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">SOURCE IMAGE</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">原图</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">导入图片。</h2>
 
               <div onDragOver={(event) => event.preventDefault()} onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} className={`mt-6 rounded-[24px] border border-dashed p-5 text-center transition ${isDragging ? "border-[#52685d] bg-[#52685d]/8" : "border-black/[.14] bg-white/20"}`}>
@@ -1015,11 +1015,11 @@ export default function ImageWatermarkPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">PRESETS</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">预设</div>
               <div className="wm-scroll mt-4 grid max-h-[300px] gap-2 overflow-auto pr-1 sm:grid-cols-2">
                 {PRESETS.map((preset) => (
                   <button key={preset.name} type="button" onClick={() => applyPreset(preset)} className="rounded-[20px] border border-black/[.08] bg-white/22 p-4 text-left transition hover:bg-white/48">
-                    <div className="font-mono text-[8px] font-semibold text-black/24">{preset.mode.toUpperCase()}</div>
+                    <div className="font-mono text-[8px] font-semibold text-black/55">{preset.mode.toUpperCase()}</div>
                     <div className="mt-2 text-[14px] font-semibold tracking-[-.03em] text-black/70">{preset.name}</div>
                     <p className="mt-2 text-[8px] leading-4 text-black/30">{preset.desc}</p>
                   </button>
@@ -1028,7 +1028,7 @@ export default function ImageWatermarkPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">TEXT SAMPLES</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">TEXT SAMPLES</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {SAMPLE_HINTS.map((item) => (
                   <button key={item} type="button" onClick={() => { setText(item); setWatermarkMode("text") }} className="rounded-full border border-black/[.085] px-3.5 py-2 text-[8px] font-semibold text-black/35 transition hover:bg-white/45 hover:text-black">{item}</button>
@@ -1041,14 +1041,14 @@ export default function ImageWatermarkPage() {
             <div className="grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.9fr_1.1fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">WATERMARK CONTROLS</span>
-                  <span className="text-[8px] text-black/22">{watermarkMode.toUpperCase()}</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">WATERMARK CONTROLS</span>
+                  <span className="text-[8px] text-black/55">{watermarkMode.toUpperCase()}</span>
                 </div>
 
                 <div className="wm-scroll h-[742px] overflow-auto p-5 sm:p-6">
                   <div className="space-y-6">
                     <div>
-                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">MODE</div>
+                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">MODE</div>
                       <div className="flex flex-wrap gap-2">
                         <TogglePill active={watermarkMode === "text"} label="文字水印" onClick={() => setWatermarkMode("text")} />
                         <TogglePill active={watermarkMode === "logo"} label="Logo 图片" onClick={() => setWatermarkMode("logo")} />
@@ -1059,7 +1059,7 @@ export default function ImageWatermarkPage() {
                     {watermarkMode === "text" ? (
                       <>
                         <label>
-                          <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">WATERMARK TEXT</span>
+                          <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">WATERMARK TEXT</span>
                           <textarea value={text} onChange={(event) => setText(event.target.value)} spellCheck={false} className="wm-scroll block h-24 w-full resize-none rounded-[20px] border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] leading-5 text-black/68 outline-none transition focus:border-black/25" placeholder="输入水印文字，支持多行" />
                         </label>
 
@@ -1071,7 +1071,7 @@ export default function ImageWatermarkPage() {
 
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label>
-                            <span className="mb-2 block text-[8px] text-black/24">字体</span>
+                            <span className="mb-2 block text-[8px] text-black/55">字体</span>
                             <select value={fontFamily} onChange={(event) => setFontFamily(event.target.value as FontFamily)} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 text-[10px] outline-none">
                               {FONT_OPTIONS.map((font) => (
                                 <option key={font.label} value={font.value}>{font.label}</option>
@@ -1080,7 +1080,7 @@ export default function ImageWatermarkPage() {
                           </label>
 
                           <label>
-                            <span className="mb-2 block text-[8px] text-black/24">文字颜色</span>
+                            <span className="mb-2 block text-[8px] text-black/55">文字颜色</span>
                             <input type="color" value={color} onChange={(event) => setColor(event.target.value)} className="h-12 w-full cursor-pointer rounded-[16px] border border-black/[.08] bg-transparent p-1" />
                           </label>
                         </div>
@@ -1093,7 +1093,7 @@ export default function ImageWatermarkPage() {
 
                           <div className="grid gap-4 sm:grid-cols-2">
                             <label>
-                              <span className="mb-2 block text-[8px] text-black/24">描边颜色</span>
+                              <span className="mb-2 block text-[8px] text-black/55">描边颜色</span>
                               <input type="color" value={strokeColor} onChange={(event) => setStrokeColor(event.target.value)} disabled={!strokeEnabled} className="h-12 w-full cursor-pointer rounded-[16px] border border-black/[.08] bg-transparent p-1 disabled:opacity-30" />
                             </label>
                             <Slider label="描边宽度" value={strokeWidth} min={0} max={14} unit="px" onChange={setStrokeWidth} />
@@ -1101,7 +1101,7 @@ export default function ImageWatermarkPage() {
 
                           <div className="mt-4 grid gap-4 sm:grid-cols-3">
                             <label>
-                              <span className="mb-2 block text-[8px] text-black/24">底片颜色</span>
+                              <span className="mb-2 block text-[8px] text-black/55">底片颜色</span>
                               <input type="color" value={backgroundColor} onChange={(event) => setBackgroundColor(event.target.value)} disabled={!backgroundEnabled} className="h-12 w-full cursor-pointer rounded-[16px] border border-black/[.08] bg-transparent p-1 disabled:opacity-30" />
                             </label>
                             <Slider label="底片透明" value={backgroundOpacity} min={0} max={1} step={0.01} unit="" onChange={setBackgroundOpacity} />
@@ -1111,7 +1111,7 @@ export default function ImageWatermarkPage() {
                       </>
                     ) : (
                       <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-5">
-                        <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">LOGO WATERMARK</div>
+                        <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">LOGO WATERMARK</div>
                         <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                         <button type="button" onClick={() => logoInputRef.current?.click()} className="mt-4 rounded-full bg-[#22231f] px-5 py-3 text-[9px] font-semibold text-white">选择 Logo 图片</button>
                         <p className="mt-3 text-[9px] leading-5 text-black/34">{logoInfo ? `${logoInfo.name} · ${logoInfo.width}×${logoInfo.height}` : "未选择 Logo 时不会绘制图片水印。"}</p>
@@ -1126,7 +1126,7 @@ export default function ImageWatermarkPage() {
                       <Slider label="旋转角度" value={rotate} min={-90} max={90} unit="°" onChange={setRotate} />
                       <Slider label="边距" value={margin} min={0} max={200} unit="px" onChange={setMargin} />
                       <label>
-                        <span className="mb-2 block text-[8px] text-black/24">混合模式</span>
+                        <span className="mb-2 block text-[8px] text-black/55">混合模式</span>
                         <select value={blendMode} onChange={(event) => setBlendMode(event.target.value as BlendMode)} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 text-[10px] outline-none">
                           <option value="source-over">normal</option>
                           <option value="multiply">multiply</option>
@@ -1144,7 +1144,7 @@ export default function ImageWatermarkPage() {
                       </div>
                     ) : (
                       <div>
-                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">POSITION</div>
+                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">POSITION</div>
                         <div className="grid grid-cols-3 gap-1.5">
                           {POSITION_OPTIONS.map((item) => (
                             <button key={item.value} type="button" onClick={() => setPosition(item.value)} className={`rounded-[14px] px-3 py-3 text-[8px] font-semibold transition ${position === item.value ? "bg-[#52685d] text-white" : "bg-white/22 text-black/33 hover:bg-white/50"}`}>{item.label}</button>
@@ -1154,10 +1154,10 @@ export default function ImageWatermarkPage() {
                     )}
 
                     <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-5">
-                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">EXPORT</div>
+                      <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">导出</div>
                       <div className="grid gap-4 sm:grid-cols-3">
                         <label>
-                          <span className="mb-2 block text-[8px] text-black/24">格式</span>
+                          <span className="mb-2 block text-[8px] text-black/55">格式</span>
                           <select value={exportFormat} onChange={(event) => setExportFormat(event.target.value as ExportFormat)} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] outline-none">
                             <option value="png">PNG</option>
                             <option value="jpeg">JPG</option>
@@ -1174,8 +1174,8 @@ export default function ImageWatermarkPage() {
 
               <div className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">LIVE CANVAS</span>
-                  <span className={`text-[8px] ${renderError ? "text-[#d49a88]" : imageInfo ? "text-[#8fb69b]" : "text-white/18"}`}>{renderError ? "ERROR" : imageInfo ? "READY" : "WAITING"}</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">LIVE CANVAS</span>
+                  <span className={`text-[8px] ${renderError ? "text-[#d49a88]" : imageInfo ? "text-[#8fb69b]" : "text-white/55"}`}>{renderError ? "ERROR" : imageInfo ? "READY" : "WAITING"}</span>
                 </div>
 
                 <div ref={previewRef} className="p-4 sm:p-5">
@@ -1201,8 +1201,8 @@ export default function ImageWatermarkPage() {
                     ].map((item) => (
                       <div key={item.label} className="group rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
                         <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">{item.label}</span>
-                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/25 transition hover:text-white">{copied === item.key ? "✓ COPIED" : "COPY"}</button>
+                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">{item.label}</span>
+                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === item.key ? "✓ 已复制" : "复制"}</button>
                         </div>
                         <pre className="wm-dark-scroll max-h-[132px] overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{item.value}</pre>
                       </div>
@@ -1216,15 +1216,15 @@ export default function ImageWatermarkPage() {
 
         <section className="wm-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL ONLY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL ONLY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">图片通过浏览器 File API 读取并绘制到 canvas，不上传服务器。下载时直接从当前画布导出。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">TEXT / LOGO</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">TEXT / LOGO</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">文字水印支持多行、描边和背景底片；Logo 水印支持单点和全图平铺，适合品牌标记。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">EXPORT SCALE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">EXPORT SCALE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">导出倍率会改变画布实际像素。2x / 3x 适合高清导出，但大图会消耗更多内存。</p>
           </div>
         </section>

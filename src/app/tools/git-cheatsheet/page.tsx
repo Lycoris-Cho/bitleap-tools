@@ -1537,7 +1537,7 @@ function CommandCard({
         <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`h-1.5 w-1.5 rounded-full ${riskDot(command.risk)}`} />
-            <span className={`text-[8px] font-semibold tracking-[.13em] ${selected ? "text-white/28" : "text-black/24"}`}>
+            <span className={`text-[8px] font-semibold tracking-[.13em] ${selected ? "text-white/55" : "text-black/55"}`}>
               {command.category}
             </span>
             {command.modern && (
@@ -1567,12 +1567,12 @@ function CommandCard({
         </button>
 
         <div className="flex shrink-0 flex-col gap-2">
-          <button type="button" onClick={onToggleFavorite} className={`grid h-8 w-8 place-items-center rounded-full border text-[12px] transition ${favorite ? "border-[#b28d48]/25 bg-[#b28d48]/14 text-[#9b7542]" : selected ? "border-white/[.08] text-white/28 hover:bg-white/10" : "border-black/[.08] text-black/25 hover:bg-white/50 hover:text-black"}`} aria-label={favorite ? "取消收藏" : "收藏命令"}>
+          <button type="button" onClick={onToggleFavorite} className={`grid h-8 w-8 place-items-center rounded-full border text-[12px] transition ${favorite ? "border-[#b28d48]/25 bg-[#b28d48]/14 text-[#9b7542]" : selected ? "border-white/[.08] text-white/55 hover:bg-white/10" : "border-black/[.08] text-black/55 hover:bg-white/50 hover:text-black"}`} aria-label={favorite ? "取消收藏" : "收藏命令"}>
             {favorite ? "★" : "☆"}
           </button>
 
           <button type="button" onClick={onCopy} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${selected ? "border border-white/[.08] text-white/30 hover:bg-white hover:text-[#151714]" : "border border-black/[.08] text-black/31 hover:bg-[#22231f] hover:text-white"}`}>
-            {copied ? "✓" : "COPY"}
+            {copied ? "✓" : "复制"}
           </button>
         </div>
       </div>
@@ -1616,7 +1616,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
         {label}
       </div>
       <div className={`git-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>
@@ -1924,7 +1924,7 @@ export default function GitCheatsheetPage() {
 
         <header className="git-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               GIT COMMAND STUDIO
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
@@ -1938,7 +1938,7 @@ export default function GitCheatsheetPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               Git 命令速查、搜索、分类、风险提示、收藏、占位符填充和常用平台复制。适合日常开发、教学、排查和新成员上手。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{formatNumber(stats.total)} COMMANDS</span>
               <span>{formatNumber(stats.categories)} CATEGORIES</span>
               <span>{formatNumber(stats.dangerous)} HIGH RISK</span>
@@ -1950,7 +1950,7 @@ export default function GitCheatsheetPage() {
         <section className="git-intro mt-7 grid gap-7 xl:grid-cols-[.68fr_1.32fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 SEARCH
               </div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">
@@ -1959,14 +1959,14 @@ export default function GitCheatsheetPage() {
 
               <div className="mt-6 space-y-5">
                 <label>
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                     KEYWORD
                   </span>
                   <input value={search} onChange={(event) => setSearch(event.target.value)} spellCheck={false} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none transition focus:border-black/25" placeholder="branch / stash / 撤销 / force..." />
                 </label>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">
                     CATEGORY
                   </div>
                   <div className="flex max-h-[166px] flex-wrap gap-1.5 overflow-auto pr-1">
@@ -1979,7 +1979,7 @@ export default function GitCheatsheetPage() {
                 </div>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">
                     RISK
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -2003,7 +2003,7 @@ export default function GitCheatsheetPage() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   COMMAND PROFILE
                 </div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">
@@ -2022,7 +2022,7 @@ export default function GitCheatsheetPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                 QUICK COPY
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
@@ -2039,7 +2039,7 @@ export default function GitCheatsheetPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                   RESULT
                 </div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">
@@ -2061,10 +2061,10 @@ export default function GitCheatsheetPage() {
                 {grouped.length === 0 ? (
                   <div className="grid min-h-[360px] place-items-center rounded-[30px] border border-black/[.075] bg-white/22 px-6 text-center">
                     <div>
-                      <div className="text-[8px] tracking-[.14em] text-black/20">
+                      <div className="text-[8px] tracking-[.14em] text-black/55">
                         EMPTY
                       </div>
-                      <p className="mt-3 text-[9px] text-black/28">
+                      <p className="mt-3 text-[9px] text-black/55">
                         没有找到匹配的 Git 命令。试试 branch、stash、reset 或清空筛选。
                       </p>
                     </div>
@@ -2074,10 +2074,10 @@ export default function GitCheatsheetPage() {
                     {grouped.map(([category, commands]) => (
                       <section key={category}>
                         <div className="mb-3 flex items-center justify-between">
-                          <h3 className="text-[9px] font-semibold tracking-[.14em] text-black/27">
+                          <h3 className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                             {category}
                           </h3>
-                          <span className="git-num font-mono text-[8px] text-black/22">
+                          <span className="git-num font-mono text-[8px] text-black/55">
                             {formatNumber(commands.length)} commands
                           </span>
                         </div>
@@ -2097,10 +2097,10 @@ export default function GitCheatsheetPage() {
                 <div className="sticky top-6 overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
                   <div className="border-b border-white/[.065] px-5 py-4">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                      <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                         COMMAND BUILDER
                       </span>
-                      <span className={`text-[8px] font-semibold ${activeCommand ? riskTone(activeCommand.risk).replace("text-", "text-") : "text-white/18"}`}>
+                      <span className={`text-[8px] font-semibold ${activeCommand ? riskTone(activeCommand.risk).replace("text-", "text-") : "text-white/55"}`}>
                         {activeCommand ? RISK_META[activeCommand.risk].label : "—"}
                       </span>
                     </div>
@@ -2133,13 +2133,13 @@ export default function GitCheatsheetPage() {
                   <div className="git-dark-scroll max-h-[390px] overflow-auto p-5">
                     {placeholders.length ? (
                       <div>
-                        <div className="mb-3 text-[8px] font-semibold tracking-[.13em] text-white/24">
+                        <div className="mb-3 text-[8px] font-semibold tracking-[.13em] text-white/55">
                           PLACEHOLDERS
                         </div>
                         <div className="space-y-3">
                           {placeholders.map((key) => (
                             <label key={key} className="block">
-                              <span className="mb-1.5 block font-mono text-[8px] text-white/25">
+                              <span className="mb-1.5 block font-mono text-[8px] text-white/55">
                                 &lt;{key}&gt;
                               </span>
                               <input value={placeholderValues[key] ?? ""} onChange={(event) => setPlaceholderValues((current) => ({ ...current, [key]: event.target.value }))} spellCheck={false} className="w-full rounded-full border border-white/[.07] bg-white/[.045] px-4 py-3 font-mono text-[10px] text-[#cbd8cd] outline-none transition focus:border-white/20" />
@@ -2148,7 +2148,7 @@ export default function GitCheatsheetPage() {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-[9px] leading-5 text-white/24">
+                      <p className="text-[9px] leading-5 text-white/55">
                         这条命令没有占位符，可以直接复制使用。
                       </p>
                     )}
@@ -2166,7 +2166,7 @@ export default function GitCheatsheetPage() {
 
                     {activeCommand && (
                       <div className="mt-5 rounded-[18px] border border-white/[.07] bg-white/[.035] p-4">
-                        <div className="text-[8px] font-semibold tracking-[.12em] text-white/24">
+                        <div className="text-[8px] font-semibold tracking-[.12em] text-white/55">
                           RISK LEVEL
                         </div>
                         <p className="mt-2 text-[8px] leading-5 text-white/31">
@@ -2183,7 +2183,7 @@ export default function GitCheatsheetPage() {
 
         <section className="git-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
               REPORT
             </div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
@@ -2206,10 +2206,10 @@ export default function GitCheatsheetPage() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">
+              <span className="text-[8px] tracking-[.13em] text-white/55">
                 CHEATSHEET PROFILE
               </span>
-              <span className="text-[8px] text-white/17">
+              <span className="text-[8px] text-white/55">
                 LOCAL INDEX
               </span>
             </div>
@@ -2222,7 +2222,7 @@ export default function GitCheatsheetPage() {
 
         <section className="git-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               SEARCH WITHOUT SIDE EFFECT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -2231,7 +2231,7 @@ export default function GitCheatsheetPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               PLACEHOLDER FILL
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -2240,7 +2240,7 @@ export default function GitCheatsheetPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               RISK FIRST
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

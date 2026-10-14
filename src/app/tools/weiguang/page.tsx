@@ -15,6 +15,7 @@ import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { RGBShiftShader } from "three/addons/shaders/RGBShiftShader.js";
 import { VignetteShader } from "three/addons/shaders/VignetteShader.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { Breadcrumb } from "@/components/breadcrumb";
 
 type 镜头模式 = "静止" | "轻柔漂移" | "电影推进" | "呼吸镜头" | "手持微动";
@@ -22,6 +23,8 @@ type 粒子类型 = "关闭" | "尘埃" | "樱花" | "萤火虫" | "雪花" | "�
 type 预设名称 = "暮光" | "春日" | "夜色" | "雨夜" | "胶片";
 
 const MAX_UPLOAD_MB = 30;
+
+type 导出范围类型 = "整幅画面" | "仅图片";
 
 type 设置 = {
   镜头X: number;
@@ -60,7 +63,7 @@ type 设置 = {
 const 默认设置: 设置 = {
   镜头X: 0.5,
   镜头Y: 0.5,
-  缩放: 0.52,
+  缩放: 0.5,
   旋转: 0,
   竖图适配: "完整显示",
   竖图构图位置: 0.0,
@@ -269,7 +272,18 @@ const 调色着色器 = {
         c.rgb = mix(c.rgb, sharpened, clamp(sharpness, 0.0, 1.0));
       }
 
+      // 曝光是物理增益，留在线性空间做
       c.rgb *= exposure;
+
+      /*
+       * 其余调色搬到"感知空间"（近似 sRGB）来做，处理完再转回线性。
+       *
+       * 线性空间里做对比度/饱和度会严重偏离肉眼预期：对比度的支点在 0.5，
+       * 而线性 0.5 已经是很亮的高光了，所以一降对比度暗部就被非线性地抬飞、
+       * 一升对比度暗部直接压死 —— 这也是「对比度怎么拉都回不来」的原因之一。
+       * 中间这段 pow 之后，滑杆手感就和普通修图软件一致了。
+       */
+      c.rgb = pow(max(c.rgb, 0.0), vec3(0.4545));
 
       float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
       c.rgb = mix(vec3(l), c.rgb, saturation);
@@ -287,6 +301,9 @@ const 调色着色器 = {
       float g = (rand(vUv * vec2(1920.0,1080.0)) - 0.5) * grain;
       c.rgb += g;
 
+      // 回到线性工作空间，最后统一由 OutputPass 编码成 sRGB
+      c.rgb = pow(max(c.rgb, 0.0), vec3(2.2));
+
       gl_FragColor = vec4(c.rgb, c.a);
     }
   `,
@@ -296,23 +313,25 @@ function 限制(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
 }
 
-function 画面比例(
+/**
+ * 图片在画布里的适配缩放（世界单位；平面是 2×2，正好铺满整个视口）。
+ *
+ * 与旧实现的区别：**「完整显示」不再把小图放大**。
+ * 以前不管原图多大都会缩放到刚好铺满某一个方向，所以一张 600px 的小图一导入
+ * 就被拉到视口大小，看起来又糊又像"被改过"。现在只有超过视口的图才缩小到
+ * 完整可见，没超过的按原始像素大小居中显示 —— 也就是导入即原大小、不放大。
+ */
+function 适配缩放(
   iw: number,
   ih: number,
   vw: number,
   vh: number,
   mode: "完整显示" | "铺满画布",
 ) {
-  const ia = iw / ih;
-  const va = vw / vh;
-
-  if (mode === "完整显示") {
-    if (ia > va) return { x: 1, y: va / ia };
-    return { x: ia / va, y: 1 };
-  }
-
-  if (ia > va) return { x: ia / va, y: 1 };
-  return { x: 1, y: va / ia };
+  const 完整 = Math.min(vw / iw, vh / ih);
+  const 铺满 = Math.max(vw / iw, vh / ih);
+  const k = mode === "铺满画布" ? 铺满 : Math.min(完整, 1);
+  return { x: (iw * k) / vw, y: (ih * k) / vh };
 }
 
 function 竖图构图偏移(
@@ -509,12 +528,14 @@ export default function WeiguangStudio() {
   const 进度计时器 = useRef<number | null>(null);
   const 录制器 = useRef<MediaRecorder | null>(null);
   const 原图预览引用 = useRef(false);
+  const 导出范围引用 = useRef<导出范围类型>("整幅画面");
 
   const [设置值, set设置值] = useState<设置>(默认设置);
   const [已有图片, set已有图片] = useState(false);
   const [暂停, set暂停] = useState(false);
   const [面板打开, set面板打开] = useState(true);
   const [原图预览, set原图预览] = useState(false);
+  const [导出范围, set导出范围] = useState<导出范围类型>("整幅画面");
   const [当前预设, set当前预设] = useState<预设名称 | "自然" | "自定义">("自然");
   const [正在录制, set正在录制] = useState(false);
   const [录制总长, set录制总长] = useState(5);
@@ -530,12 +551,16 @@ export default function WeiguangStudio() {
   }, [原图预览]);
 
   useEffect(() => {
+    导出范围引用.current = 导出范围;
+  }, [导出范围]);
+
+  useEffect(() => {
     const rt = 运行时.current;
     const mount = 容器.current;
     const img = rt?.imageTexture?.image as HTMLImageElement | undefined;
     if (!rt || !mount || !img) return;
 
-    const cover = 画面比例(
+    const cover = 适配缩放(
       img.naturalWidth || img.width,
       img.naturalHeight || img.height,
       mount.clientWidth,
@@ -561,7 +586,16 @@ export default function WeiguangStudio() {
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    /*
+     * 这里必须关掉色调映射。
+     *
+     * 整条链是「渲染到 RT → Bloom → 色散 → 暗角 → 调色 → 输出」，而 ShaderPass
+     * 不会自己做线性→sRGB 编码，所以必须由最后的 OutputPass 统一编码。
+     * 如果此时还开着 ACES，OutputPass 会顺带把整幅画面（含原图）再调一次色，
+     * 那"原图就是原图"就不成立了 —— 而 ACES 现在其实也没作用在任何东西上
+     * （图片材质 toneMapped=false，粒子是自定义 ShaderMaterial）。
+     */
+    renderer.toneMapping = THREE.NoToneMapping;
     renderer.toneMappingExposure = 1;
     renderer.setClearColor("#101116");
     renderer.setSize(mount.clientWidth, mount.clientHeight);
@@ -646,6 +680,10 @@ export default function WeiguangStudio() {
     composer.addPass(rgbPass);
     composer.addPass(vignettePass);
     composer.addPass(gradePass);
+    // 关键：把线性工作空间编码回 sRGB。
+    // 之前少了这一步，画布上显示的是线性值，于是 sRGB 128 会显示成 56 ——
+    // 整幅画面偏暗、暗部被压死，而"对比度"是在线性空间里算的，怎么拉都救不回来。
+    composer.addPass(new OutputPass());
 
     const rt = {
       renderer,
@@ -709,7 +747,7 @@ export default function WeiguangStudio() {
       if (rt.imageTexture?.image) {
         const img = rt.imageTexture.image as HTMLImageElement;
         const current = 设置引用.current;
-        const cover = 画面比例(
+        const cover = 适配缩放(
           img.naturalWidth || img.width,
           img.naturalHeight || img.height,
           w,
@@ -813,7 +851,7 @@ export default function WeiguangStudio() {
         camera.zoom = 1;
         camera.updateProjectionMatrix();
 
-        const originalFit = 画面比例(
+        const originalFit = 适配缩放(
           imgObj.naturalWidth || imgObj.width,
           imgObj.naturalHeight || imgObj.height,
           mount.clientWidth,
@@ -827,7 +865,7 @@ export default function WeiguangStudio() {
       } else {
         // 正常效果模式：使用用户选择的适配、构图和镜头参数。
         if (imgObj) {
-          const fitted = 画面比例(
+          const fitted = 适配缩放(
             imgObj.naturalWidth || imgObj.width,
             imgObj.naturalHeight || imgObj.height,
             mount.clientWidth,
@@ -838,7 +876,15 @@ export default function WeiguangStudio() {
         }
 
         const z = 限制(s.缩放 + dz, 0, 1);
-        camera.zoom = THREE.MathUtils.lerp(1.72, 0.96, z);
+        /*
+         * 0.5 = 不缩放（图片就是"完整显示/铺满"的基准大小），往左缩小留白、往右放大。
+         * 旧映射是 1.72~0.96，也就是滑杆摆在中间时相机已经放大到 1.33 倍 ——
+         * 这正是"图片一导入就是被放大的"的来源。
+         */
+        camera.zoom =
+          z >= 0.5
+            ? THREE.MathUtils.lerp(1, 2.4, (z - 0.5) / 0.5)
+            : THREE.MathUtils.lerp(0.72, 1, z / 0.5);
         camera.updateProjectionMatrix();
 
         imageMesh.position.x =
@@ -908,9 +954,76 @@ export default function WeiguangStudio() {
       // 一旦让出这一帧，画布内容就可能被换走，toDataURL 只会拿到空白
       if (rt.capture) {
         rt.capture = false;
+
+        const img = rt.imageTexture?.image as HTMLImageElement | undefined;
+        const 仅图片 = 导出范围引用.current === "仅图片" && !!img;
+
+        let dataUrl: string;
+        let fileName: string;
+
+        if (仅图片 && img) {
+          /*
+           * 只导出图片本身。
+           *
+           * 用户导入的图如果不是画面比例，视口里必然留出背景；直接 toDataURL 会把
+           * 这些背景一起下载下来。这里改成按原图像素尺寸重新渲染一帧：相机缩放到 1、
+           * 图片铺满整幅画面，于是输出就是原图尺寸、原图比例、不带任何背景 ——
+           * 为了在视口里看清楚而设的缩放/平移/旋转在这一帧里被忽略。
+           */
+          const w = Math.max(1, img.naturalWidth || img.width);
+          const h = Math.max(1, img.naturalHeight || img.height);
+          const cssW = Math.max(1, mount.clientWidth);
+          const cssH = Math.max(1, mount.clientHeight);
+          const ratio = renderer.getPixelRatio();
+
+          const 旧 = {
+            zoom: camera.zoom,
+            sx: imageMesh.scale.x,
+            sy: imageMesh.scale.y,
+            px: imageMesh.position.x,
+            py: imageMesh.position.y,
+            pz: imageMesh.position.z,
+            rz: imageMesh.rotation.z,
+            resX: gradePass.uniforms.resolution.value.x,
+            resY: gradePass.uniforms.resolution.value.y,
+          };
+
+          renderer.setPixelRatio(1);
+          composer.setPixelRatio(1);
+          renderer.setSize(w, h, false);
+          composer.setSize(w, h);
+          gradePass.uniforms.resolution.value.set(w, h);
+
+          imageMesh.scale.set(1, 1, 1);
+          imageMesh.position.set(0, 0, 0);
+          imageMesh.rotation.z = 0;
+          camera.zoom = 1;
+          camera.updateProjectionMatrix();
+
+          composer.render();
+          dataUrl = renderer.domElement.toDataURL("image/png");
+
+          renderer.setPixelRatio(ratio);
+          composer.setPixelRatio(ratio);
+          renderer.setSize(cssW, cssH, false);
+          composer.setSize(cssW, cssH);
+          gradePass.uniforms.resolution.value.set(旧.resX, 旧.resY);
+
+          imageMesh.scale.set(旧.sx, 旧.sy, 1);
+          imageMesh.position.set(旧.px, 旧.py, 旧.pz);
+          imageMesh.rotation.z = 旧.rz;
+          camera.zoom = 旧.zoom;
+          camera.updateProjectionMatrix();
+
+          fileName = `微光-原图-${w}x${h}-${Date.now()}.png`;
+        } else {
+          dataUrl = renderer.domElement.toDataURL("image/png");
+          fileName = `微光-${Date.now()}.png`;
+        }
+
         const a = document.createElement("a");
-        a.download = `微光-${Date.now()}.png`;
-        a.href = renderer.domElement.toDataURL("image/png");
+        a.download = fileName;
+        a.href = dataUrl;
         a.click();
       }
     };
@@ -971,7 +1084,7 @@ export default function WeiguangStudio() {
       const img = texture.image as HTMLImageElement;
       const mount = 容器.current!;
       const current = 设置引用.current;
-      const cover = 画面比例(
+      const cover = 适配缩放(
         img.naturalWidth || img.width,
         img.naturalHeight || img.height,
         mount.clientWidth,
@@ -1552,6 +1665,26 @@ export default function WeiguangStudio() {
             >
               {原图预览 ? "返回效果" : "查看原图"}
             </button>
+            <select
+              className="bl-ui-button"
+              value={导出范围}
+              onChange={(e) => set导出范围(e.currentTarget.value as 导出范围类型)}
+              title="「仅图片」按原图像素尺寸导出，不含视口留白；「整幅画面」导出所见画面"
+              style={{
+                ...toolbarButton,
+                appearance: "none",
+                WebkitAppearance: "none",
+                paddingRight: 10,
+                color: "rgba(255,255,255,.82)",
+              }}
+            >
+              <option value="整幅画面" style={{ color: "#111" }}>
+                导出：整幅画面
+              </option>
+              <option value="仅图片" style={{ color: "#111" }}>
+                导出：仅图片
+              </option>
+            </select>
             <button className="bl-ui-button" style={toolbarButton} onClick={导出图片}>
               导出 PNG
             </button>

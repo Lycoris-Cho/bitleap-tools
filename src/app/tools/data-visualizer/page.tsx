@@ -1067,7 +1067,7 @@ export default function DataVisualizerPage() {
                 <p className="mt-1 text-[11px] leading-5 text-zinc-400">支持上传、拖拽与粘贴。</p>
               </div>
               <div className="rounded-[20px] border border-black/[0.055] bg-white/68 p-4 backdrop-blur-md">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-zinc-300">Export</div>
+                <div className="text-[9px] uppercase tracking-[0.2em] text-zinc-300">导出</div>
                 <div className="mt-2 text-sm font-semibold text-zinc-700">PNG / Option</div>
                 <p className="mt-1 text-[11px] leading-5 text-zinc-400">快速带走图表与配置。</p>
               </div>

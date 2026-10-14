@@ -135,7 +135,7 @@ function RangeField({
             onChange={(event) => onChange(Number(event.target.value))}
             className="clamp-num w-16 bg-transparent text-right font-mono text-[11px] font-semibold outline-none"
           />
-          <span className="text-[8px] text-black/26">px</span>
+          <span className="text-[8px] text-black/55">px</span>
         </div>
       </div>
 
@@ -404,14 +404,14 @@ export default function ClampPage() {
       <div className="relative z-10 mx-auto max-w-[1500px] px-5 pb-10 pt-6 sm:px-8">
         <div className="clamp-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">
             FLUID CSS LAB · CLAMP()
           </div>
         </div>
 
         <header className="clamp-intro mt-11 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               CSS CLAMP CALCULATOR
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.8vw,96px)] font-semibold leading-[.9] tracking-[-.073em]">
@@ -443,7 +443,7 @@ export default function ClampPage() {
           <button
             type="button"
             onClick={reset}
-            className="self-start text-[9px] font-semibold text-black/29 transition hover:text-black lg:self-auto"
+            className="self-start text-[9px] font-semibold text-black/55 transition hover:text-black lg:self-auto"
           >
             恢复默认
           </button>
@@ -451,7 +451,7 @@ export default function ClampPage() {
 
         <section className="clamp-intro mt-8 grid gap-10 lg:grid-cols-[.72fr_1.28fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
               PARAMETERS
             </div>
             <h2 className="mt-2 text-3xl font-semibold tracking-[-.05em]">
@@ -490,7 +490,7 @@ export default function ClampPage() {
             </div>
 
             <div className="mt-7">
-              <div className="text-[9px] font-semibold tracking-[.11em] text-black/25">
+              <div className="text-[9px] font-semibold tracking-[.11em] text-black/55">
                 PROPERTY
               </div>
               <div className="mt-3 flex flex-wrap gap-1">
@@ -518,7 +518,7 @@ export default function ClampPage() {
                 <div className="rounded-[28px] border border-black/[.075] bg-white/28 p-5 sm:p-7">
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                      <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                         GENERATED VALUE
                       </div>
                       <div className="clamp-value clamp-num mt-3 max-w-[900px] break-all font-mono text-[clamp(18px,2.7vw,32px)] font-medium leading-[1.25] tracking-[-.035em]">
@@ -537,19 +537,19 @@ export default function ClampPage() {
 
                   <div className="mt-6 grid gap-px overflow-hidden rounded-[18px] bg-black/[.07] sm:grid-cols-3">
                     <div className="bg-[#f3f1ea] p-4">
-                      <div className="text-[8px] text-black/24">SLOPE</div>
+                      <div className="text-[8px] text-black/55">SLOPE</div>
                       <b className="clamp-num mt-2 block font-mono text-sm">
                         {formatNumber(formula.slope)}vw
                       </b>
                     </div>
                     <div className="bg-[#f3f1ea] p-4">
-                      <div className="text-[8px] text-black/24">INTERCEPT</div>
+                      <div className="text-[8px] text-black/55">INTERCEPT</div>
                       <b className="clamp-num mt-2 block font-mono text-sm">
                         {formatNumber(formula.intercept)}px
                       </b>
                     </div>
                     <div className="bg-[#f3f1ea] p-4">
-                      <div className="text-[8px] text-black/24">
+                      <div className="text-[8px] text-black/55">
                         CURRENT VALUE
                       </div>
                       <b className="clamp-value clamp-num mt-2 block font-mono text-sm">
@@ -561,10 +561,10 @@ export default function ClampPage() {
 
                 <div className="mt-5 overflow-hidden rounded-[28px] border border-black/[.075] bg-[#f7f5ef]">
                   <div className="flex items-center justify-between border-b border-black/[.065] px-5 py-3">
-                    <span className="text-[8px] tracking-[.13em] text-black/24">
+                    <span className="text-[8px] tracking-[.13em] text-black/55">
                       FLUID CURVE
                     </span>
-                    <span className="text-[8px] text-black/23">
+                    <span className="text-[8px] text-black/55">
                       {minWidth}px → {maxWidth}px
                     </span>
                   </div>
@@ -658,7 +658,7 @@ export default function ClampPage() {
           <section className="clamp-intro mt-12 border-t border-black/10 pt-7">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+                <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                   RESPONSIVE PREVIEW
                 </div>
                 <h2 className="mt-2 text-3xl font-semibold tracking-[-.05em]">
@@ -724,7 +724,7 @@ export default function ClampPage() {
                     }}
                   >
                     <div>
-                      <div className="text-[8px] font-semibold tracking-[.14em] text-black/25">
+                      <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                         BITLEAP / FLUID TYPE
                       </div>
                       <div
@@ -755,7 +755,7 @@ export default function ClampPage() {
         {formula.valid && (
           <section className="clamp-intro mt-12 grid gap-9 border-t border-black/10 pt-7 lg:grid-cols-[.58fr_1.42fr]">
             <div>
-              <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+              <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                 CSS OUTPUT
               </div>
               <h2 className="mt-2 text-[clamp(30px,4vw,48px)] font-semibold leading-[.98] tracking-[-.055em]">
@@ -777,10 +777,10 @@ export default function ClampPage() {
 
             <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
               <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-                <span className="text-[8px] tracking-[.13em] text-white/28">
+                <span className="text-[8px] tracking-[.13em] text-white/55">
                   CSS
                 </span>
-                <span className="text-[8px] text-white/20">
+                <span className="text-[8px] text-white/55">
                   LINEAR INTERPOLATION
                 </span>
               </div>
@@ -796,7 +796,7 @@ export default function ClampPage() {
 
         <section className="clamp-intro mt-12 grid gap-7 border-t border-black/10 pt-6 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               MIN
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -804,7 +804,7 @@ export default function ClampPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               FLUID
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -812,7 +812,7 @@ export default function ClampPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               MAX
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

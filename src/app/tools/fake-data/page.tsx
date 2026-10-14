@@ -138,7 +138,7 @@ function StatBox({ label, value, tone = "default" }: { label: string; value: str
   const toneClass = tone === "green" ? "text-[#52685d]" : tone === "gold" ? "text-[#9b7542]" : tone === "rose" ? "text-[#965744]" : "text-black/62"
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`fake-num mt-3 truncate font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -148,8 +148,8 @@ function OutputBlock({ label, value, copied, onCopy }: { label: string; value: s
   return (
     <article className="border-t border-white/[.07] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.14em] text-white/22">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/28 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.14em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="fake-dark-scroll max-h-48 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{value}</pre>
     </article>
@@ -160,7 +160,7 @@ function FieldCheckbox({ field, checked, onToggle }: { field: FieldOption; check
   return (
     <button type="button" onClick={onToggle} className={`flex w-full items-center justify-between gap-3 rounded-[16px] border px-3 py-2.5 text-left transition ${checked ? "border-[#52685d]/20 bg-[#52685d] text-white" : "border-black/[.07] bg-white/24 text-black/52 hover:bg-white/50"}`}>
       <span className="min-w-0 truncate text-[10px] font-semibold">{field.label || field.key}</span>
-      <span className={`shrink-0 font-mono text-[7px] ${checked ? "text-white/40" : "text-black/24"}`}>{field.key}</span>
+      <span className={`shrink-0 font-mono text-[7px] ${checked ? "text-white/40" : "text-black/55"}`}>{field.key}</span>
     </button>
   )
 }
@@ -310,7 +310,7 @@ export default function FakeData() {
 
         <header className="fake-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.76fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">FAKE DATA STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">FAKE DATA STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">假数据，<br />生成得像真表。</h1>
           </div>
           <div>
@@ -324,10 +324,10 @@ export default function FakeData() {
         <section className="fake-intro mt-7 grid gap-5 xl:grid-cols-[320px_1fr_360px]">
           <aside className="min-w-0 space-y-4">
             <div className="rounded-[30px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">GENERATOR</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">GENERATOR</div>
               <div className="mt-5 space-y-4">
                 <label className="block">
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">SEED</span>
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">SEED</span>
                   <div className="flex gap-2">
                     <input value={seed} onChange={(event) => setSeed(event.target.value)} className="min-w-0 flex-1 rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] outline-none focus:border-black/22" />
                     <button type="button" onClick={() => setSeed(randomSeed())} className="rounded-full border border-black/[.08] px-3.5 py-2 text-[8px] font-semibold text-black/34 transition hover:bg-white/50">随机</button>
@@ -335,7 +335,7 @@ export default function FakeData() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">COUNT</span>
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">COUNT</span>
                   <div className="grid grid-cols-[1fr_92px] gap-2">
                     <input type="range" min={1} max={500} value={count} onChange={(event) => setCount(safeCount(Number(event.target.value)))} className="accent-[#52685d]" />
                     <input type="number" min={1} max={500} value={count} onChange={(event) => setCount(safeCount(Number(event.target.value)))} className="rounded-full border border-black/[.08] bg-white/35 px-3 py-2 text-right font-mono text-[10px] outline-none" />
@@ -363,7 +363,7 @@ export default function FakeData() {
             <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">FIELD LIBRARY</div>
+                  <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">FIELD LIBRARY</div>
                   <p className="mt-2 text-[8px] leading-4 text-black/30">选择需要出现在导出里的字段。</p>
                 </div>
                 <div className="flex gap-1.5">
@@ -377,7 +377,7 @@ export default function FakeData() {
               <div className="fake-scroll max-h-[560px] space-y-5 overflow-auto pr-1">
                 {visibleFields.map((group) => (
                   <div key={group.name}>
-                    <div className="mb-2 text-[7px] font-semibold tracking-[.13em] text-black/23">{group.name}</div>
+                    <div className="mb-2 text-[7px] font-semibold tracking-[.13em] text-black/55">{group.name}</div>
                     <div className="space-y-1.5">
                       {group.fields.map((field) => <FieldCheckbox key={field.key} field={field} checked={selectedSet.has(field.key)} onToggle={() => toggleField(field.key)} />)}
                     </div>
@@ -390,32 +390,32 @@ export default function FakeData() {
           <main ref={resultRef} className="min-w-0 overflow-hidden rounded-[32px] border border-black/[.08] bg-[#151714]">
             <div className="flex flex-col gap-3 border-b border-white/[.065] px-5 py-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.13em] text-white/24">DATA PREVIEW</div>
-                <p className="mt-2 text-[8px] text-white/28">当前只展示已选字段，导出也会同步过滤。</p>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">DATA PREVIEW</div>
+                <p className="mt-2 text-[8px] text-white/55">当前只展示已选字段，导出也会同步过滤。</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(["table", "cards", "raw"] as ViewMode[]).map((mode) => <button key={mode} type="button" onClick={() => setViewMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${viewMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>{mode}</button>)}
+                {(["table", "cards", "raw"] as ViewMode[]).map((mode) => <button key={mode} type="button" onClick={() => setViewMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${viewMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>{mode}</button>)}
               </div>
             </div>
 
             {!hasRows ? (
               <div className="grid h-[740px] place-items-center p-8 text-center">
                 <div>
-                  <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border border-white/[.08] text-[24px] text-white/26">↳</div>
-                  <p className="mt-5 text-[10px] text-white/28">左侧配置 seed、字段和数量后生成数据。</p>
+                  <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border border-white/[.08] text-[24px] text-white/55">↳</div>
+                  <p className="mt-5 text-[10px] text-white/55">左侧配置 seed、字段和数量后生成数据。</p>
                 </div>
               </div>
             ) : (
               <div className="fake-dark-scroll h-[740px] overflow-auto">
                 {viewMode === "table" && (
                   <table className="w-full min-w-[760px] text-left text-[10px]">
-                    <thead className="sticky top-0 z-10 bg-[#151714] text-[8px] uppercase tracking-[.12em] text-white/22">
+                    <thead className="sticky top-0 z-10 bg-[#151714] text-[8px] uppercase tracking-[.12em] text-white/55">
                       <tr>{selectedFields.map((field) => <th key={field} className="border-b border-white/[.065] px-4 py-3 font-semibold">{field}</th>)}</tr>
                     </thead>
                     <tbody>
                       {filtered.map((row, rowIndex) => (
                         <tr key={rowIndex} className="border-b border-white/[.045] transition hover:bg-white/[.035]">
-                          {selectedFields.map((field) => <td key={field} className={`${rowClass} max-w-[240px] truncate font-mono text-[#cbd8cd]`} title={row[field]}>{row[field] || <span className="text-white/18">empty</span>}</td>)}
+                          {selectedFields.map((field) => <td key={field} className={`${rowClass} max-w-[240px] truncate font-mono text-[#cbd8cd]`} title={row[field]}>{row[field] || <span className="text-white/55">empty</span>}</td>)}
                         </tr>
                       ))}
                     </tbody>
@@ -426,9 +426,9 @@ export default function FakeData() {
                   <div className="grid gap-3 p-5 lg:grid-cols-2">
                     {filtered.map((row, rowIndex) => (
                       <article key={rowIndex} className="rounded-[22px] border border-white/[.065] bg-white/[.035] p-4">
-                        <div className="mb-3 font-mono text-[8px] text-white/22">ROW {String(rowIndex + 1).padStart(2, "0")}</div>
+                        <div className="mb-3 font-mono text-[8px] text-white/55">ROW {String(rowIndex + 1).padStart(2, "0")}</div>
                         <div className="space-y-2">
-                          {selectedFields.map((field) => <div key={field} className="grid grid-cols-[92px_1fr] gap-3 text-[9px]"><span className="truncate text-white/26">{field}</span><span className="break-all font-mono text-[#cbd8cd]">{row[field] || "—"}</span></div>)}
+                          {selectedFields.map((field) => <div key={field} className="grid grid-cols-[92px_1fr] gap-3 text-[9px]"><span className="truncate text-white/55">{field}</span><span className="break-all font-mono text-[#cbd8cd]">{row[field] || "—"}</span></div>)}
                         </div>
                       </article>
                     ))}
@@ -443,15 +443,15 @@ export default function FakeData() {
           <aside className="min-w-0">
             <div className="sticky top-6 overflow-hidden rounded-[28px] border border-black/[.08] bg-[#151714]">
               <div className="border-b border-white/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-white/22">EXPORT</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">EXPORT</div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {(["json", "csv", "sql", "markdown", "typescript"] as ExportMode[]).map((mode) => <button key={mode} type="button" onClick={() => setExportMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${exportMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>{mode}</button>)}
+                  {(["json", "csv", "sql", "markdown", "typescript"] as ExportMode[]).map((mode) => <button key={mode} type="button" onClick={() => setExportMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${exportMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>{mode}</button>)}
                 </div>
               </div>
 
               <div className="p-5">
                 <label className="mb-4 block">
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-white/22">SQL TABLE NAME</span>
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-white/55">SQL TABLE NAME</span>
                   <input value={tableName} onChange={(event) => setTableName(event.target.value)} className="w-full rounded-full border border-white/[.08] bg-white/[.035] px-4 py-3 font-mono text-[10px] text-white/64 outline-none focus:border-white/20" />
                 </label>
                 <OutputBlock label={exportMode.toUpperCase()} value={activeOutput || "No output"} copied={copied === exportMode} onCopy={() => copy(activeOutput, exportMode)} />
@@ -468,7 +468,7 @@ export default function FakeData() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="mb-3 text-[8px] font-semibold tracking-[.13em] text-black/24">VIEW OPTIONS</div>
+              <div className="mb-3 text-[8px] font-semibold tracking-[.13em] text-black/55">VIEW OPTIONS</div>
               <div className="flex flex-wrap gap-2">
                 <TogglePill active={density === "compact"} label="紧凑" onClick={() => setDensity("compact")} />
                 <TogglePill active={density === "comfortable"} label="舒适" onClick={() => setDensity("comfortable")} />
@@ -481,9 +481,9 @@ export default function FakeData() {
         </section>
 
         <section className="fake-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
-          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/25">REPRODUCIBLE</div><p className="mt-2 text-[9px] leading-5 text-black/34">相同 seed 和数量会生成相同数据，适合团队复现测试用例。</p></div>
-          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/25">FIELD FIRST</div><p className="mt-2 text-[9px] leading-5 text-black/34">字段库支持搜索、分组、预设和全选，结果表格只保留当前选中字段。</p></div>
-          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/25">EXPORT READY</div><p className="mt-2 text-[9px] leading-5 text-black/34">JSON、CSV、SQL、Markdown 和 TypeScript 类型都能直接复制或下载。</p></div>
+          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/55">REPRODUCIBLE</div><p className="mt-2 text-[9px] leading-5 text-black/34">相同 seed 和数量会生成相同数据，适合团队复现测试用例。</p></div>
+          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/55">FIELD FIRST</div><p className="mt-2 text-[9px] leading-5 text-black/34">字段库支持搜索、分组、预设和全选，结果表格只保留当前选中字段。</p></div>
+          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/55">EXPORT READY</div><p className="mt-2 text-[9px] leading-5 text-black/34">JSON、CSV、SQL、Markdown 和 TypeScript 类型都能直接复制或下载。</p></div>
         </section>
 
         <div className="mt-12 border-t border-black/[.08] pt-5"><FooterNote /></div>

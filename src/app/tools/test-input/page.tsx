@@ -277,7 +277,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`fuzzer-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -318,19 +318,19 @@ function PayloadCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`h-1.5 w-1.5 rounded-full ${item.source === "custom" ? "bg-[#b28d48]" : "bg-[#52685d]"}`} />
-            <span className="text-[8px] font-semibold tracking-[.13em] text-black/24">{item.field}</span>
-            <span className="rounded-full bg-black/[.04] px-2 py-0.5 text-[7px] font-semibold text-black/24">{item.source.toUpperCase()}</span>
+            <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">{item.field}</span>
+            <span className="rounded-full bg-black/[.04] px-2 py-0.5 text-[7px] font-semibold text-black/55">{item.source.toUpperCase()}</span>
           </div>
           <div className="mt-2 text-[13px] font-semibold tracking-[-.03em] text-black/68">{item.label}</div>
           <pre className="fuzzer-scroll mt-3 max-h-28 overflow-auto whitespace-pre-wrap break-all rounded-[16px] bg-[#151714] px-3 py-3 font-mono text-[10px] leading-5 text-[#cbd8cd]">{toPrintable(item.value)}</pre>
         </div>
 
         <div className="flex shrink-0 flex-col gap-2">
-          <button type="button" onClick={onToggleFavorite} className={`grid h-8 w-8 place-items-center rounded-full border text-[12px] transition ${favorite ? "border-[#b28d48]/25 bg-[#b28d48]/14 text-[#9b7542]" : "border-black/[.08] text-black/25 hover:bg-white/50 hover:text-black"}`} aria-label={favorite ? "取消收藏" : "收藏"}>
+          <button type="button" onClick={onToggleFavorite} className={`grid h-8 w-8 place-items-center rounded-full border text-[12px] transition ${favorite ? "border-[#b28d48]/25 bg-[#b28d48]/14 text-[#9b7542]" : "border-black/[.08] text-black/55 hover:bg-white/50 hover:text-black"}`} aria-label={favorite ? "取消收藏" : "收藏"}>
             {favorite ? "★" : "☆"}
           </button>
           <button type="button" onClick={onCopy} className="rounded-full border border-black/[.08] px-3 py-2 text-[8px] font-semibold text-black/31 transition hover:bg-[#22231f] hover:text-white">
-            {copied ? "✓" : "COPY"}
+            {copied ? "✓" : "复制"}
           </button>
         </div>
       </div>
@@ -665,7 +665,7 @@ export default function LoginFuzzer() {
 
         <header className="fuzzer-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">LOGIN QA PAYLOAD STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">LOGIN QA PAYLOAD STUDIO</div>
             <h1 className="mt-4 max-w-[980px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               登录表单，
               <br />
@@ -677,7 +677,7 @@ export default function LoginFuzzer() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               面向自有系统和授权测试的表单测试值工作台。保留预设分类复制，同时加入搜索、收藏、自定义字段、组合矩阵、JSON / CSV 导出和测试报告。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{formatNumber(stats.groups)} GROUPS</span>
               <span>{formatNumber(stats.presetItems)} PRESET VALUES</span>
               <span>{formatNumber(stats.customValues)} CUSTOM VALUES</span>
@@ -689,7 +689,7 @@ export default function LoginFuzzer() {
         <section className="fuzzer-intro mt-7 grid gap-7 xl:grid-cols-[.66fr_1.34fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">NAVIGATION</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">NAVIGATION</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">测试库。</h2>
 
               <div className="mt-6 flex flex-wrap gap-2">
@@ -699,7 +699,7 @@ export default function LoginFuzzer() {
               </div>
 
               <label className="mt-5 block">
-                <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">SEARCH</span>
+                <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">SEARCH</span>
                 <input value={search} onChange={(event) => setSearch(event.target.value)} spellCheck={false} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none transition focus:border-black/25" placeholder="空字符串 / 手机号 / unicode / email..." />
               </label>
 
@@ -711,7 +711,7 @@ export default function LoginFuzzer() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">PROFILE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">PROFILE</div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">这里不会向任何目标发送请求，只负责整理、复制和导出测试值。实际测试请仅用于自己的系统或已授权环境。</p>
               </div>
 
@@ -733,7 +733,7 @@ export default function LoginFuzzer() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SCENARIOS</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SCENARIOS</div>
               <div className="mt-4 space-y-2">
                 {BUILT_IN_SCENARIOS.map((scenario) => (
                   <button key={scenario.name} type="button" onClick={() => loadScenario(scenario)} className="w-full rounded-[18px] border border-black/[.08] bg-white/22 p-4 text-left transition hover:bg-white/48">
@@ -748,7 +748,7 @@ export default function LoginFuzzer() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">WORKSPACE</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">WORKSPACE</div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">
                   {viewMode === "library" ? activeGroup.label : viewMode === "custom" ? "自定义字段。" : "组合矩阵。"}
                 </h2>
@@ -765,10 +765,10 @@ export default function LoginFuzzer() {
             <div ref={resultRef} className="mt-5 grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.92fr_1.08fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     {viewMode === "library" ? "PRESET GROUPS" : viewMode === "custom" ? "CUSTOM FIELDS" : "MATRIX BUILDER"}
                   </span>
-                  <span className="text-[8px] text-black/22">{formatNumber(stats.shown)} visible</span>
+                  <span className="text-[8px] text-black/55">{formatNumber(stats.shown)} visible</span>
                 </div>
 
                 <div className="fuzzer-scroll h-[680px] overflow-auto p-5 sm:p-6">
@@ -777,7 +777,7 @@ export default function LoginFuzzer() {
                       <div className="grid gap-2 sm:grid-cols-2">
                         {SAFE_GROUPS.map((group) => (
                           <button key={group.label} type="button" onClick={() => setActiveGroupLabel(group.label)} className={`rounded-[20px] border p-4 text-left transition ${activeGroupLabel === group.label ? "border-[#22231f]/15 bg-[#22231f] text-white" : "border-black/[.08] bg-white/22 hover:bg-white/48"}`}>
-                            <div className={`font-mono text-[8px] font-semibold ${activeGroupLabel === group.label ? "text-white/32" : "text-black/25"}`}>{group.items.length} ITEMS</div>
+                            <div className={`font-mono text-[8px] font-semibold ${activeGroupLabel === group.label ? "text-white/32" : "text-black/55"}`}>{group.items.length} ITEMS</div>
                             <div className={`mt-2 text-[14px] font-semibold tracking-[-.03em] ${activeGroupLabel === group.label ? "text-white" : "text-black/70"}`}>{group.label}</div>
                             {group.description && <p className={`mt-2 text-[8px] leading-4 ${activeGroupLabel === group.label ? "text-white/32" : "text-black/30"}`}>{group.description}</p>}
                           </button>
@@ -795,14 +795,14 @@ export default function LoginFuzzer() {
                   {viewMode === "custom" && (
                     <div className="space-y-5">
                       <div className="rounded-[22px] border border-dashed border-black/[.14] bg-white/18 p-5">
-                        <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">ADD FIELD</div>
+                        <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">ADD FIELD</div>
                         <div className="mt-4 grid gap-3 md:grid-cols-[.8fr_1.2fr]">
                           <input value={fieldName} onChange={(event) => setFieldName(event.target.value)} className="rounded-full border border-black/[.08] bg-white/35 px-4 py-3 text-[10px] outline-none" placeholder="字段名，如：手机号 / 验证码" />
                           <input value={fieldNote} onChange={(event) => setFieldNote(event.target.value)} className="rounded-full border border-black/[.08] bg-white/35 px-4 py-3 text-[10px] outline-none" placeholder="备注，可选" />
                         </div>
                         <textarea value={fieldValues} onChange={(event) => setFieldValues(event.target.value)} rows={5} className="fuzzer-scroll mt-3 block w-full resize-none rounded-[20px] border border-black/[.08] bg-white/35 p-4 font-mono text-[10px] leading-5 outline-none" placeholder={"每行一个测试值，例如：\n13800138000\n123456\n中文用户名"} />
                         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                          <span className="text-[8px] text-black/29">将添加 {formatNumber(parsedFieldValues.length)} 个值</span>
+                          <span className="text-[8px] text-black/55">将添加 {formatNumber(parsedFieldValues.length)} 个值</span>
                           <div className="flex flex-wrap gap-2">
                             {QUICK_FIELDS.map((field) => (
                               <button key={field.name} type="button" onClick={() => loadQuickField(field.name)} className="rounded-full border border-black/[.08] px-3 py-2 text-[8px] font-semibold text-black/34 transition hover:bg-white/45">{field.name}</button>
@@ -830,12 +830,12 @@ export default function LoginFuzzer() {
                             </article>
                           ))
                         ) : (
-                          <div className="grid min-h-[260px] place-items-center rounded-[24px] border border-black/[.075] bg-white/18 px-6 text-center text-[9px] text-black/28">还没有自定义字段，可以从快捷模板开始。</div>
+                          <div className="grid min-h-[260px] place-items-center rounded-[24px] border border-black/[.075] bg-white/18 px-6 text-center text-[9px] text-black/55">还没有自定义字段，可以从快捷模板开始。</div>
                         )}
                       </div>
 
                       <label className="block rounded-[18px] border border-black/[.08] bg-white/18 p-4">
-                        <span className="text-[8px] font-semibold tracking-[.12em] text-black/24">IMPORT CUSTOM JSON</span>
+                        <span className="text-[8px] font-semibold tracking-[.12em] text-black/55">IMPORT CUSTOM JSON</span>
                         <input type="file" accept="application/json,.json" onChange={handleImportJson} className="mt-3 block w-full text-[9px] text-black/35 file:mr-3 file:rounded-full file:border-0 file:bg-[#22231f] file:px-4 file:py-2 file:text-[8px] file:font-semibold file:text-white" />
                       </label>
                     </div>
@@ -844,7 +844,7 @@ export default function LoginFuzzer() {
                   {viewMode === "matrix" && (
                     <div className="space-y-5">
                       <div className="rounded-[22px] border border-black/[.075] bg-white/22 p-5">
-                        <div className="mb-2 flex justify-between text-[8px] text-black/28">
+                        <div className="mb-2 flex justify-between text-[8px] text-black/55">
                           <span>矩阵行数上限</span>
                           <span className="fuzzer-num font-mono text-[#52685d]">{matrixLimit}</span>
                         </div>
@@ -856,7 +856,7 @@ export default function LoginFuzzer() {
                         {matrix.length ? (
                           matrix.map((row, index) => (
                             <article key={index} className="rounded-[20px] border border-black/[.075] bg-white/22 p-4">
-                              <div className="mb-3 font-mono text-[8px] text-black/24">CASE #{String(index + 1).padStart(2, "0")}</div>
+                              <div className="mb-3 font-mono text-[8px] text-black/55">CASE #{String(index + 1).padStart(2, "0")}</div>
                               <div className="grid gap-2">
                                 {Object.entries(row).map(([key, value]) => (
                                   <div key={key} className="grid gap-2 rounded-[14px] bg-white/30 p-3 sm:grid-cols-[120px_1fr]">
@@ -868,7 +868,7 @@ export default function LoginFuzzer() {
                             </article>
                           ))
                         ) : (
-                          <div className="grid min-h-[260px] place-items-center rounded-[24px] border border-black/[.075] bg-white/18 px-6 text-center text-[9px] text-black/28">先添加至少一个自定义字段，再生成组合矩阵。</div>
+                          <div className="grid min-h-[260px] place-items-center rounded-[24px] border border-black/[.075] bg-white/18 px-6 text-center text-[9px] text-black/55">先添加至少一个自定义字段，再生成组合矩阵。</div>
                         )}
                       </div>
                     </div>
@@ -878,7 +878,7 @@ export default function LoginFuzzer() {
 
               <div className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">EXPORT OUTPUT</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">EXPORT OUTPUT</span>
                   <span className="text-[8px] text-[#8fb69b]">{exportMode.toUpperCase()}</span>
                 </div>
 
@@ -903,7 +903,7 @@ export default function LoginFuzzer() {
 
         <section className="fuzzer-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">REPORT</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">REPORT</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               测试值，
               <br />
@@ -918,8 +918,8 @@ export default function LoginFuzzer() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">QA PROFILE</span>
-              <span className="text-[8px] text-white/17">LOCAL LIBRARY</span>
+              <span className="text-[8px] tracking-[.13em] text-white/55">QA PROFILE</span>
+              <span className="text-[8px] text-white/55">LOCAL LIBRARY</span>
             </div>
             <pre className="fuzzer-dark-scroll max-h-[390px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[11px] leading-7 text-[#c7d3c7] sm:p-6">{report}</pre>
           </div>
@@ -927,15 +927,15 @@ export default function LoginFuzzer() {
 
         <section className="fuzzer-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL ONLY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL ONLY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">页面只在浏览器本地整理文本，不会把测试值发送到服务器，也不会对目标站点发起请求。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">CUSTOM MATRIX</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">CUSTOM MATRIX</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">自定义字段可以组合成轻量测试矩阵，帮助你覆盖空值、长度、字符集和格式边界。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">SAFE SCOPE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">SAFE SCOPE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">它是 QA 辅助工具，不是攻击器。不要用于未授权系统，也不要将真实账号密码放进测试集合。</p>
           </div>
         </section>

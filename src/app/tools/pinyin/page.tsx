@@ -265,7 +265,7 @@ export default function PinyinPage() {
 
         <header className="pinyin-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               PINYIN STUDIO
             </div>
 
@@ -362,7 +362,7 @@ export default function PinyinPage() {
             <div className="flex h-11 items-center justify-between border-b border-black/[.07]">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-[#52685d]" />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/25">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   CHINESE INPUT
                 </span>
               </div>
@@ -382,10 +382,10 @@ export default function PinyinPage() {
               onChange={(event) => setInput(event.target.value)}
               spellCheck={false}
               placeholder="输入汉字、短句或一段中文…"
-              className="pinyin-scroll mt-5 block h-[390px] w-full resize-none bg-transparent text-[clamp(28px,4vw,52px)] font-medium leading-[1.45] tracking-[-.035em] outline-none placeholder:text-black/14"
+              className="pinyin-scroll mt-5 block h-[390px] w-full resize-none bg-transparent text-[clamp(28px,4vw,52px)] font-medium leading-[1.45] tracking-[-.035em] outline-none placeholder:text-black/55"
             />
 
-            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-black/[.07] pt-4 text-[8px] text-black/25">
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-black/[.07] pt-4 text-[8px] text-black/55">
               <span>{stats.chinese} 个汉字</span>
               <span>{stats.inputChars} 字符</span>
               <span>{stats.syllables} 个读音单元</span>
@@ -395,15 +395,15 @@ export default function PinyinPage() {
           <div className="pinyin-grid relative min-h-[510px] overflow-hidden rounded-[30px] border border-black/[.075] bg-white/25 p-6 sm:p-8">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                   PINYIN OUTPUT
                 </div>
-                <div className="mt-1 text-[8px] text-black/23">
+                <div className="mt-1 text-[8px] text-black/55">
                   {MODES.find((item) => item.value === mode)?.example}
                 </div>
               </div>
 
-              <span className="pinyin-num font-mono text-[8px] text-black/22">
+              <span className="pinyin-num font-mono text-[8px] text-black/55">
                 {stats.outputChars} chars
               </span>
             </div>
@@ -413,14 +413,14 @@ export default function PinyinPage() {
               className="pinyin-scroll mt-12 max-h-[310px] overflow-auto break-words font-['myFont',sans-serif] text-[clamp(38px,6vw,82px)] font-semibold leading-[1.28] tracking-[-.045em] text-[#2b302b]"
             >
               {output || (
-                <span className="text-black/13">
+                <span className="text-black/55">
                   Pinyin will appear here.
                 </span>
               )}
             </div>
 
             <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-center justify-between gap-3 border-t border-black/[.07] pt-4 sm:bottom-8 sm:left-8 sm:right-8">
-              <span className="text-[8px] text-black/24">
+              <span className="text-[8px] text-black/55">
                 实时转换 · 本地完成
               </span>
 
@@ -438,7 +438,7 @@ export default function PinyinPage() {
 
         <section className="pinyin-intro mt-8 grid gap-9 border-t border-black/10 pt-7 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
               ALL FORMATS
             </div>
 
@@ -475,11 +475,11 @@ export default function PinyinPage() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.075] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">
+              <span className="text-[8px] tracking-[.13em] text-white/55">
                 COMPLETE OUTPUT
               </span>
 
-              <span className="text-[8px] text-white/17">
+              <span className="text-[8px] text-white/55">
                 PINYIN-PRO
               </span>
             </div>
@@ -494,7 +494,7 @@ export default function PinyinPage() {
 
         <section className="pinyin-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               TONES
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -503,7 +503,7 @@ export default function PinyinPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               FORMAT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -512,7 +512,7 @@ export default function PinyinPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LOCAL
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

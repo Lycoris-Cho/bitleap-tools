@@ -2010,9 +2010,9 @@ function CommandCard({
         <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`h-1.5 w-1.5 rounded-full ${riskDot(command.risk)}`} />
-            <span className={`text-[8px] font-semibold tracking-[.13em] ${selected ? "text-white/28" : "text-black/24"}`}>{command.category}</span>
+            <span className={`text-[8px] font-semibold tracking-[.13em] ${selected ? "text-white/55" : "text-black/55"}`}>{command.category}</span>
             {command.platforms.map((platform) => (
-              <span key={platform} className={`rounded-full px-2 py-0.5 text-[7px] font-semibold ${selected ? "bg-white/10 text-white/36" : "bg-black/[.04] text-black/25"}`}>{PLATFORM_META[platform].short}</span>
+              <span key={platform} className={`rounded-full px-2 py-0.5 text-[7px] font-semibold ${selected ? "bg-white/10 text-white/36" : "bg-black/[.04] text-black/55"}`}>{PLATFORM_META[platform].short}</span>
             ))}
           </div>
 
@@ -2026,12 +2026,12 @@ function CommandCard({
         </button>
 
         <div className="flex shrink-0 flex-col gap-2">
-          <button type="button" onClick={onToggleFavorite} className={`grid h-8 w-8 place-items-center rounded-full border text-[12px] transition ${favorite ? "border-[#b28d48]/25 bg-[#b28d48]/14 text-[#9b7542]" : selected ? "border-white/[.08] text-white/28 hover:bg-white/10" : "border-black/[.08] text-black/25 hover:bg-white/50 hover:text-black"}`} aria-label={favorite ? "取消收藏" : "收藏命令"}>
+          <button type="button" onClick={onToggleFavorite} className={`grid h-8 w-8 place-items-center rounded-full border text-[12px] transition ${favorite ? "border-[#b28d48]/25 bg-[#b28d48]/14 text-[#9b7542]" : selected ? "border-white/[.08] text-white/55 hover:bg-white/10" : "border-black/[.08] text-black/55 hover:bg-white/50 hover:text-black"}`} aria-label={favorite ? "取消收藏" : "收藏命令"}>
             {favorite ? "★" : "☆"}
           </button>
 
           <button type="button" onClick={onCopy} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${selected ? "border border-white/[.08] text-white/30 hover:bg-white hover:text-[#151714]" : "border border-black/[.08] text-black/31 hover:bg-[#22231f] hover:text-white"}`}>
-            {copied ? "✓" : "COPY"}
+            {copied ? "✓" : "复制"}
           </button>
         </div>
       </div>
@@ -2068,7 +2068,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`term-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -2376,7 +2376,7 @@ export default function TerminalPage() {
 
         <header className="term-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">TERMINAL COMMAND STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">TERMINAL COMMAND STUDIO</div>
             <h1 className="mt-4 max-w-[920px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               把终端命令，
               <br />
@@ -2388,7 +2388,7 @@ export default function TerminalPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               从 Linux、macOS、Docker 常用场景中选择命令，填写参数后实时生成可复制版本。支持风险分级、收藏、脚本队列、智能 Shell 引号和导出。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{formatNumber(stats.total)} COMMANDS</span>
               <span>{formatNumber(stats.categories)} CATEGORIES</span>
               <span>{formatNumber(stats.danger)} HIGH RISK</span>
@@ -2400,17 +2400,17 @@ export default function TerminalPage() {
         <section className="term-intro mt-7 grid gap-7 xl:grid-cols-[.68fr_1.32fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">COMMAND INDEX</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">COMMAND INDEX</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">搜索命令。</h2>
 
               <div className="mt-6 space-y-5">
                 <label>
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">KEYWORD</span>
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">KEYWORD</span>
                   <input value={search} onChange={(event) => setSearch(event.target.value)} spellCheck={false} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none transition focus:border-black/25" placeholder="端口 / docker / 日志 / chmod / curl..." />
                 </label>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">CATEGORY</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">CATEGORY</div>
                   <div className="flex max-h-[166px] flex-wrap gap-1.5 overflow-auto pr-1">
                     {categories.map((category) => (
                       <button key={category} type="button" onClick={() => setActiveCategory(category)} className={`rounded-full px-3.5 py-2 text-[8px] font-semibold transition ${activeCategory === category ? "bg-[#22231f] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{category}</button>
@@ -2419,7 +2419,7 @@ export default function TerminalPage() {
                 </div>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">PLATFORM</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">PLATFORM</div>
                   <div className="flex flex-wrap gap-1.5">
                     {(["all", "linux", "macos", "docker"] as const).map((platform) => (
                       <button key={platform} type="button" onClick={() => setPlatformFilter(platform)} className={`rounded-full border px-3.5 py-2 text-[8px] font-semibold transition ${platformFilter === platform ? "border-[#52685d]/20 bg-[#52685d] text-white" : "border-black/[.08] text-black/31 hover:bg-white/45"}`}>
@@ -2430,7 +2430,7 @@ export default function TerminalPage() {
                 </div>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">RISK</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">RISK</div>
                   <div className="flex flex-wrap gap-1.5">
                     {(["all", "safe", "watch", "danger"] as const).map((risk) => (
                       <button key={risk} type="button" onClick={() => setRiskFilter(risk)} className={`rounded-full border px-3.5 py-2 text-[8px] font-semibold transition ${riskFilter === risk ? "border-[#52685d]/20 bg-[#52685d] text-white" : "border-black/[.08] text-black/31 hover:bg-white/45"}`}>
@@ -2452,7 +2452,7 @@ export default function TerminalPage() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">PROFILE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">PROFILE</div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">
                   当前显示 {formatNumber(stats.shown)} 条命令。危险操作会用红色标记，复制前请检查目标路径、进程和服务名。
                 </p>
@@ -2469,7 +2469,7 @@ export default function TerminalPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">QUICK SEARCH</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">QUICK SEARCH</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {QUICK_SEARCHES.map((item) => (
                   <button key={item.label} type="button" onClick={() => { setSearch(item.query); setActiveCategory("全部") }} className="rounded-full border border-black/[.085] px-3.5 py-2 text-[8px] font-semibold text-black/35 transition hover:bg-white/45 hover:text-black">{item.label}</button>
@@ -2481,7 +2481,7 @@ export default function TerminalPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">RESULT</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">RESULT</div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">{filtered.length ? `${formatNumber(filtered.length)} 条命令。` : "没有匹配结果。"}</h2>
               </div>
 
@@ -2496,8 +2496,8 @@ export default function TerminalPage() {
                 {grouped.length === 0 ? (
                   <div className="grid min-h-[360px] place-items-center rounded-[30px] border border-black/[.075] bg-white/22 px-6 text-center">
                     <div>
-                      <div className="text-[8px] tracking-[.14em] text-black/20">EMPTY</div>
-                      <p className="mt-3 text-[9px] text-black/28">没有找到匹配的终端命令。试试 docker、端口、日志、权限或清空筛选。</p>
+                      <div className="text-[8px] tracking-[.14em] text-black/55">EMPTY</div>
+                      <p className="mt-3 text-[9px] text-black/55">没有找到匹配的终端命令。试试 docker、端口、日志、权限或清空筛选。</p>
                     </div>
                   </div>
                 ) : (
@@ -2505,8 +2505,8 @@ export default function TerminalPage() {
                     {grouped.map(([category, commands]) => (
                       <section key={category}>
                         <div className="mb-3 flex items-center justify-between">
-                          <h3 className="text-[9px] font-semibold tracking-[.14em] text-black/27">{category}</h3>
-                          <span className="term-num font-mono text-[8px] text-black/22">{formatNumber(commands.length)} commands</span>
+                          <h3 className="text-[9px] font-semibold tracking-[.14em] text-black/55">{category}</h3>
+                          <span className="term-num font-mono text-[8px] text-black/55">{formatNumber(commands.length)} commands</span>
                         </div>
 
                         <div className="grid gap-3 lg:grid-cols-2">
@@ -2524,7 +2524,7 @@ export default function TerminalPage() {
                 <div className="sticky top-6 overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
                   <div className="border-b border-white/[.065] px-5 py-4">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">COMMAND BUILDER</span>
+                      <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">COMMAND BUILDER</span>
                       <span className={`text-[8px] font-semibold ${riskTone(activeCommand.risk)}`}>{RISK_META[activeCommand.risk].label}</span>
                     </div>
 
@@ -2548,11 +2548,11 @@ export default function TerminalPage() {
                   <div className="term-dark-scroll max-h-[450px] overflow-auto p-5">
                     {activeCommand.params.length ? (
                       <div>
-                        <div className="mb-3 text-[8px] font-semibold tracking-[.13em] text-white/24">PARAMS</div>
+                        <div className="mb-3 text-[8px] font-semibold tracking-[.13em] text-white/55">PARAMS</div>
                         <div className="space-y-3">
                           {activeCommand.params.map((param) => (
                             <label key={param.key} className="block">
-                              <span className="mb-1.5 block text-[8px] text-white/25">
+                              <span className="mb-1.5 block text-[8px] text-white/55">
                                 {param.label}{param.required && <span className="text-[#d49a88]"> *</span>}
                               </span>
 
@@ -2570,7 +2570,7 @@ export default function TerminalPage() {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-[9px] leading-5 text-white/24">这条命令没有参数，可以直接复制使用。</p>
+                      <p className="text-[9px] leading-5 text-white/55">这条命令没有参数，可以直接复制使用。</p>
                     )}
 
                     {activeCommand.note && (
@@ -2581,7 +2581,7 @@ export default function TerminalPage() {
                     )}
 
                     <div className="mt-5 rounded-[18px] border border-white/[.07] bg-white/[.035] p-4">
-                      <div className="text-[8px] font-semibold tracking-[.12em] text-white/24">RISK LEVEL</div>
+                      <div className="text-[8px] font-semibold tracking-[.12em] text-white/55">RISK LEVEL</div>
                       <p className="mt-2 text-[8px] leading-5 text-white/31">{RISK_META[activeCommand.risk].desc}</p>
                     </div>
                   </div>
@@ -2593,7 +2593,7 @@ export default function TerminalPage() {
 
         <section className="term-intro mt-12 grid gap-7 border-t border-black/10 pt-8 lg:grid-cols-[.56fr_1.44fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">SCRIPT QUEUE</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">SCRIPT QUEUE</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               多条命令，
               <br />
@@ -2613,7 +2613,7 @@ export default function TerminalPage() {
           <div className="grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.8fr_1.2fr]">
             <div className="bg-[#f4f1e9]">
               <div className="border-b border-black/[.065] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">QUEUE ITEMS</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">QUEUE ITEMS</div>
                 <p className="mt-2 text-[8px] leading-5 text-black/31">{queue.length ? `已有 ${formatNumber(queue.length)} 条命令。` : "还没有加入脚本的命令。"}</p>
               </div>
 
@@ -2622,7 +2622,7 @@ export default function TerminalPage() {
                   queue.map((item, index) => (
                     <div key={item.id} className="grid gap-2 border-b border-black/[.055] px-5 py-4 last:border-b-0">
                       <div className="flex items-center justify-between gap-3">
-                        <span className="term-num font-mono text-[8px] text-black/22">#{String(index + 1).padStart(2, "0")}</span>
+                        <span className="term-num font-mono text-[8px] text-black/55">#{String(index + 1).padStart(2, "0")}</span>
                         <button type="button" onClick={() => setQueue((current) => current.filter((entry) => entry.id !== item.id))} className="text-[8px] font-semibold text-[#965744]">删除</button>
                       </div>
                       <div className="text-[10px] font-semibold text-black/66">{item.name}</div>
@@ -2630,15 +2630,15 @@ export default function TerminalPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="grid min-h-[260px] place-items-center px-6 text-center text-[9px] text-black/27">从右侧命令详情点击“加入脚本”。</div>
+                  <div className="grid min-h-[260px] place-items-center px-6 text-center text-[9px] text-black/55">从右侧命令详情点击“加入脚本”。</div>
                 )}
               </div>
             </div>
 
             <div className="bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">BASH SCRIPT</span>
-                <span className="text-[8px] text-white/18">{queue.length ? "READY" : "EMPTY"}</span>
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">BASH SCRIPT</span>
+                <span className="text-[8px] text-white/55">{queue.length ? "READY" : "EMPTY"}</span>
               </div>
               <pre className="term-dark-scroll h-[484px] overflow-auto whitespace-pre-wrap break-all p-5 font-mono text-[10px] leading-6 text-[#cbd8cd] sm:p-6">{queue.length ? queueScript : "#!/usr/bin/env bash\nset -euo pipefail\n\n# command queue is empty"}</pre>
             </div>
@@ -2647,7 +2647,7 @@ export default function TerminalPage() {
 
         <section className="term-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">REPORT</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">REPORT</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               结果与脚本，
               <br />
@@ -2661,8 +2661,8 @@ export default function TerminalPage() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">TERMINAL PROFILE</span>
-              <span className="text-[8px] text-white/17">LOCAL GENERATOR</span>
+              <span className="text-[8px] tracking-[.13em] text-white/55">TERMINAL PROFILE</span>
+              <span className="text-[8px] text-white/55">LOCAL GENERATOR</span>
             </div>
             <pre className="term-dark-scroll max-h-[390px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[11px] leading-7 text-[#c7d3c7] sm:p-6">{report}</pre>
           </div>
@@ -2670,15 +2670,15 @@ export default function TerminalPage() {
 
         <section className="term-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">SMART QUOTE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">SMART QUOTE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">默认会对包含空格或特殊字符的参数做 Shell 引号包裹，减少路径、URL、搜索词中断命令的概率。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">RISK FIRST</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">RISK FIRST</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">删除、停止服务、强制结束进程、权限变更等命令会标记为注意或高风险，复制前先确认目标。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">NOT A SANDBOX</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">NOT A SANDBOX</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">这个页面只生成文本命令，不执行命令。真正运行前请根据你的系统、权限和路径做最终确认。</p>
           </div>
         </section>

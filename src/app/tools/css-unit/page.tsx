@@ -200,10 +200,10 @@ function SettingInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">{label}</span>
+      <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">{label}</span>
       <div className="flex items-center rounded-full border border-black/[.08] bg-white/35 px-4 py-2.5">
         <input value={value} min={min} max={max} type="number" onChange={(event) => onChange(safeNumber(event.target.value, value, min, max))} className="min-w-0 flex-1 bg-transparent font-mono text-[10px] text-black/68 outline-none" />
-        <span className="text-[8px] text-black/27">{unit}</span>
+        <span className="text-[8px] text-black/55">{unit}</span>
       </div>
     </label>
   )
@@ -266,7 +266,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`unit-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -286,8 +286,8 @@ function OutputBlock({
   return (
     <article className="rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.13em] text-white/24">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/26 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="unit-dark-scroll max-h-44 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{value}</pre>
     </article>
@@ -490,7 +490,7 @@ export default function CssUnitConvertPage() {
 
         <header className="unit-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.76fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">CSS UNIT STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">CSS UNIT STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">
               单位换算，
               <br />
@@ -515,7 +515,7 @@ export default function CssUnitConvertPage() {
           <div className="grid gap-5 xl:grid-cols-[360px_1fr]">
             <aside className="min-w-0 space-y-4">
               <div className="rounded-[30px] border border-black/[.075] bg-white/24 p-5">
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">INPUT</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">INPUT</div>
 
                 <div className="mt-5 grid grid-cols-[1fr_120px] gap-3">
                   <input value={sourceValue} onChange={(event) => setSourceValue(event.target.value)} inputMode="decimal" className="min-w-0 rounded-[22px] border border-black/[.08] bg-white/40 px-5 py-5 font-mono text-[32px] leading-none tracking-[-.05em] text-black/72 outline-none focus:border-black/20" placeholder="24" />
@@ -545,7 +545,7 @@ export default function CssUnitConvertPage() {
               </div>
 
               <div className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">CONTEXT</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">CONTEXT</div>
                 <div className="mt-5 grid gap-4">
                   <SettingInput label="Root font-size" value={settings.rootFont} min={1} max={64} unit="px" onChange={(rootFont) => patchSettings({ rootFont })} />
                   <SettingInput label="Parent font-size" value={settings.parentFont} min={1} max={96} unit="px" onChange={(parentFont) => patchSettings({ parentFont })} />
@@ -561,8 +561,8 @@ export default function CssUnitConvertPage() {
               <div className="grid gap-px overflow-hidden rounded-[32px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.92fr_1.08fr]">
                 <div className="bg-[#f4f1e9]">
                   <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                    <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">CONVERSIONS</span>
-                    <span className="unit-num text-[8px] text-black/22">{isValid ? `${trimNumber(sourcePx, settings.precision)}px base` : "invalid"}</span>
+                    <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">CONVERSIONS</span>
+                    <span className="unit-num text-[8px] text-black/55">{isValid ? `${trimNumber(sourcePx, settings.precision)}px base` : "invalid"}</span>
                   </div>
 
                   <div className="unit-scroll h-[760px] overflow-auto p-5 sm:p-6">
@@ -571,12 +571,12 @@ export default function CssUnitConvertPage() {
                         <article key={item.unit} className="group rounded-[22px] border border-black/[.075] bg-white/24 p-4 transition hover:bg-white/45">
                           <div className="mb-3 flex items-start justify-between gap-3">
                             <div>
-                              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">{item.label}</div>
+                              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">{item.label}</div>
                               <code className="unit-num mt-2 block break-all font-mono text-[18px] font-semibold tracking-[-.035em] text-black/70">{item.display}</code>
                             </div>
-                            <button type="button" onClick={() => copy(item.display, item.unit)} className="rounded-full border border-black/[.08] px-3 py-2 text-[8px] font-semibold text-black/30 transition hover:bg-[#22231f] hover:text-white">{copied === item.unit ? "✓" : "COPY"}</button>
+                            <button type="button" onClick={() => copy(item.display, item.unit)} className="rounded-full border border-black/[.08] px-3 py-2 text-[8px] font-semibold text-black/30 transition hover:bg-[#22231f] hover:text-white">{copied === item.unit ? "✓" : "复制"}</button>
                           </div>
-                          <p className="text-[8px] leading-4 text-black/29">{item.note}</p>
+                          <p className="text-[8px] leading-4 text-black/55">{item.note}</p>
                         </article>
                       ))}
                     </div>
@@ -584,8 +584,8 @@ export default function CssUnitConvertPage() {
                     <div className="mt-5 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                          <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">VISUAL PREVIEW</div>
-                          <p className="mt-2 text-[8px] text-black/29">同一个数值在文字、方块、间距里的视觉参考。</p>
+                          <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">VISUAL PREVIEW</div>
+                          <p className="mt-2 text-[8px] text-black/55">同一个数值在文字、方块、间距里的视觉参考。</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <TogglePill active={previewMode === "type"} label="文字" onClick={() => setPreviewMode("type")} />
@@ -597,7 +597,7 @@ export default function CssUnitConvertPage() {
                       <div ref={previewRef} className="unit-ruler overflow-hidden rounded-[22px] border border-black/[.07] bg-[#ebe7dd] p-6">
                         {previewMode === "type" && (
                           <div>
-                            <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">font-size: {displayValue(sourcePx, "px", settings.precision)}</div>
+                            <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">font-size: {displayValue(sourcePx, "px", settings.precision)}</div>
                             <p className="mt-4 max-w-[700px] font-semibold leading-[1.08] tracking-[-.055em] text-black/74" style={{ fontSize: clamp(sourcePx, 8, 120) }}>BitLeap Typography Preview</p>
                           </div>
                         )}
@@ -625,8 +625,8 @@ export default function CssUnitConvertPage() {
                     <div className="mt-5 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                          <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SCALE TABLE</div>
-                          <p className="mt-2 text-[8px] text-black/29">常用 spacing / type scale 快速换算。</p>
+                          <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SCALE TABLE</div>
+                          <p className="mt-2 text-[8px] text-black/55">常用 spacing / type scale 快速换算。</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {(["4pt", "8pt", "type", "custom"] as ScalePreset[]).map((item) => (
@@ -655,7 +655,7 @@ export default function CssUnitConvertPage() {
 
                 <div className="bg-[#151714]">
                   <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                    <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">OUTPUT</span>
+                    <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">OUTPUT</span>
                     <span className="text-[8px] text-[#8fb69b]">CSS READY</span>
                   </div>
 
@@ -667,8 +667,8 @@ export default function CssUnitConvertPage() {
 
                       <article className="rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
                         <div className="mb-4 flex items-center justify-between gap-3">
-                          <span className="text-[8px] font-semibold tracking-[.13em] text-white/24">Fluid clamp()</span>
-                          <button type="button" onClick={() => copy(clampCode, "clamp")} className="text-[8px] font-semibold text-white/26 transition hover:text-white">{copied === "clamp" ? "✓ COPIED" : "COPY"}</button>
+                          <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">Fluid clamp()</span>
+                          <button type="button" onClick={() => copy(clampCode, "clamp")} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === "clamp" ? "✓ 已复制" : "复制"}</button>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
@@ -701,15 +701,15 @@ export default function CssUnitConvertPage() {
 
         <section className="unit-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">CONTEXT AWARE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">CONTEXT AWARE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">rem、em、vw、vh、vmin、vmax 和百分比都需要上下文，这版把字号、视口和容器宽度全部显式放出来。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">FLUID CLAMP</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">FLUID CLAMP</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">内置 clamp 生成器，可以快速把最小 / 最大字号或间距转换为响应式 CSS。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">DESIGN SCALE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">DESIGN SCALE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">4pt、8pt、字体尺度和自定义步进可以直接生成 px / rem / vw 对照表。</p>
           </div>
         </section>

@@ -358,7 +358,7 @@ export default function TimestampPage() {
 
         <header className="time-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               TIMESTAMP STUDIO
             </div>
 
@@ -379,7 +379,7 @@ export default function TimestampPage() {
         <section className="time-intro mt-7">
           <div className="flex flex-col gap-4 border-b border-black/10 pb-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="min-w-0 flex-1">
-              <label className="mb-2 block text-[8px] font-semibold tracking-[.13em] text-black/25">
+              <label className="mb-2 block text-[8px] font-semibold tracking-[.13em] text-black/55">
                 TIME INPUT
               </label>
               <input
@@ -460,7 +460,7 @@ export default function TimestampPage() {
                     key={label}
                     className="bg-[#f3f0e8]/92 p-5"
                   >
-                    <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+                    <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
                       {label}
                     </div>
                     <div className="time-num mt-3 break-all font-mono text-[12px] font-semibold text-black/61">
@@ -502,7 +502,7 @@ export default function TimestampPage() {
                     key={row.label}
                     className="group grid gap-3 border-b border-white/[.055] px-5 py-5 last:border-b-0 sm:grid-cols-[150px_1fr_auto] sm:items-center"
                   >
-                    <div className="text-[8px] font-semibold tracking-[.13em] text-white/22">
+                    <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                       {row.label}
                     </div>
 
@@ -523,7 +523,7 @@ export default function TimestampPage() {
                       >
                         {copied === row.key
                           ? "✓"
-                          : "COPY"}
+                          : "复制"}
                       </button>
                     )}
                   </div>
@@ -544,7 +544,7 @@ export default function TimestampPage() {
             </>
           ) : (
             <div className="grid min-h-[330px] place-items-center rounded-[30px] border border-black/[.075] bg-white/22 px-6 text-center">
-              <p className="text-[9px] text-black/26">
+              <p className="text-[9px] text-black/55">
                 输入时间戳或日期后查看转换结果。
               </p>
             </div>
@@ -553,7 +553,7 @@ export default function TimestampPage() {
 
         <section className="time-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               AUTO DETECT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -562,7 +562,7 @@ export default function TimestampPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LOCAL / UTC
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -571,7 +571,7 @@ export default function TimestampPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LIVE CLOCK
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

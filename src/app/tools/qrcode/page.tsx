@@ -334,14 +334,14 @@ export default function QrcodePage() {
       <div className="relative z-10 mx-auto max-w-[1500px] px-5 pb-10 pt-6 sm:px-8">
         <div className="qr-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">
             QR STUDIO · LOCAL GENERATION
           </div>
         </div>
 
         <header className="qr-intro mt-11 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               QR CODE STUDIO
             </div>
             <h1 className="mt-4 max-w-[850px] text-[clamp(48px,6.8vw,96px)] font-semibold leading-[.9] tracking-[-.073em]">
@@ -380,7 +380,7 @@ export default function QrcodePage() {
             </div>
 
             <div>
-              <div className="text-[9px] font-semibold tracking-[.14em] text-black/26">
+              <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                 {label.toUpperCase()}
               </div>
 
@@ -390,7 +390,7 @@ export default function QrcodePage() {
                   onChange={(event) => setText(event.target.value)}
                   placeholder={placeholder}
                   rows={5}
-                  className="qr-scroll mt-3 w-full resize-none border-b border-black/15 bg-transparent pb-4 text-[clamp(22px,3vw,38px)] font-medium leading-[1.2] tracking-[-.04em] outline-none placeholder:text-black/16"
+                  className="qr-scroll mt-3 w-full resize-none border-b border-black/15 bg-transparent pb-4 text-[clamp(22px,3vw,38px)] font-medium leading-[1.2] tracking-[-.04em] outline-none placeholder:text-black/55"
                 />
               ) : (
                 <input
@@ -398,7 +398,7 @@ export default function QrcodePage() {
                   onChange={(event) => setText(event.target.value)}
                   placeholder={placeholder}
                   spellCheck={false}
-                  className="mt-3 w-full border-b border-black/15 bg-transparent pb-4 font-mono text-[clamp(20px,3vw,34px)] font-medium tracking-[-.045em] outline-none placeholder:text-black/16"
+                  className="mt-3 w-full border-b border-black/15 bg-transparent pb-4 font-mono text-[clamp(20px,3vw,34px)] font-medium tracking-[-.045em] outline-none placeholder:text-black/55"
                 />
               )}
             </div>
@@ -406,7 +406,7 @@ export default function QrcodePage() {
             {type === "wifi" && (
               <div className="mt-7 grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label className="text-[9px] font-semibold tracking-[.12em] text-black/25">
+                  <label className="text-[9px] font-semibold tracking-[.12em] text-black/55">
                     SECURITY
                   </label>
                   <div className="mt-3 flex gap-1">
@@ -434,7 +434,7 @@ export default function QrcodePage() {
                     <b className="block text-[9px] font-semibold">
                       隐藏网络
                     </b>
-                    <span className="mt-1 block text-[8px] text-black/26">
+                    <span className="mt-1 block text-[8px] text-black/55">
                       SSID 不公开广播
                     </span>
                   </span>
@@ -449,7 +449,7 @@ export default function QrcodePage() {
 
                 {wifiSecurity !== "nopass" && (
                   <div className="sm:col-span-2">
-                    <label className="text-[9px] font-semibold tracking-[.12em] text-black/25">
+                    <label className="text-[9px] font-semibold tracking-[.12em] text-black/55">
                       PASSWORD
                     </label>
                     <input
@@ -457,7 +457,7 @@ export default function QrcodePage() {
                       onChange={(event) => setWifiPassword(event.target.value)}
                       type="text"
                       placeholder="WiFi 密码"
-                      className="mt-2 w-full border-b border-black/15 bg-transparent pb-3 font-mono text-base outline-none placeholder:text-black/17"
+                      className="mt-2 w-full border-b border-black/15 bg-transparent pb-3 font-mono text-base outline-none placeholder:text-black/55"
                     />
                   </div>
                 )}
@@ -467,7 +467,7 @@ export default function QrcodePage() {
             <div className="mt-9 border-t border-black/10 pt-6">
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+                  <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                     OUTPUT
                   </div>
                   <h2 className="mt-1 text-xl font-semibold tracking-[-.035em]">
@@ -478,7 +478,7 @@ export default function QrcodePage() {
                 <button
                   type="button"
                   onClick={reset}
-                  className="text-[9px] text-black/28 transition hover:text-black"
+                  className="text-[9px] text-black/55 transition hover:text-black"
                 >
                   恢复默认
                 </button>
@@ -575,7 +575,7 @@ export default function QrcodePage() {
             </div>
 
             <div className="mt-8 border-t border-black/10 pt-6">
-              <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+              <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
                 COLOR
               </div>
 
@@ -602,7 +602,7 @@ export default function QrcodePage() {
                   ["背景色", light, setLight],
                 ].map(([name, value, setter]) => (
                   <div key={name as string}>
-                    <label className="text-[8px] text-black/26">
+                    <label className="text-[8px] text-black/55">
                       {name as string}
                     </label>
 
@@ -637,7 +637,7 @@ export default function QrcodePage() {
               </div>
 
               <div className="mt-4 flex items-center justify-between text-[9px]">
-                <span className="text-black/28">颜色对比度</span>
+                <span className="text-black/55">颜色对比度</span>
                 <span
                   className={
                     contrast >= 4.5
@@ -657,11 +657,11 @@ export default function QrcodePage() {
               ref={previewRef}
               className="qr-checker relative flex min-h-[560px] items-center justify-center overflow-hidden rounded-[34px] border border-black/[.075] bg-white/25 p-6 sm:p-10"
             >
-              <div className="absolute left-5 top-5 text-[8px] tracking-[.14em] text-black/22">
+              <div className="absolute left-5 top-5 text-[8px] tracking-[.14em] text-black/55">
                 LIVE PREVIEW
               </div>
 
-              <div className="absolute right-5 top-5 flex items-center gap-2 text-[8px] text-black/25">
+              <div className="absolute right-5 top-5 flex items-center gap-2 text-[8px] text-black/55">
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
                     status === "ready"
@@ -757,7 +757,7 @@ export default function QrcodePage() {
               </button>
             </div>
 
-            <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-4 text-[8px] text-black/26">
+            <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-4 text-[8px] text-black/55">
               <span>{size}px · ECC {errorLevel} · Margin {margin}</span>
               <span>LOCAL ONLY</span>
             </div>
@@ -766,7 +766,7 @@ export default function QrcodePage() {
 
         <section className="qr-intro mt-5 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.12em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">
               URL / TEXT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -775,7 +775,7 @@ export default function QrcodePage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.12em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">
               WIFI
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -784,7 +784,7 @@ export default function QrcodePage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.12em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">
               EXPORT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

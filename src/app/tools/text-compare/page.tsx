@@ -815,7 +815,7 @@ export default function TextCompare() {
 
         <header className="compare-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               TEXT DIFF STUDIO
             </div>
 
@@ -831,7 +831,7 @@ export default function TextCompare() {
               对比两版文本，识别新增、删除与修改内容。支持字符级差异、忽略空白 / 大小写 / 空行，以及大文本保护。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>LOCAL ONLY</span>
               <span>LINE DIFF</span>
               <span>CHAR DIFF</span>
@@ -915,12 +915,12 @@ export default function TextCompare() {
             <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-[#a85f50]" />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   TEXT A / OLD
                 </span>
               </div>
 
-              <span className="compare-num font-mono text-[8px] text-black/23">
+              <span className="compare-num font-mono text-[8px] text-black/55">
                 {stats.linesA} lines
               </span>
             </div>
@@ -930,7 +930,7 @@ export default function TextCompare() {
               onChange={(event) => setText1(event.target.value)}
               spellCheck={false}
               placeholder="粘贴原始文本…"
-              className="compare-scroll block h-[350px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+              className="compare-scroll block h-[350px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
             />
           </div>
 
@@ -938,12 +938,12 @@ export default function TextCompare() {
             <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-[#5f806c]" />
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   TEXT B / NEW
                 </span>
               </div>
 
-              <span className="compare-num font-mono text-[8px] text-black/23">
+              <span className="compare-num font-mono text-[8px] text-black/55">
                 {stats.linesB} lines
               </span>
             </div>
@@ -953,7 +953,7 @@ export default function TextCompare() {
               onChange={(event) => setText2(event.target.value)}
               spellCheck={false}
               placeholder="粘贴修改后的文本…"
-              className="compare-scroll block h-[350px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+              className="compare-scroll block h-[350px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
             />
           </div>
         </section>
@@ -968,7 +968,7 @@ export default function TextCompare() {
             ["ENGINE", prepared.algorithm === "exact" ? "EXACT" : "FAST"],
           ].map(([label, value]) => (
             <div key={label} className="bg-[#f3f0e8] p-4">
-              <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+              <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
                 {label}
               </div>
 
@@ -990,7 +990,7 @@ export default function TextCompare() {
         <section className="compare-intro mt-10">
           <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                 DIFF RESULT
               </div>
 
@@ -1038,10 +1038,10 @@ export default function TextCompare() {
             {!prepared.rows.length ? (
               <div className="grid min-h-[260px] place-items-center px-6 text-center">
                 <div>
-                  <div className="text-[9px] tracking-[.14em] text-white/16">
+                  <div className="text-[9px] tracking-[.14em] text-white/55">
                     WAITING FOR TEXT
                   </div>
-                  <p className="mt-3 text-[9px] leading-5 text-white/22">
+                  <p className="mt-3 text-[9px] leading-5 text-white/55">
                     输入两段文本后，会在这里生成差异。
                   </p>
                 </div>
@@ -1053,7 +1053,7 @@ export default function TextCompare() {
                   <div className="mt-4 text-xl font-semibold tracking-[-.035em] text-white">
                     两段文本一致
                   </div>
-                  <p className="mt-2 text-[9px] text-white/28">
+                  <p className="mt-2 text-[9px] text-white/55">
                     当前比较条件下没有检测到差异。
                   </p>
                 </div>
@@ -1061,10 +1061,10 @@ export default function TextCompare() {
             ) : viewMode === "split" ? (
               <div className="min-w-[760px]">
                 <div className="sticky top-0 z-10 grid grid-cols-2 border-b border-white/[.06] bg-[#151714]/95 backdrop-blur">
-                  <div className="border-r border-white/[.055] px-4 py-3 text-[8px] tracking-[.12em] text-white/24">
+                  <div className="border-r border-white/[.055] px-4 py-3 text-[8px] tracking-[.12em] text-white/55">
                     A / OLD
                   </div>
-                  <div className="px-4 py-3 text-[8px] tracking-[.12em] text-white/24">
+                  <div className="px-4 py-3 text-[8px] tracking-[.12em] text-white/55">
                     B / NEW
                   </div>
                 </div>
@@ -1086,7 +1086,7 @@ export default function TextCompare() {
                       className="grid min-h-8 grid-cols-2 border-b border-white/[.035] last:border-b-0"
                     >
                       <div className={`grid min-w-0 grid-cols-[46px_1fr] border-r border-white/[.045] ${oldClass}`}>
-                        <span className="compare-num select-none border-r border-white/[.035] px-2 py-2.5 text-right text-[8px] text-white/18">
+                        <span className="compare-num select-none border-r border-white/[.035] px-2 py-2.5 text-right text-[8px] text-white/55">
                           {row.old?.line ?? ""}
                         </span>
 
@@ -1109,7 +1109,7 @@ export default function TextCompare() {
                       </div>
 
                       <div className={`grid min-w-0 grid-cols-[46px_1fr] ${newClass}`}>
-                        <span className="compare-num select-none border-r border-white/[.035] px-2 py-2.5 text-right text-[8px] text-white/18">
+                        <span className="compare-num select-none border-r border-white/[.035] px-2 py-2.5 text-right text-[8px] text-white/55">
                           {row.next?.line ?? ""}
                         </span>
 
@@ -1137,14 +1137,14 @@ export default function TextCompare() {
             ) : (
               <div>
                 <div className="sticky top-0 z-10 grid grid-cols-[54px_54px_28px_1fr] border-b border-white/[.06] bg-[#151714]/95 px-0 backdrop-blur">
-                  <div className="px-2 py-3 text-right text-[8px] text-white/18">
+                  <div className="px-2 py-3 text-right text-[8px] text-white/55">
                     A
                   </div>
-                  <div className="px-2 py-3 text-right text-[8px] text-white/18">
+                  <div className="px-2 py-3 text-right text-[8px] text-white/55">
                     B
                   </div>
                   <div />
-                  <div className="px-3 py-3 text-[8px] tracking-[.12em] text-white/24">
+                  <div className="px-3 py-3 text-[8px] tracking-[.12em] text-white/55">
                     UNIFIED DIFF
                   </div>
                 </div>
@@ -1153,8 +1153,8 @@ export default function TextCompare() {
                   if (row.type === "changed") {
                     return [
                       <div key={`old-${index}`} className="grid grid-cols-[54px_54px_28px_1fr] border-b border-white/[.035] bg-[#9d5145]/10 text-[#e6a89c]">
-                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/18">{row.old?.line ?? ""}</span>
-                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/10" />
+                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/55">{row.old?.line ?? ""}</span>
+                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/55" />
                         <span className="select-none py-2.5 text-center text-[10px]">−</span>
                         <span className="whitespace-pre-wrap break-words px-3 py-2.5 text-[10px] leading-5">
                           {row.old && row.next ? (
@@ -1165,8 +1165,8 @@ export default function TextCompare() {
                         </span>
                       </div>,
                       <div key={`new-${index}`} className="grid grid-cols-[54px_54px_28px_1fr] border-b border-white/[.035] bg-[#50755e]/11 text-[#acd0b6]">
-                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/10" />
-                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/18">{row.next?.line ?? ""}</span>
+                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/55" />
+                        <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/55">{row.next?.line ?? ""}</span>
                         <span className="select-none py-2.5 text-center text-[10px]">+</span>
                         <span className="whitespace-pre-wrap break-words px-3 py-2.5 text-[10px] leading-5">
                           {row.old && row.next ? (
@@ -1195,10 +1195,10 @@ export default function TextCompare() {
 
                   return [
                     <div key={`${row.type}-${index}`} className={`grid grid-cols-[54px_54px_28px_1fr] border-b border-white/[.035] ${rowClass}`}>
-                      <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/18">
+                      <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/55">
                         {row.old?.line ?? ""}
                       </span>
-                      <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/18">
+                      <span className="compare-num px-2 py-2.5 text-right text-[8px] text-white/55">
                         {row.next?.line ?? ""}
                       </span>
                       <span className="select-none py-2.5 text-center text-[10px]">
@@ -1235,7 +1235,7 @@ export default function TextCompare() {
               </button>
             </div>
 
-            <div className="text-[8px] text-black/24">
+            <div className="text-[8px] text-black/55">
               {prepared.algorithm === "exact"
                 ? "精确 LCS 比对"
                 : "文本较大，已自动切换快速模式以避免页面卡顿"}
@@ -1245,7 +1245,7 @@ export default function TextCompare() {
 
         <section className="compare-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               LINE DIFF
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1254,7 +1254,7 @@ export default function TextCompare() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               CHAR DIFF
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1263,7 +1263,7 @@ export default function TextCompare() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               SAFE LARGE TEXT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

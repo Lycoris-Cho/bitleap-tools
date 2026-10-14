@@ -224,8 +224,8 @@ function CopyBlock({
   return (
     <article className="border-t border-white/[.07] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.14em] text-white/22">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/28 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.14em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="transform-dark-scroll max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{value}</pre>
     </article>
@@ -372,7 +372,7 @@ export default function CssTransformPage() {
 
         <header className="transform-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">TRANSFORM LAB</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">TRANSFORM LAB</div>
             <h1 className="mt-4 text-[clamp(48px,6.15vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">
               Transform，
               <br />
@@ -402,7 +402,7 @@ export default function CssTransformPage() {
                 <div className="flex flex-col gap-3 border-b border-white/[.065] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap gap-2">
                     {(["grid", "dark", "plain"] as StageMode[]).map((mode) => (
-                      <button key={mode} type="button" onClick={() => setStageMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${stageMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>
+                      <button key={mode} type="button" onClick={() => setStageMode(mode)} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${stageMode === mode ? "bg-white text-[#151714]" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>
                         {mode.toUpperCase()}
                       </button>
                     ))}
@@ -410,11 +410,11 @@ export default function CssTransformPage() {
 
                   <div className="flex flex-wrap gap-2">
                     {(["square", "card", "pill"] as ItemShape[]).map((item) => (
-                      <button key={item} type="button" onClick={() => setShape(item)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${shape === item ? "bg-[#52685d] text-white" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>
+                      <button key={item} type="button" onClick={() => setShape(item)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${shape === item ? "bg-[#52685d] text-white" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>
                         {item}
                       </button>
                     ))}
-                    <button type="button" onClick={() => setShowGhost((value) => !value)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${showGhost ? "bg-[#b28d48] text-white" : "border border-white/[.08] text-white/28"}`}>
+                    <button type="button" onClick={() => setShowGhost((value) => !value)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${showGhost ? "bg-[#b28d48] text-white" : "border border-white/[.08] text-white/55"}`}>
                       原位参考
                     </button>
                   </div>
@@ -422,7 +422,7 @@ export default function CssTransformPage() {
 
                 <div className="transform-dark-scroll overflow-auto p-5 sm:p-7">
                   <div className="mx-auto max-w-[1020px]">
-                    <div className="mb-3 flex items-center justify-between gap-3 text-[8px] text-white/18">
+                    <div className="mb-3 flex items-center justify-between gap-3 text-[8px] text-white/55">
                       <span>LIVE TRANSFORM STAGE</span>
                       <span className="transform-num font-mono">{state.perspective}px perspective</span>
                     </div>
@@ -480,7 +480,7 @@ export default function CssTransformPage() {
                     ["ORIGIN", `${state.originX}% ${state.originY}%`],
                   ].map(([label, value]) => (
                     <div key={label} className="bg-[#151714] p-4">
-                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/18">{label}</div>
+                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{label}</div>
                       <div className="transform-num mt-2 font-mono text-[10px] font-semibold text-[#cbd8cd]">{value}</div>
                     </div>
                   ))}
@@ -490,14 +490,14 @@ export default function CssTransformPage() {
               <div className="mt-5 border-y border-black/[.09] bg-white/18">
                 <div className="grid lg:grid-cols-3">
                   <div className="border-b border-black/[.07] p-5 lg:border-b-0 lg:border-r">
-                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">POSITION</div>
+                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">POSITION</div>
                     <Slider label="translateX" value={state.translateX} min={-320} max={320} unit="px" onChange={(translateX) => patch({ translateX })} />
                     <Slider label="translateY" value={state.translateY} min={-320} max={320} unit="px" onChange={(translateY) => patch({ translateY })} />
                     <Slider label="rotate" value={state.rotate} min={-180} max={180} unit="°" onChange={(rotate) => patch({ rotate })} />
                   </div>
 
                   <div className="border-b border-black/[.07] p-5 lg:border-b-0 lg:border-r">
-                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">SHAPE</div>
+                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">SHAPE</div>
                     <Slider label="scaleX" value={state.scaleX} min={0.1} max={3} step={0.01} unit="" onChange={(scaleX) => patch({ scaleX })} />
                     <Slider label="scaleY" value={state.scaleY} min={0.1} max={3} step={0.01} unit="" onChange={(scaleY) => patch({ scaleY })} />
                     <Slider label="skewX" value={state.skewX} min={-60} max={60} unit="°" onChange={(skewX) => patch({ skewX })} />
@@ -505,13 +505,13 @@ export default function CssTransformPage() {
                   </div>
 
                   <div className="p-5">
-                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">3D / ORIGIN</div>
+                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">3D / ORIGIN</div>
                     <Slider label="perspective" value={state.perspective} min={200} max={2000} step={50} unit="px" onChange={(perspective) => patch({ perspective })} />
                     <Slider label="rotateX" value={state.rotateX} min={-75} max={75} unit="°" onChange={(rotateX) => patch({ rotateX })} />
                     <Slider label="rotateY" value={state.rotateY} min={-75} max={75} unit="°" onChange={(rotateY) => patch({ rotateY })} />
 
                     <div className="mt-4">
-                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">TRANSFORM ORIGIN</div>
+                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">TRANSFORM ORIGIN</div>
                       <div className="grid grid-cols-3 gap-1.5">
                         {ORIGIN_PRESETS.map((origin) => (
                           <button key={origin.id} type="button" onClick={() => patch({ originX: origin.x, originY: origin.y })} className={`rounded-[13px] px-2 py-2.5 text-[8px] font-semibold transition ${state.originX === origin.x && state.originY === origin.y ? "bg-[#22231f] text-white" : "bg-white/30 text-black/32 hover:bg-white/60"}`}>
@@ -528,7 +528,7 @@ export default function CssTransformPage() {
             <aside className="min-w-0">
               <div className="sticky top-6 overflow-hidden rounded-[28px] border border-black/[.08] bg-[#151714]">
                 <div className="border-b border-white/[.06] px-5 py-4">
-                  <div className="text-[8px] font-semibold tracking-[.13em] text-white/22">OUTPUT</div>
+                  <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">OUTPUT</div>
                 </div>
 
                 <div className="transform-dark-scroll max-h-[790px] overflow-auto px-5">
@@ -552,15 +552,15 @@ export default function CssTransformPage() {
 
         <section className="transform-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">ORIGIN VISIBLE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">ORIGIN VISIBLE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">金色锚点就是 transform-origin，可以直接看旋转和缩放围绕哪里发生。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">2D + 3D</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">2D + 3D</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">在原有 translate / rotate / scale / skew 基础上加入 perspective、rotateX 和 rotateY。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">ORDER MATTERS</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">ORDER MATTERS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">CSS transform 函数按书写顺序组合执行。当前输出顺序固定，方便结果稳定复现。</p>
           </div>
         </section>

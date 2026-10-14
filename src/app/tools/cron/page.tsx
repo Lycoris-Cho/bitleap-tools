@@ -361,7 +361,7 @@ function MetricCard({ label, value, note, tone = "ink" }: { label: string; value
 
   return (
     <article className="rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-      <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">{label}</div>
+      <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">{label}</div>
       <div className={`cron-num mt-4 break-all font-mono text-[19px] font-semibold tracking-[-.045em] ${toneClass}`}>{value}</div>
       <p className="mt-3 text-[8px] leading-5 text-black/30">{note}</p>
     </article>
@@ -559,7 +559,7 @@ export default function CronPage() {
 
         <header className="cron-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">CRON STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">CRON STUDIO</div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               把定时任务，
               <br />
@@ -571,7 +571,7 @@ export default function CronPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               可视化生成 Linux 5 字段 Cron 表达式，支持自定义解析、字段校验、下一次执行预览，以及 GitHub Actions / Vercel / Quartz 常用格式输出。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>5-FIELD CRONTAB</span>
               <span>NEXT RUNS</span>
               <span>GITHUB / VERCEL</span>
@@ -583,7 +583,7 @@ export default function CronPage() {
         <section className="cron-intro mt-7 grid gap-7 xl:grid-cols-[.68fr_1.32fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">SCHEDULE BUILDER</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">SCHEDULE BUILDER</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">生成规则。</h2>
 
               <div className="mt-6 grid gap-2 sm:grid-cols-2">
@@ -598,13 +598,13 @@ export default function CronPage() {
               <div className="mt-6 space-y-5 border-t border-black/[.065] pt-5">
                 {period === "custom" ? (
                   <label>
-                    <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">CUSTOM CRON</span>
+                    <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">CUSTOM CRON</span>
                     <input value={customCron} onChange={(event) => setCustomCron(event.target.value)} spellCheck={false} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none transition focus:border-black/25" placeholder="*/5 * * * *" />
                   </label>
                 ) : (
                   <>
                     <div>
-                      <div className="mb-2 flex justify-between text-[8px] text-black/28">
+                      <div className="mb-2 flex justify-between text-[8px] text-black/55">
                         <span>分钟</span>
                         <span className="cron-num font-mono text-[#52685d]">{pad(minute)}</span>
                       </div>
@@ -613,7 +613,7 @@ export default function CronPage() {
 
                     {period !== "minute" && (
                       <div>
-                        <div className="mb-2 flex justify-between text-[8px] text-black/28">
+                        <div className="mb-2 flex justify-between text-[8px] text-black/55">
                           <span>小时</span>
                           <span className="cron-num font-mono text-[#52685d]">{pad(hour)}</span>
                         </div>
@@ -623,14 +623,14 @@ export default function CronPage() {
 
                     {period === "month" && (
                       <label>
-                        <span className="mb-2 block text-[8px] text-black/24">日期</span>
+                        <span className="mb-2 block text-[8px] text-black/55">日期</span>
                         <input type="number" min={1} max={31} value={monthDay} onChange={(event) => setMonthDay(normalizeNumber(Number(event.target.value) || 1, 1, 31))} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] outline-none" />
                       </label>
                     )}
 
                     {period === "week" && (
                       <div>
-                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">WEEKDAY</div>
+                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">WEEKDAY</div>
                         <div className="flex flex-wrap gap-1.5">
                           {WEEK_OPTIONS.map((item) => (
                             <button key={item.value} type="button" onClick={() => setWeekday(item.value)} className={`rounded-full px-3.5 py-2 text-[8px] font-semibold transition ${weekday === item.value ? "bg-[#52685d] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{item.label}</button>
@@ -641,7 +641,7 @@ export default function CronPage() {
 
                     {(period === "day" || period === "week" || period === "month") && (
                       <div>
-                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">MONTH FILTER</div>
+                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">MONTH FILTER</div>
                         <div className="flex max-h-[104px] flex-wrap gap-1.5 overflow-auto pr-1">
                           {MONTH_OPTIONS.map((item) => (
                             <button key={item.value} type="button" onClick={() => setMonth(item.value)} className={`rounded-full px-3 py-2 text-[8px] font-semibold transition ${month === item.value ? "bg-[#22231f] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{item.label}</button>
@@ -653,7 +653,7 @@ export default function CronPage() {
                 )}
 
                 <label>
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">COMMAND / PATH</span>
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">COMMAND / PATH</span>
                   <input value={command} onChange={(event) => setCommand(event.target.value)} spellCheck={false} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] text-black/68 outline-none transition focus:border-black/25" placeholder="npm run task" />
                 </label>
 
@@ -668,7 +668,7 @@ export default function CronPage() {
             </div>
 
             <div className="mt-4 rounded-[24px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">PRESETS</div>
+              <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">PRESETS</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {PRESETS.map((item) => (
                   <button key={item.cron} type="button" onClick={() => applyPreset(item.cron)} className="rounded-full border border-black/[.085] px-3.5 py-2 text-[8px] font-semibold text-black/35 transition hover:bg-white/45 hover:text-black">{item.label}</button>
@@ -680,7 +680,7 @@ export default function CronPage() {
           <div ref={resultRef} className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">CRON OUTPUT</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">CRON OUTPUT</div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">{parsed.ok ? "表达式有效。" : "需要检查。"}</h2>
               </div>
 
@@ -692,7 +692,7 @@ export default function CronPage() {
 
             <div className="mt-5 overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">LINUX CRONTAB</span>
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">LINUX CRONTAB</span>
                 <span className={`text-[8px] ${parsed.ok ? "text-[#8fb69b]" : "text-[#d49a88]"}`}>{parsed.ok ? "VALID" : "INVALID"}</span>
               </div>
 
@@ -707,9 +707,9 @@ export default function CronPage() {
 
                   return (
                     <div key={item.label} className="bg-[#151714] p-4">
-                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/19">{item.label} · {item.range}</div>
+                      <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{item.label} · {item.range}</div>
                       <div className="cron-num mt-3 break-all font-mono text-[14px] font-semibold text-white/70">{part}</div>
-                      <div className="mt-2 text-[8px] text-white/20">{cronFieldExplain(part, index)}</div>
+                      <div className="mt-2 text-[8px] text-white/55">{cronFieldExplain(part, index)}</div>
                     </div>
                   )
                 })}
@@ -726,7 +726,7 @@ export default function CronPage() {
             <div className="mt-5 grid gap-px overflow-hidden rounded-[28px] border border-black/[.075] bg-black/[.07] lg:grid-cols-[.82fr_1.18fr]">
               <div className="bg-[#f4f1e9]">
                 <div className="border-b border-black/[.065] px-5 py-4">
-                  <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">NEXT RUN PREVIEW</div>
+                  <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">NEXT RUN PREVIEW</div>
                   <p className="mt-2 text-[8px] leading-5 text-black/31">预览在浏览器本地按分钟扫描生成，复杂表达式可能只显示可找到的前几次。</p>
                 </div>
 
@@ -734,21 +734,21 @@ export default function CronPage() {
                   {now && nextRuns.length ? (
                     nextRuns.map((date, index) => (
                       <div key={date.toISOString()} className="grid gap-2 px-5 py-4 sm:grid-cols-[54px_1fr_auto] sm:items-center">
-                        <div className="cron-num font-mono text-[8px] text-black/22">#{String(index + 1).padStart(2, "0")}</div>
+                        <div className="cron-num font-mono text-[8px] text-black/55">#{String(index + 1).padStart(2, "0")}</div>
                         <div className="cron-num font-mono text-[12px] font-semibold text-black/62">{formatRun(date, zone)}</div>
-                        <div className="text-[8px] text-black/27">{relativeRun(date, now)}</div>
+                        <div className="text-[8px] text-black/55">{relativeRun(date, now)}</div>
                       </div>
                     ))
                   ) : (
-                    <div className="px-5 py-10 text-center text-[9px] text-black/27">{parsed.ok ? "客户端时钟准备中…" : parsed.error}</div>
+                    <div className="px-5 py-10 text-center text-[9px] text-black/55">{parsed.ok ? "客户端时钟准备中…" : parsed.error}</div>
                   )}
                 </div>
               </div>
 
               <div className="bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">EXPORT FORMATS</span>
-                  <button type="button" onClick={() => copy(report, "report")} disabled={!parsed.ok} className="text-[8px] font-semibold text-white/27 transition hover:text-white disabled:opacity-20">{copied === "report" ? "✓ COPIED" : "COPY REPORT"}</button>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">EXPORT FORMATS</span>
+                  <button type="button" onClick={() => copy(report, "report")} disabled={!parsed.ok} className="text-[8px] font-semibold text-white/55 transition hover:text-white disabled:opacity-20">{copied === "report" ? "✓ 已复制" : "复制报告"}</button>
                 </div>
 
                 <div className="cron-dark-scroll max-h-[444px] overflow-auto">
@@ -760,8 +760,8 @@ export default function CronPage() {
                   ].map((item) => (
                     <div key={item.label} className="group border-b border-white/[.055] px-5 py-4 last:border-b-0">
                       <div className="mb-2 flex items-center justify-between gap-3">
-                        <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">{item.label}</span>
-                        <button type="button" onClick={() => copy(item.value, item.key)} disabled={!parsed.ok} className="text-[8px] font-semibold text-white/24 opacity-100 transition hover:text-white disabled:opacity-20 sm:opacity-0 sm:group-hover:opacity-100">{copied === item.key ? "✓" : "COPY"}</button>
+                        <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">{item.label}</span>
+                        <button type="button" onClick={() => copy(item.value, item.key)} disabled={!parsed.ok} className="text-[8px] font-semibold text-white/55 opacity-100 transition hover:text-white disabled:opacity-20 ">{copied === item.key ? "✓" : "复制"}</button>
                       </div>
                       <pre className="whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{item.value}</pre>
                     </div>
@@ -774,15 +774,15 @@ export default function CronPage() {
 
         <section className="cron-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">5 FIELDS</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">5 FIELDS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">这里生成的是 Linux Crontab 常见 5 字段格式：分、时、日、月、星期。Quartz 通常还会多一个“秒”字段。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">DAY MATCHING</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">DAY MATCHING</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">当“日”和“星期”都不是星号时，很多 crontab 会按“任一匹配”执行。不同平台可能略有差异，部署前需要确认平台文档。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">UTC NOTE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">UTC NOTE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">GitHub Actions 的 schedule 使用 UTC。页面提供 UTC 预览，方便把本地时间换算到 CI 定时任务。</p>
           </div>
         </section>

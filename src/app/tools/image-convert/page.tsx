@@ -279,8 +279,8 @@ function OutputBlock({
   return (
     <article className="rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold tracking-[.13em] text-white/24">{label}</span>
-        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/26 transition hover:text-white">{copied ? "✓ COPIED" : "COPY"}</button>
+        <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">{label}</span>
+        <button type="button" onClick={onCopy} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied ? "✓ 已复制" : "复制"}</button>
       </div>
       <pre className="convert-dark-scroll max-h-44 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#CBD8CD]">{value}</pre>
     </article>
@@ -300,7 +300,7 @@ function StatBox({
 
   return (
     <div className="bg-[#F3F0E8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`convert-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -329,7 +329,7 @@ function QueueCard({
       <button type="button" onClick={onSelect} className="min-w-0 text-left">
         <div className="truncate text-[10px] font-semibold">{item.name}</div>
         <div className={`convert-num mt-1 truncate font-mono text-[8px] ${active ? "text-white/36" : "text-black/30"}`}>{item.width}×{item.height} → {target.w}×{target.h}</div>
-        <div className={`mt-1 text-[7px] ${active ? "text-white/28" : item.status === "error" ? "text-[#965744]" : "text-black/24"}`}>{item.status}</div>
+        <div className={`mt-1 text-[7px] ${active ? "text-white/55" : item.status === "error" ? "text-[#965744]" : "text-black/55"}`}>{item.status}</div>
       </button>
       <button type="button" onClick={onRemove} className={`rounded-full px-2.5 py-1.5 text-[8px] font-semibold ${active ? "bg-white/10 text-[#FFB2A4]" : "bg-[#965744]/8 text-[#965744]"}`}>删</button>
     </article>
@@ -660,7 +660,7 @@ export default function ImageConvertPage() {
 
         <header className="convert-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.74fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">IMAGE CONVERT STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">IMAGE CONVERT STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.01] tracking-[-.058em]">
               图片转换，
               <br />
@@ -685,7 +685,7 @@ export default function ImageConvertPage() {
             <div className="rounded-[30px] border border-black/[.075] bg-white/24 p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">SOURCE QUEUE</div>
+                  <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">SOURCE QUEUE</div>
                   <p className="mt-2 text-[8px] leading-4 text-black/30">支持多图上传和拖拽。</p>
                 </div>
                 <button type="button" onClick={() => fileRef.current?.click()} className="rounded-full bg-[#22231F] px-4 py-3 text-[9px] font-semibold text-white">选择</button>
@@ -732,8 +732,8 @@ export default function ImageConvertPage() {
           <main className="min-w-0 overflow-hidden rounded-[32px] border border-black/[.08] bg-[#151714]">
             <div className="flex flex-col gap-3 border-b border-white/[.065] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.13em] text-white/24">PREVIEW STAGE</div>
-                <p className="mt-2 text-[8px] text-white/27">查看原图与转换结果。</p>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">PREVIEW STAGE</div>
+                <p className="mt-2 text-[8px] text-white/55">查看原图与转换结果。</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <TogglePill active={previewMode === "before"} label="原图" onClick={() => setPreviewMode("before")} />
@@ -748,11 +748,11 @@ export default function ImageConvertPage() {
                   previewMode === "compare" ? (
                     <div className="grid w-full max-w-[900px] gap-4 md:grid-cols-2">
                       <figure className="rounded-[24px] border border-black/[.08] bg-white/62 p-4">
-                        <figcaption className="mb-3 text-[8px] font-semibold tracking-[.13em] text-black/28">BEFORE · {activeItem.width}×{activeItem.height}</figcaption>
+                        <figcaption className="mb-3 text-[8px] font-semibold tracking-[.13em] text-black/55">BEFORE · {activeItem.width}×{activeItem.height}</figcaption>
                         <img src={activeItem.src} alt={activeItem.name} className="max-h-[430px] w-full object-contain" />
                       </figure>
                       <figure className="rounded-[24px] border border-black/[.08] bg-white/62 p-4">
-                        <figcaption className="mb-3 text-[8px] font-semibold tracking-[.13em] text-black/28">AFTER · {targetSize ? `${targetSize.w}×${targetSize.h}` : "—"}</figcaption>
+                        <figcaption className="mb-3 text-[8px] font-semibold tracking-[.13em] text-black/55">AFTER · {targetSize ? `${targetSize.w}×${targetSize.h}` : "—"}</figcaption>
                         {activeItem.outputUrl ? <img src={activeItem.outputUrl} alt={`${activeItem.name} converted`} className="max-h-[430px] w-full object-contain" /> : <div className="grid h-[320px] place-items-center rounded-[20px] border border-dashed border-black/10 text-[9px] text-black/34">先转换当前图片</div>}
                       </figure>
                     </div>
@@ -787,7 +787,7 @@ export default function ImageConvertPage() {
                   ["ACTIVE", activeItem ? activeItem.status : "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-[#151714] p-4">
-                    <div className="text-[7px] font-semibold tracking-[.12em] text-white/18">{label}</div>
+                    <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{label}</div>
                     <div className="convert-num mt-2 truncate font-mono text-[10px] font-semibold text-[#CBD8CD]">{value}</div>
                   </div>
                 ))}
@@ -802,16 +802,16 @@ export default function ImageConvertPage() {
 
           <aside className="min-w-0 space-y-4">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">EXPORT SETTINGS</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">EXPORT SETTINGS</div>
 
               <div className="mt-5 space-y-6">
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">FORMAT</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">FORMAT</div>
                   <div className="grid grid-cols-2 gap-2">
                     {(Object.keys(FORMAT_META) as OutputFormat[]).map((format) => (
                       <button key={format} type="button" onClick={() => patchSettings({ format })} className={`rounded-[16px] border p-3 text-left transition ${settings.format === format ? "border-[#22231F]/15 bg-[#22231F] text-white" : "border-black/[.08] bg-white/24 hover:bg-white/55"}`}>
                         <div className={`font-mono text-[10px] font-semibold ${settings.format === format ? "text-white" : "text-black/64"}`}>{FORMAT_META[format].label}</div>
-                        <p className={`mt-2 text-[7px] leading-4 ${settings.format === format ? "text-white/34" : "text-black/28"}`}>{FORMAT_META[format].note}</p>
+                        <p className={`mt-2 text-[7px] leading-4 ${settings.format === format ? "text-white/34" : "text-black/55"}`}>{FORMAT_META[format].note}</p>
                       </button>
                     ))}
                   </div>
@@ -820,7 +820,7 @@ export default function ImageConvertPage() {
                 {settings.format !== "png" && <Slider label="质量" value={settings.quality} min={0.1} max={1} step={0.01} unit="" onChange={(quality) => patchSettings({ quality })} />}
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">RESIZE</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">RESIZE</div>
                   <div className="flex flex-wrap gap-2">
                     <TogglePill active={settings.resizeMode === "original"} label="原尺寸" onClick={() => patchSettings({ resizeMode: "original" })} />
                     <TogglePill active={settings.resizeMode === "scale"} label="比例" onClick={() => patchSettings({ resizeMode: "scale" })} />
@@ -849,7 +849,7 @@ export default function ImageConvertPage() {
                 )}
 
                 <div className="rounded-[22px] border border-black/[.075] bg-white/24 p-4">
-                  <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">MATTE BACKGROUND</div>
+                  <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">MATTE BACKGROUND</div>
                   <div className="flex flex-wrap gap-2">
                     <TogglePill active={settings.matteEnabled || settings.format === "jpeg"} label={settings.format === "jpeg" ? "JPEG 必须铺底" : "启用铺底"} onClick={() => patchSettings({ matteEnabled: !settings.matteEnabled })} />
                   </div>
@@ -860,7 +860,7 @@ export default function ImageConvertPage() {
 
             <div className="overflow-hidden rounded-[28px] border border-black/[.08] bg-[#151714]">
               <div className="border-b border-white/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-white/22">OUTPUT</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">OUTPUT</div>
               </div>
               <div className="convert-dark-scroll max-h-[560px] overflow-auto p-5">
                 <div className="space-y-4">
@@ -879,15 +879,15 @@ export default function ImageConvertPage() {
 
         <section className="convert-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL CANVAS</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL CANVAS</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">图片通过 objectURL 本地读取，再由 canvas 编码导出。不会上传服务器。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">BATCH READY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">BATCH READY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">可以一次加入多张图片，统一格式、质量和尺寸策略后批量转换。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">FORMAT LIMIT</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">FORMAT LIMIT</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">AVIF / WebP 导出取决于浏览器的 canvas 编码能力；不支持时会显示错误。</p>
           </div>
         </section>

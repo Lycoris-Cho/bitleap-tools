@@ -331,7 +331,7 @@ function buildStandaloneHtml(data: DashboardDataset, range: TimeRange) {
     <header class="header">
       <div class="status">SYSTEM STATUS<b>● ONLINE</b></div>
       <div>
-        <div class="eyebrow">INTELLIGENT DATA CENTER</div>
+        <div class="eyebrow">DASHBOARD TEMPLATE</div>
         <h1 id="pageTitle"></h1>
         <div class="subtitle" id="pageSubtitle"></div>
       </div>
@@ -649,11 +649,11 @@ export default function DataAnalyticsPage() {
                 <span className="hidden h-px w-12 bg-gradient-to-l from-transparent to-cyan-300/50 sm:block" />
               </div>
               <h1 className="bg-gradient-to-b from-white via-cyan-50 to-cyan-300 bg-clip-text text-xl font-black tracking-[0.16em] text-transparent sm:text-2xl md:text-[28px]">
-                智 能 数 据 驾 驶 舱
+                数 据 看 板 模 板
               </h1>
               <div className="mx-auto mt-2 flex items-center justify-center gap-2">
                 <span className="h-px w-8 bg-cyan-300/15" />
-                <span className="text-[10px] tracking-[0.22em] text-slate-500">实时监控 · 多维分析 · 决策支持</span>
+                <span className="text-[10px] tracking-[0.22em] text-slate-500">自带模拟数据的仪表盘演示 · 可导出为 HTML</span>
                 <span className="h-px w-8 bg-cyan-300/15" />
               </div>
             </div>

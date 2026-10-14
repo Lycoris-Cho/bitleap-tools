@@ -1190,8 +1190,17 @@ export default function GSAPToolPage() {
                                     </span>
                                 </div>
 
-                                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-black/28">
+                                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-black/55">
                                     001—∞
+                                </span>
+                            </div>
+
+                            <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 lg:mt-4">
+                                <span className="rounded-full bg-[#11120f] px-3 py-1.5 text-[11px] font-semibold tracking-[0.12em] text-[#f2f4ef]">
+                                    GSAP 动效实验室
+                                </span>
+                                <span className="text-[12px] text-black/55">
+                                    滚动 / 布局 / 拖拽 / 文字 / 路径 / SVG 六类动效演示，时长可调
                                 </span>
                             </div>
 
@@ -1269,7 +1278,7 @@ export default function GSAPToolPage() {
 
                             <div className="hero-core absolute left-1/2 top-1/2 flex h-[138px] w-[138px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[36px] bg-[#11120f] shadow-[0_38px_80px_-38px_rgba(0,0,0,.62)] sm:h-[215px] sm:w-[215px] sm:rounded-[48px]">
                                 <div className="text-center">
-                                    <div className="text-[9px] font-black uppercase tracking-[0.22em] text-white/25">
+                                    <div className="text-[9px] font-black uppercase tracking-[0.22em] text-white/55">
                                         Motion engine
                                     </div>
                                     <div className="mt-2 text-[42px] font-black tracking-[-0.09em] text-[#aaff57] sm:text-[66px]">
@@ -1301,7 +1310,7 @@ export default function GSAPToolPage() {
                                 timeline()
                             </div>
 
-                            <div className="absolute bottom-[4%] left-[7%] font-mono text-[9px] uppercase tracking-[0.18em] text-black/28">
+                            <div className="absolute bottom-[4%] left-[7%] font-mono text-[9px] uppercase tracking-[0.18em] text-black/55">
                                 x: 240 · rotate: 360 · ease: power4.out
                             </div>
                         </div>
@@ -1470,7 +1479,7 @@ export default function GSAPToolPage() {
                             </div>
                         </div>
 
-                        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2 text-[9px] font-black tracking-[0.18em] text-white/25">
+                        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2 text-[9px] font-black tracking-[0.18em] text-white/55">
                             KEEP SCROLLING
                             <ArrowDown className="h-3 w-3" />
                         </div>
@@ -2009,7 +2018,7 @@ export default function ScrollDemo() {
             </main>
 
             <footer className="bg-white">
-                <div className="mx-auto flex max-w-[1360px] flex-col justify-between gap-3 px-5 py-7 text-[10px] font-bold uppercase tracking-[0.12em] text-black/25 md:flex-row md:px-8">
+                <div className="mx-auto flex max-w-[1360px] flex-col justify-between gap-3 px-5 py-7 text-[10px] font-bold uppercase tracking-[0.12em] text-black/55 md:flex-row md:px-8">
                     <span>GSAP Motion Lab</span>
                     <span>Next.js · TypeScript · Tailwind CSS · ScrollTrigger</span>
                 </div>
@@ -2137,12 +2146,12 @@ function CodePanel({
                 }`}
             >
                 <div>
-                    <div className="font-mono text-[10px] font-black uppercase tracking-[0.18em] text-black/28">
+                    <div className="font-mono text-[10px] font-black uppercase tracking-[0.18em] text-black/55">
                         {number}
                     </div>
                     {isWide && (
                         <div className="mt-7 hidden lg:block">
-                            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-black/25">
+                            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-black/55">
                                 Production pattern
                             </div>
                             <div className="mt-3 text-4xl font-black leading-[0.92] tracking-[-0.055em]">
@@ -2167,7 +2176,7 @@ function CodePanel({
 
             {isCompact && (
                 <div className="mt-6 flex items-center justify-between border-t border-black/[0.08] pt-4">
-                    <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-black/28">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-black/55">
                         package manager
                     </span>
                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#11120f] text-white transition-transform duration-300 group-hover:rotate-12 group-hover:scale-105">

@@ -319,7 +319,7 @@ function StatCard({
 
   return (
     <div className="rounded-[22px] border border-white/[.08] bg-white/[.045] p-4">
-      <div className="text-[8px] font-semibold tracking-[.15em] text-white/25">{label}</div>
+      <div className="text-[8px] font-semibold tracking-[.15em] text-white/55">{label}</div>
       <div className={`snake-num mt-3 truncate font-mono text-[18px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -669,7 +669,7 @@ export default function SnakePage() {
         <section className="snake-intro grid flex-1 gap-5 py-5 xl:grid-cols-[270px_minmax(0,1fr)_290px]">
           <aside className="snake-panel-scroll min-h-0 space-y-4 overflow-auto">
             <div className="rounded-[30px] border border-white/[.08] bg-white/[.04] p-5 backdrop-blur-xl">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-white/25">SCOREBOARD</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">SCOREBOARD</div>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <StatCard label="SCORE" value={numberLabel(score)} tone="green" />
                 <StatCard label="BEST" value={numberLabel(best)} tone="gold" />
@@ -678,7 +678,7 @@ export default function SnakePage() {
               </div>
 
               <div className="mt-5">
-                <div className="mb-2 flex justify-between text-[8px] text-white/28">
+                <div className="mb-2 flex justify-between text-[8px] text-white/55">
                   <span>Next level</span>
                   <span>{score % 6}/6</span>
                 </div>
@@ -689,20 +689,20 @@ export default function SnakePage() {
             </div>
 
             <div className="rounded-[30px] border border-white/[.08] bg-white/[.04] p-5 backdrop-blur-xl">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-white/25">GAMEPLAY</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">GAMEPLAY</div>
               <div className="mt-5 space-y-5">
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-white/24">难度</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-white/55">难度</div>
                   <div className="flex flex-wrap gap-2">
                     {(Object.keys(DIFFICULTY) as Difficulty[]).map((item) => (
                       <ButtonPill key={item} active={difficulty === item} label={DIFFICULTY[item].label} onClick={() => setDifficulty(item)} />
                     ))}
                   </div>
-                  <p className="mt-3 text-[8px] leading-4 text-white/28">{DIFFICULTY[difficulty].note}</p>
+                  <p className="mt-3 text-[8px] leading-4 text-white/55">{DIFFICULTY[difficulty].note}</p>
                 </div>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-white/24">边界</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-white/55">边界</div>
                   <div className="flex flex-wrap gap-2">
                     <ButtonPill active={wallMode === "wrap"} label="穿墙" onClick={() => setWallMode("wrap")} />
                     <ButtonPill active={wallMode === "wall"} label="撞墙" onClick={() => setWallMode("wall")} />
@@ -710,7 +710,7 @@ export default function SnakePage() {
                 </div>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-white/24">主题</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-white/55">主题</div>
                   <div className="flex flex-wrap gap-2">
                     {(Object.keys(THEMES) as ThemeName[]).map((item) => (
                       <ButtonPill key={item} active={theme === item} label={THEMES[item].label} onClick={() => setTheme(item)} />
@@ -721,7 +721,7 @@ export default function SnakePage() {
             </div>
 
             <div className="rounded-[24px] border border-white/[.08] bg-white/[.035] p-5 text-[9px] leading-5 text-white/30">
-              <div className="mb-2 text-[8px] font-semibold tracking-[.14em] text-white/24">DETAILS</div>
+              <div className="mb-2 text-[8px] font-semibold tracking-[.14em] text-white/55">DETAILS</div>
               输入采用最多 2 步方向队列，快速连按不会漏掉转弯；自撞判断允许合法进入即将离开的尾巴位置。
             </div>
           </aside>
@@ -732,11 +732,11 @@ export default function SnakePage() {
             <div className="relative mx-auto flex h-full min-h-[620px] max-w-[860px] flex-col rounded-[38px] border border-white/[.08] bg-[#0E120F]/88 p-3 shadow-[0_40px_140px_-70px_rgba(0,0,0,.82)] backdrop-blur-xl">
               <div className="flex items-center justify-between gap-3 px-3 py-3">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.14em] text-white/24">LIVE BOARD</div>
+                  <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">LIVE BOARD</div>
                   <div className="snake-num mt-1 font-mono text-[9px] text-[#8FE6AE]/55">{GRID}×{GRID} · {interval}ms · {formatDirection(gameRef.current.dir)}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="hidden rounded-full border border-white/[.08] px-3 py-2 text-[8px] text-white/28 sm:inline-flex">Last {lastEat}</span>
+                  <span className="hidden rounded-full border border-white/[.08] px-3 py-2 text-[8px] text-white/55 sm:inline-flex">Last {lastEat}</span>
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status === "playing" ? "#8FE6AE" : status === "over" ? "#F07B8C" : "#F0C86E", boxShadow: status === "playing" ? "0 0 24px rgba(143,230,174,.45)" : "none" }} />
                 </div>
               </div>
@@ -768,7 +768,7 @@ export default function SnakePage() {
 
           <aside className="snake-panel-scroll min-h-0 space-y-4 overflow-auto">
             <div className="rounded-[30px] border border-white/[.08] bg-white/[.04] p-5 backdrop-blur-xl">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-white/25">TOUCH CONTROL</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">TOUCH CONTROL</div>
               <div className="mt-5 grid grid-cols-3 justify-items-center gap-2">
                 <span />
                 <DPadButton label="↑" onClick={() => turn({ x: 0, y: -1 })} />
@@ -780,11 +780,11 @@ export default function SnakePage() {
                 <DPadButton label="↓" onClick={() => turn({ x: 0, y: 1 })} />
                 <span />
               </div>
-              <p className="mt-4 text-[8px] leading-4 text-white/28">也可以直接在棋盘上滑动控制方向。</p>
+              <p className="mt-4 text-[8px] leading-4 text-white/55">也可以直接在棋盘上滑动控制方向。</p>
             </div>
 
             <div className="rounded-[30px] border border-white/[.08] bg-white/[.04] p-5 backdrop-blur-xl">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-white/25">KEYBOARD</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">KEYBOARD</div>
               <div className="mt-4 grid grid-cols-2 gap-2 text-[9px] text-white/34">
                 <div className="rounded-2xl bg-white/[.035] p-3"><span className="font-mono text-[#8FE6AE]">WASD</span><br />移动方向</div>
                 <div className="rounded-2xl bg-white/[.035] p-3"><span className="font-mono text-[#8FE6AE]">ARROWS</span><br />方向键</div>
@@ -794,7 +794,7 @@ export default function SnakePage() {
             </div>
 
             <div className="rounded-[30px] border border-white/[.08] bg-white/[.04] p-5 backdrop-blur-xl">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-white/25">LOCAL BEST</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-white/55">LOCAL BEST</div>
               <p className="mt-4 text-[9px] leading-5 text-white/30">最高分保存在当前浏览器本地，不会上传。切换难度和边界不会清空最高分。</p>
               <button type="button" onClick={resetBest} className="mt-4 rounded-full border border-[#F07B8C]/18 px-4 py-3 text-[9px] font-semibold text-[#F07B8C] transition hover:bg-[#F07B8C]/10">清除最高分</button>
             </div>

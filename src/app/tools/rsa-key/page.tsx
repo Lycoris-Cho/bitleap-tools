@@ -221,13 +221,13 @@ function KeyPanel({
     <div className="min-w-0 bg-[#151714]">
       <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
         <div>
-          <div className="text-[8px] font-semibold tracking-[.13em] text-white/27">{title}</div>
-          <div className="mt-0.5 text-[7px] text-white/15">{label}</div>
+          <div className="text-[8px] font-semibold tracking-[.13em] text-white/55">{title}</div>
+          <div className="mt-0.5 text-[7px] text-white/55">{label}</div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" onClick={onDownload} disabled={!value} className="text-[8px] font-semibold text-white/27 transition hover:text-white disabled:opacity-20">DOWNLOAD</button>
-          <button type="button" onClick={onCopy} disabled={!value} className="text-[8px] font-semibold text-white/27 transition hover:text-white disabled:opacity-20">{copied ? "✓ COPIED" : "COPY"}</button>
+          <button type="button" onClick={onDownload} disabled={!value} className="text-[8px] font-semibold text-white/55 transition hover:text-white disabled:opacity-20">DOWNLOAD</button>
+          <button type="button" onClick={onCopy} disabled={!value} className="text-[8px] font-semibold text-white/55 transition hover:text-white disabled:opacity-20">{copied ? "✓ 已复制" : "复制"}</button>
         </div>
       </div>
 
@@ -540,7 +540,7 @@ export default function RsaKeyPage() {
 
         <header className="rsa-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">RSA KEY STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">RSA KEY STUDIO</div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               在本地，
               <br />
@@ -553,7 +553,7 @@ export default function RsaKeyPage() {
               使用浏览器 WebCrypto 生成 RSA-OAEP 或 RSA-PSS 密钥对，导出 PKCS#8 私钥、SPKI 公钥和 JWK，并提供指纹、自检、复制与下载。
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>WEBCRYPTO</span>
               <span>PEM / JWK</span>
               <span>LOCAL ONLY</span>
@@ -565,12 +565,12 @@ export default function RsaKeyPage() {
         <section className="rsa-intro mt-7 grid gap-7 xl:grid-cols-[.66fr_1.34fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">KEY SETTINGS</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">KEY SETTINGS</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">生成参数。</h2>
 
               <div className="mt-6 space-y-6">
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">PURPOSE</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">PURPOSE</div>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {PURPOSES.map((item) => (
                       <button key={item.value} type="button" onClick={() => setPurpose(item.value)} className={`rounded-[20px] border p-4 text-left transition ${purpose === item.value ? "border-[#22231f]/15 bg-[#22231f] text-white" : "border-black/[.08] bg-white/24 hover:bg-white/48"}`}>
@@ -583,7 +583,7 @@ export default function RsaKeyPage() {
                 </div>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">MODULUS LENGTH</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">MODULUS LENGTH</div>
                   <div className="flex flex-wrap gap-1.5">
                     {MODULUS_OPTIONS.map((bits) => (
                       <button key={bits} type="button" onClick={() => setModulusLength(bits)} className={`rounded-full px-3.5 py-2 text-[8px] font-semibold transition ${modulusLength === bits ? "bg-[#22231f] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{bits} bit</button>
@@ -592,7 +592,7 @@ export default function RsaKeyPage() {
                 </div>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">HASH</div>
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">HASH</div>
                   <div className="flex flex-wrap gap-1.5">
                     {HASHES.map((item) => (
                       <button key={item} type="button" onClick={() => setHash(item)} className={`rounded-full px-3.5 py-2 text-[8px] font-semibold transition ${hash === item ? "bg-[#52685d] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{item}</button>
@@ -602,7 +602,7 @@ export default function RsaKeyPage() {
 
                 {purpose === "oaep" && (
                   <div className="rounded-[20px] border border-black/[.07] bg-white/24 p-4">
-                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">OAEP PAYLOAD LIMIT</div>
+                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">OAEP PAYLOAD LIMIT</div>
                     <div className="rsa-num mt-3 font-mono text-[18px] font-semibold tracking-[-.04em] text-[#52685d]">{maxPayload} bytes</div>
                     <p className="mt-2 text-[8px] leading-5 text-black/30">RSA-OAEP 只适合加密很短的明文；实际文件加密通常用混合加密。</p>
                   </div>
@@ -620,7 +620,7 @@ export default function RsaKeyPage() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">KEY PROFILE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">KEY PROFILE</div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">{status || "等待生成密钥。"}</p>
               </div>
 
@@ -634,7 +634,7 @@ export default function RsaKeyPage() {
                   ["公钥长度", meta ? formatNumber(meta.publicLength) : "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-[#f3f0e8]/92 p-4">
-                    <div className="text-[8px] text-black/24">{label}</div>
+                    <div className="text-[8px] text-black/55">{label}</div>
                     <div className="rsa-num mt-2 break-all font-mono text-[12px] font-semibold text-black/61">{value}</div>
                   </div>
                 ))}
@@ -643,8 +643,8 @@ export default function RsaKeyPage() {
               {meta && (
                 <div className="border-t border-black/[.06] px-5 py-4">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">PUBLIC SHA-256 FINGERPRINT</div>
-                    <button type="button" onClick={() => copy(meta.publicFingerprint, "fingerprint")} className="text-[8px] font-semibold text-black/30 transition hover:text-black">{copied === "fingerprint" ? "✓ COPIED" : "COPY"}</button>
+                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">PUBLIC SHA-256 FINGERPRINT</div>
+                    <button type="button" onClick={() => copy(meta.publicFingerprint, "fingerprint")} className="text-[8px] font-semibold text-black/30 transition hover:text-black">{copied === "fingerprint" ? "✓ 已复制" : "复制"}</button>
                   </div>
                   <div className="mt-3 break-all font-mono text-[9px] leading-5 text-black/48">{meta.publicFingerprint}</div>
                 </div>
@@ -662,7 +662,7 @@ export default function RsaKeyPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">KEY OUTPUT</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">KEY OUTPUT</div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">{hasKeys ? "PEM 已准备好。" : "等待生成。"}</h2>
               </div>
 
@@ -697,7 +697,7 @@ export default function RsaKeyPage() {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
                 <span>{hasKeys ? "key generated" : "no key"}</span>
                 <span>{meta ? meta.generatedAt : "local only"}</span>
                 <span>{meta ? humanBytes(new TextEncoder().encode(currentBundle).length) : "—"}</span>
@@ -713,7 +713,7 @@ export default function RsaKeyPage() {
 
         <section className="rsa-intro mt-12 grid gap-7 border-t border-black/10 pt-8 lg:grid-cols-[.62fr_1.38fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">SELF TEST</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">SELF TEST</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               生成后，
               <br />
@@ -727,10 +727,10 @@ export default function RsaKeyPage() {
           <div className="grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-2">
             <div className="min-w-0 bg-[#f4f1e9]">
               <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">TEST MESSAGE</span>
-                <span className="rsa-num font-mono text-[8px] text-black/22">{new TextEncoder().encode(testMessage).length} bytes</span>
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">TEST MESSAGE</span>
+                <span className="rsa-num font-mono text-[8px] text-black/55">{new TextEncoder().encode(testMessage).length} bytes</span>
               </div>
-              <textarea value={testMessage} onChange={(event) => setTestMessage(event.target.value)} spellCheck={false} className="rsa-scroll block h-[330px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6" />
+              <textarea value={testMessage} onChange={(event) => setTestMessage(event.target.value)} spellCheck={false} className="rsa-scroll block h-[330px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6" />
               <div className="border-t border-black/[.06] px-5 py-4">
                 <button type="button" onClick={runSelfTest} disabled={!keyPair} className="rounded-full bg-[#22231f] px-5 py-3 text-[9px] font-semibold text-white disabled:opacity-30">运行自检</button>
               </div>
@@ -738,8 +738,8 @@ export default function RsaKeyPage() {
 
             <div className="min-w-0 bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">TEST OUTPUT</span>
-                <button type="button" onClick={() => copy(testOutput, "test")} disabled={!testOutput} className="text-[8px] font-semibold text-white/27 transition hover:text-white disabled:opacity-20">{copied === "test" ? "✓ COPIED" : "COPY"}</button>
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">TEST OUTPUT</span>
+                <button type="button" onClick={() => copy(testOutput, "test")} disabled={!testOutput} className="text-[8px] font-semibold text-white/55 transition hover:text-white disabled:opacity-20">{copied === "test" ? "✓ 已复制" : "复制"}</button>
               </div>
 
               <pre className="rsa-dark-scroll h-[394px] overflow-auto whitespace-pre-wrap break-all p-5 font-mono text-[10px] leading-6 text-[#cbd8cd] sm:p-6">{testOutput || "运行自检后会显示加密 / 解密或签名 / 验签结果。"}</pre>
@@ -749,15 +749,15 @@ export default function RsaKeyPage() {
 
         <section className="rsa-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">PEM FORMAT</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">PEM FORMAT</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">私钥导出为 PKCS#8 PEM，公钥导出为 SPKI PEM，适合复制到常见开发和接口调试场景。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">USE FOR PURPOSE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">USE FOR PURPOSE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">RSA-OAEP 用于加密 / 解密；RSA-PSS 用于签名 / 验签。不同用途的 KeyUsage 不一样，不建议混用。</p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">PRIVATE KEY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">PRIVATE KEY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">私钥只在浏览器本地生成和展示，不会上传。复制或下载后请自行保管，不要放进公开仓库。</p>
           </div>
         </section>

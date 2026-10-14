@@ -187,7 +187,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">
         {label}
       </div>
       <div className={`ws-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>
@@ -640,7 +640,7 @@ export default function WebSocketPage() {
 
         <header className="ws-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               WEBSOCKET STUDIO
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
@@ -654,7 +654,7 @@ export default function WebSocketPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               连接 ws / wss 服务，发送 JSON 或文本，记录收发时间线、状态、关闭码、流量与重连过程。适合调试实时推送、echo 服务和本地 WebSocket 接口。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>NATIVE WEBSOCKET</span>
               <span>JSON / TEXT</span>
               <span>AUTO RECONNECT</span>
@@ -668,7 +668,7 @@ export default function WebSocketPage() {
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">
+                  <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                     CONNECTION
                   </div>
                   <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">
@@ -686,7 +686,7 @@ export default function WebSocketPage() {
 
               <div className="mt-6 space-y-5">
                 <label>
-                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <span className="mb-2 block text-[8px] font-semibold tracking-[.12em] text-black/55">
                     WS URL
                   </span>
                   <input
@@ -699,7 +699,7 @@ export default function WebSocketPage() {
                 </label>
 
                 <div>
-                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">
+                  <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">
                     PRESETS
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -760,7 +760,7 @@ export default function WebSocketPage() {
                 </div>
 
                 <label>
-                  <span className="mb-2 block text-[8px] text-black/24">
+                  <span className="mb-2 block text-[8px] text-black/55">
                     重连基础间隔：{Math.round(reconnectDelay / 1000)} 秒
                   </span>
                   <input
@@ -778,7 +778,7 @@ export default function WebSocketPage() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                   SESSION PROFILE
                 </div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">
@@ -819,7 +819,7 @@ export default function WebSocketPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                   MESSAGE LAB
                 </div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">
@@ -848,10 +848,10 @@ export default function WebSocketPage() {
             <div className="mt-5 grid gap-px overflow-hidden rounded-[30px] border border-black/[.075] bg-black/[.07] lg:grid-cols-[.92fr_1.08fr]">
               <div className="min-w-0 bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                     PAYLOAD
                   </span>
-                  <span className={`text-[8px] ${payloadMode === "json" && !payloadInfo.validJson ? "text-[#965744]" : "text-black/22"}`}>
+                  <span className={`text-[8px] ${payloadMode === "json" && !payloadInfo.validJson ? "text-[#965744]" : "text-black/55"}`}>
                     {payloadMode === "json"
                       ? payloadInfo.validJson
                         ? "VALID JSON"
@@ -870,7 +870,7 @@ export default function WebSocketPage() {
                     }
                   }}
                   spellCheck={false}
-                  className="ws-scroll block h-[430px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6"
+                  className="ws-scroll block h-[430px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6"
                   placeholder='{"type":"ping"}'
                 />
 
@@ -892,10 +892,10 @@ export default function WebSocketPage() {
 
               <div ref={outputRef} className="min-w-0 bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                     TIMELINE
                   </span>
-                  <span className="ws-num font-mono text-[8px] text-white/18">
+                  <span className="ws-num font-mono text-[8px] text-white/55">
                     {formatNumber(filteredMessages.length)} logs
                   </span>
                 </div>
@@ -903,7 +903,7 @@ export default function WebSocketPage() {
                 <div ref={logRef} className="ws-dark-scroll h-[494px] overflow-auto p-4 sm:p-5">
                   {!filteredMessages.length ? (
                     <div className="grid h-full place-items-center text-center">
-                      <p className="max-w-[280px] text-[9px] leading-5 text-white/25">
+                      <p className="max-w-[280px] text-[9px] leading-5 text-white/55">
                         连接后发送消息，系统事件、发送和接收内容都会显示在这里。
                       </p>
                     </div>
@@ -939,15 +939,15 @@ export default function WebSocketPage() {
                             </div>
 
                             <div className="flex items-center gap-3">
-                              <span className="ws-num font-mono text-[7px] text-white/17">
+                              <span className="ws-num font-mono text-[7px] text-white/55">
                                 {message.time} · {humanBytes(message.size)}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => copy(message.text, "message")}
-                                className="text-[7px] font-semibold text-white/20 opacity-100 transition hover:text-white sm:opacity-0 sm:group-hover:opacity-100"
+                                className="text-[7px] font-semibold text-white/55 opacity-100 transition hover:text-white "
                               >
-                                {copied === "message" ? "✓" : "COPY"}
+                                {copied === "message" ? "✓" : "复制"}
                               </button>
                             </div>
                           </div>
@@ -1025,7 +1025,7 @@ export default function WebSocketPage() {
                   {sample.label}
                 </button>
               ))}
-              <span className="self-center text-[8px] text-black/24">
+              <span className="self-center text-[8px] text-black/55">
                 当前 payload：{payloadInfo.lines} 行 · {humanBytes(payloadInfo.bytes)}
               </span>
             </div>
@@ -1034,7 +1034,7 @@ export default function WebSocketPage() {
 
         <section className="ws-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               NATIVE SOCKET
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1043,7 +1043,7 @@ export default function WebSocketPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               AUTO RECONNECT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -1052,7 +1052,7 @@ export default function WebSocketPage() {
           </div>
 
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               PROTOCOL LIMIT
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

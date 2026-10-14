@@ -256,14 +256,14 @@ export default function CaseConvertPage() {
       <div className="relative z-10 mx-auto max-w-[1500px] px-5 pb-10 pt-6 sm:px-8">
         <div className="case-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden text-[9px] tracking-[.14em] text-black/25 sm:block">
+          <div className="hidden text-[9px] tracking-[.14em] text-black/55 sm:block">
             NAMING STUDIO · CASE CONVERTER
           </div>
         </div>
 
         <header className="case-intro mt-11 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               VARIABLE NAMING CONVERTER
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.8vw,96px)] font-semibold leading-[.9] tracking-[-.073em]">
@@ -311,7 +311,7 @@ export default function CaseConvertPage() {
               ))}
             </div>
 
-            <div className="flex items-center gap-4 text-[8px] text-black/26">
+            <div className="flex items-center gap-4 text-[8px] text-black/55">
               <span>{words.length} WORDS</span>
               <button
                 type="button"
@@ -334,7 +334,7 @@ export default function CaseConvertPage() {
                 ? "helloWorld / XMLHttpRequest / hello_world"
                 : "每行一个名称…"
             }
-            className="case-scroll mt-5 block w-full resize-none bg-transparent font-mono text-[clamp(30px,5vw,66px)] font-medium leading-[1.15] tracking-[-.055em] outline-none placeholder:text-black/14"
+            className="case-scroll mt-5 block w-full resize-none bg-transparent font-mono text-[clamp(30px,5vw,66px)] font-medium leading-[1.15] tracking-[-.055em] outline-none placeholder:text-black/55"
           />
 
           {mode === "single" && words.length > 0 && (
@@ -356,7 +356,7 @@ export default function CaseConvertPage() {
           className="case-intro mt-10 grid gap-8 lg:grid-cols-[.72fr_1.28fr]"
         >
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">
               SELECTED FORMAT
             </div>
 
@@ -366,7 +366,7 @@ export default function CaseConvertPage() {
                   <h2 className="text-2xl font-semibold tracking-[-.04em]">
                     {active.label}
                   </h2>
-                  <div className="mt-1 font-mono text-[9px] text-black/28">
+                  <div className="mt-1 font-mono text-[9px] text-black/55">
                     {active.sub}
                   </div>
                 </div>
@@ -383,11 +383,11 @@ export default function CaseConvertPage() {
 
               <div className="case-scroll mt-7 max-h-[260px] overflow-auto whitespace-pre-wrap break-all font-mono text-[clamp(24px,3.6vw,48px)] font-medium leading-[1.15] tracking-[-.05em]">
                 {active.value || (
-                  <span className="text-black/16">等待输入…</span>
+                  <span className="text-black/55">等待输入…</span>
                 )}
               </div>
 
-              <div className="mt-5 text-[9px] text-black/28">
+              <div className="mt-5 text-[9px] text-black/55">
                 {active.description}
               </div>
             </div>
@@ -437,7 +437,7 @@ export default function CaseConvertPage() {
                       className={`text-[8px] font-semibold tracking-[.11em] ${
                         activeId === item.id
                           ? "text-white/35"
-                          : "text-black/25"
+                          : "text-black/55"
                       }`}
                     >
                       {item.label}
@@ -445,8 +445,8 @@ export default function CaseConvertPage() {
                     <div
                       className={`mt-1 font-mono text-[8px] ${
                         activeId === item.id
-                          ? "text-white/25"
-                          : "text-black/23"
+                          ? "text-white/55"
+                          : "text-black/55"
                       }`}
                     >
                       {item.sub}
@@ -456,8 +456,8 @@ export default function CaseConvertPage() {
                   <span
                     className={`text-[8px] ${
                       activeId === item.id
-                        ? "text-white/25"
-                        : "text-black/18 group-hover:text-black/45"
+                        ? "text-white/55"
+                        : "text-black/55 group-hover:text-black/45"
                     }`}
                   >
                     VIEW
@@ -475,8 +475,8 @@ export default function CaseConvertPage() {
                 <div
                   className={`mt-4 text-[8px] ${
                     activeId === item.id
-                      ? "text-white/28"
-                      : "text-black/27"
+                      ? "text-white/55"
+                      : "text-black/55"
                   }`}
                 >
                   {item.description}
@@ -488,7 +488,7 @@ export default function CaseConvertPage() {
 
         <section className="case-intro mt-12 grid gap-7 border-t border-black/10 pt-6 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               ACRONYMS
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -496,7 +496,7 @@ export default function CaseConvertPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               NUMBERS
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
@@ -504,7 +504,7 @@ export default function CaseConvertPage() {
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">
               BATCH
             </div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">

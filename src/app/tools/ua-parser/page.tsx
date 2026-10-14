@@ -400,7 +400,7 @@ function OutputPanel({
   return (
     <article className="border-t border-white/[0.08] py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/28">{label}</span>
+        <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">{label}</span>
         <button type="button" onClick={onCopy} className="rounded-full border border-white/[0.1] px-3 py-1.5 text-[9px] font-semibold text-white/45 transition hover:bg-white/[0.08] hover:text-white">{copied ? "已复制" : "复制"}</button>
       </div>
       <pre className="ua-scroll max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-5 text-emerald-100/82">{value || "等待解析"}</pre>
@@ -642,7 +642,7 @@ export default function UAParserPage() {
                 <div className="ua-scan pointer-events-none absolute inset-y-0 left-[-35%] w-1/3 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)] opacity-50" />
                 <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/24">Parsed Summary</div>
+                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">Parsed Summary</div>
                     <div className="mt-2 truncate font-mono text-[12px] text-emerald-100/82">{parsedSummary}</div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -664,7 +664,7 @@ export default function UAParserPage() {
 
                   <div className="mt-4 rounded-[26px] border border-white/[0.08] bg-white/[0.045] p-4">
                     <div className="mb-4 flex items-center justify-between">
-                      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/24">Flags</div>
+                      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">Flags</div>
                       <button type="button" disabled={!uaText.trim()} onClick={() => void copyText(uaText, "ua", "UA 已复制。")} className="rounded-full border border-white/[0.1] px-3 py-1.5 text-[9px] font-semibold text-white/45 transition hover:bg-white/[0.08] hover:text-white disabled:opacity-30">{copied === "ua" ? "已复制 UA" : "复制 UA"}</button>
                     </div>
 
@@ -686,13 +686,13 @@ export default function UAParserPage() {
                   </div>
 
                   <div className="mt-4 rounded-[26px] border border-white/[0.08] bg-white/[0.045] p-4">
-                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/24">UA Tokens</div>
+                    <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">UA Tokens</div>
                     <div className="ua-scroll mt-4 max-h-[270px] overflow-auto">
                       {result ? (
                         <div className="grid gap-2">
                           {result.tokens.map((token, index) => (
                             <div key={`${token.label}-${index}`} className="grid gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.035] p-3 sm:grid-cols-[120px_1fr]">
-                              <div className="font-mono text-[10px] text-white/28">{token.label}</div>
+                              <div className="font-mono text-[10px] text-white/55">{token.label}</div>
                               <div className="break-all font-mono text-[10px] leading-5 text-emerald-100/72">{token.value}</div>
                             </div>
                           ))}
@@ -708,7 +708,7 @@ export default function UAParserPage() {
                   <OutputPanel label="JSON Result" value={jsonOutput} copied={copied === "json"} onCopy={() => void copyText(jsonOutput, "json", "结果 JSON 已复制。")} />
                   <OutputPanel label="JS Snippet" value={snippet} copied={copied === "snippet"} onCopy={() => void copyText(snippet, "snippet", "JS 片段已复制。")} />
                   <div className="border-t border-white/[0.08] py-4">
-                    <div className="mb-3 text-[8px] font-semibold uppercase tracking-[0.18em] text-white/28">Warnings</div>
+                    <div className="mb-3 text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">Warnings</div>
                     {result?.warnings.length ? (
                       <div className="space-y-2">
                         {result.warnings.map((warning) => (

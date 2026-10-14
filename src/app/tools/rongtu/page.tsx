@@ -17,7 +17,7 @@ import { Breadcrumb } from "@/components/breadcrumb";
 type FitMode = "铺满画布" | "完整显示";
 type KeyMode = "保留透明" | "自动去纯色";
 type BlendMode = "正常" | "柔光" | "滤色" | "叠加";
-type PresetName = "自然融入" | "黄昏" | "雨夜" | "街灯" | "胶片" | "梦境";
+;
 type ExportSize = "原图尺寸" | "1920px" | "2560px" | "3840px";
 type LightPatchShape = "柔光" | "硬光" | "光带";
 type LightPatchMode = "光" | "影";
@@ -101,10 +101,32 @@ type Settings = {
 
   blendMode: BlendMode;
 
+  keyMode: KeyMode;
+  keyTolerance: number;
+  keyFeather: number;
+
+  /*
+   * 边缘去污染。
+   *
+   * 抠图 PNG 的半透明像素里通常还残留着原背景的颜色（白底抠图 => 白边，
+   * 黑底/绿幕 => 深边/绿边）。这是「像贴纸」最主要的原因，也是调色阶段
+   * 唯一无法补救的问题：再好的环境色匹配也盖不住一圈白边。
+   * 做法是在人物 alpha 内部做一次颜色外推（interior color bleed），
+   * 把轮廓附近被污染的像素颜色替换成邻近实心区域的颜色，再轻微收缩遮罩。
+   */
+  edgeDecontaminate: number;
+  edgeChoke: number;
+
+  // 环境色分布：0 = 单一均值染色，1 = 完全按背景四角做双线性渐变（AE 四色渐变思路）
+  ambientSpread: number;
+
   shadowOpacity: number;
   shadowBlur: number;
   shadowX: number;
   shadowY: number;
+  // 落地投影：沿光向斜切并拉伸，形成“贴地”的方向性投影，而不是简单偏移的贴纸阴影
+  shadowLength: number;
+  shadowSkew: number;
   contactShadow: number;
   contactShadowWidth: number;
   contactShadowBlur: number;
@@ -112,11 +134,16 @@ type Settings = {
   personGlow: number;
   personGlowSize: number;
   personGlowColor: string;
+  // 背光：人物轮廓外的光溢出，逆光/霓虹场景里最出效果的一层
+  backLight: number;
+  backLightSize: number;
+  backLightColor: string;
 
-  keyMode: KeyMode;
-  keyTolerance: number;
-  keyFeather: number;
-
+  // 人物表面高光（镜面反射）：有高光才像被灯照到，而不是整体提亮
+  specular: number;
+  specularSharpness: number;
+  // 亮部滚降：让过曝区域平滑过渡到白，而不是硬切到 255
+  highlightRolloff: number;
   overallExposure: number;
   overallContrast: number;
   overallSaturation: number;
@@ -128,28 +155,42 @@ type Settings = {
   exportSize: ExportSize;
 };
 
+/*
+ * 默认参数：**恒等**。
+ *
+ * 导入一张人物，它必须和原图一模一样 —— 不加深、不降饱和、不模糊、不重照明、
+ * 不压高光、不去边。所有会改变画面像素的东西一律默认关闭，由用户自己按需加
+ * （「一键融入」会按现场情况把这套参数一次性配好，那是用户主动触发的动作）。
+ *
+ * 注意 personBrightness / personContrast / personSaturation / overallExposure 等
+ * 之所以是 1 而不是"差不多"，是因为合成里对恒等值做了短路（见 createProcessedPerson
+ * 与 buildBackgroundCanvas），这样连一次滤镜求值的舍入都不会发生。
+ */
 const DEFAULT_SETTINGS: Settings = {
   bgFit: "完整显示",
   bgBlur: 0,
   bgBrightness: 1,
   bgSaturation: 1,
 
+  // 人物：全部恒等
   personOpacity: 1,
-  personBrightness: 0.94,
-  personContrast: 0.98,
-  personSaturation: 0.92,
+  personBrightness: 1,
+  personContrast: 1,
+  personSaturation: 1,
   personWarmth: 0,
-  personBlur: 0.25,
-  edgeSoftness: 0.6,
-  ambientTint: 0.22,
-  ambientHaze: 0.04,
-  lightStrength: 0.16,
+  personBlur: 0,
+  edgeSoftness: 0,
+  ambientTint: 0,
+  ambientHaze: 0,
+
+  // 光照：默认不参与合成（保留参数本身，方便用户自己拉起来）
+  lightStrength: 0,
   lightAngle: -35,
   lightSoftness: 0.62,
   lightCoverage: 0.58,
   lightWarmth: 0.06,
-  lightLift: 0.04,
-  relightStrength: 0.46,
+  lightLift: 0,
+  relightStrength: 0,
   volumeDepth: 0.62,
   wrapLight: 0.34,
   edgeLight: 0.22,
@@ -161,236 +202,47 @@ const DEFAULT_SETTINGS: Settings = {
   localLightBloom: 0.08,
   blendMode: "正常",
 
-  shadowOpacity: 0.22,
-  shadowBlur: 18,
-  shadowX: 4,
-  shadowY: 12,
-  contactShadow: 0.28,
+  // 投影与落地感：默认不生成，用户自己加
+  shadowOpacity: 0,
+  shadowBlur: 20,
+  shadowX: 6,
+  shadowY: 14,
+  shadowLength: 0.62,
+  shadowSkew: 0.5,
+  contactShadow: 0,
   contactShadowWidth: 0.72,
   contactShadowBlur: 18,
-  rimLight: 0.06,
-  personGlow: 0.08,
+  rimLight: 0,
+  personGlow: 0,
   personGlowSize: 20,
   personGlowColor: "#B6D7FF",
+  backLight: 0,
+  backLightSize: 26,
+  backLightColor: "#FFD9A6",
 
+  // 高光：默认不改动原图
+  specular: 0,
+  specularSharpness: 0.42,
+  highlightRolloff: 0,
+
+  // 去背：默认沿用原图 alpha，不做任何像素改动
   keyMode: "保留透明",
   keyTolerance: 0.2,
   keyFeather: 0.16,
+  edgeDecontaminate: 0,
+  edgeChoke: 0,
+  ambientSpread: 0.55,
 
-  overallExposure: 0.98,
-  overallContrast: 1.01,
-  overallSaturation: 0.98,
+  // 整体调色：默认恒等
+  overallExposure: 1,
+  overallContrast: 1,
+  overallSaturation: 1,
   overallWarmth: 0,
-  grain: 0.018,
-  vignette: 0.18,
-  bloom: 0.05,
+  grain: 0,
+  vignette: 0,
+  bloom: 0,
 
   exportSize: "原图尺寸",
-};
-
-const PRESETS: Record<PresetName, Partial<Settings>> = {
-  自然融入: {
-    personBrightness: 0.94,
-    personContrast: 0.98,
-    personSaturation: 0.92,
-    personWarmth: 0,
-    personBlur: 0.2,
-    edgeSoftness: 0.55,
-    ambientTint: 0.2,
-    ambientHaze: 0.035,
-    lightStrength: 0.14,
-    lightAngle: -35,
-    lightSoftness: 0.7,
-    lightCoverage: 0.6,
-    lightWarmth: 0.04,
-    lightLift: 0.035,
-    relightStrength: 0.42,
-    volumeDepth: 0.58,
-    wrapLight: 0.36,
-    edgeLight: 0.18,
-    backShade: 0.15,
-    shadowOpacity: 0.2,
-    shadowBlur: 18,
-    contactShadow: 0.26,
-    rimLight: 0.04,
-    personGlow: 0.05,
-    personGlowSize: 16,
-    personGlowColor: "#B9D2FF",
-    overallExposure: 0.98,
-    overallContrast: 1.01,
-    overallSaturation: 0.98,
-    overallWarmth: 0,
-    grain: 0.016,
-    vignette: 0.16,
-    bloom: 0.035,
-  },
-  黄昏: {
-    personBrightness: 0.9,
-    personContrast: 0.96,
-    personSaturation: 0.9,
-    personWarmth: 0.28,
-    personBlur: 0.35,
-    edgeSoftness: 0.75,
-    ambientTint: 0.34,
-    ambientHaze: 0.08,
-    lightStrength: 0.28,
-    lightAngle: -28,
-    lightSoftness: 0.58,
-    lightCoverage: 0.54,
-    lightWarmth: 0.3,
-    lightLift: 0.06,
-    relightStrength: 0.58,
-    volumeDepth: 0.68,
-    wrapLight: 0.25,
-    edgeLight: 0.36,
-    backShade: 0.24,
-    shadowOpacity: 0.3,
-    shadowBlur: 24,
-    shadowY: 15,
-    contactShadow: 0.3,
-    rimLight: 0.15,
-    personGlow: 0.1,
-    personGlowSize: 22,
-    personGlowColor: "#FFD2A6",
-    overallExposure: 0.94,
-    overallContrast: 1.02,
-    overallSaturation: 0.97,
-    overallWarmth: 0.14,
-    grain: 0.022,
-    vignette: 0.2,
-    bloom: 0.08,
-  },
-  雨夜: {
-    personBrightness: 0.83,
-    personContrast: 1.04,
-    personSaturation: 0.82,
-    personWarmth: -0.18,
-    personBlur: 0.5,
-    edgeSoftness: 0.9,
-    ambientTint: 0.38,
-    ambientHaze: 0.12,
-    lightStrength: 0.22,
-    lightAngle: -48,
-    lightSoftness: 0.68,
-    lightCoverage: 0.48,
-    lightWarmth: -0.18,
-    lightLift: 0.045,
-    relightStrength: 0.52,
-    volumeDepth: 0.62,
-    wrapLight: 0.3,
-    edgeLight: 0.42,
-    backShade: 0.28,
-    shadowOpacity: 0.36,
-    shadowBlur: 28,
-    shadowY: 10,
-    contactShadow: 0.2,
-    rimLight: 0.2,
-    overallExposure: 0.88,
-    overallContrast: 1.06,
-    overallSaturation: 0.88,
-    overallWarmth: -0.1,
-    grain: 0.028,
-    vignette: 0.28,
-    bloom: 0.09,
-  },
-  街灯: {
-    personBrightness: 0.9,
-    personContrast: 1.01,
-    personSaturation: 0.88,
-    personWarmth: 0.22,
-    personBlur: 0.35,
-    edgeSoftness: 0.8,
-    ambientTint: 0.32,
-    ambientHaze: 0.07,
-    lightStrength: 0.34,
-    lightAngle: -32,
-    lightSoftness: 0.46,
-    lightCoverage: 0.44,
-    lightWarmth: 0.34,
-    lightLift: 0.075,
-    relightStrength: 0.66,
-    volumeDepth: 0.72,
-    wrapLight: 0.2,
-    edgeLight: 0.48,
-    backShade: 0.32,
-    shadowOpacity: 0.34,
-    shadowBlur: 22,
-    shadowX: 10,
-    shadowY: 14,
-    contactShadow: 0.32,
-    rimLight: 0.24,
-    overallExposure: 0.92,
-    overallContrast: 1.05,
-    overallSaturation: 0.91,
-    overallWarmth: 0.1,
-    grain: 0.025,
-    vignette: 0.26,
-    bloom: 0.11,
-  },
-  胶片: {
-    personBrightness: 0.93,
-    personContrast: 0.94,
-    personSaturation: 0.84,
-    personWarmth: 0.08,
-    personBlur: 0.55,
-    edgeSoftness: 0.85,
-    ambientTint: 0.22,
-    ambientHaze: 0.06,
-    lightStrength: 0.15,
-    lightAngle: -38,
-    lightSoftness: 0.74,
-    lightCoverage: 0.62,
-    lightWarmth: 0.08,
-    lightLift: 0.035,
-    relightStrength: 0.4,
-    volumeDepth: 0.54,
-    wrapLight: 0.38,
-    edgeLight: 0.16,
-    backShade: 0.14,
-    shadowOpacity: 0.24,
-    shadowBlur: 24,
-    contactShadow: 0.24,
-    rimLight: 0.04,
-    overallExposure: 0.93,
-    overallContrast: 1.08,
-    overallSaturation: 0.86,
-    overallWarmth: 0.08,
-    grain: 0.065,
-    vignette: 0.3,
-    bloom: 0.035,
-  },
-  梦境: {
-    personBrightness: 0.96,
-    personContrast: 0.9,
-    personSaturation: 0.94,
-    personWarmth: 0.08,
-    personBlur: 0.75,
-    edgeSoftness: 1.4,
-    ambientTint: 0.28,
-    ambientHaze: 0.12,
-    lightStrength: 0.2,
-    lightAngle: -24,
-    lightSoftness: 0.82,
-    lightCoverage: 0.7,
-    lightWarmth: 0.1,
-    lightLift: 0.07,
-    relightStrength: 0.46,
-    volumeDepth: 0.5,
-    wrapLight: 0.52,
-    edgeLight: 0.34,
-    backShade: 0.1,
-    shadowOpacity: 0.16,
-    shadowBlur: 30,
-    contactShadow: 0.16,
-    rimLight: 0.3,
-    overallExposure: 0.97,
-    overallContrast: 0.94,
-    overallSaturation: 0.94,
-    overallWarmth: 0.06,
-    grain: 0.012,
-    vignette: 0.14,
-    bloom: 0.16,
-  },
 };
 
 const clamp = (v: number, min: number, max: number) =>
@@ -417,6 +269,362 @@ function getScratch(key: string, w: number, h: number) {
     canvas.height = h;
   }
   return canvas;
+}
+
+/** getScratch 的 ctx 版本：拿到的画布一定是干净的（尺寸没变时手动清一次） */
+function getScratchCtx(key: string, w: number, h: number) {
+  const canvas = getScratch(key, w, h);
+  const ctx = canvas.getContext("2d")!;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  ctx.filter = "none";
+  ctx.clearRect(0, 0, w, h);
+  return { canvas, ctx };
+}
+
+/**
+ * 人物内容包围盒（按 alpha 计算，归一化到 0~1）。
+ *
+ * 抠好的透明 PNG 往往四周带很多透明留白，直接用图片高度去算「脚在哪」
+ * 会整体偏上一大截：接触阴影浮在半空、自动摆放也摆不到地平面。
+ * 所以这里统计真正不透明的范围，后续落地阴影、自动构图都以它为基准。
+ */
+type PersonBounds = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+};
+
+const FULL_BOUNDS: PersonBounds = {
+  left: 0,
+  top: 0,
+  right: 1,
+  bottom: 1,
+  width: 1,
+  height: 1,
+};
+
+function computeAlphaBounds(canvas: HTMLCanvasElement): PersonBounds {
+  const w = canvas.width;
+  const h = canvas.height;
+  if (w < 2 || h < 2) return FULL_BOUNDS;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return FULL_BOUNDS;
+  const d = ctx.getImageData(0, 0, w, h).data;
+
+  let minX = w;
+  let minY = h;
+  let maxX = -1;
+  let maxY = -1;
+  // 每 2px 采一次就足够定位，省一半遍历。
+  for (let y = 0; y < h; y += 2) {
+    const row = y * w;
+    for (let x = 0; x < w; x += 2) {
+      if (d[(row + x) * 4 + 3] < 16) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  if (maxX < 0 || maxY < 0) return FULL_BOUNDS;
+
+  const left = clamp(minX / w, 0, 1);
+  const top = clamp(minY / h, 0, 1);
+  const right = clamp((maxX + 1) / w, 0, 1);
+  const bottom = clamp((maxY + 1) / h, 0, 1);
+  return {
+    left,
+    top,
+    right,
+    bottom,
+    width: Math.max(0.001, right - left),
+    height: Math.max(0.001, bottom - top),
+  };
+}
+
+/**
+ * 边缘去污染（color decontamination）。
+ *
+ * 抠图出来的半透明像素满足 I = α·F + (1-α)·B，B 是原背景色。直接贴到新背景上
+ * 就带着原背景的颜色 —— 白底抠图必然一圈白边，绿幕则是一圈绿边。这是「像贴纸」
+ * 最主要、也最无法靠调色补救的原因。
+ *
+ * 这里不解方程（B 未知、边缘处还不稳定），而是用更稳的做法：从「可信的内部实心
+ * 像素」向外逐圈扩散颜色，只替换 alpha 落在边界带上的像素。因为取色只来自人物
+ * 内部，线稿/五官的深色会被保留，被冲淡的只有那圈污染色。
+ *
+ * 另外提供一个遮罩收缩（choke），等价于 PS 里「收缩选区 1px」，把最外层污染环
+ * 直接裁掉。两者叠加基本能消掉肉眼可见的白边。
+ */
+function decontaminateEdges(
+  canvas: HTMLCanvasElement,
+  strength: number,
+  choke: number,
+) {
+  const useChoke = choke > 0.002;
+  const useBleed = strength > 0.002;
+  if (!useChoke && !useBleed) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  if (w < 4 || h < 4) return;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return;
+  const image = ctx.getImageData(0, 0, w, h);
+  const d = image.data;
+  const n = w * h;
+
+  if (useChoke) {
+    const c = clamp(choke, 0, 1) * 0.6;
+    const inv = 1 / Math.max(0.05, 1 - c);
+    for (let i = 3, len = d.length; i < len; i += 4) {
+      const a = d[i];
+      if (a === 0 || a === 255) continue;
+      d[i] = clamp(Math.round((a / 255 - c) * inv * 255), 0, 255);
+    }
+  }
+
+  if (useBleed) {
+    // 只处理 alpha 落在边界带上的像素：实心内部不需要动，全透明像素画不出来。
+    const band: number[] = [];
+    for (let p = 0; p < n; p++) {
+      const a = d[p * 4 + 3];
+      if (a >= 8 && a <= 238) band.push(p);
+    }
+
+    if (band.length) {
+      const known = new Uint8Array(n);
+      for (let p = 0; p < n; p++) {
+        if (d[p * 4 + 3] >= 239) known[p] = 1;
+      }
+
+      const rounds = clamp(Math.round(2 + strength * 9), 2, 12);
+      let active = band;
+      for (let round = 0; round < rounds && active.length; round++) {
+        const filled: number[] = [];
+        const next: number[] = [];
+        for (let bi = 0; bi < active.length; bi++) {
+          const p = active[bi];
+          const x = p % w;
+          const y = (p - x) / w;
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          let cnt = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = y + dy;
+            if (yy < 0 || yy >= h) continue;
+            const rowBase = yy * w;
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx === 0 && dy === 0) continue;
+              const xx = x + dx;
+              if (xx < 0 || xx >= w) continue;
+              const q = rowBase + xx;
+              if (!known[q]) continue;
+              const qi = q * 4;
+              r += d[qi];
+              g += d[qi + 1];
+              b += d[qi + 2];
+              cnt++;
+            }
+          }
+          if (!cnt) {
+            next.push(p);
+            continue;
+          }
+          const i = p * 4;
+          const a = d[i + 3] / 255;
+          /*
+           * 替换强度。边界带里保存的 RGB 本身就是被原背景冲淡过的值，属于「不可信」，
+           * 所以靠近全透明一侧要**整体替换**成人物自身的颜色，而不是简单加权混合 ——
+           * 混合会留下一部分污染色，白边只是变淡而不是消失。
+           * 越接近实心内部越保守，避免动到真正属于人物的细节。
+           */
+          const solid = clamp((a - 0.55) / 0.4, 0, 1); // 0.55 以下全替换，0.95 以上不动
+          const taper = 1 - solid * solid * (3 - 2 * solid);
+          const t = clamp(strength * taper, 0, 1);
+          if (t <= 0.001) {
+            filled.push(p);
+            continue;
+          }
+          d[i] = d[i] * (1 - t) + (r / cnt) * t;
+          d[i + 1] = d[i + 1] * (1 - t) + (g / cnt) * t;
+          d[i + 2] = d[i + 2] * (1 - t) + (b / cnt) * t;
+          filled.push(p);
+        }
+        // 本轮新填充的像素下一轮才参与取色，保证是一圈一圈向外扩而不是沿扫描方向窜。
+        for (let fi = 0; fi < filled.length; fi++) known[filled[fi]] = 1;
+        active = next;
+      }
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+}
+
+/**
+ * 自动去纯色的背景色估计。
+ *
+ * 之前的实现取四角平均，只要主体有一点伸进角落（很常见：手、头发、道具）
+ * 就会把背景色估错。这里沿四条边密集取样，再按 4bit/通道做直方图取众数，
+ * 对「主体贴边」和轻微渐变背景都更稳。
+ */
+function estimateKeyColor(d: Uint8ClampedArray, w: number, h: number) {
+  const bins = new Map<number, { r: number; g: number; b: number; c: number }>();
+  const stepX = Math.max(1, Math.floor(w / 96));
+  const stepY = Math.max(1, Math.floor(h / 96));
+
+  const record = (x: number, y: number) => {
+    const i = (y * w + x) * 4;
+    const r = d[i];
+    const g = d[i + 1];
+    const b = d[i + 2];
+    const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+    const bin = bins.get(key);
+    if (bin) {
+      bin.r += r;
+      bin.g += g;
+      bin.b += b;
+      bin.c += 1;
+    } else {
+      bins.set(key, { r, g, b, c: 1 });
+    }
+  };
+
+  for (let x = 0; x < w; x += stepX) {
+    record(x, 0);
+    record(x, h - 1);
+  }
+  for (let y = 0; y < h; y += stepY) {
+    record(0, y);
+    record(w - 1, y);
+  }
+
+  let best: { r: number; g: number; b: number; c: number } | null = null;
+  bins.forEach((bin) => {
+    if (!best || bin.c > best.c) best = bin;
+  });
+  const winner = best as { r: number; g: number; b: number; c: number } | null;
+  if (!winner) return { r: 255, g: 255, b: 255 };
+  return {
+    r: winner.r / winner.c,
+    g: winner.g / winner.c,
+    b: winner.b / winner.c,
+  };
+}
+
+/**
+ * 4x4 噪点瓦片。
+ *
+ * 原来每帧用 4 万次 fillRect 撒颗粒，1600px 画布上一帧就要几毫秒。
+ * 改成预生成一张固定种子的噪点贴图，用 pattern 一次填满，速度提升一个量级，
+ * 而且因为种子固定，拖动时颗粒不会闪烁。
+ */
+let noiseTileCanvas: HTMLCanvasElement | null = null;
+
+function getNoiseTile() {
+  if (noiseTileCanvas) return noiseTileCanvas;
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const img = ctx.createImageData(size, size);
+  let seed = 0x9e3779b9;
+  const random = () => {
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    return ((seed >>> 0) % 100000) / 100000;
+  };
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = random() > 0.5 ? 255 : 0;
+    img.data[i] = v;
+    img.data[i + 1] = v;
+    img.data[i + 2] = v;
+    img.data[i + 3] = Math.round(random() * 255);
+  }
+  ctx.putImageData(img, 0, 0);
+  noiseTileCanvas = canvas;
+  return canvas;
+}
+
+/**
+ * 四角环境色场。
+ *
+ * AE 溶图里的「四色渐变」：把背景在人物四周取到的四个角色，做成双线性渐变，
+ * 以柔光叠到人物上。相比单一均值染色，它能把「左边是窗户冷光、右边是台灯暖光」
+ * 这种方向性的环境色差带到人物身上，是人物质感「进入场景」的关键一步。
+ * 用 2x2 的小图放大绘制即可拿到浏览器的双线性插值。
+ */
+function buildAmbientFieldCanvas(
+  key: string,
+  w: number,
+  h: number,
+  corners: { tl: Rgb; tr: Rgb; bl: Rgb; br: Rgb },
+) {
+  const { ctx } = getScratchCtx(key, w, h);
+  const tiny = getScratch(`${key}-tiny`, 2, 2).getContext("2d")!;
+  tiny.setTransform(1, 0, 0, 1, 0, 0);
+  tiny.globalAlpha = 1;
+  tiny.globalCompositeOperation = "source-over";
+  tiny.filter = "none";
+  tiny.clearRect(0, 0, 2, 2);
+  const put = (x: number, y: number, c: Rgb) => {
+    tiny.fillStyle = `rgb(${Math.round(clamp(c.r, 0, 255))},${Math.round(
+      clamp(c.g, 0, 255),
+    )},${Math.round(clamp(c.b, 0, 255))})`;
+    tiny.fillRect(x, y, 1, 1);
+  };
+  put(0, 0, corners.tl);
+  put(1, 0, corners.tr);
+  put(0, 1, corners.bl);
+  put(1, 1, corners.br);
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(getScratch(`${key}-tiny`, 2, 2), 0, 0, w, h);
+  return getScratch(key, w, h);
+}
+
+type Rgb = { r: number; g: number; b: number };
+
+/** 环境采样结果：均值 + 四角色 + 亮度/饱和度，四角色用于环境色场 */
+type AmbientSample = {
+  r: number;
+  g: number;
+  b: number;
+  l: number;
+  s: number;
+  corners: { tl: Rgb; tr: Rgb; bl: Rgb; br: Rgb };
+};
+
+const NEUTRAL_AMBIENT: AmbientSample = {
+  r: 190,
+  g: 180,
+  b: 170,
+  l: 0.55,
+  s: 0.2,
+  corners: {
+    tl: { r: 190, g: 180, b: 170 },
+    tr: { r: 196, g: 184, b: 172 },
+    bl: { r: 182, g: 174, b: 166 },
+    br: { r: 188, g: 178, b: 168 },
+  },
+};
+
+/** 按 t 在「角色」和「均值」之间插值，t=1 保留角色差异，t=0 退回均值 */
+function mixRgb(color: Rgb, avg: Rgb, t: number): Rgb {
+  return {
+    r: avg.r + (color.r - avg.r) * t,
+    g: avg.g + (color.g - avg.g) * t,
+    b: avg.b + (color.b - avg.b) * t,
+  };
 }
 
 function normalizeSettings(value: Partial<Settings> | Settings): Settings {
@@ -599,27 +807,14 @@ function drawNoise(
   h: number,
   amount: number,
 ) {
-  if (amount <= 0.001) return;
-
-  // 固定种子的颗粒，拖动人物/滑杆时不会“闪烁”。
-  let seed = 0x9e3779b9;
-  const random = () => {
-    seed ^= seed << 13;
-    seed ^= seed >>> 17;
-    seed ^= seed << 5;
-    return ((seed >>> 0) % 100000) / 100000;
-  };
-
-  const count = Math.min(42000, Math.floor((w * h * amount) / 155));
+  if (amount <= 0.001 || w < 2 || h < 2) return;
+  const pattern = ctx.createPattern(getNoiseTile(), "repeat");
+  if (!pattern) return;
   ctx.save();
   ctx.globalCompositeOperation = "soft-light";
-  for (let i = 0; i < count; i++) {
-    const alpha = random() * amount * 0.5;
-    const c = random() > 0.5 ? 255 : 0;
-    ctx.fillStyle = `rgba(${c},${c},${c},${alpha})`;
-    const size = random() > 0.94 ? 2 : 1;
-    ctx.fillRect(random() * w, random() * h, size, size);
-  }
+  ctx.globalAlpha = clamp(amount * 0.6, 0, 0.72);
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, w, h);
   ctx.restore();
 }
 
@@ -723,6 +918,218 @@ function sampleLightSourceColor(
   return { r, g, b, l: luminance(r, g, b), s: saturationEstimate(r, g, b) };
 }
 
+/**
+ * 由人物剪影算出的「形体起伏场」。
+ *
+ * 原来的做法是把每个人物都当成一个固定椭球（`1 - ex²·0.82 - ey²·0.9`）来取法线，
+ * 结果就是无论人物长什么样、姿势如何，明暗都长一个样 —— 这是「光打上去没感觉」
+ * 最根本的原因：光照没有跟着形体走。
+ *
+ * 这里改成对 alpha 做内部距离变换（chamfer 两遍扫描，O(n)）：离轮廓越远表示越接近
+ * 形体中心，越「高」。再把它软化成 h = d/(d+k)，得到一张处处连续、越靠边越陡的
+ * 高度场 —— 它的梯度就是跟随真实轮廓的伪法线：手臂自动像圆柱、裙摆自动像穹顶、
+ * 躯干自动有柔和的整体起伏。
+ *
+ * 距离场在小图上算完（上限 512），采样时再做双线性，代价和分辨率无关。
+ */
+type ShapeField = {
+  hx: Float32Array;
+  hy: Float32Array;
+  hgt: Float32Array;
+  w: number;
+  h: number;
+  id: number;
+};
+
+function buildShapeField(
+  alphaSource: HTMLCanvasElement,
+  maxSide = 512,
+): ShapeField | null {
+  const sw = alphaSource.width;
+  const sh = alphaSource.height;
+  if (sw < 8 || sh < 8) return null;
+
+  const ratio = Math.min(1, maxSide / Math.max(sw, sh));
+  const w = Math.max(8, Math.round(sw * ratio));
+  const h = Math.max(8, Math.round(sh * ratio));
+
+  const { ctx } = getScratchCtx("shapeMask", w, h);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(alphaSource, 0, 0, w, h);
+  const src = ctx.getImageData(0, 0, w, h).data;
+
+  const n = w * h;
+  const INF = 1e6;
+  const dist = new Float32Array(n);
+  for (let p = 0; p < n; p++) dist[p] = src[p * 4 + 3] > 120 ? INF : 0;
+
+  const D1 = 1;
+  const D2 = Math.SQRT2;
+  const at = (x: number, y: number) => dist[y * w + x];
+
+  // 第一遍：左上 -> 右下
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const p = y * w + x;
+      if (dist[p] === 0) continue;
+      let best = dist[p];
+      if (y > 0) {
+        best = Math.min(best, at(x, y - 1) + D1);
+        if (x > 0) best = Math.min(best, at(x - 1, y - 1) + D2);
+        if (x < w - 1) best = Math.min(best, at(x + 1, y - 1) + D2);
+      }
+      if (x > 0) best = Math.min(best, at(x - 1, y) + D1);
+      dist[p] = best;
+    }
+  }
+  // 第二遍：右下 -> 左上
+  for (let y = h - 1; y >= 0; y--) {
+    for (let x = w - 1; x >= 0; x--) {
+      const p = y * w + x;
+      if (dist[p] === 0) continue;
+      let best = dist[p];
+      if (y < h - 1) {
+        best = Math.min(best, at(x, y + 1) + D1);
+        if (x > 0) best = Math.min(best, at(x - 1, y + 1) + D2);
+        if (x < w - 1) best = Math.min(best, at(x + 1, y + 1) + D2);
+      }
+      if (x < w - 1) best = Math.min(best, at(x + 1, y) + D1);
+      dist[p] = best;
+    }
+  }
+
+  // 软化：h = d/(d+k)。k 取画布短边的 8%，让「薄」的部位陡、「厚」的部位平缓，
+  // 既不会像椭球那样一刀切，也不会让粗壮的人物整块变平。
+  const k = Math.max(2, Math.min(w, h) * 0.08);
+  const height = new Float32Array(n);
+  for (let p = 0; p < n; p++) {
+    const v = dist[p];
+    height[p] = v >= INF ? 0 : v / (v + k);
+  }
+
+  // 中心差分得到梯度场；再乘回 k，使靠近轮廓处的斜率落在「约 1」这个量级，
+  // 这样 volumeDepth 的取值才有直观意义（0 = 平，1 = 强起伏）。
+  // 注意这里刻意不按重采样比例缩放：距离场始终在 ≤512 的网格上计算，
+  // 于是预览(960)与导出(3000)得到完全相同的法线场，明暗不会随分辨率漂移。
+  const hx = new Float32Array(n);
+  const hy = new Float32Array(n);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const p = y * w + x;
+      const xl = height[y * w + Math.max(0, x - 1)];
+      const xr = height[y * w + Math.min(w - 1, x + 1)];
+      const yt = height[Math.max(0, y - 1) * w + x];
+      const yb = height[Math.min(h - 1, y + 1) * w + x];
+      hx[p] = (xr - xl) * 0.5 * k;
+      hy[p] = (yb - yt) * 0.5 * k;
+    }
+  }
+
+  return { hx, hy, hgt: height, w, h, id: 0 };
+}
+
+/*
+ * 形体场按画布缓存。
+ *
+ * 同一个 processed 画布会被重照明和光斑两层共用，距离变换不该算两遍；
+ * 而 processed 每次重新处理都是一个新对象，用 WeakMap 可以在它被回收时自动失效。
+ */
+let shapeFieldSeq = 0;
+const shapeFieldCache = new WeakMap<HTMLCanvasElement, ShapeField | null>();
+
+function getShapeField(canvas: HTMLCanvasElement): ShapeField | null {
+  const hit = shapeFieldCache.get(canvas);
+  if (hit !== undefined) return hit;
+  const field = buildShapeField(canvas);
+  if (field) field.id = ++shapeFieldSeq;
+  shapeFieldCache.set(canvas, field);
+  return field;
+}
+
+/*
+ * 「形体受光遮罩」：把某个光斑的受光强度写进一张遮罩的 alpha。
+ *
+ * 这是这一轮光斑优化的核心。以前光斑用 screen 平铺在人物上，效果是一块贴上去的
+ * 亮斑，跟身体的起伏没有关系；真实的光打在圆柱上，正对光的一面最亮、侧面衰减。
+ * 这里用剪影距离场的伪法线，按「从形体指向光斑」的方向算一个朗伯系数，
+ * 直接乘进光斑的 alpha —— 于是硬光会沿着肩膀、手臂的起伏自然衰减，
+ * 而不是糊一块均匀的亮。
+ *
+ * 系数下限保底 0.45，背光侧只是变弱、不会被抹掉；体积深度为 0 时整张遮罩为 1
+ * （即完全没有形体衰减），与「体积深度 = 0 表示法线是平的」保持一致的语义。
+ * 遮罩只有 160px 长边，且按方位角分桶缓存，拖动时不会重复计算。
+ */
+const FORM_MASK_BUCKETS = 24;
+const formMaskCache = new Map<string, HTMLCanvasElement>();
+
+function getFormLightMask(
+  shape: ShapeField,
+  azimuth: number,
+  depth: number,
+) {
+  const k = clamp(depth, 0, 1);
+  if (k < 0.03) return null;
+
+  const turns = ((azimuth / (Math.PI * 2)) % 1 + 1) % 1;
+  const bucket = Math.round(turns * FORM_MASK_BUCKETS) % FORM_MASK_BUCKETS;
+  const depthBucket = Math.round(k * 4);
+  const key = `${shape.id}-${bucket}-${depthBucket}`;
+  const hit = formMaskCache.get(key);
+  if (hit) return hit;
+
+  const maxSide = 160;
+  const ratio = Math.min(1, maxSide / Math.max(shape.w, shape.h));
+  const mw = Math.max(8, Math.round(shape.w * ratio));
+  const mh = Math.max(8, Math.round(shape.h * ratio));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = mw;
+  canvas.height = mh;
+  const mctx = canvas.getContext("2d")!;
+  const img = mctx.createImageData(mw, mh);
+
+  // 光源方向 = 从人物中心指向光斑的方位，配一个固定仰角
+  const ux = Math.cos(azimuth);
+  const uy = Math.sin(azimuth);
+  const llen = Math.hypot(ux, uy, 1.15) || 1;
+  const lx = ux / llen;
+  const ly = uy / llen;
+  const lz = 1.15 / llen;
+
+  const sx = shape.w / mw;
+  const sy = shape.h / mh;
+  for (let y = 0; y < mh; y++) {
+    const srow = Math.min(shape.h - 1, Math.floor(y * sy)) * shape.w;
+    for (let x = 0; x < mw; x++) {
+      const p = srow + Math.min(shape.w - 1, Math.floor(x * sx));
+      let nx = -shape.hx[p] * 1.6;
+      let ny = -shape.hy[p] * 1.6;
+      let nz = 1;
+      const nl = Math.hypot(nx, ny, nz) || 1;
+      nx /= nl;
+      ny /= nl;
+      nz /= nl;
+      const lit = clamp(nx * lx + ny * ly + nz * lz, 0, 1);
+      const m = 1 - k * (1 - (0.45 + 0.55 * lit));
+      const i = (y * mw + x) * 4;
+      img.data[i] = 255;
+      img.data[i + 1] = 255;
+      img.data[i + 2] = 255;
+      img.data[i + 3] = Math.round(clamp(m, 0, 1) * 255);
+    }
+  }
+  mctx.putImageData(img, 0, 0);
+  if (formMaskCache.size > 160) formMaskCache.clear();
+  formMaskCache.set(key, canvas);
+  return canvas;
+}
+
+/** 光斑相对人物中心的方位角，用来决定形体受光的方向 */
+function patchAzimuth(patch: LightPatch, w: number, h: number) {
+  return Math.atan2((patch.y - 0.5) * h, (patch.x - 0.5) * w);
+}
+
 function applyIntrinsicStyleRelight(
   out: HTMLCanvasElement,
   alphaSource: HTMLCanvasElement,
@@ -737,21 +1144,15 @@ function applyIntrinsicStyleRelight(
   if (w < 3 || h < 3) return;
 
   const ctx = out.getContext("2d", { willReadFrequently: true });
-  const actx = alphaSource.getContext("2d", { willReadFrequently: true });
-  if (!ctx || !actx) return;
+  if (!ctx) return;
 
-  // Build a softened silhouette. Its gradient gives us a useful local normal
-  // near hair / clothes / outline edges without a neural normal estimator.
-  const soft = document.createElement("canvas");
-  soft.width = w;
-  soft.height = h;
-  const sctx = soft.getContext("2d", { willReadFrequently: true })!;
+  // 柔化的剪影：它的梯度负责边缘处（发丝、衣服轮廓）的细节法线。
+  const { ctx: sctx } = getScratchCtx("relightSoft", w, h);
   sctx.filter = `blur(${Math.max(1.2, 2.4 + settings.edgeSoftness * 0.7)}px)`;
   sctx.drawImage(alphaSource, 0, 0);
 
   const pixels = ctx.getImageData(0, 0, w, h);
-  const alphaPixels = soft.getContext("2d", { willReadFrequently: true })!
-    .getImageData(0, 0, w, h).data;
+  const alphaPixels = sctx.getImageData(0, 0, w, h).data;
   const d = pixels.data;
 
   const rad = (settings.lightAngle * Math.PI) / 180;
@@ -772,6 +1173,58 @@ function applyIntrinsicStyleRelight(
   const faceShadowSoftness = clamp(settings.faceShadowSoftness ?? 0.38, 0.04, 1);
   const faceShadowThreshold = clamp(settings.faceShadowThreshold ?? 0.48, 0.05, 0.95);
 
+  // 高光（镜面反射）。真正的「被灯照到」主要靠这一层：漫反射只让画面变亮，
+  // 只有高光才有明确的形状和方向感，也才会在阈值泛光里发光。
+  const specStrength = clamp(settings.specular ?? 0, 0, 1) * strength;
+  const specSharp = clamp(settings.specularSharpness ?? 0.45, 0.02, 1);
+  const shininess = 2 + Math.pow(1 - specSharp, 2.1) * 150;
+  // 半程向量：光方向与视线(0,0,1)的中间方向
+  let hvx = nlx;
+  let hvy = nly;
+  let hvz = nlz + 1;
+  const hvl = Math.hypot(hvx, hvy, hvz) || 1;
+  hvx /= hvl;
+  hvy /= hvl;
+  hvz /= hvl;
+
+  const shape = getShapeField(alphaSource);
+  const sfScaleX = shape ? shape.w / w : 0;
+  const sfScaleY = shape ? shape.h / h : 0;
+  const depthK = 0.35 + depth * 1.6;
+  let sfx = 0;
+  let sfy = 0;
+  let sfm = 1;
+  const readShape = (x: number, y: number) => {
+    if (!shape) {
+      sfx = 0;
+      sfy = 0;
+      sfm = 1;
+      return;
+    }
+    const fx = clamp(x * sfScaleX - 0.5, 0, shape.w - 1.001);
+    const fy = clamp(y * sfScaleY - 0.5, 0, shape.h - 1.001);
+    const x0 = fx | 0;
+    const y0 = fy | 0;
+    const tx = fx - x0;
+    const ty = fy - y0;
+    const i00 = y0 * shape.w + x0;
+    const i10 = i00 + 1;
+    const i01 = i00 + shape.w;
+    const i11 = i01 + 1;
+    const w00 = (1 - tx) * (1 - ty);
+    const w10 = tx * (1 - ty);
+    const w01 = (1 - tx) * ty;
+    const w11 = tx * ty;
+    sfx =
+      (shape.hx[i00] * w00 + shape.hx[i10] * w10 + shape.hx[i01] * w01 + shape.hx[i11] * w11) *
+      depthK;
+    sfy =
+      (shape.hy[i00] * w00 + shape.hy[i10] * w10 + shape.hy[i01] * w01 + shape.hy[i11] * w11) *
+      depthK;
+    sfm =
+      shape.hgt[i00] * w00 + shape.hgt[i10] * w10 + shape.hgt[i01] * w01 + shape.hgt[i11] * w11;
+  };
+
   const lr = clamp(
     ambient.r + settings.lightWarmth * 110,
     0,
@@ -788,8 +1241,20 @@ function applyIntrinsicStyleRelight(
     255,
   );
 
-  const invW = 1 / Math.max(1, w - 1);
-  const invH = 1 / Math.max(1, h - 1);
+  // 亮部滚降：超过拐点的部分按软肩压缩。
+  // 这一步必须在浮点阶段做 —— 一旦写进 8bit 画布，超过 255 的部分已经被 clamp 掉，
+  // 再想恢复层次就不可能了。滚降之后高光是「一条平滑过渡到接近白」的带，
+  // 而不是一片切平的死白，也才有东西可以让阈值泛光抓出来发光。
+  const rolloff = clamp(settings.highlightRolloff ?? 0, 0, 1);
+  const kneeV = 255 * (1 - rolloff * 0.5);
+  const shoulderSpan = Math.max(1, 255 - kneeV);
+  const shoulderS = shoulderSpan * (0.8 + rolloff * 1.4);
+  const useShoulder = rolloff > 0.004;
+  const shoulder = (v: number) => {
+    if (v <= kneeV) return v;
+    const ex = v - kneeV;
+    return kneeV + shoulderSpan * (ex / (ex + shoulderS));
+  };
 
   const alphaAt = (x: number, y: number) => {
     x = Math.max(0, Math.min(w - 1, x));
@@ -798,24 +1263,21 @@ function applyIntrinsicStyleRelight(
   };
 
   for (let y = 1; y < h - 1; y++) {
-    const ey = y * invH * 2 - 1;
     for (let x = 1; x < w - 1; x++) {
       const i = (y * w + x) * 4;
       const alpha = d[i + 3] / 255;
       if (alpha < 0.01) continue;
 
-      const ex = x * invW * 2 - 1;
-
-      // Silhouette-gradient normal.
+      // Silhouette-gradient normal（边缘细节）
       const gx = alphaAt(x + 1, y) - alphaAt(x - 1, y);
       const gy = alphaAt(x, y + 1) - alphaAt(x, y - 1);
 
-      // Ellipsoid-like volume term gives broad face/body curvature inside
-      // otherwise flat anime regions.
-      const radial = Math.max(0, 1 - ex * ex * 0.82 - ey * ey * 0.9);
-      let nx = -gx * 3.1 + ex * depth * 0.42;
-      let ny = -gy * 3.1 + ey * depth * 0.34;
-      let nz = 0.72 + radial * depth * 0.82;
+      // 形体起伏法线：来自剪影距离场，跟随人物真实形状（手臂像圆柱、躯干像穹顶）
+      readShape(x, y);
+
+      let nx = -gx * 3.1 + sfx;
+      let ny = -gy * 3.1 + sfy;
+      let nz = 0.72 + sfm * depth * 0.95;
 
       const nlen = Math.hypot(nx, ny, nz) || 1;
       nx /= nlen;
@@ -844,22 +1306,44 @@ function applyIntrinsicStyleRelight(
 
       const gain =
         1 +
-        centered * strength * 0.9 +
-        rim * strength * 0.72 -
-        (1 - lambert) * backShade * strength * 0.36 -
+        centered * strength * 0.95 +
+        rim * strength * 0.8 -
+        (1 - lambert) * backShade * strength * 0.4 -
         localShadow * 0.72;
+
+      // 方向性轮廓光：只有「朝向光源那侧的轮廓」会被推向光源色，形成暖边/冷边，
+      // 而不是整圈均匀发光。这是逆光、街灯场景里人物从背景里「跳出来」的关键。
+      const rimTint = rim * strength * (0.22 + settings.lightLift * 1.5);
 
       const tint = clamp(
         (lambert * 0.6 + rim * 0.9) *
           strength *
-          (0.16 + settings.lightLift * 0.7),
+          (0.16 + settings.lightLift * 0.7) +
+          rimTint,
         0,
-        0.42,
+        0.62,
       );
 
-      d[i] = clamp(d[i] * gain * (1 - tint) + lr * tint, 0, 255);
-      d[i + 1] = clamp(d[i + 1] * gain * (1 - tint) + lg * tint, 0, 255);
-      d[i + 2] = clamp(d[i + 2] * gain * (1 - tint) + lb * tint, 0, 255);
+      // 镜面高光：漫反射负责明暗，高光负责「被灯照到」这件事本身。
+      let spec = 0;
+      if (specStrength > 0.002) {
+        const dot = nx * hvx + ny * hvy + nz * hvz;
+        if (dot > 0) spec = Math.pow(dot, shininess) * specStrength;
+      }
+      const specAdd = spec * 255;
+
+      // 高光的颜色略偏向白（真实高光是被光源色漂白的），否则会像糊了一层颜料
+      const shr = lr * 0.62 + 255 * 0.38;
+      const shg = lg * 0.62 + 255 * 0.38;
+      const shb = lb * 0.62 + 255 * 0.38;
+
+      const r0 = d[i] * gain * (1 - tint) + lr * tint + specAdd * (shr / 255);
+      const g0 = d[i + 1] * gain * (1 - tint) + lg * tint + specAdd * (shg / 255);
+      const b0 = d[i + 2] * gain * (1 - tint) + lb * tint + specAdd * (shb / 255);
+
+      d[i] = clamp(useShoulder ? shoulder(r0) : r0, 0, 255);
+      d[i + 1] = clamp(useShoulder ? shoulder(g0) : g0, 0, 255);
+      d[i + 2] = clamp(useShoulder ? shoulder(b0) : b0, 0, 255);
     }
   }
 
@@ -887,15 +1371,14 @@ function drawLocalLightPatches(
     ctx.restore();
   }
 
-  const lightLayer = document.createElement("canvas");
-  lightLayer.width = w;
-  lightLayer.height = h;
-  const lctx = lightLayer.getContext("2d")!;
-
-  const shadowLayer = document.createElement("canvas");
-  shadowLayer.width = w;
-  shadowLayer.height = h;
-  const sctx = shadowLayer.getContext("2d")!;
+  const { canvas: shadowLayer, ctx: sctx } = getScratchCtx("patchShadow", w, h);
+  const shape = getShapeField(alphaSource);
+  const depth = clamp(settings.volumeDepth ?? 0, 0, 1);
+  const bloomAmount = clamp(settings.localLightBloom ?? 0, 0, 0.5);
+  // 局部辉光需要一张"叠加后的光层"，只有真的要用时才多维护一块画布
+  const accum = bloomAmount > 0.001
+    ? getScratchCtx("patchLightAccum", w, h)
+    : null;
 
   const paintPatch = (
     pctx: CanvasRenderingContext2D,
@@ -936,59 +1419,111 @@ function drawLocalLightPatches(
       pctx.fillRect(-radius, -radius, radius * 2, radius * 2);
       pctx.restore();
     } else {
-      // 硬光/光带统一使用“模糊遮罩 + 可衰减核心”。四条边都会羽化，避免矩形硬边。
-      const blurPx = softness <= 0.001 ? 0 : Math.max(0.8, softness * Math.min(pw, ph) * 0.48);
-      const baseAlpha = clamp(power * alphaScale, 0, 1);
-      if (blurPx > 0) {
+      /*
+       * 硬光 / 光带。
+       *
+       * 这里以前是「先模糊一层，再盖一个完全不羽化的实心矩形当核心」。
+       * 结果是无论边缘模糊拉多高，最外面那圈硬边永远都在 —— 用户只能把
+       * 边缘模糊一路拉到 0.9 以上、把核心整个压掉，光斑自然也就废了。
+       *
+       * 现在形状完全由「模糊后的矩形」本身定义：羽化宽度直接由 softness 决定，
+       * 核心平台按内缩的第二层模糊叠出来。任何取值都不会出现硬边，
+       * 并且「变软」不再等于「变暗」（峰值按羽化量补偿）。
+       */
+      const minSide = Math.min(pw, ph);
+      const featherPx = clamp(0.6 + softness * minSide * 0.55, 0.6, minSide * 0.55);
+      const peak = clamp(power * alphaScale * (0.74 + softness * 0.5), 0, 1);
+
+      if (patch.shape === "光带") {
+        // 光带：沿短轴做线性渐变（中间最亮、两侧衰减），四边同时被羽化。
         pctx.save();
-        pctx.filter = `blur(${blurPx}px)`;
-        pctx.fillStyle = `rgba(${r},${g},${b},${clamp(baseAlpha * (0.72 + softness * 0.22), 0, 1)})`;
+        pctx.filter = `blur(${featherPx.toFixed(2)}px)`;
+        const grad = pctx.createLinearGradient(0, -ph / 2, 0, ph / 2);
+        const edge = clamp(0.06 + softness * 0.22, 0.06, 0.3);
+        grad.addColorStop(0, `rgba(${r},${g},${b},0)`);
+        grad.addColorStop(edge, `rgba(${r},${g},${b},${peak * 0.78})`);
+        grad.addColorStop(0.5, `rgba(${r},${g},${b},${peak})`);
+        grad.addColorStop(1 - edge, `rgba(${r},${g},${b},${peak * 0.78})`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+        pctx.fillStyle = grad;
         pctx.fillRect(-pw / 2, -ph / 2, pw, ph);
         pctx.restore();
-      }
-
-      const coreAlpha = clamp(baseAlpha * Math.pow(1 - softness, 2.8), 0, 1);
-      if (coreAlpha > 0.008) {
-        if (patch.shape === "光带") {
-          const grad = pctx.createLinearGradient(0, -ph / 2, 0, ph / 2);
-          const edge = clamp(0.04 + softness * 0.24, 0.04, 0.32);
-          grad.addColorStop(0, `rgba(${r},${g},${b},0)`);
-          grad.addColorStop(edge, `rgba(${r},${g},${b},${coreAlpha * 0.72})`);
-          grad.addColorStop(0.5, `rgba(${r},${g},${b},${coreAlpha})`);
-          grad.addColorStop(1 - edge, `rgba(${r},${g},${b},${coreAlpha * 0.72})`);
-          grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
-          pctx.fillStyle = grad;
-        } else {
-          pctx.fillStyle = `rgba(${r},${g},${b},${coreAlpha})`;
-        }
+      } else {
+        // 硬光：外层大羽化 + 内缩小羽化两层叠加，得到「核心实在但边缘连续」的效果。
+        pctx.save();
+        pctx.filter = `blur(${featherPx.toFixed(2)}px)`;
+        pctx.fillStyle = `rgba(${r},${g},${b},${peak * 0.66})`;
         pctx.fillRect(-pw / 2, -ph / 2, pw, ph);
+
+        const inset = minSide * 0.15;
+        pctx.filter = `blur(${Math.max(0.6, featherPx * 0.5).toFixed(2)}px)`;
+        pctx.fillStyle = `rgba(${r},${g},${b},${peak * 0.52})`;
+        pctx.fillRect(
+          -pw / 2 + inset,
+          -ph / 2 + inset,
+          Math.max(2, pw - inset * 2),
+          Math.max(2, ph - inset * 2),
+        );
+        pctx.restore();
       }
     }
     pctx.restore();
   };
 
-  lctx.imageSmoothingEnabled = true;
-  lctx.imageSmoothingQuality = "high";
   sctx.imageSmoothingEnabled = true;
   sctx.imageSmoothingQuality = "high";
 
   for (const patch of patches) {
-    const isShadow = patch.mode === "影";
-    paintPatch(isShadow ? sctx : lctx, patch, isShadow);
+    if (patch.mode === "影") paintPatch(sctx, patch, true);
   }
+  // 影只存在于人物 alpha 内部。
+  sctx.save();
+  sctx.globalCompositeOperation = "destination-in";
+  sctx.drawImage(alphaSource, 0, 0, w, h);
+  sctx.restore();
 
-  // 光与影都只存在于人物 alpha 内部。
-  for (const layerCtx of [lctx, sctx]) {
-    layerCtx.save();
-    layerCtx.globalCompositeOperation = "destination-in";
-    layerCtx.drawImage(alphaSource, 0, 0, w, h);
-    layerCtx.restore();
-  }
+  /*
+   * 光斑逐块合成。
+   *
+   * 每块光斑先单独画进一张临时画布，再乘上「形体受光遮罩」（朝光斑那一侧更亮、
+   * 背向衰减），最后才以 screen 叠到人物上。这样硬光会顺着肩膀/手臂的起伏走，
+   * 而不是糊一块均匀的亮斑 —— 光斑真正"打在形体上"的关键就在这一步。
+   */
+  const { canvas: lightOne, ctx: oneCtx } = getScratchCtx("patchLightOne", w, h);
+  oneCtx.imageSmoothingEnabled = true;
+  oneCtx.imageSmoothingQuality = "high";
 
-  // Screen 更接近直射光；先把亮部推起来。
   ctx.save();
   ctx.globalCompositeOperation = "screen";
-  ctx.drawImage(lightLayer, 0, 0);
+  for (const patch of patches) {
+    if (patch.mode === "影") continue;
+
+    oneCtx.setTransform(1, 0, 0, 1, 0, 0);
+    oneCtx.globalAlpha = 1;
+    oneCtx.globalCompositeOperation = "source-over";
+    oneCtx.filter = "none";
+    oneCtx.clearRect(0, 0, w, h);
+    paintPatch(oneCtx, patch, false);
+
+    const mask = shape
+      ? getFormLightMask(shape, patchAzimuth(patch, w, h), depth)
+      : null;
+    if (mask) {
+      oneCtx.globalCompositeOperation = "destination-in";
+      oneCtx.drawImage(mask, 0, 0, w, h);
+      oneCtx.globalCompositeOperation = "source-over";
+    }
+    oneCtx.globalCompositeOperation = "destination-in";
+    oneCtx.drawImage(alphaSource, 0, 0, w, h);
+    oneCtx.globalCompositeOperation = "source-over";
+
+    ctx.drawImage(lightOne, 0, 0);
+    if (accum) {
+      accum.ctx.globalCompositeOperation = "screen";
+      accum.ctx.drawImage(lightOne, 0, 0);
+      accum.ctx.globalCompositeOperation = "source-over";
+    }
+  }
   ctx.restore();
 
   // 遮光片放在直射光之后，相当于窗框 / 树影挡住光，能形成参考图中的硬明暗切线。
@@ -998,15 +1533,11 @@ function drawLocalLightPatches(
   ctx.restore();
 
   // 少量局部 bloom，仅围绕正向光斑，不给整个人蒙雾。
-  const bloom = clamp(settings.localLightBloom ?? 0, 0, 0.5);
-  if (bloom > 0.001) {
-    const blur = document.createElement("canvas");
-    blur.width = w;
-    blur.height = h;
-    const bctx = blur.getContext("2d")!;
+  if (accum && bloomAmount > 0.001) {
+    const { canvas: blur, ctx: bctx } = getScratchCtx("patchBloom", w, h);
     bctx.filter = `blur(${Math.max(1.2, Math.min(w, h) * 0.012)}px)`;
-    bctx.globalAlpha = bloom;
-    bctx.drawImage(lightLayer, 0, 0);
+    bctx.globalAlpha = bloomAmount;
+    bctx.drawImage(accum.canvas, 0, 0);
     bctx.globalCompositeOperation = "destination-in";
     bctx.globalAlpha = 1;
     bctx.drawImage(alphaSource, 0, 0);
@@ -1017,11 +1548,16 @@ function drawLocalLightPatches(
   }
 }
 
-function createProcessedPerson(
+/**
+ * 抠图 + 去污染：把原图变成「只剩人物、颜色干净」的图层。
+ *
+ * 这是所有权衡之前的输入。单独抽出来是因为「量一下人物实际占多大」也需要同一套
+ * 抠图结果，否则测出来的内容和实际画出来的对不上。
+ */
+function prepareRawPerson(
   asset: ImageAsset,
   settings: Settings,
-  ambient: { r: number; g: number; b: number },
-  maxSide = 1600,
+  maxSide: number,
 ) {
   const ratio = Math.min(1, maxSide / Math.max(asset.width, asset.height));
   const w = Math.max(2, Math.round(asset.width * ratio));
@@ -1037,25 +1573,10 @@ function createProcessedPerson(
     const imgData = rctx.getImageData(0, 0, w, h);
     const d = imgData.data;
 
-    const corners = [
-      [2, 2],
-      [Math.max(0, w - 3), 2],
-      [2, Math.max(0, h - 3)],
-      [Math.max(0, w - 3), Math.max(0, h - 3)],
-    ];
-
-    let kr = 0;
-    let kg = 0;
-    let kb = 0;
-    for (const [x, y] of corners) {
-      const i = (y * w + x) * 4;
-      kr += d[i];
-      kg += d[i + 1];
-      kb += d[i + 2];
-    }
-    kr /= corners.length;
-    kg /= corners.length;
-    kb /= corners.length;
+    const key = estimateKeyColor(d, w, h);
+    const kr = key.r;
+    const kg = key.g;
+    const kb = key.b;
 
     const threshold = 18 + settings.keyTolerance * 150;
     const feather = 8 + settings.keyFeather * 70;
@@ -1077,25 +1598,62 @@ function createProcessedPerson(
     rctx.putImageData(imgData, 0, 0);
   }
 
+  /*
+   * 去白边 / 去杂色必须在所有调色之前做：它改的是「像素本身是什么颜色」，
+   * 一旦先做了亮度/色温/环境染色，污染色就已经和新颜色混在一起，再想分开就难了。
+   */
+  decontaminateEdges(raw, settings.edgeDecontaminate, settings.edgeChoke);
+
+  return raw;
+}
+
+/** 只做抠图 + 量一次内容包围盒，尺度很小，用于自动摆放这类需要立即拿到结果的场景 */
+function measurePersonBounds(asset: ImageAsset, settings: Settings) {
+  return computeAlphaBounds(prepareRawPerson(asset, settings, 380));
+}
+
+function createProcessedPerson(
+  asset: ImageAsset,
+  settings: Settings,
+  ambient: AmbientSample,
+  maxSide = 1600,
+) {
+  const raw = prepareRawPerson(asset, settings, maxSide);
+  const w = raw.width;
+  const h = raw.height;
+  const bounds = computeAlphaBounds(raw);
+
   const out = document.createElement("canvas");
   out.width = w;
   out.height = h;
   const ctx = out.getContext("2d")!;
 
-  ctx.save();
+  /*
+   * 恒等短路。
+   *
+   * 亮度/对比度/饱和度都等于 1、也没有微模糊时，干脆不设 filter ——
+   * 这样「导入即原图」是字节级的，连一次滤镜求值的舍入都不会发生。
+   */
+  const gradeParts: string[] = [];
+  if (Math.abs(settings.personBrightness - 1) > 0.001) {
+    gradeParts.push(`brightness(${settings.personBrightness})`);
+  }
+  if (Math.abs(settings.personContrast - 1) > 0.001) {
+    gradeParts.push(`contrast(${settings.personContrast})`);
+  }
+  if (Math.abs(settings.personSaturation - 1) > 0.001) {
+    gradeParts.push(`saturate(${settings.personSaturation})`);
+  }
   // 人物微模糊只处理画面细节；边缘柔化在最终 alpha 上单独完成，避免把脸和线稿一起糊掉。
   const blur = settings.personBlur;
-  ctx.filter = [
-    `brightness(${settings.personBrightness})`,
-    `contrast(${settings.personContrast})`,
-    `saturate(${settings.personSaturation})`,
-    blur > 0.02 ? `blur(${blur.toFixed(2)}px)` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  if (blur > 0.02) gradeParts.push(`blur(${blur.toFixed(2)}px)`);
 
+  if (gradeParts.length) {
+    ctx.save();
+    ctx.filter = gradeParts.join(" ");
+  }
   ctx.drawImage(raw, 0, 0);
-  ctx.restore();
+  if (gradeParts.length) ctx.restore();
 
   // Warm / cool shift.
   if (Math.abs(settings.personWarmth) > 0.005) {
@@ -1110,13 +1668,46 @@ function createProcessedPerson(
     ctx.restore();
   }
 
-  // Environment color contamination — the key to avoiding a sticker look.
+  /*
+   * 环境色匹配分两层，两层都用「四角色场」而不是单一均值：
+   * 1) 方向性色偏（source-atop）：把背景在人物四周的颜色差按位置铺上去，
+   *    左边窗光偏冷、右边台灯偏暖，人物两侧就该吃到不同的环境色；
+   * 2) 柔光（soft-light）：让环境色参与明暗关系，这是 AE 溶图里「四色渐变 + 柔光」的用法。
+   * ambientSpread 越小两块越接近均值色，退化成整体染色；越大越保留方向性差异。
+   */
+  const spread = clamp(settings.ambientSpread ?? 0, 0, 1);
   if (settings.ambientTint > 0.001) {
-    ctx.save();
-    ctx.globalCompositeOperation = "source-atop";
-    ctx.fillStyle = `rgba(${ambient.r},${ambient.g},${ambient.b},${settings.ambientTint * 0.38})`;
-    ctx.fillRect(0, 0, w, h);
-    ctx.restore();
+    const field = buildAmbientFieldCanvas("ambientField", w, h, {
+      tl: mixRgb(ambient.corners.tl, ambient, spread),
+      tr: mixRgb(ambient.corners.tr, ambient, spread),
+      bl: mixRgb(ambient.corners.bl, ambient, spread),
+      br: mixRgb(ambient.corners.br, ambient, spread),
+    });
+
+    const cast = clamp(settings.ambientTint * 0.3, 0, 1);
+    if (cast > 0.001) {
+      ctx.save();
+      ctx.globalCompositeOperation = "source-atop";
+      ctx.globalAlpha = cast;
+      ctx.drawImage(field, 0, 0);
+      ctx.restore();
+    }
+
+    const softAmount = clamp(settings.ambientTint * (0.28 + spread * 0.62), 0, 1);
+    if (softAmount > 0.001) {
+      // 先把场裁到人物 alpha 内，才能用柔光混合且不影响背景。
+      const { canvas: layer, ctx: lctx } = getScratchCtx("ambientLayer", w, h);
+      lctx.globalAlpha = softAmount;
+      lctx.drawImage(field, 0, 0);
+      lctx.globalAlpha = 1;
+      lctx.globalCompositeOperation = "destination-in";
+      lctx.drawImage(out, 0, 0);
+
+      ctx.save();
+      ctx.globalCompositeOperation = "soft-light";
+      ctx.drawImage(layer, 0, 0);
+      ctx.restore();
+    }
   }
 
   if (settings.ambientHaze > 0.001) {
@@ -1218,10 +1809,11 @@ function createProcessedPerson(
 
   // 只柔化轮廓 alpha，不再牺牲人物内部的线稿与五官细节。
   if (settings.edgeSoftness > 0.01) {
-    const featherMask = document.createElement("canvas");
-    featherMask.width = w;
-    featherMask.height = h;
-    const fctx = featherMask.getContext("2d")!;
+    const { canvas: featherMask, ctx: fctx } = getScratchCtx(
+      "edgeFeather",
+      w,
+      h,
+    );
     const featherPx = clamp(settings.edgeSoftness * 1.8, 0.25, 5.5);
     fctx.filter = `blur(${featherPx.toFixed(2)}px)`;
     fctx.drawImage(raw, 0, 0);
@@ -1236,7 +1828,7 @@ function createProcessedPerson(
     ctx.restore();
   }
 
-  return out;
+  return { canvas: out, bounds };
 }
 
 function drawPersonGlow(
@@ -1250,11 +1842,11 @@ function drawPersonGlow(
   const glowAmount = clamp(settings.personGlow, 0, 1);
   if (glowAmount <= 0.001) return;
 
-  const glowCanvas = document.createElement("canvas");
-  glowCanvas.width = processed.width;
-  glowCanvas.height = processed.height;
-  const glowCtx = glowCanvas.getContext("2d")!;
-  glowCtx.clearRect(0, 0, glowCanvas.width, glowCanvas.height);
+  const { canvas: glowCanvas, ctx: glowCtx } = getScratchCtx(
+    "personGlow",
+    processed.width,
+    processed.height,
+  );
   glowCtx.drawImage(processed, 0, 0);
   glowCtx.globalCompositeOperation = "source-in";
   glowCtx.fillStyle = settings.personGlowColor || "#FFFFFF";
@@ -1307,27 +1899,8 @@ function drawPersonLayer(
   ctx.rotate((transform.rotation * Math.PI) / 180);
   ctx.scale(transform.flipX ? -1 : 1, 1);
 
-  // Full silhouette shadow.
-  if (!showRaw && settings.shadowOpacity > 0.001) {
-    ctx.save();
-    ctx.globalAlpha = settings.shadowOpacity;
-    ctx.shadowColor = `rgba(${Math.round(ambient.r * 0.16)},${Math.round(
-      ambient.g * 0.16,
-    )},${Math.round(ambient.b * 0.16)},0.9)`;
-    ctx.shadowBlur = settings.shadowBlur * scaleFactor;
-    ctx.shadowOffsetX = settings.shadowX * scaleFactor;
-    ctx.shadowOffsetY = settings.shadowY * scaleFactor;
-    ctx.filter = "brightness(0)";
-    ctx.drawImage(
-      processed,
-      -targetW / 2,
-      -targetH / 2,
-      targetW,
-      targetH,
-    );
-    ctx.restore();
-  }
-
+  // 投影与接触阴影已经由 drawGroundShadow 单独处理（它们需要按内容包围盒定位，
+  // 并且要在人物图层之下、背景之上），这里只负责人物自身的光效。
   // Environment rim light.
   if (!showRaw && settings.rimLight > 0.001) {
     ctx.save();
@@ -1362,6 +1935,143 @@ function drawPersonLayer(
   return { x, y, targetW, targetH };
 }
 
+/** 人物本地归一化坐标（-0.5~0.5，相对图片框）→ 画布坐标，含旋转与镜像 */
+function personLocalToCanvas(
+  transform: Transform,
+  lx: number,
+  ly: number,
+  scaleFactor: number,
+) {
+  const x = transform.flipX ? -lx : lx;
+  const rad = (transform.rotation * Math.PI) / 180;
+  return {
+    x: transform.x * scaleFactor + x * Math.cos(rad) - ly * Math.sin(rad),
+    y: transform.y * scaleFactor + x * Math.sin(rad) + ly * Math.cos(rad),
+  };
+}
+
+/** 人物图片框在画布上的像素尺寸（不含内容裁剪） */
+function personBoxOnCanvas(
+  transform: Transform,
+  processed: HTMLCanvasElement,
+  scaleFactor: number,
+  rawAsset?: ImageAsset,
+) {
+  const srcW = rawAsset?.width ?? processed.width;
+  const srcH = rawAsset?.height ?? processed.height;
+  const h = srcH * transform.scale * scaleFactor;
+  return { w: (h * srcW) / Math.max(1, srcH), h, srcW, srcH };
+}
+
+/**
+ * 落地投影。
+ *
+ * 原来的实现是「在人物图层上用 ctx.shadowOffset」，本质是一张按固定像素偏移的贴纸
+ * 阴影，而且脚点写死在图片高度的 0.47 处 —— 抠图 PNG 四周的透明留白一大，阴影就
+ * 浮在半空。
+ *
+ * 这里换成和 AE「CC Slant」同思路的做法：拿人物剪影本身，沿光照方向压扁 + 斜切，
+ * 得到“躺在地上”的方向性投影，再按距离渐隐，最后以正片叠底压到地面上。
+ * 落点用真正的内容包围盒底边中点，人物站在哪，影子就从哪开始。
+ */
+function drawGroundShadow(
+  ctx: CanvasRenderingContext2D,
+  transform: Transform,
+  processed: HTMLCanvasElement,
+  settings: Settings,
+  scaleFactor: number,
+  bounds: PersonBounds | undefined,
+  rawAsset?: ImageAsset,
+) {
+  const opacity = clamp(settings.shadowOpacity, 0, 1);
+  if (opacity <= 0.001) return;
+
+  const box = personBoxOnCanvas(transform, processed, scaleFactor, rawAsset);
+  const b = bounds ?? FULL_BOUNDS;
+  const foot = personLocalToCanvas(
+    transform,
+    ((b.left + b.right) / 2 - 0.5) * box.w,
+    (b.bottom - 0.5) * box.h,
+    scaleFactor,
+  );
+
+  const length = clamp(settings.shadowLength, 0.08, 1.6);
+  const skew = clamp(settings.shadowSkew, -1.5, 1.5);
+  const blur = Math.max(0.6, settings.shadowBlur * scaleFactor);
+
+  // 铺开方向：优先听「阴影水平/垂直」滑杆（自动融入时会被光向写进来），
+  // 没有明显偏移时按斜切方向给一个默认的侧向地面投影。
+  const offX = settings.shadowX;
+  const offY = settings.shadowY;
+  const dirRad =
+    Math.hypot(offX, offY) > 1
+      ? Math.atan2(offY, offX)
+      : (transform.flipX ? -1 : 1) * (skew >= 0 ? 1 : -1) * (Math.PI / 2.4);
+
+  const pad = blur * 3 + 8;
+  const along = box.h * length * 1.2 + pad * 2;
+  const across = box.w * 1.25 + Math.abs(skew) * box.h * length + pad * 2;
+
+  const cap = 1400;
+  const ratio = Math.min(1, cap / Math.max(along, across));
+  const fw = Math.max(8, Math.round(across * ratio));
+  const fh = Math.max(8, Math.round(along * ratio));
+  const { canvas: frame, ctx: fctx } = getScratchCtx("castShadow", fw, fh);
+
+  const blurScaled = blur * ratio;
+  const footY = fh - pad * ratio;
+
+  /*
+   * 在「影子本地坐标系」里作画：
+   *   +x —— 轮廓横向（斜切方向）
+   *   -y —— 影子从脚点向外铺开的方向
+   * 脚点固定在 (fw/2, footY)。
+   */
+  fctx.save();
+  fctx.translate(fw / 2, footY);
+  fctx.transform(1, 0, -skew, 1, 0, 0); // 斜切：离地越高越往侧面倒
+  fctx.scale(1, length); // 压扁：形成“躺在地上”的透视
+  fctx.rotate((transform.rotation * Math.PI) / 180);
+  fctx.scale(transform.flipX ? -1 : 1, 1);
+  fctx.filter = `brightness(0) blur(${blurScaled.toFixed(2)}px)`;
+  const drawW = box.w * ratio;
+  const drawH = box.h * ratio;
+  fctx.drawImage(
+    processed,
+    -drawW / 2 - ((b.left + b.right) / 2 - 0.5) * drawW,
+    -drawH / 2 - (b.bottom - 0.5) * drawH,
+    drawW,
+    drawH,
+  );
+  fctx.restore();
+
+  // 距离渐隐：越远离脚点越淡，避免出现一条生硬的边缘。
+  fctx.globalCompositeOperation = "destination-out";
+  const fade = fctx.createLinearGradient(0, footY, 0, 0);
+  fade.addColorStop(0, "rgba(0,0,0,0)");
+  fade.addColorStop(0.3, "rgba(0,0,0,0.22)");
+  fade.addColorStop(0.68, "rgba(0,0,0,0.66)");
+  fade.addColorStop(1, "rgba(0,0,0,1)");
+  fctx.fillStyle = fade;
+  fctx.fillRect(0, 0, fw, fh);
+  fctx.globalCompositeOperation = "source-over";
+
+  // 正片叠底让影子真正「压暗地面」而不是糊一层灰。
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.globalCompositeOperation = "multiply";
+  ctx.translate(foot.x, foot.y);
+  ctx.rotate(dirRad + Math.PI / 2);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(frame, -fw / 2, -footY);
+  ctx.restore();
+}
+
+/**
+ * 接触阴影：脚底那一小块环境遮蔽。
+ * 用内容包围盒的宽度与底边定位，抠图 PNG 带留白时也能准确踩在地上。
+ */
 function drawContactShadow(
   ctx: CanvasRenderingContext2D,
   transform: Transform,
@@ -1369,32 +2079,82 @@ function drawContactShadow(
   settings: Settings,
   scaleFactor: number,
   rawAsset?: ImageAsset,
+  bounds?: PersonBounds,
 ) {
-  if (settings.contactShadow <= 0.001) return;
+  const amount = clamp(settings.contactShadow, 0, 1);
+  if (amount <= 0.001) return;
 
-  const sourceW = rawAsset?.width ?? processed.width;
-  const sourceH = rawAsset?.height ?? processed.height;
-  const personH = sourceH * transform.scale * scaleFactor;
-  const personW = sourceW * transform.scale * scaleFactor;
-  const footY = transform.y * scaleFactor + personH * 0.47;
-  const shadowW =
-    personW * clamp(settings.contactShadowWidth, 0.15, 1.4) * 0.48;
+  const box = personBoxOnCanvas(transform, processed, scaleFactor, rawAsset);
+  const b = bounds ?? FULL_BOUNDS;
+  const foot = personLocalToCanvas(
+    transform,
+    ((b.left + b.right) / 2 - 0.5) * box.w,
+    (b.bottom - 0.5) * box.h,
+    scaleFactor,
+  );
+
+  const shadowW = Math.max(
+    6,
+    box.w * clamp(b.width, 0.05, 1) * clamp(settings.contactShadowWidth, 0.15, 1.4) * 0.62,
+  );
+  const shadowH = Math.max(3, shadowW * 0.2);
 
   ctx.save();
-  ctx.translate(transform.x * scaleFactor, footY);
+  ctx.translate(foot.x, foot.y);
   ctx.rotate((transform.rotation * Math.PI) / 180);
-
+  ctx.filter = `blur(${Math.max(0.5, settings.contactShadowBlur * scaleFactor * 0.34)}px)`;
+  ctx.scale(1, shadowH / shadowW);
   const g = ctx.createRadialGradient(0, 0, 0, 0, 0, shadowW);
-  g.addColorStop(0, `rgba(0,0,0,${settings.contactShadow * 0.7})`);
-  g.addColorStop(0.52, `rgba(0,0,0,${settings.contactShadow * 0.28})`);
+  g.addColorStop(0, `rgba(0,0,0,${amount * 0.85})`);
+  g.addColorStop(0.5, `rgba(0,0,0,${amount * 0.34})`);
   g.addColorStop(1, "rgba(0,0,0,0)");
-
-  ctx.filter = `blur(${settings.contactShadowBlur * scaleFactor * 0.3}px)`;
-  ctx.scale(1, 0.22);
   ctx.fillStyle = g;
   ctx.beginPath();
   ctx.arc(0, 0, shadowW, 0, Math.PI * 2);
   ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * 背光。
+ *
+ * 教程里的「背光」是把人物剪影填成光源色、模糊后垫在人物身后：逆光、霓虹、
+ * 雪夜这类场景里，它比轮廓光更能把人物从背景里托出来，也解释了「人物挡住了
+ * 光源，所以边缘发光」这件事。
+ */
+function drawBackLight(
+  ctx: CanvasRenderingContext2D,
+  transform: Transform,
+  processed: HTMLCanvasElement,
+  settings: Settings,
+  scaleFactor: number,
+  rawAsset?: ImageAsset,
+) {
+  const amount = clamp(settings.backLight, 0, 1);
+  if (amount <= 0.001) return;
+
+  const box = personBoxOnCanvas(transform, processed, scaleFactor, rawAsset);
+  if (box.w < 2 || box.h < 2) return;
+
+  // 模糊是低频操作，用几百像素的画布算完再放大，省掉 4K 导出时的大图滤波。
+  const cap = 720;
+  const ratio = Math.min(1, cap / Math.max(box.w, box.h));
+  const gw = Math.max(4, Math.round(box.w * ratio));
+  const gh = Math.max(4, Math.round(box.h * ratio));
+  const { canvas: glow, ctx: gctx } = getScratchCtx("backLight", gw, gh);
+  gctx.drawImage(processed, 0, 0, gw, gh);
+  gctx.globalCompositeOperation = "source-in";
+  gctx.fillStyle = settings.backLightColor || "#FFD9A6";
+  gctx.fillRect(0, 0, gw, gh);
+
+  ctx.save();
+  ctx.translate(transform.x * scaleFactor, transform.y * scaleFactor);
+  ctx.rotate((transform.rotation * Math.PI) / 180);
+  ctx.scale(transform.flipX ? -1 : 1, 1);
+  ctx.globalCompositeOperation = "screen";
+  ctx.globalAlpha = clamp(amount * 0.9, 0, 1);
+  ctx.filter = `blur(${Math.max(1, (settings.backLightSize * scaleFactor) / ratio * 0.28)}px)`;
+  ctx.drawImage(glow, -box.w / 2, -box.h / 2, box.w, box.h);
   ctx.restore();
 }
 
@@ -1412,6 +2172,14 @@ function drawBloom(
   ctx.restore();
 }
 
+/**
+ * 阈值泛光（高光泛光）。
+ *
+ * 原来的「柔光泛光」是把整张图模糊后 screen 回去 —— 那只会让画面蒙一层雾，
+ * 暗部被一起抬亮，画面反而更平。真正好看的光晕只来自高光：先把阈值以上的部分
+ * 抽出来，再大范围模糊叠回去。这样暗部纹丝不动，亮部周围浮起一层光 —— 是「发光」
+ * 而不是「起雾」。
+ */
 function makeIcon(path: string) {
   return (
     <svg
@@ -1475,18 +2243,18 @@ export default function Page() {
   });
   const transformRef = useRef(transform);
 
-  const [activePreset, setActivePreset] = useState<PresetName | null>("自然融入");
   const [showRawComposite, setShowRawComposite] = useState(false);
-  const [activeTab, setActiveTab] = useState<"融合" | "空间" | "氛围" | "去背">("融合");
+  const holdCompareRef = useRef<boolean | null>(null);
+  type TabName = "融合" | "空间" | "氛围" | "去背";
+  const [activeTab, setActiveTab] = useState<TabName>("融合");
   const [ambientColor, setAmbientColor] = useState("#c5b6a8");
   // 保存最近一次的环境采样结果（含亮度与饱和度），交互期间会冻结在这里。
-  const ambientRef = useRef<{
-    r: number;
-    g: number;
-    b: number;
-    l: number;
-    s: number;
-  }>({ r: 197, g: 182, b: 168, l: 0.55, s: 0.2 });
+  const ambientRef = useRef<AmbientSample>({
+    ...NEUTRAL_AMBIENT,
+    r: 197,
+    g: 182,
+    b: 168,
+  });
   const [toast, setToast] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [personSelected, setPersonSelected] = useState(false);
@@ -1503,13 +2271,7 @@ export default function Page() {
    * 不能省，但可以降分辨率：交互期间按半分辨率处理，松手后再按原分辨率重算一次。
    * 配合冻结环境采样，拖动时既不会每帧重算，观感也不会掉链子。
    */
-  const frozenAmbientRef = useRef<{
-    r: number;
-    g: number;
-    b: number;
-    l: number;
-    s: number;
-  } | null>(null);
+  const frozenAmbientRef = useRef<AmbientSample | null>(null);
   const interactingRef = useRef(false);
   const [interactionTick, setInteractionTick] = useState(0);
 
@@ -1542,7 +2304,11 @@ export default function Page() {
     }));
   }, []);
 
-  const processedPersonRef = useRef<HTMLCanvasElement | null>(null);
+  /** 缓存的人物处理图层；bounds 是它的内容包围盒，投影/构图要用 */
+  const processedPersonRef = useRef<{
+    canvas: HTMLCanvasElement;
+    bounds: PersonBounds;
+  } | null>(null);
   const processedPersonKeyRef = useRef("");
   const backgroundCanvasCacheRef = useRef<{ key: string; canvas: HTMLCanvasElement } | null>(null);
   const toastTimerRef = useRef<number | null>(null);
@@ -1631,7 +2397,6 @@ export default function Page() {
     setSettings(snap.settings);
     setTransform(snap.transform);
     setLightPatches(snap.lightPatches);
-    setActivePreset(null);
   }, []);
 
   const updateSettings = <K extends keyof Settings>(key: K, value: Settings[K]) => {
@@ -1639,7 +2404,6 @@ export default function Page() {
     if (Object.is(settingsRef.current[key], value)) return;
     pushHistory(`setting:${key}`);
     setSettings((prev) => (Object.is(prev[key], value) ? prev : { ...prev, [key]: value }));
-    setActivePreset((prev) => (prev === null ? prev : null));
   };
 
   const activeLightPatch =
@@ -1661,6 +2425,8 @@ export default function Page() {
   const patchColorHexRef = useRef<HTMLSpanElement | null>(null);
   const personGlowColorInputRef = useRef<HTMLInputElement | null>(null);
   const personGlowColorHexRef = useRef<HTMLSpanElement | null>(null);
+  const backLightColorInputRef = useRef<HTMLInputElement | null>(null);
+  const backLightColorHexRef = useRef<HTMLSpanElement | null>(null);
 
   // 面板里的 range/select 在拖动时会非常高频地触发 change。
   // Next 16 + React 19 开发模式下，如果每个原生 change 都同步 setState，
@@ -1695,7 +2461,6 @@ export default function Page() {
           next[index] = { ...prev[index], ...nextUpdate.patch };
           return next;
         });
-        setActivePreset((prev) => (prev === null ? prev : null));
       });
     },
     [pushHistory],
@@ -1721,7 +2486,6 @@ export default function Page() {
         next[index] = { ...prev[index], color };
         return next;
       });
-      setActivePreset((prev) => (prev === null ? prev : null));
     },
     [pushHistory],
   );
@@ -1751,7 +2515,6 @@ export default function Page() {
     setSettings((prev) =>
       prev.personGlowColor === color ? prev : { ...prev, personGlowColor: color },
     );
-    setActivePreset((prev) => (prev === null ? prev : null));
   }, [pushHistory]);
 
   useEffect(() => {
@@ -1763,7 +2526,31 @@ export default function Page() {
     }
   }, [settings.personGlowColor]);
 
-  // PointerMove 可能每秒触发上百次；合并到每个动画帧一次，避免 React / Canvas 被拖垮。
+  const previewBackLightColor = useCallback((color: string) => {
+    if (backLightColorHexRef.current) {
+      backLightColorHexRef.current.textContent = color.toUpperCase();
+    }
+  }, []);
+
+  const commitBackLightColor = useCallback((color: string) => {
+    pushHistory("backlight-color");
+    if (backLightColorHexRef.current) {
+      backLightColorHexRef.current.textContent = color.toUpperCase();
+    }
+    setSettings((prev) =>
+      prev.backLightColor === color ? prev : { ...prev, backLightColor: color },
+    );
+  }, [pushHistory]);
+
+  useEffect(() => {
+    if (backLightColorInputRef.current) {
+      backLightColorInputRef.current.value = settings.backLightColor;
+    }
+    if (backLightColorHexRef.current) {
+      backLightColorHexRef.current.textContent = settings.backLightColor.toUpperCase();
+    }
+  }, [settings.backLightColor]);
+
   const queueLightPatchUpdate = useCallback((id: string, patch: Partial<LightPatch>) => {
     pushHistory(`patch:${id}`);
     const pending = pendingPatchMoveRef.current;
@@ -1779,7 +2566,6 @@ export default function Page() {
       setLightPatches((prev) =>
         prev.map((item) => (item.id === next.id ? { ...item, ...next.patch } : item)),
       );
-      setActivePreset(null);
     });
   }, [pushHistory]);
 
@@ -1805,9 +2591,9 @@ export default function Page() {
               width: 0.5,
               height: 0.16,
               rotation: -16,
-              color: "#111722",
-              intensity: 0.62,
-              softness: 0.12,
+              color: "#141A26",
+              intensity: 0.6,
+              softness: 0.1,
               highlight: 0,
               shape: "硬光",
               mode: "影",
@@ -1821,10 +2607,10 @@ export default function Page() {
               width: 0.46,
               height: 0.34,
               rotation: -18,
-              color: "#b9dcff",
-              intensity: 0.72,
-              softness: 0.72,
-              highlight: 0.34,
+              color: "#9AC6FF",
+              intensity: 0.82,
+              softness: 0.6,
+              highlight: 0.26,
               shape: "柔光",
               mode: "光",
             }
@@ -1837,10 +2623,10 @@ export default function Page() {
                 width: 0.5,
                 height: 0.14,
                 rotation: -16,
-                color: "#fff0c8",
-                intensity: 0.95,
-                softness: 0.08,
-                highlight: 0.8,
+                color: "#FFF3D6",
+                intensity: 1,
+                softness: 0.05,
+                highlight: 0.6,
                 shape: "硬光",
                 mode: "光",
               }
@@ -1852,10 +2638,10 @@ export default function Page() {
                 width: 0.44,
                 height: 0.32,
                 rotation: -16,
-                color: "#ffd9a6",
-                intensity: 0.72,
-                softness: 0.68,
-                highlight: 0.38,
+                color: "#FFAE5E",
+                intensity: 0.82,
+                softness: 0.6,
+                highlight: 0.26,
                 shape: "柔光",
                 mode: "光",
               };
@@ -1863,11 +2649,6 @@ export default function Page() {
       setActiveLightPatchId(id);
       setPersonSelected(false);
       setLightPatchEditMode(true);
-      setSettings((prev) => ({
-        ...prev,
-        localLightShadow: Math.max(prev.localLightShadow ?? 0, kind === "硬窗光" ? 0.24 : kind === "阴影" ? 0.08 : 0.12),
-      }));
-      setActivePreset(null);
     },
     [pushHistory],
   );
@@ -1903,13 +2684,10 @@ export default function Page() {
     setLightPatchEditMode(true);
     setSettings((prev) => ({
       ...prev,
-      localLightShadow: 0.28,
-      localLightBloom: 0.09,
       faceShadowStrength: Math.max(prev.faceShadowStrength ?? 0.32, 0.42),
       backShade: Math.max(prev.backShade ?? 0.18, 0.24),
       relightStrength: Math.max(prev.relightStrength ?? 0.46, 0.5),
     }));
-    setActivePreset(null);
     if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
     setToast("已生成参考图风格的斜射日光，可直接拖动每一块光");
     toastTimerRef.current = window.setTimeout(() => {
@@ -2108,16 +2886,17 @@ export default function Page() {
 
       ctx.fillStyle = "#111115";
       ctx.fillRect(0, 0, width, height);
-      ctx.save();
-      ctx.filter = [
-        `brightness(${s.bgBrightness})`,
-        `saturate(${s.bgSaturation})`,
-        s.bgBlur > 0.01 ? `blur(${s.bgBlur}px)` : "",
-      ]
-        .filter(Boolean)
-        .join(" ");
+      // 同样是恒等短路：背景默认也要原样呈现
+      const bgParts: string[] = [];
+      if (Math.abs(s.bgBrightness - 1) > 0.001) bgParts.push(`brightness(${s.bgBrightness})`);
+      if (Math.abs(s.bgSaturation - 1) > 0.001) bgParts.push(`saturate(${s.bgSaturation})`);
+      if (s.bgBlur > 0.01) bgParts.push(`blur(${s.bgBlur}px)`);
+      if (bgParts.length) {
+        ctx.save();
+        ctx.filter = bgParts.join(" ");
+      }
       ctx.drawImage(bg.img, rect.x, rect.y, rect.w, rect.h);
-      ctx.restore();
+      if (bgParts.length) ctx.restore();
 
       if (finalGrade) {
         const grade = document.createElement("canvas");
@@ -2133,89 +2912,99 @@ export default function Page() {
     [],
   );
 
+  /**
+   * 环境采样。
+   *
+   * 除了原来的「人物周围均值」，这里额外在人物框四角附近各采一块，作为双线性
+   * 环境色场的四个控制点。窗光/台灯这类场景里，人物左侧和右侧接收到的环境色
+   * 本来就不同，只用一个均值染色会把这种方向性抹平，人物看起来就“贴”在画面上。
+   */
   const analyzeAmbient = useCallback(
-    (canvas: HTMLCanvasElement, t: Transform, asset?: ImageAsset | null) => {
-      const canvasEl = canvasRef.current;
-      if (!canvasEl) return { r: 190, g: 180, b: 170, l: 0.55, s: 0.2 };
+    (
+      canvas: HTMLCanvasElement,
+      t: Transform,
+      asset?: ImageAsset | null,
+      scaleFactor = 1,
+    ): AmbientSample => {
+      const sampleAt = (cx: number, cy: number, rw: number, rh: number) =>
+        sampleCanvas(canvas, { x: cx - rw / 2, y: cy - rh / 2, w: rw, h: rh });
 
-      const cssW = parseFloat(canvasEl.style.width) || canvasEl.clientWidth || 1;
-      const cssH = parseFloat(canvasEl.style.height) || canvasEl.clientHeight || 1;
-      const sx = canvas.width / cssW;
-      const sy = canvas.height / cssH;
+      const boxW = asset ? asset.width * t.scale * scaleFactor : canvas.width * 0.22;
+      const boxH = asset ? asset.height * t.scale * scaleFactor : canvas.height * 0.26;
+      const regionW = clamp(Math.max(80, boxW * 1.18), 80, canvas.width * 0.58);
+      const regionH = clamp(Math.max(80, boxH * 1.12), 80, canvas.height * 0.62);
+      const cx = t.x * scaleFactor;
+      const cy = t.y * scaleFactor;
 
-      const displayedW = asset ? asset.width * t.scale * sx : canvas.width * 0.22;
-      const displayedH = asset ? asset.height * t.scale * sy : canvas.height * 0.26;
-      const regionW = clamp(Math.max(80, displayedW * 1.18), 80, canvas.width * 0.58);
-      const regionH = clamp(Math.max(80, displayedH * 1.12), 80, canvas.height * 0.62);
-      return sampleCanvas(canvas, {
-        x: t.x * sx - regionW / 2,
-        y: t.y * sy - regionH / 2,
-        w: regionW,
-        h: regionH,
-      });
+      const avg = sampleAt(cx, cy, regionW, regionH);
+
+      /*
+       * 四角色场：取样块按「人物框四角」摆放，而且要足够小。
+       * 早期版本用了很大的取样块（boxW*0.72），结果左右两块互相重叠、
+       * 把背景自身的渐变平均掉了，四色场退化成一片灰，完全看不出方向性。
+       * 现在把小块直接压在四角上，量到的才是「人物左右上下的局部环境色」。
+       */
+      const cellW = clamp(boxW * 0.36, 20, 220);
+      const cellH = clamp(boxH * 0.22, 20, 200);
+      const dx = boxW * 0.5;
+      const dy = boxH * 0.5;
+
+      return {
+        ...avg,
+        corners: {
+          tl: sampleAt(cx - dx, cy - dy, cellW, cellH),
+          tr: sampleAt(cx + dx, cy - dy, cellW, cellH),
+          bl: sampleAt(cx - dx, cy + dy, cellW, cellH),
+          br: sampleAt(cx + dx, cy + dy, cellW, cellH),
+        },
+      };
     },
     [],
   );
 
-  const renderScene = useCallback(
+  /**
+   * 合成核心：假定背景画布已经按目标尺寸准备好，负责把人物、光影、整体调色
+   * 叠到 target 上。
+   *
+   * 预览和导出走的是同一个函数 —— 以前导出单独抄了一份百余行的合成流程，
+   * 任何一处观感改动都得改两遍，还很容易让「导出和预览不一样」。
+   */
+  const composeScene = useCallback(
     (
       target: HTMLCanvasElement,
-      bg: ImageAsset,
+      bgCanvas: HTMLCanvasElement,
       fg: ImageAsset | null,
       s: Settings,
       t: Transform,
-      options?: { rawComposite?: boolean; exportMode?: boolean; preview?: boolean },
+      ambient: AmbientSample,
+      scaleFactor: number,
+      options?: {
+        rawComposite?: boolean;
+        exportMode?: boolean;
+        preview?: boolean;
+        lightPatches?: LightPatch[];
+      },
     ) => {
       const ctx = target.getContext("2d")!;
       const w = target.width;
       const h = target.height;
+      const patches = options?.lightPatches ?? [];
 
-      const bgCacheKey = [
-        bg.url,
-        w,
-        h,
-        s.bgFit,
-        s.bgBlur.toFixed(3),
-        s.bgBrightness.toFixed(4),
-        s.bgSaturation.toFixed(4),
-      ].join("|");
-      let bgCanvas = backgroundCanvasCacheRef.current?.key === bgCacheKey
-        ? backgroundCanvasCacheRef.current.canvas
-        : null;
-      if (!bgCanvas) {
-        bgCanvas = buildBackgroundCanvas(w, h, bg, s, false);
-        backgroundCanvasCacheRef.current = { key: bgCacheKey, canvas: bgCanvas };
-      }
-
-      /*
-       * 拖动时冻结环境采样。
-       *
-       * 环境色是「按人物当前所在区域采样背景」得到的，所以人物一移动，采样区域
-       * 就跟着动，量化后几乎每帧都会落到新的档位；而它参与了 processedKey，
-       * 于是每帧都会重新执行整套逐像素重照明 —— 实测一帧要几百毫秒。
-       *
-       * 交互期间沿用上一次的环境值，processedKey 保持稳定，缓存的人物图层可以
-       * 直接复用；松手后再做一次完整重算。
-       */
-      const ambient =
-        options?.preview && frozenAmbientRef.current
-          ? frozenAmbientRef.current
-          : analyzeAmbient(bgCanvas, t, fg);
-      if (!options?.preview) ambientRef.current = ambient;
-
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over";
+      ctx.filter = "none";
       ctx.clearRect(0, 0, w, h);
       ctx.drawImage(bgCanvas, 0, 0);
 
       if (fg) {
-        const displayCanvas = canvasRef.current;
-        const cssW = displayCanvas
-          ? parseFloat(displayCanvas.style.width) || displayCanvas.clientWidth
-          : w;
-        const scaleFactor = w / Math.max(1, cssW);
-
-        const ambientKey = `${Math.round(ambient.r / 8)}-${Math.round(
-          ambient.g / 8,
-        )}-${Math.round(ambient.b / 8)}`;
+        const ambientKey = [
+          Math.round(ambient.r / 8),
+          Math.round(ambient.g / 8),
+          Math.round(ambient.b / 8),
+          Math.round((ambient.corners.tl.r + ambient.corners.br.r) / 16),
+          Math.round((ambient.corners.tr.r + ambient.corners.bl.b) / 16),
+        ].join("-");
 
         const processedKey = [
           fg.url,
@@ -2228,6 +3017,7 @@ export default function Page() {
           s.edgeSoftness,
           s.ambientTint,
           s.ambientHaze,
+          s.ambientSpread,
           s.lightStrength,
           s.lightAngle,
           s.lightSoftness,
@@ -2245,40 +3035,50 @@ export default function Page() {
           s.keyMode,
           s.keyTolerance,
           s.keyFeather,
+          s.edgeDecontaminate,
+          s.edgeChoke,
         ].join("|");
 
-        let processed = processedPersonRef.current;
+        let entry = processedPersonRef.current;
         if (
-          !processed ||
+          !entry ||
           processedPersonKeyRef.current !== processedKey ||
           options?.exportMode
         ) {
-          processed = createProcessedPerson(
+          entry = createProcessedPerson(
             fg,
             s,
             ambient,
-            options?.exportMode ? 3000 : 960,
+            options?.exportMode ? Math.max(3000, Math.max(w, h)) : 960,
           );
           if (!options?.exportMode) {
-            processedPersonRef.current = processed;
+            processedPersonRef.current = entry;
             processedPersonKeyRef.current = processedKey;
           }
         }
+        const processed = entry.canvas;
+        const bounds = entry.bounds;
 
         let personForDraw = processed;
-        if (!options?.rawComposite && lightPatches.length) {
+        if (!options?.rawComposite && patches.length) {
           // 局部光斑单独作为轻量图层叠加，不再因为拖动光斑反复执行整套逐像素重照明。
           // 这样拖动/缩放/旋转的反馈能稳定在动画帧级别。
-          const localLit = getScratch("localLit", processed.width, processed.height);
-          const localCtx = localLit.getContext("2d")!;
-          localCtx.clearRect(0, 0, localLit.width, localLit.height);
+          const { canvas: localLit, ctx: localCtx } = getScratchCtx(
+            "localLit",
+            processed.width,
+            processed.height,
+          );
           localCtx.drawImage(processed, 0, 0);
-          drawLocalLightPatches(localLit, processed, lightPatches, s);
+          drawLocalLightPatches(localLit, processed, patches, s);
           personForDraw = localLit;
         }
 
         if (!options?.rawComposite) {
-          drawContactShadow(ctx, t, personForDraw, s, scaleFactor, fg);
+          // 先落地投影，再接触阴影，再背光，最后人物本体 —— 这个顺序保证
+          // 影子永远在脚下、背光永远在身后。
+          drawGroundShadow(ctx, t, personForDraw, s, scaleFactor, bounds, fg);
+          drawContactShadow(ctx, t, personForDraw, s, scaleFactor, fg, bounds);
+          drawBackLight(ctx, t, processed, s, scaleFactor, fg);
         }
 
         drawPersonLayer(
@@ -2294,12 +3094,12 @@ export default function Page() {
       }
 
       if (!options?.rawComposite) {
-        const graded = getScratch("graded", w, h);
-        const gctx = graded.getContext("2d")!;
-        gctx.globalCompositeOperation = "source-over";
-        gctx.globalAlpha = 1;
-        gctx.clearRect(0, 0, w, h);
-        gctx.filter = `brightness(${s.overallExposure}) contrast(${s.overallContrast}) saturate(${s.overallSaturation})`;
+        const { canvas: graded, ctx: gctx } = getScratchCtx("graded", w, h);
+        const overallParts: string[] = [];
+        if (Math.abs(s.overallExposure - 1) > 0.001) overallParts.push(`brightness(${s.overallExposure})`);
+        if (Math.abs(s.overallContrast - 1) > 0.001) overallParts.push(`contrast(${s.overallContrast})`);
+        if (Math.abs(s.overallSaturation - 1) > 0.001) overallParts.push(`saturate(${s.overallSaturation})`);
+        if (overallParts.length) gctx.filter = overallParts.join(" ");
         gctx.drawImage(target, 0, 0);
         gctx.filter = "none";
 
@@ -2313,11 +3113,17 @@ export default function Page() {
           gctx.globalCompositeOperation = "source-over";
         }
 
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = "source-over";
+        ctx.filter = "none";
         ctx.clearRect(0, 0, w, h);
         ctx.drawImage(graded, 0, 0);
 
-        // 交互中跳过泛光与颗粒：这两项是纯观感修饰，拖动时省掉能明显降帧耗时，
-        // 松手后的完整渲染会把它们补回来。暗角便宜且观感差异大，保留。
+        /*
+         * 交互中跳过泛光、光点与颗粒：这三项是纯观感修饰，拖动时省掉能明显降帧耗时，
+         * 松手后的完整渲染会把它们补回来。光柱、暗角、分离色调便宜且影响大，保留。
+         */
         if (!options?.preview) {
           drawBloom(ctx, graded, s.bloom);
         }
@@ -2326,10 +3132,81 @@ export default function Page() {
           drawNoise(ctx, w, h, s.grain);
         }
       }
+    },
+    [],
+  );
+
+  /**
+   * 背景画布缓存。
+   *
+   * 背景本身在「拖动人物」时是不变的，但它每帧都要重画一次（fit + 亮度/饱和度/景深）。
+   * 拾取光源时更是每次点击都会重新合成一遍。抽成一个带缓存的取用口，两条路径共用。
+   */
+  const getBackgroundCanvas = useCallback(
+    (w: number, h: number, bg: ImageAsset, s: Settings) => {
+      const key = [
+        bg.url,
+        w,
+        h,
+        s.bgFit,
+        s.bgBlur.toFixed(3),
+        s.bgBrightness.toFixed(4),
+        s.bgSaturation.toFixed(4),
+      ].join("|");
+      const cached = backgroundCanvasCacheRef.current;
+      if (cached?.key === key) return cached.canvas;
+      const canvas = buildBackgroundCanvas(w, h, bg, s, false);
+      backgroundCanvasCacheRef.current = { key, canvas };
+      return canvas;
+    },
+    [buildBackgroundCanvas],
+  );
+
+  const renderScene = useCallback(
+    (
+      target: HTMLCanvasElement,
+      bg: ImageAsset,
+      fg: ImageAsset | null,
+      s: Settings,
+      t: Transform,
+      options?: { rawComposite?: boolean; preview?: boolean },
+    ) => {
+      const w = target.width;
+      const h = target.height;
+
+      const bgCanvas = getBackgroundCanvas(w, h, bg, s);
+
+      const displayCanvas = canvasRef.current;
+      const cssW = displayCanvas
+        ? parseFloat(displayCanvas.style.width) || displayCanvas.clientWidth || w
+        : w;
+      const scaleFactor = w / Math.max(1, cssW);
+
+      /*
+       * 拖动时冻结环境采样。
+       *
+       * 环境色是「按人物当前所在区域采样背景」得到的，所以人物一移动，采样区域
+       * 就跟着动，量化后几乎每帧都会落到新的档位；而它参与了 processedKey，
+       * 于是每帧都会重新执行整套逐像素重照明 —— 实测一帧要几百毫秒。
+       *
+       * 交互期间沿用上一次的环境值，processedKey 保持稳定，缓存的人物图层可以
+       * 直接复用；松手后再做一次完整重算。
+       */
+      const ambient =
+        options?.preview && frozenAmbientRef.current
+          ? frozenAmbientRef.current
+          : analyzeAmbient(bgCanvas, t, fg, scaleFactor);
+      if (!options?.preview) ambientRef.current = ambient;
+
+      composeScene(target, bgCanvas, fg, s, t, ambient, scaleFactor, {
+        rawComposite: options?.rawComposite,
+        preview: options?.preview,
+        lightPatches,
+      });
 
       return ambient;
     },
-    [analyzeAmbient, buildBackgroundCanvas, lightPatches],
+    [analyzeAmbient, composeScene, getBackgroundCanvas, lightPatches],
   );
 
   useEffect(() => {
@@ -2345,6 +3222,7 @@ export default function Page() {
     settings.edgeSoftness,
     settings.ambientTint,
     settings.ambientHaze,
+    settings.ambientSpread,
     settings.lightStrength,
     settings.lightAngle,
     settings.lightSoftness,
@@ -2362,6 +3240,8 @@ export default function Page() {
     settings.keyMode,
     settings.keyTolerance,
     settings.keyFeather,
+    settings.edgeDecontaminate,
+    settings.edgeChoke,
   ]);
 
   useEffect(() => {
@@ -2488,12 +3368,23 @@ export default function Page() {
     const cssW = parseFloat(canvas.style.width) || canvas.clientWidth || 900;
     const cssH = parseFloat(canvas.style.height) || canvas.clientHeight || 650;
 
-    const desiredHeight = cssH * 0.67;
-    const scale = desiredHeight / Math.max(1, person.height);
+    /*
+     * 按「实际内容」而不是「整张图片」摆放。
+     *
+     * 抠图 PNG 的四边经常留着一大圈透明像素，直接按图片高度算尺寸会让同一个人
+     * 时大时小，落点也会浮在半空。这里先量出内容包围盒，让内容高度占画布 66%，
+     * 内容底边落在画布 88% 处，看上去就是站在地面上。
+     */
+    const b = measurePersonBounds(person, normalizeSettings(settingsRef.current));
+    const contentH = Math.max(0.05, b.height);
+    const scale = (cssH * 0.66) / Math.max(1, person.height * contentH);
+
+    const contentCenterX = ((b.left + b.right) / 2 - 0.5) * person.width * scale;
+    const contentBottom = (b.bottom - 0.5) * person.height * scale;
 
     setTransform({
-      x: cssW * 0.56,
-      y: cssH * 0.53,
+      x: cssW * 0.54 - contentCenterX,
+      y: cssH * 0.88 - contentBottom,
       scale,
       rotation: 0,
       flipX: false,
@@ -2515,20 +3406,25 @@ export default function Page() {
     pushHistory("auto-blend");
 
     const canvas = canvasRef.current;
-    const bgCanvas = buildBackgroundCanvas(
+    const bgCanvas = getBackgroundCanvas(
       canvas.width,
       canvas.height,
       background,
       normalizeSettings(settingsRef.current),
-      false,
     );
-
-    const ambient = analyzeAmbient(bgCanvas, transformRef.current, person);
 
     const cssW = parseFloat(canvas.style.width) || canvas.clientWidth || 1;
     const cssH = parseFloat(canvas.style.height) || canvas.clientHeight || 1;
     const sx = bgCanvas.width / cssW;
     const sy = bgCanvas.height / cssH;
+
+    const ambient = analyzeAmbient(
+      bgCanvas,
+      transformRef.current,
+      person,
+      (sx + sy) / 2,
+    );
+
     const lightInfo = analyzeDirectionalLight(
       bgCanvas,
       transformRef.current.x * sx,
@@ -2574,6 +3470,11 @@ export default function Page() {
       volumeDepth: clamp(0.56 + lightInfo.contrast * 0.35, 0.56, 0.82),
       wrapLight: clamp(0.38 - lightInfo.contrast * 0.32, 0.14, 0.38),
       edgeLight: clamp(0.18 + lightInfo.contrast * 0.82, 0.18, 0.56),
+      // 一键融入是出成品的动作，顺手把抠图残留的边缘污染清掉
+      edgeDecontaminate:
+        settingsRef.current.edgeDecontaminate > 0.01
+          ? settingsRef.current.edgeDecontaminate
+          : 0.7,
       backShade: clamp(0.12 + lightInfo.contrast * 0.5, 0.12, 0.34),
       shadowOpacity: clamp(0.16 + (1 - ambient.l) * 0.24, 0.18, 0.38),
       shadowBlur: ambient.l < 0.38 ? 25 : 18,
@@ -2585,32 +3486,34 @@ export default function Page() {
       grain: 0.018 + (1 - ambient.l) * 0.015,
       vignette: 0.16 + (1 - ambient.l) * 0.1,
       bloom: ambient.l < 0.35 ? 0.08 : 0.035,
+
+      // 环境色按四角色场铺开；光是暗场景时把背光开出来，人物更容易从暗背景里站出来。
+      ambientSpread: clamp(0.6 + ambient.s * 0.5, 0.6, 1),
+      shadowLength: clamp(0.4 + (1 - ambient.l) * 0.5, 0.4, 0.9),
+      shadowSkew: clamp(0.3 + lightInfo.contrast * 1.4, 0.3, 0.8),
+      backLight: clamp((1 - ambient.l) * 0.22, 0.03, 0.26),
+      backLightSize: ambient.l < 0.4 ? 34 : 24,
+      backLightColor: rgbToHex(
+        clamp(lightInfo.color.r + (lightInfo.color.r > lightInfo.color.b ? 18 : -10), 0, 255),
+        clamp(lightInfo.color.g, 0, 255),
+        clamp(lightInfo.color.b + (lightInfo.color.b > lightInfo.color.r ? 18 : -10), 0, 255),
+      ),
+
     }));
-    setActivePreset(null);
     notify("已匹配环境色、明暗与局部光照方向");
   }, [
     analyzeAmbient,
     background,
-    buildBackgroundCanvas,
+    getBackgroundCanvas,
     notify,
     person,
     pushHistory,
   ]);
 
-  const applyPreset = (name: PresetName) => {
-    pushHistory("preset");
-    setSettings((prev) => ({
-      ...DEFAULT_SETTINGS,
-      ...prev,
-      ...PRESETS[name],
-    }));
-    setActivePreset(name);
-  };
 
   const resetAllAdjustments = useCallback(() => {
     pushHistory("reset-all");
     setSettings(DEFAULT_SETTINGS);
-    setActivePreset("自然融入");
     setShowRawComposite(false);
     setPickLightMode(false);
     setPickPatchColorMode(false);
@@ -2731,12 +3634,11 @@ export default function Page() {
       if (canvas) {
         const dprX = canvas.width / Math.max(1, rect.width);
         const dprY = canvas.height / Math.max(1, rect.height);
-        const bgCanvas = buildBackgroundCanvas(
+        const bgCanvas = getBackgroundCanvas(
           canvas.width,
           canvas.height,
           background,
           normalizeSettings(settingsRef.current),
-          false,
         );
         const lightSample = sampleLightSourceColor(
           bgCanvas,
@@ -2780,7 +3682,6 @@ export default function Page() {
           shadowX: clamp((-dx / Math.max(1, rect.width)) * 90, -65, 65),
           shadowY: clamp((-dy / Math.max(1, rect.height)) * 70 + 14, -20, 80),
         }));
-        setActivePreset(null);
         setPickLightMode(false);
         notify("已采样光源位置、颜色和方向");
       }
@@ -3078,29 +3979,30 @@ export default function Page() {
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
 
       const step = e.shiftKey ? 10 : 2;
+      // 方向键微调也记进撤销栈：同一个 label 在 700ms 内会被合并成一步，
+      // 所以连按不会把历史刷爆，但「按几下再撤销」能一次退回原处。
+      const nudge = (patch: (t: Transform) => Partial<Transform>) => {
+        e.preventDefault();
+        pushHistory("nudge");
+        setTransform((p) => ({ ...p, ...patch(p) }));
+      };
       if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        setTransform((p) => ({ ...p, x: p.x - step }));
+        nudge((p) => ({ x: p.x - step }));
       } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        setTransform((p) => ({ ...p, x: p.x + step }));
+        nudge((p) => ({ x: p.x + step }));
       } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setTransform((p) => ({ ...p, y: p.y - step }));
+        nudge((p) => ({ y: p.y - step }));
       } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setTransform((p) => ({ ...p, y: p.y + step }));
+        nudge((p) => ({ y: p.y + step }));
       } else if (e.key === "=" || e.key === "+") {
-        e.preventDefault();
-        setTransform((p) => ({ ...p, scale: clamp(p.scale * 1.04, 0.02, 5) }));
+        nudge((p) => ({ scale: clamp(p.scale * 1.04, 0.02, 5) }));
       } else if (e.key === "-" || e.key === "_") {
-        e.preventDefault();
-        setTransform((p) => ({ ...p, scale: clamp(p.scale * 0.96, 0.02, 5) }));
+        nudge((p) => ({ scale: clamp(p.scale * 0.96, 0.02, 5) }));
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [person, redo, undo]);
+  }, [person, pushHistory, redo, undo]);
 
   const exportImage = useCallback(async () => {
     if (exporting) return;
@@ -3184,9 +4086,6 @@ export default function Page() {
     const out = document.createElement("canvas");
     out.width = Math.max(2, width);
     out.height = Math.max(2, height);
-    const ctx = out.getContext("2d")!;
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
 
     // 坐标不是从整个黑色舞台映射，而是从「真实背景内容区域」映射。
     // 因此人物在竖图里的相对位置与预览保持一致。
@@ -3210,75 +4109,19 @@ export default function Page() {
       scale: transform.scale * uniformScale,
     };
 
-    const ambient = sampleCanvas(bgCanvas, {
-      x: exportTransform.x - width * 0.11,
-      y: exportTransform.y - height * 0.13,
-      w: width * 0.22,
-      h: height * 0.26,
-    });
-
-    ctx.drawImage(bgCanvas, 0, 0);
-
-    if (person) {
-      const processed = createProcessedPerson(
-        person,
-        safeSettings,
-        ambient,
-        3200,
-      );
-      let personForExport = processed;
-      if (lightPatches.length) {
-        const localLit = document.createElement("canvas");
-        localLit.width = processed.width;
-        localLit.height = processed.height;
-        const localCtx = localLit.getContext("2d")!;
-        localCtx.drawImage(processed, 0, 0);
-        drawLocalLightPatches(localLit, processed, lightPatches, safeSettings);
-        personForExport = localLit;
-      }
-      drawContactShadow(
-        ctx,
-        exportTransform,
-        personForExport,
-        safeSettings,
-        1,
-        person,
-      );
-      drawPersonLayer(
-        ctx,
-        personForExport,
-        exportTransform,
-        safeSettings,
-        ambient,
-        1,
-        false,
-        person,
-      );
-    }
-
-    const graded = document.createElement("canvas");
-    graded.width = width;
-    graded.height = height;
-    const gctx = graded.getContext("2d")!;
-    gctx.imageSmoothingEnabled = true;
-    gctx.imageSmoothingQuality = "high";
-    gctx.filter = `brightness(${safeSettings.overallExposure}) contrast(${safeSettings.overallContrast}) saturate(${safeSettings.overallSaturation})`;
-    gctx.drawImage(out, 0, 0);
-
-    if (Math.abs(safeSettings.overallWarmth) > 0.004) {
-      gctx.globalCompositeOperation = "soft-light";
-      gctx.fillStyle =
-        safeSettings.overallWarmth > 0
-          ? `rgba(255,145,70,${Math.abs(safeSettings.overallWarmth) * 0.22})`
-          : `rgba(75,145,255,${Math.abs(safeSettings.overallWarmth) * 0.22})`;
-      gctx.fillRect(0, 0, width, height);
-    }
-
-    ctx.clearRect(0, 0, width, height);
-    ctx.drawImage(graded, 0, 0);
-    drawBloom(ctx, graded, safeSettings.bloom);
-    drawVignette(ctx, width, height, safeSettings.vignette);
-    drawNoise(ctx, width, height, safeSettings.grain);
+    // 和预览走完全同一条合成路径：exportMode 会让它跳过缓存、按导出分辨率重算，
+    // 并保留泛光/颗粒这些交互期被降掉的修饰层。
+    const ambient = analyzeAmbient(bgCanvas, exportTransform, person, 1);
+    composeScene(
+      out,
+      bgCanvas,
+      person,
+      safeSettings,
+      exportTransform,
+      ambient,
+      1,
+      { exportMode: true, preview: false, lightPatches },
+    );
 
     out.toBlob(
       (blob) => {
@@ -3304,6 +4147,8 @@ export default function Page() {
     settings,
     transform,
     buildBackgroundCanvas,
+    analyzeAmbient,
+    composeScene,
     exporting,
     lightPatches,
     notify,
@@ -3325,29 +4170,6 @@ export default function Page() {
   const interaction = useMemo(
     () => ({ begin: beginInteraction, end: endInteraction }),
     [beginInteraction, endInteraction],
-  );
-
-  const presetDock = useMemo<CSSProperties>(
-    () => ({
-      position: "absolute",
-      top: 58,
-      left: 16,
-      zIndex: 22,
-      display: "flex",
-      alignItems: "center",
-      gap: 6,
-      maxWidth: "calc(100% - 390px)",
-      padding: "6px 7px",
-      borderRadius: 15,
-      border: "1px solid rgba(255,255,255,.12)",
-      background:
-        "linear-gradient(180deg,rgba(22,20,25,.72),rgba(13,13,17,.58))",
-      boxShadow:
-        "0 18px 48px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05)",
-      backdropFilter: "blur(18px) saturate(125%)",
-      WebkitBackdropFilter: "blur(18px) saturate(125%)",
-    }),
-    [],
   );
 
   return (
@@ -3420,10 +4242,9 @@ export default function Page() {
             background:linear-gradient(180deg,rgba(6,7,10,.48),rgba(6,7,10,.14) 52%,transparent);
           }
 
-          .preset-scroll::-webkit-scrollbar,
           .toolbar::-webkit-scrollbar,
           .panel-scroll::-webkit-scrollbar { display:none; }
-          .preset-scroll, .toolbar, .panel-scroll { scrollbar-width:none; }
+          .toolbar, .panel-scroll { scrollbar-width:none; }
 
           .range {
             appearance:none;
@@ -3590,12 +4411,6 @@ export default function Page() {
               right:8px !important;
               max-width:none !important;
             }
-            .preset-dock {
-              left:8px !important;
-              right:8px !important;
-              top:52px !important;
-              max-width:none !important;
-            }
             .panel {
               left:8px !important;
               right:8px !important;
@@ -3631,65 +4446,6 @@ export default function Page() {
 
         <div className="blend-floating-breadcrumb">
           <Breadcrumb />
-        </div>
-
-        <div className="preset-dock preset-scroll" style={presetDock}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              flexShrink: 0,
-              padding: "0 4px 0 2px",
-              color: "rgba(255,255,255,.65)",
-              fontSize: 11,
-              letterSpacing: ".08em",
-            }}
-          >
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: 99,
-                background: "linear-gradient(135deg,#f1a6b9,#eac48d)",
-                boxShadow: "0 0 15px rgba(239,177,159,.7)",
-              }}
-            />
-            氛围
-          </div>
-          {(["自然融入", "黄昏", "雨夜", "街灯", "胶片", "梦境"] as PresetName[]).map(
-            (name) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => applyPreset(name)}
-                style={{
-                  borderWidth: 1,
-                  borderStyle: "solid",
-                  borderColor:
-                    activePreset === name
-                      ? "rgba(245,199,172,.36)"
-                      : "transparent",
-                  whiteSpace: "nowrap",
-                  borderRadius: 10,
-                  padding: "7px 10px",
-                  color:
-                    activePreset === name
-                      ? "#fff7f1"
-                      : "rgba(255,255,255,.58)",
-                  background:
-                    activePreset === name
-                      ? "linear-gradient(135deg,rgba(242,157,179,.17),rgba(234,198,142,.14))"
-                      : "transparent",
-                  cursor: "pointer",
-                  fontSize: 11,
-                  transition: ".15s ease",
-                }}
-              >
-                {name}
-              </button>
-            ),
-          )}
         </div>
 
         <div className="canvas-wrap" ref={stageRef}>
@@ -4171,6 +4927,25 @@ export default function Page() {
                     onChange={(v) => updateSettings("ambientTint", v)}
                   />
                   <Slider
+                    label="环境色分布"
+                    value={settings.ambientSpread}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onChange={(v) => updateSettings("ambientSpread", v)}
+                    format={(v) =>
+                      v < 0.03
+                        ? "均匀"
+                        : v > 0.94
+                          ? "四角渐变"
+                          : `渐变 ${Math.round(v * 100)}`
+                    }
+                  />
+                  <div style={{ color: "rgba(255,255,255,.28)", fontSize: 9.5, lineHeight: 1.55 }}>
+                    环境色分布把背景在人物左右/上下的色差按位置铺到人物身上（AE 四色渐变 + 柔光），
+                    左边窗户冷光、右边台灯暖光这种场景，拉到「四角渐变」才自然。
+                  </div>
+                  <Slider
                     label="空气透色"
                     value={settings.ambientHaze}
                     min={0}
@@ -4539,6 +5314,41 @@ export default function Page() {
                     step={0.01}
                     onChange={(v) => updateSettings("faceShadowThreshold", v)}
                   />
+                  <Slider
+                    label="高光强度"
+                    value={settings.specular}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onChange={(v) => updateSettings("specular", v)}
+                  />
+                  <Slider
+                    label="高光聚焦"
+                    value={settings.specularSharpness}
+                    min={0.05}
+                    max={1}
+                    step={0.01}
+                    onChange={(v) => updateSettings("specularSharpness", v)}
+                    format={(v) =>
+                      v > 0.72 ? "锐利" : v < 0.3 ? "柔和" : `${Math.round(v * 100)}`
+                    }
+                  />
+                  <Slider
+                    label="亮部滚降"
+                    value={settings.highlightRolloff}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onChange={(v) => updateSettings("highlightRolloff", v)}
+                    format={(v) =>
+                      v < 0.03 ? "硬切" : v > 0.8 ? "很软" : `${Math.round(v * 100)}`
+                    }
+                  />
+                  <div style={{ color: "rgba(255,255,255,.28)", fontSize: 9.5, lineHeight: 1.55 }}>
+                    明暗来自「剪影距离场」算出的伪法线，会跟着人物真实形状走（手臂像圆柱、躯干像穹顶）。
+                    高光是「被灯照到」的关键：漫反射只让画面变亮，只有镜面高光才有形状和方向；
+                    亮部滚降让过曝区域平滑过渡到接近白，而不是切成一团死白，也给阈值泛光留出发光素材。
+                  </div>
                 </Section>
 
                 <Section title="边缘与质感">
@@ -4620,6 +5430,54 @@ export default function Page() {
                     </div>
                   </div>
                 </Section>
+
+                <Section
+                  title="背光"
+                  hint="把人物剪影填成光源色、模糊后垫在身后；逆光、霓虹、雪夜里最能托出人物"
+                >
+                  <Slider
+                    label="背光强度"
+                    value={settings.backLight}
+                    min={0}
+                    max={0.6}
+                    step={0.01}
+                    onChange={(v) => updateSettings("backLight", v)}
+                  />
+                  <Slider
+                    label="背光扩散"
+                    value={settings.backLightSize}
+                    min={0}
+                    max={80}
+                    step={1}
+                    onChange={(v) => updateSettings("backLightSize", v)}
+                    suffix="px"
+                  />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 10, alignItems: "center" }}>
+                    <div>
+                      <div style={{ color: "rgba(255,255,255,.7)", fontSize: 11, marginBottom: 6 }}>背光颜色</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 12, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.06)" }}>
+                        <input
+                          ref={backLightColorInputRef}
+                          type="color"
+                          defaultValue={settings.backLightColor}
+                          onInput={(e) => previewBackLightColor((e.target as HTMLInputElement).value)}
+                          onChange={(e) => commitBackLightColor((e.target as HTMLInputElement).value)}
+                          onBlur={(e) => commitBackLightColor((e.target as HTMLInputElement).value)}
+                          style={{ width: 34, height: 34, padding: 0, border: "none", background: "transparent", cursor: "pointer" }}
+                        />
+                        <span ref={backLightColorHexRef} style={{ fontSize: 11, letterSpacing: ".06em", color: "rgba(255,255,255,.78)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{settings.backLightColor.toUpperCase()}</span>
+                        <span style={{ fontSize: 9, color: "rgba(255,255,255,.24)", whiteSpace: "nowrap" }}>松开应用</span>
+                        <button
+                          type="button"
+                          onClick={() => commitBackLightColor(ambientColor)}
+                          style={{ marginLeft: "auto", borderRadius: 999, padding: "6px 10px", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.08)", color: "rgba(255,255,255,.75)", fontSize: 10.5, cursor: "pointer" }}
+                        >
+                          用环境色
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Section>
               </>
             )}
 
@@ -4627,7 +5485,7 @@ export default function Page() {
               <>
                 <Section
                   title="人物投影"
-                  hint="阴影越贴合现场光向，人物越不容易像贴纸"
+                  hint="阴影从内容底边出发，沿光照反方向斜切铺开；越贴合现场光向，人物越不像贴纸"
                 >
                   <Slider
                     label="阴影强度"
@@ -4647,6 +5505,23 @@ export default function Page() {
                     suffix="px"
                   />
                   <Slider
+                    label="投影长度"
+                    value={settings.shadowLength}
+                    min={0.05}
+                    max={1.6}
+                    step={0.01}
+                    onChange={(v) => updateSettings("shadowLength", v)}
+                    format={(v) => `${Math.round(v * 100)}%`}
+                  />
+                  <Slider
+                    label="投影斜切"
+                    value={settings.shadowSkew}
+                    min={-1.2}
+                    max={1.2}
+                    step={0.01}
+                    onChange={(v) => updateSettings("shadowSkew", v)}
+                  />
+                  <Slider
                     label="阴影水平"
                     value={settings.shadowX}
                     min={-60}
@@ -4664,6 +5539,10 @@ export default function Page() {
                     onChange={(v) => updateSettings("shadowY", v)}
                     suffix="px"
                   />
+                  <div style={{ color: "rgba(255,255,255,.28)", fontSize: 9.5, lineHeight: 1.55 }}>
+                    「阴影水平/垂直」同时决定投影铺开的方向：自动融入会按光向写入这两个值。
+                    投影长度控制影子被拉多长，斜切控制它往侧面倒多少，两者一起就是「贴地」的透视感。
+                  </div>
                 </Section>
 
                 <Section title="落地感">
@@ -4850,11 +5729,49 @@ export default function Page() {
                           lineHeight: 1.6,
                         }}
                       >
-                        自动去纯色会采样图片四角作为背景色，更适合白底、绿幕、单色背景。
-                        复杂背景仍建议先使用透明 PNG。
+                        自动去纯色会沿图片四条边取样，按颜色众数估计背景色，
+                        白底、绿幕、单色背景都能用。复杂背景仍建议先使用透明 PNG。
                       </div>
                     </>
                   )}
+                </Section>
+
+                <Section
+                  title="去白边 / 去杂色"
+                  hint="抠图素材边缘残留的原背景色，是「像贴纸」最直接的原因"
+                >
+                  <Slider
+                    label="去污染强度"
+                    value={settings.edgeDecontaminate}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onChange={(v) => updateSettings("edgeDecontaminate", v)}
+                  />
+                  <Slider
+                    label="边缘收缩"
+                    value={settings.edgeChoke}
+                    min={0}
+                    max={0.6}
+                    step={0.01}
+                    onChange={(v) => updateSettings("edgeChoke", v)}
+                  />
+                  <div
+                    style={{
+                      marginTop: 4,
+                      padding: "10px 11px",
+                      borderRadius: 12,
+                      background: "rgba(255,255,255,.035)",
+                      border: "1px solid rgba(255,255,255,.055)",
+                      color: "rgba(255,255,255,.34)",
+                      fontSize: 10.5,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    去污染会把轮廓内侧那条被原背景冲淡的窄带，用人物自身的颜色填回来（白边变回头发/衣服的颜色），
+                    边缘收缩则直接把最外层污染环裁掉，等价于 PS 的「收缩选区 1px」。
+                    留一点强度通常最稳；素材本身很干净时把两项都拉到 0 即可。
+                  </div>
                 </Section>
 
                 <Section title="导出">
@@ -4903,8 +5820,25 @@ export default function Page() {
               color: showRawComposite ? "#fff2e9" : toolbarButton.color,
             }}
             onClick={() => setShowRawComposite((v) => !v)}
+            onPointerDown={() => {
+              // 按住临时预览未融合效果，松手回到原来的状态；单击仍然保持切换。
+              holdCompareRef.current = showRawComposite;
+              if (!showRawComposite) setShowRawComposite(true);
+            }}
+            onPointerUp={() => {
+              if (holdCompareRef.current === null) return;
+              const restore = holdCompareRef.current;
+              holdCompareRef.current = null;
+              setShowRawComposite(restore);
+            }}
+            onPointerLeave={() => {
+              if (holdCompareRef.current === null) return;
+              const restore = holdCompareRef.current;
+              holdCompareRef.current = null;
+              setShowRawComposite(restore);
+            }}
             disabled={!hasBoth}
-            title="查看没有经过融合处理的人物叠加"
+            title="单击切换未融合对比；按住可临时查看，松手自动恢复"
           >
             {Icons.compare}
             {showRawComposite ? "返回效果" : "未融合对比"}
@@ -5044,7 +5978,7 @@ export default function Page() {
           }}
         >
           {Icons.layers}
-          点击人物/光斑显示编辑框 · 点击空白隐藏 · 拖动人物 · 滚轮缩放 · 光斑四角自由缩放 · 拾取场景光源
+          点击人物/光斑显示编辑框 · 点击空白隐藏 · 拖动人物 · 滚轮缩放 · 方向键微调 · 按住「未融合对比」临时预览
         </div>
       </main>
     </div>

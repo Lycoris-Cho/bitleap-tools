@@ -820,7 +820,7 @@ export default function PomodoroPage() {
                         );
                       })}
                     </div>
-                    <div className="mt-2 text-[9px] font-bold text-black/25">
+                    <div className="mt-2 text-[9px] font-bold text-black/55">
                       {cycleProgress === 0 && completedPoms > 0
                         ? "一轮完成"
                         : `${cycleProgress}/4 本轮`}
@@ -963,7 +963,7 @@ export default function PomodoroPage() {
             <div className="border-b border-black/[0.055] p-5 sm:p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-[9px] font-black uppercase tracking-[0.18em] text-black/28">
+                  <div className="text-[9px] font-black uppercase tracking-[0.18em] text-black/55">
                     Today
                   </div>
                   <h2 className="mt-1 text-xl font-black tracking-[-0.035em]">
@@ -987,7 +987,7 @@ export default function PomodoroPage() {
                     if (event.key === "Enter") addTask();
                   }}
                   placeholder="写下下一步具体行动…"
-                  className="h-12 min-w-0 flex-1 rounded-2xl border border-black/[0.07] bg-[#f7f7f3] px-4 text-sm font-medium text-black outline-none transition placeholder:text-black/25 focus:border-black/20 focus:bg-white"
+                  className="h-12 min-w-0 flex-1 rounded-2xl border border-black/[0.07] bg-[#f7f7f3] px-4 text-sm font-medium text-black outline-none transition placeholder:text-black/55 focus:border-black/20 focus:bg-white"
                 />
 
                 <button
@@ -1003,7 +1003,7 @@ export default function PomodoroPage() {
 
             <div className="flex-1 p-4 sm:p-5">
               <div className="mb-3 flex items-center justify-between px-1">
-                <span className="text-[9px] font-black uppercase tracking-[0.18em] text-black/28">
+                <span className="text-[9px] font-black uppercase tracking-[0.18em] text-black/55">
                   进行中
                 </span>
                 {selectedTask && (
@@ -1082,7 +1082,7 @@ export default function PomodoroPage() {
                           </div>
                         </div>
 
-                        <GripVertical className="hidden h-4 w-4 shrink-0 text-black/15 sm:block" />
+                        <GripVertical className="hidden h-4 w-4 shrink-0 text-black/55 sm:block" />
                       </div>
 
                       <div className="mt-3 flex items-center justify-between border-t border-black/[0.045] pt-2.5">
@@ -1145,7 +1145,7 @@ export default function PomodoroPage() {
               <section className="mt-6 border-t border-black/[0.055] pt-4">
                 <div className="mb-3 flex items-center justify-between px-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-black uppercase tracking-[0.18em] text-black/28">
+                    <span className="text-[9px] font-black uppercase tracking-[0.18em] text-black/55">
                       已完成
                     </span>
                     <span className="rounded-full bg-black/[0.045] px-2 py-0.5 font-mono text-[9px] font-bold text-black/35">
@@ -1154,7 +1154,7 @@ export default function PomodoroPage() {
                   </div>
 
                   {doneTasks.length > 0 && (
-                    <span className="text-[9px] font-medium text-black/25">
+                    <span className="text-[9px] font-medium text-black/55">
                       点击 ✓ 可恢复任务
                     </span>
                   )}
@@ -1180,14 +1180,14 @@ export default function PomodoroPage() {
                           {task.title}
                         </span>
 
-                        <span className="inline-flex h-7 shrink-0 items-center rounded-full bg-white/70 px-2.5 text-[9px] font-bold text-black/28">
+                        <span className="inline-flex h-7 shrink-0 items-center rounded-full bg-white/70 px-2.5 text-[9px] font-bold text-black/55">
                           {task.poms} 番茄
                         </span>
 
                         <button
                           type="button"
                           onClick={() => deleteTask(task.id)}
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-black/18 transition hover:bg-red-50 hover:text-red-500"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-black/55 transition hover:bg-red-50 hover:text-red-500"
                           aria-label={`删除已完成任务“${task.title}”`}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -1196,7 +1196,7 @@ export default function PomodoroPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-[18px] border border-dashed border-black/[0.07] bg-black/[0.012] px-4 py-5 text-center text-[10px] font-medium text-black/25">
+                  <div className="rounded-[18px] border border-dashed border-black/[0.07] bg-black/[0.012] px-4 py-5 text-center text-[10px] font-medium text-black/55">
                     完成的任务会直接显示在这里
                   </div>
                 )}
@@ -1242,7 +1242,7 @@ function Metric({
 }) {
   return (
     <div className="px-2 text-center">
-      <div className="flex items-center justify-center gap-1.5 text-black/28">
+      <div className="flex items-center justify-center gap-1.5 text-black/55">
         {icon}
         <span className="text-[9px] font-black uppercase tracking-[0.12em]">
           {label}
@@ -1278,7 +1278,7 @@ function MinuteInput({
           onChange={(event) => onChange(clampMinutes(Number(event.target.value)))}
           className="min-w-0 flex-1 bg-transparent font-mono text-xs font-bold outline-none"
         />
-        <span className="text-[9px] font-bold text-black/25">min</span>
+        <span className="text-[9px] font-bold text-black/55">min</span>
       </div>
     </label>
   );
@@ -1309,8 +1309,8 @@ function MiniAction({
       }}
       className={`flex h-8 w-8 items-center justify-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-20 ${
         danger
-          ? "text-black/22 hover:bg-red-50 hover:text-red-500"
-          : "text-black/22 hover:bg-black/[0.05] hover:text-black/65"
+          ? "text-black/55 hover:bg-red-50 hover:text-red-500"
+          : "text-black/55 hover:bg-black/[0.05] hover:text-black/65"
       }`}
     >
       {children}

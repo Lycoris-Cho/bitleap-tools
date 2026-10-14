@@ -314,7 +314,7 @@ export default function FlexGridPage() {
 
         <header className="layout-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.75fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/25">LAYOUT STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">LAYOUT STUDIO</div>
             <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-semibold leading-[1.02] tracking-[-.055em]">Flex / Grid，<br />看着调。</h1>
           </div>
           <div>
@@ -337,22 +337,22 @@ export default function FlexGridPage() {
 
             <div className="flex flex-wrap items-center gap-2">
               {(Object.keys(VIEWPORTS) as Array<Exclude<Viewport, "custom">>).map((viewport) => (
-                <button key={viewport} type="button" onClick={() => patch({ viewport })} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${state.viewport === viewport ? "bg-[#52685d] text-white" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>{VIEWPORTS[viewport].label} {VIEWPORTS[viewport].width}</button>
+                <button key={viewport} type="button" onClick={() => patch({ viewport })} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${state.viewport === viewport ? "bg-[#52685d] text-white" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>{VIEWPORTS[viewport].label} {VIEWPORTS[viewport].width}</button>
               ))}
-              <button type="button" onClick={() => patch({ viewport: "custom" })} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${state.viewport === "custom" ? "bg-[#52685d] text-white" : "border border-white/[.08] text-white/28 hover:bg-white/[.06]"}`}>CUSTOM</button>
+              <button type="button" onClick={() => patch({ viewport: "custom" })} className={`rounded-full px-3 py-2 font-mono text-[8px] font-semibold transition ${state.viewport === "custom" ? "bg-[#52685d] text-white" : "border border-white/[.08] text-white/55 hover:bg-white/[.06]"}`}>CUSTOM</button>
             </div>
           </div>
 
           <div className="grid gap-px bg-white/[.06] xl:grid-cols-[330px_1fr_330px]">
             <aside className="bg-[#f4f1e9]">
-              <div className="border-b border-black/[.06] px-5 py-4 text-[8px] font-semibold tracking-[.13em] text-black/24">CONTROLS</div>
+              <div className="border-b border-black/[.06] px-5 py-4 text-[8px] font-semibold tracking-[.13em] text-black/55">CONTROLS</div>
               <div className="layout-scroll h-[720px] overflow-auto p-5">
                 <div className="space-y-6">
                   <Slider label="子项数量" value={state.count} min={1} max={30} unit="" onChange={(count) => patch({ count })} />
                   <Slider label="容器最小高度" value={state.minHeight} min={160} max={620} step={10} unit="px" onChange={(minHeight) => patch({ minHeight })} />
 
                   <div>
-                    <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">GAP</div>
+                    <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">GAP</div>
                     <div className="mb-3 flex gap-2">
                       <button type="button" onClick={() => patch({ splitGap: false })} className={buttonClass(!state.splitGap)}>统一</button>
                       <button type="button" onClick={() => patch({ splitGap: true })} className={buttonClass(state.splitGap)}>行 / 列</button>
@@ -388,7 +388,7 @@ export default function FlexGridPage() {
                   )}
 
                   <div className="border-t border-black/[.08] pt-5">
-                    <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/24">ITEMS</div>
+                    <div className="mb-4 text-[8px] font-semibold tracking-[.12em] text-black/55">ITEMS</div>
                     <div className="space-y-4">
                       <Slider label="Item width" value={state.itemWidth} min={44} max={220} unit="px" onChange={(itemWidth) => patch({ itemWidth })} />
                       <Slider label="Item height" value={state.itemHeight} min={36} max={180} unit="px" onChange={(itemHeight) => patch({ itemHeight })} />
@@ -401,20 +401,20 @@ export default function FlexGridPage() {
 
             <main className="min-w-0 bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.06] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/24">LIVE VIEWPORT</span>
-                <span className="layout-num font-mono text-[8px] text-white/20">{formatNumber(viewportWidth)}px</span>
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">LIVE VIEWPORT</span>
+                <span className="layout-num font-mono text-[8px] text-white/55">{formatNumber(viewportWidth)}px</span>
               </div>
 
               <div className="layout-dark-scroll overflow-auto p-5 sm:p-7">
                 {state.viewport === "custom" && (
                   <div className="mb-5 max-w-[460px]">
-                    <div className="mb-2 flex justify-between text-[8px] text-white/24"><span>Custom viewport</span><span className="font-mono text-[#8fb69b]">{state.customWidth}px</span></div>
+                    <div className="mb-2 flex justify-between text-[8px] text-white/55"><span>Custom viewport</span><span className="font-mono text-[#8fb69b]">{state.customWidth}px</span></div>
                     <input type="range" min={280} max={1440} step={10} value={state.customWidth} onChange={(event) => patch({ customWidth: Number(event.target.value) })} className="w-full accent-[#8fb69b]" />
                   </div>
                 )}
 
                 <div className="mx-auto transition-[width] duration-300 ease-out" style={{ width: `${previewWidth}px`, maxWidth: "100%" }}>
-                  <div className="mb-2 flex items-center justify-between text-[8px] text-white/18">
+                  <div className="mb-2 flex items-center justify-between text-[8px] text-white/55">
                     <span>{state.viewport === "custom" ? "CUSTOM" : VIEWPORTS[state.viewport].label.toUpperCase()}</span>
                     <span>{state.mode.toUpperCase()}</span>
                   </div>
@@ -449,7 +449,7 @@ export default function FlexGridPage() {
                   ["SELECTED", selected ? `#${selected}` : "none"],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-[#151714] p-4">
-                    <div className="text-[7px] font-semibold tracking-[.12em] text-white/20">{label}</div>
+                    <div className="text-[7px] font-semibold tracking-[.12em] text-white/55">{label}</div>
                     <div className="layout-num mt-2 font-mono text-[10px] font-semibold text-[#cbd8cd]">{value}</div>
                   </div>
                 ))}
@@ -457,7 +457,7 @@ export default function FlexGridPage() {
             </main>
 
             <aside className="bg-[#f4f1e9]">
-              <div className="border-b border-black/[.06] px-5 py-4 text-[8px] font-semibold tracking-[.13em] text-black/24">OUTPUT</div>
+              <div className="border-b border-black/[.06] px-5 py-4 text-[8px] font-semibold tracking-[.13em] text-black/55">OUTPUT</div>
               <div className="layout-scroll h-[720px] overflow-auto p-5">
                 <div className="space-y-4">
                   {[
@@ -466,15 +466,15 @@ export default function FlexGridPage() {
                   ].map((item) => (
                     <article key={item.label} className="rounded-[20px] border border-black/[.075] bg-white/28 p-4">
                       <div className="mb-3 flex items-center justify-between">
-                        <span className="text-[8px] font-semibold tracking-[.12em] text-black/24">{item.label}</span>
-                        <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-black/28 hover:text-black">{copied === item.key ? "✓ COPIED" : "COPY"}</button>
+                        <span className="text-[8px] font-semibold tracking-[.12em] text-black/55">{item.label}</span>
+                        <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-black/55 hover:text-black">{copied === item.key ? "✓ 已复制" : "复制"}</button>
                       </div>
                       <pre className="layout-scroll max-h-[240px] overflow-auto whitespace-pre-wrap break-all rounded-[16px] bg-[#151714] p-4 font-mono text-[9px] leading-5 text-[#cbd8cd]">{item.value}</pre>
                     </article>
                   ))}
 
                   <article className="rounded-[20px] border border-black/[.075] bg-white/28 p-4">
-                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">BEHAVIOR NOTE</div>
+                    <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">BEHAVIOR NOTE</div>
                     <p className="mt-3 text-[8px] leading-5 text-black/34">
                       Grid 的 auto-fit 会折叠空轨道，auto-fill 会保留轨道。Flex 的 align-content 只有在多行且交叉轴有额外空间时才明显。
                     </p>
@@ -492,9 +492,9 @@ export default function FlexGridPage() {
         </section>
 
         <section className="layout-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
-          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/25">REAL VIEWPORT</div><p className="mt-2 text-[9px] leading-5 text-black/34">手机、平板、桌面、宽屏和自定义宽度都会真实改变预览容器宽度。</p></div>
-          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/25">GRID DEPTH</div><p className="mt-2 text-[9px] leading-5 text-black/34">支持 auto-fit、auto-fill、固定列数、justify-items、align-items 和 dense。</p></div>
-          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/25">FLEX DEPTH</div><p className="mt-2 text-[9px] leading-5 text-black/34">支持 direction、wrap、完整 justify-content、align-items 和 align-content。</p></div>
+          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/55">REAL VIEWPORT</div><p className="mt-2 text-[9px] leading-5 text-black/34">手机、平板、桌面、宽屏和自定义宽度都会真实改变预览容器宽度。</p></div>
+          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/55">GRID DEPTH</div><p className="mt-2 text-[9px] leading-5 text-black/34">支持 auto-fit、auto-fill、固定列数、justify-items、align-items 和 dense。</p></div>
+          <div><div className="text-[8px] font-semibold tracking-[.11em] text-black/55">FLEX DEPTH</div><p className="mt-2 text-[9px] leading-5 text-black/34">支持 direction、wrap、完整 justify-content、align-items 和 align-content。</p></div>
         </section>
 
         <div className="mt-12 border-t border-black/[.08] pt-5"><FooterNote /></div>
@@ -516,7 +516,7 @@ function ControlGroup({
 }) {
   return (
     <div>
-      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">{title}</div>
+      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">{title}</div>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => (
           <button key={value} type="button" onClick={() => onChange(value)} className={buttonClass(active === value)}>

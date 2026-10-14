@@ -403,7 +403,7 @@ export default function PdfToWordPage() {
 
         <header className="pdfword-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">
               PDF TO WORD STUDIO
             </div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
@@ -417,7 +417,7 @@ export default function PdfToWordPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               提取文本型 PDF 的文字内容，生成可编辑 DOCX，并提供纯文本预览、复制和 TXT 导出。适合文档、论文、说明书和电子书草稿整理。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>PDFJS TEXT EXTRACT</span>
               <span>DOCX OUTPUT</span>
               <span>LOCAL CONTENT</span>
@@ -462,7 +462,7 @@ export default function PdfToWordPage() {
               {file && (
                 <div className="mt-5 overflow-hidden rounded-[22px] border border-black/[.075] bg-white/28">
                   <div className="border-b border-black/[.06] px-5 py-4">
-                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">
+                    <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">
                       FILE READY
                     </div>
                     <div className="mt-2 break-all font-mono text-[10px] leading-5 text-black/58">
@@ -478,7 +478,7 @@ export default function PdfToWordPage() {
                       ["文本", textLength ? formatNumber(textLength) : "待提取"],
                     ].map(([label, value]) => (
                       <div key={label} className="bg-[#f3f0e8]/92 p-4">
-                        <div className="text-[8px] text-black/24">{label}</div>
+                        <div className="text-[8px] text-black/55">{label}</div>
                         <div className="pdfword-num mt-2 break-all font-mono text-[12px] font-semibold text-black/61">{value}</div>
                       </div>
                     ))}
@@ -486,7 +486,7 @@ export default function PdfToWordPage() {
 
                   {loading && (
                     <div className="border-t border-black/[.06] px-5 py-4">
-                      <div className="mb-2 flex justify-between text-[8px] text-black/28">
+                      <div className="mb-2 flex justify-between text-[8px] text-black/55">
                         <span>正在提取第 {processedPages || 1} / {pageCount || "?"} 页</span>
                         <span>{progress}%</span>
                       </div>
@@ -523,7 +523,7 @@ export default function PdfToWordPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">
                   EXTRACTED TEXT
                 </div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">
@@ -543,10 +543,10 @@ export default function PdfToWordPage() {
 
             <div ref={previewRef} className="mt-5 overflow-hidden rounded-[30px] border border-black/[.08] bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">
                   TEXT PREVIEW
                 </span>
-                <span className="pdfword-num text-[8px] text-white/18">
+                <span className="pdfword-num text-[8px] text-white/55">
                   {pages.length ? `${formatNumber(pages.length)} pages` : "WAITING"}
                 </span>
               </div>
@@ -557,7 +557,7 @@ export default function PdfToWordPage() {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
                 <span>{pageCount ? `${formatNumber(pageCount)} pages` : "no file"}</span>
                 <span>{formatNumber(textLength)} chars</span>
                 <span>{formatNumber(extractedItems)} text items</span>
@@ -577,19 +577,19 @@ export default function PdfToWordPage() {
 
         <section className="pdfword-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">TEXT PDF ONLY</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">TEXT PDF ONLY</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
               这个工具提取 PDF 内部已有文字，不做 OCR。扫描件、图片型 PDF 可能只能得到很少或没有文字。
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">EDITABLE DOCX</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">EDITABLE DOCX</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
               生成的 Word 会按页整理文本，方便后续编辑、复制和二次排版，但不会还原复杂表格或图片布局。
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOCAL CONTENT</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOCAL CONTENT</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
               PDF 内容在浏览器中读取和转换，不会上传文件内容。页面会动态加载 PDF.js worker 来完成解析。
             </p>

@@ -468,7 +468,7 @@ function HighlightedSample({
   matches: MatchItem[]
 }) {
   if (!sample || !matches.length) {
-    return <span className="text-white/28">{sample || "测试文本为空。"}</span>
+    return <span className="text-white/55">{sample || "测试文本为空。"}</span>
   }
 
   const nodes: ReactNode[] = []
@@ -534,7 +534,7 @@ function StatBox({
 
   return (
     <div className="bg-[#f3f0e8]/92 p-4">
-      <div className="text-[7px] font-semibold tracking-[.12em] text-black/23">{label}</div>
+      <div className="text-[7px] font-semibold tracking-[.12em] text-black/55">{label}</div>
       <div className={`rxgen-num mt-3 break-all font-mono text-[13px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   )
@@ -555,7 +555,7 @@ function OptionNumber({
 }) {
   return (
     <label>
-      <span className="mb-2 block text-[8px] text-black/24">{label}</span>
+      <span className="mb-2 block text-[8px] text-black/55">{label}</span>
       <input type="number" min={min} max={max} value={value} onChange={(event) => onChange(Math.max(min, Math.min(max, Number(event.target.value) || min)))} className="w-full rounded-full border border-black/[.08] bg-white/35 px-4 py-3 font-mono text-[10px] outline-none" />
     </label>
   )
@@ -769,7 +769,7 @@ export default function RegexGeneratorPage() {
 
         <header className="rxgen-intro mt-8 grid gap-7 border-b border-black/10 pb-8 lg:grid-cols-[1fr_.72fr] lg:items-end">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.2em] text-black/27">REGEX GENERATOR STUDIO</div>
+            <div className="text-[9px] font-semibold tracking-[.2em] text-black/55">REGEX GENERATOR STUDIO</div>
             <h1 className="mt-4 max-w-[900px] text-[clamp(48px,6.35vw,90px)] font-semibold leading-[1.03] tracking-[-.055em]">
               不手写，
               <br />
@@ -781,7 +781,7 @@ export default function RegexGeneratorPage() {
             <p className="max-w-[560px] text-[11px] leading-6 text-black/40">
               从常用规则出发，可视化调整选项、修饰符和锚点，实时生成 JavaScript 正则字面量、构造器代码，并在测试文本中高亮匹配结果。
             </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/25">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[8px] text-black/55">
               <span>{RULES.length} TEMPLATES</span>
               <span>LIVE TEST</span>
               <span>JS / TS OUTPUT</span>
@@ -793,7 +793,7 @@ export default function RegexGeneratorPage() {
         <section className="rxgen-intro mt-7 grid gap-7 xl:grid-cols-[.68fr_1.32fr]">
           <aside className="min-w-0">
             <div className="rounded-[28px] border border-black/[.075] bg-white/24 p-5">
-              <div className="text-[8px] font-semibold tracking-[.14em] text-black/24">RULE LIBRARY</div>
+              <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">RULE LIBRARY</div>
               <h2 className="mt-3 text-[clamp(30px,3.5vw,46px)] font-semibold leading-none tracking-[-.045em]">选择模板。</h2>
 
               <div className="mt-6 flex flex-wrap gap-1.5">
@@ -806,8 +806,8 @@ export default function RegexGeneratorPage() {
                 {visibleRules.map((rule) => (
                   <button key={rule.id} type="button" onClick={() => setActiveId(rule.id)} className={`w-full rounded-[20px] border p-4 text-left transition ${activeId === rule.id ? "border-[#22231f]/15 bg-[#22231f] text-white" : "border-black/[.08] bg-white/22 hover:bg-white/48"}`}>
                     <div className="flex items-center justify-between gap-3">
-                      <span className={`font-mono text-[8px] font-semibold ${activeId === rule.id ? "text-white/32" : "text-black/25"}`}>{rule.short}</span>
-                      <span className={`text-[8px] ${activeId === rule.id ? "text-white/24" : "text-black/23"}`}>{rule.category}</span>
+                      <span className={`font-mono text-[8px] font-semibold ${activeId === rule.id ? "text-white/32" : "text-black/55"}`}>{rule.short}</span>
+                      <span className={`text-[8px] ${activeId === rule.id ? "text-white/55" : "text-black/55"}`}>{rule.category}</span>
                     </div>
                     <div className={`mt-2 text-[14px] font-semibold tracking-[-.03em] ${activeId === rule.id ? "text-white" : "text-black/70"}`}>{rule.label}</div>
                   </button>
@@ -817,7 +817,7 @@ export default function RegexGeneratorPage() {
 
             <div className="mt-4 overflow-hidden rounded-[24px] border border-black/[.075] bg-white/24">
               <div className="border-b border-black/[.06] px-5 py-4">
-                <div className="text-[8px] font-semibold tracking-[.13em] text-black/24">REGEX PROFILE</div>
+                <div className="text-[8px] font-semibold tracking-[.13em] text-black/55">REGEX PROFILE</div>
                 <p className="mt-2 text-[9px] leading-5 text-black/35">{activeRegexError ? "当前表达式无法编译。" : result.desc}</p>
               </div>
 
@@ -840,7 +840,7 @@ export default function RegexGeneratorPage() {
           <div className="min-w-0">
             <div className="flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-[8px] font-semibold tracking-[.14em] text-black/23">BUILDER</div>
+                <div className="text-[8px] font-semibold tracking-[.14em] text-black/55">BUILDER</div>
                 <h2 className="mt-2 text-[clamp(31px,4vw,48px)] font-semibold leading-none tracking-[-.045em]">{activeRule.label}</h2>
               </div>
 
@@ -853,15 +853,15 @@ export default function RegexGeneratorPage() {
             <div className="mt-5 grid gap-px overflow-hidden rounded-[30px] border border-black/[.075] bg-black/[.07] lg:grid-cols-[.92fr_1.08fr]">
               <div className="min-w-0 bg-[#f4f1e9]">
                 <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">OPTIONS</span>
-                  <span className="text-[8px] text-black/22">{activeRule.category}</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">OPTIONS</span>
+                  <span className="text-[8px] text-black/55">{activeRule.category}</span>
                 </div>
 
                 <div className="rxgen-scroll h-[560px] overflow-auto p-5 sm:p-6">
                   <div className="space-y-6">
                     {!["whitespace", "emptyLine", "password"].includes(activeId) && (
                       <div>
-                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">MATCH RANGE</div>
+                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">MATCH RANGE</div>
                         <TogglePill active={opts.anchored} label="完整匹配 ^...$" onClick={() => updateOption("anchored", !opts.anchored)} />
                       </div>
                     )}
@@ -876,7 +876,7 @@ export default function RegexGeneratorPage() {
 
                     {activeId === "chinese" && (
                       <div>
-                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">HAN RANGE</div>
+                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">HAN RANGE</div>
                         <div className="flex flex-wrap gap-1.5">
                           {(["basic", "han"] as const).map((mode) => (
                             <button key={mode} type="button" onClick={() => updateOption("chineseMode", mode)} className={`rounded-full px-3.5 py-2 font-mono text-[8px] font-semibold transition ${opts.chineseMode === mode ? "bg-[#52685d] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{mode}</button>
@@ -896,7 +896,7 @@ export default function RegexGeneratorPage() {
                     {activeId === "password" && (
                       <div className="space-y-5">
                         <div>
-                          <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">REQUIRED TYPES</div>
+                          <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">REQUIRED TYPES</div>
                           <div className="flex flex-wrap gap-2">
                             <TogglePill active={opts.passwordLowercase} label="小写" onClick={() => updateOption("passwordLowercase", !opts.passwordLowercase)} />
                             <TogglePill active={opts.passwordUppercase} label="大写" onClick={() => updateOption("passwordUppercase", !opts.passwordUppercase)} />
@@ -927,7 +927,7 @@ export default function RegexGeneratorPage() {
 
                     {activeId === "date" && (
                       <div>
-                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">SEPARATOR</div>
+                        <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">SEPARATOR</div>
                         <div className="flex flex-wrap gap-1.5">
                           {(["-", "/", "."] as const).map((sep) => (
                             <button key={sep} type="button" onClick={() => updateOption("dateSeparator", sep)} className={`rounded-full px-3.5 py-2 font-mono text-[8px] font-semibold transition ${opts.dateSeparator === sep ? "bg-[#52685d] text-white" : "text-black/32 hover:bg-white/45 hover:text-black"}`}>{sep}</button>
@@ -953,7 +953,7 @@ export default function RegexGeneratorPage() {
                     )}
 
                     <div>
-                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/24">FLAGS</div>
+                      <div className="mb-2 text-[8px] font-semibold tracking-[.12em] text-black/55">FLAGS</div>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {FLAG_INFO.map((flag) => (
                           <button key={flag.key} type="button" onClick={() => toggleFlag(flag.key)} className={`rounded-[18px] border p-3 text-left transition ${flags[flag.key] ? "border-[#52685d]/25 bg-[#52685d] text-white" : "border-black/[.08] bg-white/20 hover:bg-white/50"}`}>
@@ -965,7 +965,7 @@ export default function RegexGeneratorPage() {
                     </div>
 
                     <div className="rounded-[20px] border border-black/[.07] bg-white/24 p-4">
-                      <div className="text-[8px] font-semibold tracking-[.12em] text-black/24">TIPS</div>
+                      <div className="text-[8px] font-semibold tracking-[.12em] text-black/55">TIPS</div>
                       <div className="mt-3 space-y-2">
                         {result.tips.map((tip) => (
                           <p key={tip} className="text-[8px] leading-5 text-black/34">· {tip}</p>
@@ -978,7 +978,7 @@ export default function RegexGeneratorPage() {
 
               <div ref={outputRef} className="min-w-0 bg-[#151714]">
                 <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">REGEX OUTPUT</span>
+                  <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">REGEX OUTPUT</span>
                   <span className={`text-[8px] ${activeRegexError ? "text-[#d49a88]" : "text-[#8fb69b]"}`}>{activeRegexError ? "INVALID" : "READY"}</span>
                 </div>
 
@@ -992,8 +992,8 @@ export default function RegexGeneratorPage() {
                     ].map((item) => (
                       <div key={item.label} className="group rounded-[20px] border border-white/[.065] bg-white/[.035] p-4">
                         <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/24">{item.label}</span>
-                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/25 transition hover:text-white">{copied === item.key ? "✓ COPIED" : "COPY"}</button>
+                          <span className="text-[8px] font-semibold tracking-[.12em] text-white/55">{item.label}</span>
+                          <button type="button" onClick={() => copy(item.value, item.key)} className="text-[8px] font-semibold text-white/55 transition hover:text-white">{copied === item.key ? "✓ 已复制" : "复制"}</button>
                         </div>
                         <pre className="whitespace-pre-wrap break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{item.value}</pre>
                       </div>
@@ -1014,7 +1014,7 @@ export default function RegexGeneratorPage() {
 
         <section className="rxgen-intro mt-12 grid gap-7 border-t border-black/10 pt-8 lg:grid-cols-[.56fr_1.44fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">TEST LAB</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">TEST LAB</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               生成之后，
               <br />
@@ -1032,16 +1032,16 @@ export default function RegexGeneratorPage() {
           <div className="grid gap-px overflow-hidden rounded-[30px] border border-black/[.08] bg-black/[.08] lg:grid-cols-[.82fr_1.18fr]">
             <div className="bg-[#f4f1e9]">
               <div className="flex h-12 items-center justify-between border-b border-black/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-black/26">TEST INPUT</span>
-                <span className="rxgen-num font-mono text-[8px] text-black/22">{testText.length} chars</span>
+                <span className="text-[8px] font-semibold tracking-[.13em] text-black/55">TEST INPUT</span>
+                <span className="rxgen-num font-mono text-[8px] text-black/55">{testText.length} chars</span>
               </div>
-              <textarea value={testText} onChange={(event) => setSample(event.target.value)} spellCheck={false} className="rxgen-scroll block h-[420px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/16 sm:p-6" />
+              <textarea value={testText} onChange={(event) => setSample(event.target.value)} spellCheck={false} className="rxgen-scroll block h-[420px] w-full resize-none bg-transparent p-5 font-mono text-[11px] leading-6 text-[#292b26] outline-none placeholder:text-black/55 sm:p-6" />
             </div>
 
             <div className="bg-[#151714]">
               <div className="flex h-12 items-center justify-between border-b border-white/[.065] px-5">
-                <span className="text-[8px] font-semibold tracking-[.13em] text-white/27">MATCH PREVIEW</span>
-                <span className="rxgen-num font-mono text-[8px] text-white/18">{matchResult.matches.length} matches</span>
+                <span className="text-[8px] font-semibold tracking-[.13em] text-white/55">MATCH PREVIEW</span>
+                <span className="rxgen-num font-mono text-[8px] text-white/55">{matchResult.matches.length} matches</span>
               </div>
               <div className="rxgen-dark-scroll h-[420px] overflow-auto p-5 sm:p-6">
                 <pre className="whitespace-pre-wrap break-all font-mono text-[10px] leading-6">
@@ -1052,8 +1052,8 @@ export default function RegexGeneratorPage() {
                   {matchResult.matches.slice(0, 50).map((match) => (
                     <article key={`${match.index}-${match.start}-${match.end}`} className="rounded-[16px] border border-white/[.06] bg-white/[.035] p-3">
                       <div className="mb-2 flex items-center justify-between gap-3">
-                        <span className="rxgen-num font-mono text-[8px] text-white/25">#{match.index} · [{match.start}, {match.end})</span>
-                        <span className="text-[8px] text-white/16">{match.text.length} chars</span>
+                        <span className="rxgen-num font-mono text-[8px] text-white/55">#{match.index} · [{match.start}, {match.end})</span>
+                        <span className="text-[8px] text-white/55">{match.text.length} chars</span>
                       </div>
                       <div className="break-all font-mono text-[10px] leading-5 text-[#cbd8cd]">{match.text || "[zero-width]"}</div>
                       {(match.groups.length > 0 || Object.keys(match.namedGroups).length > 0) && (
@@ -1069,7 +1069,7 @@ export default function RegexGeneratorPage() {
 
         <section className="rxgen-intro mt-12 grid gap-9 border-t border-black/10 pt-8 lg:grid-cols-[.55fr_1.45fr]">
           <div>
-            <div className="text-[9px] font-semibold tracking-[.14em] text-black/25">REPORT</div>
+            <div className="text-[9px] font-semibold tracking-[.14em] text-black/55">REPORT</div>
             <h2 className="mt-3 text-[clamp(30px,4vw,46px)] font-semibold leading-[1.06] tracking-[-.045em]">
               规则、代码、
               <br />
@@ -1083,8 +1083,8 @@ export default function RegexGeneratorPage() {
 
           <div className="overflow-hidden rounded-[25px] border border-black/[.08] bg-[#171916]">
             <div className="flex items-center justify-between border-b border-white/[.07] px-5 py-3">
-              <span className="text-[8px] tracking-[.13em] text-white/25">REGEX PROFILE</span>
-              <span className="text-[8px] text-white/17">LOCAL GENERATOR</span>
+              <span className="text-[8px] tracking-[.13em] text-white/55">REGEX PROFILE</span>
+              <span className="text-[8px] text-white/55">LOCAL GENERATOR</span>
             </div>
             <pre className="rxgen-dark-scroll max-h-[390px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[11px] leading-7 text-[#c7d3c7] sm:p-6">{report}</pre>
           </div>
@@ -1092,19 +1092,19 @@ export default function RegexGeneratorPage() {
 
         <section className="rxgen-intro mt-12 grid gap-8 border-t border-black/10 pt-7 md:grid-cols-3">
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">LOOKAHEAD FIX</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">LOOKAHEAD FIX</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
               密码规则使用 lookahead 判断“必须包含”，不是只限制可用字符集，因此比简单字符类更符合强密码检查。
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">TEST BEFORE USE</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">TEST BEFORE USE</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
               每条规则都能用样本即时测试。复制到生产环境前，建议再用真实边界数据跑一遍。
             </p>
           </div>
           <div>
-            <div className="text-[8px] font-semibold tracking-[.11em] text-black/25">REGEX IS NOT PARSER</div>
+            <div className="text-[8px] font-semibold tracking-[.11em] text-black/55">REGEX IS NOT PARSER</div>
             <p className="mt-2 text-[9px] leading-5 text-black/34">
               URL、HTML、邮箱等复杂格式不建议完全依赖正则做最终判断，严格场景应使用专用解析器或后端校验。
             </p>

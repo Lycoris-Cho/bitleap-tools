@@ -360,7 +360,7 @@ export default function CurrencyIntelligencePage() {
       <div className="relative z-10 mx-auto max-w-[1540px] px-4 pb-8 pt-6 sm:px-7 lg:px-9">
         <div className="fx-intro flex items-center justify-between gap-4">
           <Breadcrumb />
-          <div className="hidden items-center gap-2 text-[9px] tracking-[.12em] text-white/28 sm:flex">
+          <div className="hidden items-center gap-2 text-[9px] tracking-[.12em] text-white/55 sm:flex">
             <span className={`h-1.5 w-1.5 rounded-full ${error ? "bg-[#bb7767]" : "bg-[#809a83]"}`} />
             FRANKFURTER V2 · CENTRAL BANK DATA
           </div>
@@ -369,10 +369,10 @@ export default function CurrencyIntelligencePage() {
         <section className="mt-9 min-h-[560px]">
           <div className="fx-intro flex flex-wrap items-start justify-between gap-5">
             <div>
-              <div className="text-[10px] font-medium tracking-[.18em] text-white/28">汇率观测台</div>
+              <div className="text-[10px] font-medium tracking-[.18em] text-white/55">汇率观测台</div>
               <h1 className="mt-2 text-[clamp(29px,4vw,48px)] font-semibold tracking-[-.05em]">汇率换算器-汇率的上下文。</h1>
             </div>
-            <div className="max-w-sm text-right text-[10px] leading-5 text-white/28">
+            <div className="max-w-sm text-right text-[10px] leading-5 text-white/55">
               参考汇率来自多家中央银行。适合旅行预算、跨币种估算和历史观察，不用于高频交易报价。
             </div>
           </div>
@@ -400,7 +400,7 @@ export default function CurrencyIntelligencePage() {
                     ))}
                   </select>
                 </div>
-                <div className="mt-4 flex items-center justify-between text-[10px] text-white/28">
+                <div className="mt-4 flex items-center justify-between text-[10px] text-white/55">
                   <span>{currencyLabel(baseCurrency)}</span>
                   <span>{baseCurrency?.symbol ? `符号 ${baseCurrency.symbol}` : "BASE CURRENCY"}</span>
                 </div>
@@ -434,7 +434,7 @@ export default function CurrencyIntelligencePage() {
                     ))}
                   </select>
                 </div>
-                <div className="mt-4 flex items-center justify-between text-[10px] text-white/28">
+                <div className="mt-4 flex items-center justify-between text-[10px] text-white/55">
                   <span>{currencyLabel(quoteCurrency)}</span>
                   <span>{rate ? `1 ${base} = ${formatNumber(rate.rate, 6)} ${quote}` : "正在获取参考汇率"}</span>
                 </div>
@@ -448,13 +448,13 @@ export default function CurrencyIntelligencePage() {
         <section className="fx-intro border-t border-white/10 pt-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-[10px] font-medium tracking-[.16em] text-white/28">历史位置</div>
+              <div className="text-[10px] font-medium tracking-[.16em] text-white/55">历史位置</div>
               <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <h2 className="text-2xl font-semibold tracking-[-.04em]">{base} / {quote}</h2>
                 <span className={`text-xs font-medium ${stats && stats.change >= 0 ? "text-[#91b19b]" : "text-[#d08a77]"}`}>
                   {stats ? `${stats.change >= 0 ? "+" : ""}${stats.change.toFixed(2)}%` : "—"}
                 </span>
-                <span className="text-[9px] text-white/24">{rate ? `${rate.date} · ${daysAgoLabel(rate.date)}` : ""}</span>
+                <span className="text-[9px] text-white/55">{rate ? `${rate.date} · ${daysAgoLabel(rate.date)}` : ""}</span>
               </div>
             </div>
 
@@ -473,7 +473,7 @@ export default function CurrencyIntelligencePage() {
           </div>
 
           <div className="relative mt-5 h-[330px] sm:h-[410px]">
-            {historyLoading && <div className="absolute inset-0 z-10 flex items-center justify-center text-[10px] tracking-[.12em] text-white/28">正在读取历史汇率…</div>}
+            {historyLoading && <div className="absolute inset-0 z-10 flex items-center justify-center text-[10px] tracking-[.12em] text-white/55">正在读取历史汇率…</div>}
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
               <defs>
                 <linearGradient id="fxArea" x1="0" y1="0" x2="0" y2="1">
@@ -490,10 +490,10 @@ export default function CurrencyIntelligencePage() {
 
             {history.length > 1 && (
               <>
-                <div className="absolute bottom-2 left-[4%] text-[9px] text-white/22">{history[0].date}</div>
-                <div className="absolute bottom-2 right-[4%] text-[9px] text-white/22">{history[history.length - 1].date}</div>
-                <div className="absolute right-[4%] top-[15%] text-[9px] text-white/22">高 {formatNumber(chart.max, 5)}</div>
-                <div className="absolute bottom-[17%] right-[4%] text-[9px] text-white/22">低 {formatNumber(chart.min, 5)}</div>
+                <div className="absolute bottom-2 left-[4%] text-[9px] text-white/55">{history[0].date}</div>
+                <div className="absolute bottom-2 right-[4%] text-[9px] text-white/55">{history[history.length - 1].date}</div>
+                <div className="absolute right-[4%] top-[15%] text-[9px] text-white/55">高 {formatNumber(chart.max, 5)}</div>
+                <div className="absolute bottom-[17%] right-[4%] text-[9px] text-white/55">低 {formatNumber(chart.min, 5)}</div>
               </>
             )}
           </div>
@@ -506,7 +506,7 @@ export default function CurrencyIntelligencePage() {
               ["波动区间", stats ? `${formatNumber(stats.min, 5)} — ${formatNumber(stats.max, 5)}` : "—"],
             ].map(([label, value]) => (
               <div key={label} className="fx-stat bg-[#151612] px-4 py-4">
-                <div className="text-[9px] text-white/25">{label}</div>
+                <div className="text-[9px] text-white/55">{label}</div>
                 <div className="fx-number mt-2 text-sm font-semibold text-white/72">{value}</div>
               </div>
             ))}
@@ -516,9 +516,9 @@ export default function CurrencyIntelligencePage() {
         <section className="mt-12 border-t border-white/10 pt-7">
           <div className="grid gap-9 lg:grid-cols-[1.15fr_.85fr]">
             <div>
-              <div className="text-[10px] font-medium tracking-[.16em] text-white/28">实际换汇成本</div>
+              <div className="text-[10px] font-medium tracking-[.16em] text-white/55">实际换汇成本</div>
               <h2 className="mt-2 text-2xl font-semibold tracking-[-.04em]">别只看牌价。</h2>
-              <p className="mt-3 max-w-lg text-[10px] leading-5 text-white/28">银行卡、支付平台和兑换点通常会加入汇差或固定手续费。这里把“参考汇率”和“实际到账”拆开。</p>
+              <p className="mt-3 max-w-lg text-[10px] leading-5 text-white/55">银行卡、支付平台和兑换点通常会加入汇差或固定手续费。这里把“参考汇率”和“实际到账”拆开。</p>
 
               <div className="mt-7 grid gap-5 sm:grid-cols-2">
                 <label className="block">
@@ -533,13 +533,13 @@ export default function CurrencyIntelligencePage() {
             </div>
 
             <div className="rounded-[26px] border border-white/[.08] bg-white/[.035] p-5 sm:p-6">
-              <div className="text-[9px] tracking-[.13em] text-white/24">ESTIMATED RECEIPT</div>
+              <div className="text-[9px] tracking-[.13em] text-white/55">ESTIMATED RECEIPT</div>
               <div className="fx-number mt-4 text-[clamp(34px,5vw,58px)] font-medium tracking-[-.06em]">
                 {formatMoney(feeAdjusted, quote, quoteCurrency?.symbol)}
               </div>
               <div className="mt-5 grid grid-cols-2 gap-4 border-t border-white/8 pt-4">
-                <div><div className="text-[9px] text-white/23">理论换算</div><div className="fx-number mt-1 text-xs text-white/58">{formatMoney(converted, quote, quoteCurrency?.symbol)}</div></div>
-                <div><div className="text-[9px] text-white/23">成本差额</div><div className="fx-number mt-1 text-xs text-[#d69a82]">-{formatMoney(feeCost, quote, quoteCurrency?.symbol)}</div></div>
+                <div><div className="text-[9px] text-white/55">理论换算</div><div className="fx-number mt-1 text-xs text-white/58">{formatMoney(converted, quote, quoteCurrency?.symbol)}</div></div>
+                <div><div className="text-[9px] text-white/55">成本差额</div><div className="fx-number mt-1 text-xs text-[#d69a82]">-{formatMoney(feeCost, quote, quoteCurrency?.symbol)}</div></div>
               </div>
             </div>
           </div>
@@ -547,7 +547,7 @@ export default function CurrencyIntelligencePage() {
 
         <section className="mt-12 border-t border-white/10 pt-7">
           <div className="flex items-end justify-between gap-4">
-            <div><div className="text-[10px] font-medium tracking-[.16em] text-white/28">多币种视野</div><h2 className="mt-2 text-xl font-semibold tracking-[-.035em]">1 {base} 今天能换多少。</h2></div>
+            <div><div className="text-[10px] font-medium tracking-[.16em] text-white/55">多币种视野</div><h2 className="mt-2 text-xl font-semibold tracking-[-.035em]">1 {base} 今天能换多少。</h2></div>
             <button type="button" onClick={() => downloadCsv(base, quote, history)} disabled={!history.length} className="rounded-full border border-white/10 px-4 py-2 text-[9px] text-white/36 transition hover:text-white disabled:opacity-30">导出历史 CSV</button>
           </div>
 
@@ -556,16 +556,16 @@ export default function CurrencyIntelligencePage() {
               const currency = currencies.find((item) => item.iso_code === row.quote)
               return (
                 <button key={row.quote} type="button" onClick={() => setQuote(row.quote)} className={`min-w-[155px] rounded-2xl border p-4 text-left transition ${quote === row.quote ? "border-[#d7ca9b]/38 bg-[#d7ca9b]/[.07]" : "border-white/[.07] bg-white/[.025] hover:border-white/15"}`}>
-                  <div className="flex items-center justify-between"><b className="text-xs">{row.quote}</b><span className="text-[9px] text-white/20">{currencyLabel(currency)}</span></div>
+                  <div className="flex items-center justify-between"><b className="text-xs">{row.quote}</b><span className="text-[9px] text-white/55">{currencyLabel(currency)}</span></div>
                   <div className="fx-number mt-5 text-lg font-semibold">{formatNumber(row.rate, row.rate < 10 ? 4 : 2)}</div>
-                  <div className="mt-1 text-[9px] text-white/23">{row.date}</div>
+                  <div className="mt-1 text-[9px] text-white/55">{row.date}</div>
                 </button>
               )
             })}
           </div>
         </section>
 
-        <div className="mt-12 border-t border-white/10 pt-5 text-[9px] leading-5 text-white/22">
+        <div className="mt-12 border-t border-white/10 pt-5 text-[9px] leading-5 text-white/55">
           数据来自 Frankfurter v2。其公开 API 无需 API Key；默认汇率会综合多个中央银行来源。参考汇率不等同于银行、信用卡或现金兑换点的最终成交价。
         </div>
 

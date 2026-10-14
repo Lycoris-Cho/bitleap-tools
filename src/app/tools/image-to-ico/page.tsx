@@ -644,7 +644,7 @@ export default function ImageToIcoPage() {
             </label>
 
             <div className="rounded-[34px] border border-black/[0.06] bg-white/44 p-5 backdrop-blur-xl">
-              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">Icon Sizes</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">图标尺寸</div>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 {SIZE_OPTIONS.map((size) => (
                   <button key={size} type="button" onClick={() => toggleSize(size)} className={`rounded-[18px] border px-3 py-3 text-left transition ${selectedSizes.includes(size) ? "border-[#1e4037]/30 bg-[#1e4037] text-[#f6efe3]" : "border-black/[0.06] bg-white/48 text-stone-600 hover:-translate-y-0.5 hover:bg-white"}`}>
@@ -657,7 +657,7 @@ export default function ImageToIcoPage() {
             </div>
 
             <div className="rounded-[34px] border border-black/[0.06] bg-white/44 p-5 backdrop-blur-xl">
-              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">Artwork Fit</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">画面适配</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {(["contain", "cover", "stretch"] as FitMode[]).map((mode) => (
                   <ButtonPill key={mode} active={fitMode === mode} onClick={() => setFitMode(mode)}>
@@ -673,7 +673,7 @@ export default function ImageToIcoPage() {
             </div>
 
             <div className="rounded-[34px] border border-black/[0.06] bg-white/44 p-5 backdrop-blur-xl">
-              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">Background</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-black/34">背景</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {(["transparent", "white", "black", "custom"] as BackgroundMode[]).map((mode) => (
                   <ButtonPill key={mode} active={backgroundMode === mode} onClick={() => setBackgroundMode(mode)}>
@@ -694,7 +694,7 @@ export default function ImageToIcoPage() {
             <div className="overflow-hidden rounded-[32px] border border-black/[0.055] bg-[#151712]">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
                 <div>
-                  <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/24">Icon Preview Board</div>
+                  <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/55">图标预览</div>
                   <div className="mt-2 font-mono text-[12px] text-emerald-100/82">{sourceInfo ? `${sourceInfo.width}×${sourceInfo.height}` : "waiting for image"}</div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -736,7 +736,7 @@ export default function ImageToIcoPage() {
                           </div>
                           <div>
                             <div className="font-mono text-[11px] text-white/74">{item.size}×{item.size}</div>
-                            <div className="mt-1 text-[9px] text-white/28">{formatSize(item.bytes)} PNG layer</div>
+                            <div className="mt-1 text-[9px] text-white/55">{formatSize(item.bytes)} PNG layer</div>
                           </div>
                         </button>
                       ))
