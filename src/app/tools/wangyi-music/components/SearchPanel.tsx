@@ -16,6 +16,18 @@ interface SearchPanelProps {
     resolvingId: string | null
     currentSongId: string | null
     onPick: (song: SearchSong) => void
+    /** 搜到同名艺人时显示在结果上方，点进去看他的单曲与专辑 */
+    artists?: SearchArtist[]
+    onPickArtist?: (artist: SearchArtist) => void
+}
+
+export interface SearchArtist {
+    id: string
+    name: string
+    cover: string
+    alias: string
+    musicSize: number
+    albumSize: number
 }
 
 /**
@@ -92,6 +104,8 @@ export default function SearchPanel({
     resolvingId,
     currentSongId,
     onPick,
+    artists = [],
+    onPickArtist,
 }: SearchPanelProps) {
     return (
         <>
@@ -124,6 +138,43 @@ export default function SearchPanel({
             </div>
 
             <div className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto px-3 py-3">
+                {/* 艺人：点进去看他的单曲与专辑 */}
+                {!loading && artists.length > 0 && onPickArtist && (
+                    <section className="mb-3">
+                        <p className="mb-2 px-1 text-[11px] text-white/35">艺人</p>
+                        <div className="flex flex-wrap gap-2">
+                            {artists.map((artist) => (
+                                <button
+                                    key={artist.id}
+                                    type="button"
+                                    onClick={() => onPickArtist(artist)}
+                                    title={artist.alias ? `${artist.name} · ${artist.alias}` : artist.name}
+                                    className="group flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.05] py-1 pl-1 pr-3.5 text-left transition hover:border-[#ec4141]/40 hover:bg-[#ec4141]/12"
+                                >
+                                    {artist.cover ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={artist.cover}
+                                            alt=""
+                                            loading="lazy"
+                                            className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-white/12"
+                                        />
+                                    ) : (
+                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-[13px] font-semibold text-white/45">
+                                            {artist.name.slice(0, 1)}
+                                        </span>
+                                    )}
+                                    <span className="min-w-0">
+                                        <span className="block max-w-[132px] truncate text-[12.5px] text-white/90">{artist.name}</span>
+                                        <span className="mt-0.5 block font-mono text-[10px] text-white/35">
+                                            {artist.musicSize} 首 · {artist.albumSize} 专辑
+                                        </span>
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+                )}
                 {loading ? (
                     <div className="space-y-2">
                         {[...Array(8)].map((_, i) => (

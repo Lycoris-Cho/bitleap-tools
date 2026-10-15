@@ -61,11 +61,16 @@ export interface StageLyricData {
     isWordByWord?: boolean
 }
 
+/** 全屏舞台的动画风格：流光（逐字弹出）/ 静流（整句上浮 + 逐字扫光） */
+export type LyricStageStyle = 'classic' | 'zen'
+
 export interface StageTheme {
     backgroundColor: string
     primaryColor: string
     accentColor: string
     secondaryColor: string
+    /** 扫光 / 高亮的亮色：比 primaryColor 更亮，带一点封面色相（静流模式用） */
+    highlightColor?: string
     fontStyle: 'sans' | 'serif' | 'mono'
     fontWeight: number
     animationIntensity: 'calm' | 'normal' | 'chaotic'

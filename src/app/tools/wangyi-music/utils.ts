@@ -2,7 +2,20 @@ import type { LyricLine, MusicResult } from './types'
 
 export const ACCENT = '#ec4141'
 export const STORAGE_KEY = 'bitleap:wangyi-music'
+/**
+ * 逐曲歌词偏移的存档（与主存档分开存）。
+ * 主存档每次调音量/列表都会整体重写，把"哪首歌偏了多少"塞进去就等于每次都重写一遍它；
+ * 而这份数据的写入时机完全不同（换曲、校准），分开存各写各的。
+ */
+export const LYRIC_OFFSET_STORE_KEY = 'bitleap:wangyi-music:offset-by-song'
+/** 最多记住多少首：这是个"记忆"，不是数据库 */
+export const LYRIC_OFFSET_STORE_LIMIT = 120
 export const NETEASE_SONG_URL = 'https://music.163.com/#/song?id='
+export const NETEASE_PLAYLIST_URL = 'https://music.163.com/#/playlist?id='
+export const NETEASE_ARTIST_URL = 'https://music.163.com/#/artist?id='
+export const NETEASE_ALBUM_URL = 'https://music.163.com/#/album?id='
+/** 歌单里的曲目只能按 id 逐首解析直链，所以播放前要拿到"歌单 → 队列"的完整映射 */
+export const PLAYLIST_TRACKS_PAGE_SIZE = 100
 
 /** 细颗粒噪点，用于给背景增加质感 */
 export const NOISE_URL =
@@ -29,6 +42,18 @@ export function formatTime(sec: number) {
 /** 上游 duration 单位是毫秒 */
 export function formatDurationMs(ms: number) {
     return formatTime((ms || 0) / 1000)
+}
+
+/**
+ * 播放量的中文缩写（网易云的口径）：1.2亿 / 2550万 / 8600。
+ * 卡片上那一行数字是排版的一部分，10 位数原样铺上去会把歌单名挤掉。
+ */
+export function formatPlayCount(count: number) {
+    const value = Number(count)
+    if (!Number.isFinite(value) || value <= 0) return '0'
+    if (value >= 100000000) return `${(value / 100000000).toFixed(1).replace(/\.0$/, '')}亿`
+    if (value >= 10000) return `${(value / 10000).toFixed(1).replace(/\.0$/, '')}万`
+    return String(Math.round(value))
 }
 
 /** 解析 LRC 歌词 */

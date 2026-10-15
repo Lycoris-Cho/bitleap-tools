@@ -28,3 +28,40 @@ export interface SearchSong {
 }
 
 export type PlayMode = 'list' | 'single' | 'shuffle'
+
+/* ── 歌单 ──
+ * 三个接口各给一半信息，这里统一成两套类型：
+ *   PlaylistBrief —— 卡片用（推荐列表、分类列表都映射成它，界面不必关心来源）
+ *   PlaylistTrack —— 曲目用；**只有 id 和元数据，没有直链**，播放前才按 id 解析
+ */
+
+export interface PlaylistBrief {
+    id: string
+    name: string
+    cover: string
+    playCount: number
+    trackCount: number
+    /** 推荐歌单才有的推荐语 */
+    copywriter?: string
+}
+
+export interface PlaylistHeader {
+    id: string
+    name: string
+    cover: string
+    description: string
+    creator: string
+    playCount: number
+    trackCount: number
+}
+
+export interface PlaylistTrack {
+    id: string
+    name: string
+    artist: string
+    album: string
+    cover: string
+    /** 毫秒 */
+    duration: number
+}
+

@@ -121,21 +121,32 @@ export const wordGlowVariants: Variants = {
                 typeof charStartTime === 'number' && typeof charEndTime === 'number' && typeof wordStartTime === 'number'
             const charDuration = hasCharTiming ? Math.max(charEndTime - charStartTime, 0.001) : singleDuration
             const charDelay = hasCharTiming ? Math.max(0, charStartTime - wordStartTime) : singleDuration * (index ?? 0)
+            /*
+             * 峰值必须落在**这个字自己的时长之内**。
+             * 之前这里是 charDuration * 6 配 times [0, .3, 1]：峰值出现在这个字开始之后
+             * 1.8 倍字长的地方 —— 每个字的光晕都要等人声唱过去才亮到最亮，整句看下来就是
+             * "光追着声音跑"。改成 2.5 倍配 times [0, .35, 1]，峰值落在 0.875 字长处，
+             * 光晕依旧是从前一个字荡过来的一道流光，但它在这个字上最亮。
+             */
             return {
                 ...glowKeyframes(activeColor, 20, 40, [0, 1, 0]),
                 transition: {
-                    duration: charDuration * 6,
-                    times: [0, 0.3, 1],
+                    duration: Math.max(charDuration * 2.5, 0.18),
+                    times: [0, 0.35, 1],
                     delay: charDelay,
                     ease: 'easeInOut',
                 },
             }
         }
 
-        // 单字 / 中日文一个词：常亮
+        // 单字 / 中日文一个词：常亮（同样把"涨到最亮"压进这个词的开头一小段）
         return {
             ...glowKeyframes(activeColor, 20, 40, [0, 1, 1]),
-            transition: { duration: duration || 0.1, times: [0, 0.9, 1], ease: 'easeInOut' },
+            transition: {
+                duration: Math.min(Math.max((duration ?? 0.1) * 0.35, 0.1), 0.2),
+                times: [0, 0.6, 1],
+                ease: 'easeInOut',
+            },
         }
     },
     passed: ({ activeColor = '', wordRevealMode }: GlowCustom) => {
@@ -194,7 +205,12 @@ export const glowWordBodyVariants: Variants = {
         color: activeColor,
         filter: 'none',
         transition: {
-            color: { duration: duration || 0.2, ease: 'linear' },
+            /*
+             * 颜色渐变**不能按整个词的时长**来铺：长词（拖长音、整句两个字）会变成"唱到一半
+             * 颜色才走到一半"，看上去就是高亮追不上人声。压到 0.12~0.24 秒内走完，
+             * 亮起来的时机就跟去模糊、弹大这几件事对齐了。
+             */
+            color: { duration: Math.min(Math.max((duration ?? 0.2) * 0.5, 0.12), 0.24), ease: 'linear' },
             filter: { type: 'tween', duration: wordRevealMode === 'instant' ? 0.08 : wordRevealMode === 'fast' ? 0.12 : 0.2 },
         },
         transitionEnd: { filter: 'none' },
@@ -259,17 +275,31 @@ export const GlowWord = memo(function GlowWord({
     fontSize,
     layoutStyle,
 }: GlowWordProps) {
-    const [status, setStatus] = useState<'waiting' | 'active' | 'passed'>('waiting')
     const rippleScale = useMemo(() => 1.5 + Math.random() * 2, [])
     const duration = getGlowWordDisplayDuration(word, renderProfile)
     const activeEndTime = getGlowWordActiveEndTime(word, renderProfile)
     const graphemeTimings = useMemo(() => buildWordGraphemeTimings(word), [word])
 
+    /*
+     * 状态由时刻唯一决定 —— 这样一个纯函数同时解决两件事：
+     *   ① 初次挂载就用**当前时刻**算出该有的状态，而不是一律从 waiting 起步。
+     *      从 waiting 起步的代价很实在：暂停（或拖动后停住）时时间轴不再变化，
+     *      新换上场的词就永远停在 waiting —— 字是透明的、糊的，整句像没在唱。
+     *   ② 时间轴出现大跳（拖动、后台回来一次性补齐）时不会漏掉某个状态，
+     *      下一次变化就能直接落到正确的那一档。
+     */
+    const statusAt = (time: number): 'waiting' | 'active' | 'passed' => {
+        if (time > activeEndTime) return 'passed'
+        if (time >= word.startTime - renderProfile.wordLookahead) return 'active'
+        return 'waiting'
+    }
+
+    const [status, setStatus] = useState<'waiting' | 'active' | 'passed'>(() => statusAt(currentTime.get()))
+
     useMotionValueEvent(currentTime, 'change', (latest: number) => {
-        let next: 'waiting' | 'active' | 'passed' = 'waiting'
-        if (latest >= word.startTime - renderProfile.wordLookahead && latest <= activeEndTime) next = 'active'
-        else if (latest > activeEndTime) next = 'passed'
-        if (next !== status) setStatus(next)
+        const next = statusAt(latest)
+        // 用函数式更新：值没变时 React 会直接跳过这次渲染，省掉每帧的无谓重渲染
+        setStatus((prev) => (prev === next ? prev : next))
     })
 
     return (

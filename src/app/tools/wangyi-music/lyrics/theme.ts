@@ -70,6 +70,21 @@ export function darkBackdropOf(coverColors: [string, string] | null): string {
     return `rgb(${f(r)}, ${f(g)}, ${f(b)})`
 }
 
+/**
+ * 高亮色：拿封面副色往白里提。
+ *
+ * 直接用封面色不行 —— 它可能很深，当歌词高亮会读不清；一律用纯白也不行 ——
+ * 静流模式的"扫光"就没有个性了。提白 70% 之后色相还在、亮度一定够，
+ * 于是每个词可以差别明显（封面色相）又不失可读性（近白）。
+ */
+export function highlightOf(coverColors: [string, string] | null): string {
+    const source = coverColors?.[1] || coverColors?.[0]
+    if (!source) return '#fafafa'
+    const { r, g, b } = channelsOf(source, { r: 250, g: 250, b: 250 })
+    const lift = (v: number) => Math.round(clamp(v * 0.3 + 255 * 0.7, 0, 255))
+    return `rgb(${lift(r)}, ${lift(g)}, ${lift(b)})`
+}
+
 /* ── 字体 ── */
 
 const SANS_STACK =
@@ -136,9 +151,10 @@ export interface BuildStageThemeOptions {
 }
 
 /**
- * 组装 classic 模式要用的主题。
+ * 组装舞台要用的主题。
  * 文字一律近白（#f4f4f5），高亮色 accent 也保持近白 —— 这是 Folia 内置主题的默认，
  * 高亮完全交给"去模糊 + 光晕 + 弹大"来表达。底色则从封面主色压到近黑，避免纯黑发死。
+ * 静流模式另外要一个 highlightColor：同样是近白，但掺了封面副色的色相，用来画扫光。
  */
 export function buildStageTheme(options: BuildStageThemeOptions = {}): StageTheme {
     const { coverColors = null, fontStyle = 'sans', animationIntensity = 'normal' } = options
@@ -148,6 +164,7 @@ export function buildStageTheme(options: BuildStageThemeOptions = {}): StageThem
         primaryColor: '#f4f4f5',
         accentColor: '#f4f4f5',
         secondaryColor: '#71717a',
+        highlightColor: highlightOf(coverColors),
         fontStyle,
         fontWeight: 700,
         animationIntensity,

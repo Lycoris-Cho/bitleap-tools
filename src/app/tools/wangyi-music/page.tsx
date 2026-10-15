@@ -2,16 +2,21 @@
 
 import { useEffect, useRef, useState, type SyntheticEvent } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
+import DiscoverPanel from './components/DiscoverPanel'
 import Drawer from './components/Drawer'
+import ArtistPanel from './components/ArtistPanel'
+import AlbumPanel from './components/AlbumPanel'
 import LyricPanel from './components/LyricPanel'
 import LyricsStage from './components/LyricsStage'
+import PlaylistDetail from './components/PlaylistDetail'
 import QueuePanel from './components/QueuePanel'
-import SearchPanel from './components/SearchPanel'
+import SearchPanel, { type SearchArtist } from './components/SearchPanel'
 import Slider from './components/Slider'
 import Tonearm from './components/Tonearm'
 import {
     IconAlert,
     IconCheck,
+    IconCompass,
     IconDisc,
     IconExternal,
     IconLink,
@@ -32,6 +37,8 @@ import {
 } from './components/icons'
 import {
     ACCENT,
+    LYRIC_OFFSET_STORE_KEY,
+    LYRIC_OFFSET_STORE_LIMIT,
     NETEASE_SONG_URL,
     STORAGE_KEY,
     toneDown,
@@ -42,9 +49,12 @@ import {
     normalizeSong,
     parseLRC,
 } from './utils'
-import type { LyricLine, MusicResult, PlayMode, SearchSong } from './types'
-import type { StageLyricData } from './lyrics/types'
+import type { LyricLine, MusicResult, PlayMode, PlaylistTrack, SearchSong } from './types'
+import type { LyricStageStyle, StageLyricData } from './lyrics/types'
 import { buildStageLyrics } from './lyrics/parse'
+import { createPlaybackClock, type PlaybackClock } from './lyrics/clock'
+import { clampLyricOffset } from './lyrics/offset'
+import { isLyricStageStyle } from './lyrics/styles'
 
 /** 组件内自用的关键帧，避免污染全局样式 */
 const KEYFRAMES = `
@@ -55,6 +65,8 @@ const KEYFRAMES = `
 @keyframes wy-slide-in { from { opacity: 0; transform: translateX(30px) } to { opacity: 1; transform: translateX(0) } }
 @keyframes wy-rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes wy-panel-in { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+/* 缓冲/准备中的那道来回扫的光带 */
+@keyframes wy-loading { 0% { transform: translateX(-100%) } 100% { transform: translateX(350%) } }
 `
 
 const MODE_META: Record<PlayMode, { label: string; hint: string }> = {
@@ -100,9 +112,19 @@ interface PersistedState {
     index?: number
     /** 歌词呈现方式：经典滚动列表 / 音频可视化动画 */
     lyricMode?: LyricMode
+    /** 动画舞台的风格：流光 / 静流 */
+    stageStyle?: LyricStageStyle
+    /** 歌词偏移（秒）：正数 = 歌词提前。跟着设备走，所以和设置一起存档 */
+    lyricOffset?: number
 }
 
 type LyricMode = 'list' | 'stage'
+
+/** 逐曲偏移的一条记忆。存成数组而不是对象：对象里纯数字的键会被按大小重排，丢掉"先后" */
+interface SongOffsetEntry {
+    id: string
+    offset: number
+}
 
 /** 随机挑一个不同于 exclude 的下标（放在组件外，保持渲染函数纯净） */
 function pickRandomIndex(length: number, exclude: number) {
@@ -110,6 +132,39 @@ function pickRandomIndex(length: number, exclude: number) {
     let index = exclude
     while (index === exclude) index = Math.floor(Math.random() * length)
     return index
+}
+
+/**
+ * 底部播放条里的「正在播放」小块：封面 + 歌名 / 歌手。
+ * 浏览歌单时主区被占满，用户需要一眼看到"现在放的是哪首"；点它回到播放视图。
+ * 放在组件外只是因为它纯展示，不带任何状态。
+ */
+function NowPlayingStrip({ song, onOpen, className = '' }: { song: MusicResult; onOpen: () => void; className?: string }) {
+    return (
+        <button
+            type="button"
+            onClick={onOpen}
+            title={`回到播放：${song.name}`}
+            aria-label={`回到播放：${song.name} - ${song.artist}`}
+            className={`flex min-w-0 items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-left transition hover:bg-white/[0.08] ${className}`}
+        >
+            {song.cover ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    src={song.cover}
+                    alt=""
+                    className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-white/10"
+                    style={{ animation: 'wy-rise .3s ease-out' }}
+                />
+            ) : (
+                <span className="h-9 w-9 shrink-0 rounded-lg bg-white/[0.08] ring-1 ring-white/10" />
+            )}
+            <span className="min-w-0">
+                <span className="block truncate text-[12.5px] text-white/90">{song.name}</span>
+                <span className="mt-0.5 block truncate text-[11px] text-white/45">{song.artist}</span>
+            </span>
+        </button>
+    )
 }
 
 export default function WangyiMusicPage() {
@@ -124,13 +179,42 @@ export default function WangyiMusicPage() {
     const [searchLoading, setSearchLoading] = useState(false)
     const [searchError, setSearchError] = useState('')
     const [resolvingId, setResolvingId] = useState<string | null>(null)
+    /** 搜索里的艺人结果：和歌曲结果分开存，点进去看他的单曲与专辑 */
+    const [searchArtists, setSearchArtists] = useState<SearchArtist[]>([])
 
     const [queue, setQueue] = useState<{ songs: MusicResult[]; index: number }>({ songs: [], index: -1 })
     const [error, setError] = useState('')
     const [notice, setNotice] = useState('')
 
+    /**
+     * 主区当前显示哪一屏。
+     *   player   —— 黑胶 + 信息 + 歌词（原来的全部内容）
+     *   discover —— 歌单发现（推荐 + 分类 + 网格）
+     *   playlist —— 某张歌单的详情与曲目
+     * 只切主区，顶栏、底部播放条、全屏动画舞台都不受影响。
+     */
+    const [view, setView] = useState<'player' | 'discover' | 'playlist' | 'artist' | 'album'>('player')
+    const [playlistId, setPlaylistId] = useState<string | null>(null)
+    /** 艺人 / 专辑页的当前对象（艺人名先拿着，详情没回来时标题不空着） */
+    const [artistId, setArtistId] = useState<string | null>(null)
+    const [artistName, setArtistName] = useState('')
+    const [albumId, setAlbumId] = useState<string | null>(null)
+    /** 从卡片上的"悬浮播放钮"进来的歌单：详情页第一页到手就自动开播 */
+    const [playlistAutoPlay, setPlaylistAutoPlay] = useState(false)
+    /** 歌单点播正在解析直链（播放前必须先拿到直链）：用来给按钮一个"准备中"的反馈 */
+    const [playlistBusy, setPlaylistBusy] = useState(false)
+
     const [isPlaying, setIsPlaying] = useState(false)
+    /**
+     * 正在取数据（换源、解析直链、缓冲）。
+     * 进度条平时显示的是"播到哪儿"，可这段时间里它显示的其实是**还没开始播** ——
+     * 元素每次重新取数据都会把位置归零，于是进度条就在 0 与上次的位置之间来回跳，
+     * 看着像 bug。所以这段状态单独拎出来：条上换成一个来回扫的等待动画，而不是假装在走。
+     */
+    const [buffering, setBuffering] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
+    /** 校准后的歌词时刻（秒）：左列表的高亮用它，跟舞台上逐字动画吃到的是同一个时刻 */
+    const [lyricTime, setLyricTime] = useState(0)
     const [audioDuration, setAudioDuration] = useState(0)
     const [buffered, setBuffered] = useState(0)
     const [volume, setVolume] = useState(0.8)
@@ -146,8 +230,14 @@ export default function WangyiMusicPage() {
     const [mobileLyrics, setMobileLyrics] = useState(false)
     /** 歌词区域呈现方式：滚动列表（默认）或音频可视化动画舞台 */
     const [lyricMode, setLyricMode] = useState<LyricMode>('list')
+    /** 动画舞台的风格：流光（默认，逐字弹出）/ 静流（整句上浮 + 扫光） */
+    const [stageStyle, setStageStyle] = useState<LyricStageStyle>('classic')
     /** 本地设置读取完成后才允许回写 localStorage */
     const [hydrated, setHydrated] = useState(false)
+    /** 歌词偏移（秒）：正数 = 歌词提前，用来补偿蓝牙/外接声卡的输出延迟 */
+    const [lyricOffset, setLyricOffset] = useState(0)
+    /** 当前这首歌是否单独校准过（面板里据此多给一个"清除本曲校准"） */
+    const [songOffsetTuned, setSongOffsetTuned] = useState(false)
 
     const audioRef = useRef<HTMLAudioElement>(null)
     const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -159,6 +249,29 @@ export default function WangyiMusicPage() {
     const userPlayRef = useRef(false)
     /** 已经为哪些歌重新解析过一次直链（防止失败后无限重试） */
     const retriedRef = useRef<Set<string>>(new Set())
+    /**
+     * 队列的实时镜像。
+     * 异步流程（解析直链、失败后跳过）里读 `queue` 拿到的是发起那一刻的闭包，
+     * 而歌单动辄上百首、连播中途还会换队列，靠闭包判断"下一首是谁"必然错位。
+     */
+    const queueRef = useRef(queue)
+    /** 连续跳过了几首：整张歌单都不可播时要停下报错，不能无限往下顺 */
+    const skipStreakRef = useRef(0)
+    /**
+     * 直链中途失效、重新解析之后要恢复到的播放位置（秒）。
+     * 重新解析会让 <audio> 换一个 src，媒体从头加载、位置归零 ——
+     * 不把位置接回去的话，用户看到的就是进度条从 35% 掉到 0 再爬一遍（还以为在抽搐）。
+     */
+    const resumeAtRef = useRef(0)
+    /**
+     * 设备默认偏移 = 最后一次调到的那个值。
+     * 延迟来自耳机/声卡，不来自歌，所以换一首没单独记录过的曲子要沿用这个值，
+     * 而不是回到 0 让用户从头再调一遍。
+     */
+    const defaultOffsetRef = useRef(0)
+    /** 逐曲偏移记忆（按写入先后排列，见 SongOffsetEntry） */
+    const songOffsetsRef = useRef<SongOffsetEntry[]>([])
+    const songOffsetSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const currentSong = queue.index >= 0 ? queue.songs[queue.index] ?? null : null
     const songId = currentSong?.id ?? null
@@ -171,8 +284,12 @@ export default function WangyiMusicPage() {
     /**
      * 当前歌词行直接由播放进度推导，而不是等 timeupdate 事件。
      * 这样刚进页面、暂停中、拖动进度时也能正确高亮当前句。
+     *
+     * 用的是**校准后的歌词时刻**（播放时钟 + 台阶补偿 + 用户偏移），跟全屏舞台吃的是同一个值 ——
+     * 列表是默认视图，它以前直接读 audio.currentTime，也就是那个台阶式、平均慢半档的下界，
+     * 于是"列表比声音慢半拍、舞台却对得上"会同时出现。两处统一到一个时钟上才不会各说各话。
      */
-    const currentLyricIndex = lyrics.length > 0 ? findLyricIndex(lyrics, currentTime) : -1
+    const currentLyricIndex = lyrics.length > 0 ? findLyricIndex(lyrics, lyricTime) : -1
 
     /* 歌词只在拉取时整体写入。解析 LRC 最后一行要用到整首时长，但拉取那一刻音频时长还没就绪，
        所以把它放进 ref：解析时读一次当前值，避免把时长塞进 effect 依赖里导致反复重拉。 */
@@ -181,9 +298,88 @@ export default function WangyiMusicPage() {
         durationRef.current = audioDuration || (currentSong ? currentSong.duration / 1000 : 0)
     }, [audioDuration, currentSong])
 
+    /* 歌词偏移的实时快照：播放时钟每帧都要读它，走 ref 就不必因为改动而重建时钟。 */
+    const lyricOffsetRef = useRef(0)
+    useEffect(() => {
+        lyricOffsetRef.current = lyricOffset
+    }, [lyricOffset])
+
+    /*
+     * 播放时钟：整个歌词体系（舞台的逐字动画、列表的当前句高亮）的时间来源。
+     *
+     * 不直接用 audio.currentTime 的原因见 lyrics/clock.ts 顶部 —— 简要说就是它按几十毫秒
+     * 的步长跳、标的是媒体时间轴而不是耳朵听到的时刻、拖动之后要等 seek 真的落地才变。
+     * 时钟在内部把这些都抹平：连续外推、按采样平滑收敛、seek/起停/变速立刻重新打锚。
+     */
+    const clockRef = useRef<PlaybackClock | null>(null)
+    useEffect(() => {
+        const audio = audioRef.current
+        if (!audio) return
+        const clock = createPlaybackClock(audio, { getOffset: () => lyricOffsetRef.current })
+        clockRef.current = clock
+        return () => {
+            clock.dispose()
+            clockRef.current = null
+        }
+    }, [])
+
     /* 动画舞台的取数口子。用函数而不用值：舞台每帧在 rAF 里取一次，
-       这样不会因为 currentTime 每 200ms 更新一次就把 60fps 的循环拽回 React 渲染。 */
-    const getStageTime = () => audioRef.current?.currentTime ?? 0
+       这样不会因为 currentTime 每 200ms 更新一次就把 60fps 的循环拽回 React 渲染。
+       两条口子分开：舞台上逐字动画吃"校准后的歌词时刻"，进度条吃"未校准的媒体时刻"。 */
+    const getStageTime = () => clockRef.current?.now() ?? (audioRef.current?.currentTime ?? 0) + lyricOffsetRef.current
+    const getStageMediaTime = () => clockRef.current?.mediaTime() ?? audioRef.current?.currentTime ?? 0
+    /** 朗读一次时钟，把"进度条用的媒体时刻"和"歌词用的校准时刻"一起写进状态 */
+    const syncClocks = (fallback: number) => {
+        const clock = clockRef.current
+        setCurrentTime(clock ? clock.mediaTime() : fallback)
+        setLyricTime(clock ? clock.now() : fallback + lyricOffsetRef.current)
+    }
+
+    /* ── 歌词同步偏移的记忆 ──
+     * 三处都要用到同一个值：舞台上的 ± / 滑条 / 快捷键。都走 applyLyricOffset。
+     * 除了"当前值"，还更新两处记忆：
+     *   设备默认 —— 换一首没记录过的歌时沿用它（延迟属于耳机，不属于歌）；
+     *   本曲      —— 这首歌专门调过就单独记下来，下次放这首歌直接对上。
+     * 写入按 400ms 去抖：按住 ± 快拉时会连发十几次，不必每次都落盘。 */
+
+    const persistSongOffsets = () => {
+        try {
+            localStorage.setItem(LYRIC_OFFSET_STORE_KEY, JSON.stringify(songOffsetsRef.current))
+        } catch {
+            /* 配额满了也无所谓：记不住不影响这次校准 */
+        }
+    }
+
+    const applyLyricOffset = (value: number) => {
+        const next = clampLyricOffset(value)
+        setLyricOffset(next)
+        defaultOffsetRef.current = next
+        if (!songId) return
+        // 同一首歌只留最新的一条，并保证排列顺序就是写入顺序
+        const rest = songOffsetsRef.current.filter((entry) => entry.id !== songId)
+        rest.push({ id: songId, offset: next })
+        songOffsetsRef.current = rest.length > LYRIC_OFFSET_STORE_LIMIT ? rest.slice(-LYRIC_OFFSET_STORE_LIMIT) : rest
+        setSongOffsetTuned(true)
+        if (songOffsetSaveTimerRef.current) clearTimeout(songOffsetSaveTimerRef.current)
+        songOffsetSaveTimerRef.current = setTimeout(persistSongOffsets, 400)
+    }
+
+    /** 忘掉这首歌的单独校准，回到设备默认 —— 数据本身偏的歌换回去，或者不再需要时 */
+    const clearSongOffset = () => {
+        if (!songId) return
+        songOffsetsRef.current = songOffsetsRef.current.filter((entry) => entry.id !== songId)
+        persistSongOffsets()
+        setSongOffsetTuned(false)
+        setLyricOffset(defaultOffsetRef.current)
+    }
+
+    /* 换曲：这首歌单独记录过就用它，否则沿用设备默认 */
+    useEffect(() => {
+        if (!hydrated || !songId) return
+        const remembered = songOffsetsRef.current.find((entry) => entry.id === songId)
+        setSongOffsetTuned(Boolean(remembered))
+        setLyricOffset(remembered ? remembered.offset : defaultOffsetRef.current)
+    }, [hydrated, songId])
 
     /* ==================== 小工具 ==================== */
 
@@ -241,6 +437,8 @@ export default function WangyiMusicPage() {
         const target = queue.songs[index]
         if (!target) return
         shouldAutoPlayRef.current = true
+        // 换歌就是新的开始：位置不再接着上一首
+        resumeAtRef.current = 0
         // 用户每切一次都是新的意图，重新给它一次"自动重新解析"的机会
         retriedRef.current.delete(target.id)
         if (!isUrlStale(target)) {
@@ -256,6 +454,8 @@ export default function WangyiMusicPage() {
                     if (at >= 0 && fresh?.url) songs[at] = { ...songs[at], ...fresh }
                     return { songs, index: at >= 0 ? at : index }
                 })
+                // 直链刚补上：立刻推一次播放（不能等 canplay，见 kickPlayback 的注释）
+                if (fresh?.url) kickPlayback()
             })
             // 解析失败也照样切过去：播放失败会走 handleAudioError 去报错，比卡在原地好
             .catch(() => setQueue((q) => ({ ...q, index })))
@@ -282,6 +482,202 @@ export default function WangyiMusicPage() {
             else if (index === q.index) next = Math.min(q.index, songs.length - 1)
             return { songs, index: next }
         })
+    }
+
+    /* ==================== 歌单（发现） ==================== */
+
+    /**
+     * 歌单曲目 → 队列条目。
+     * 直链留空：歌单接口只给 id 与元数据，直链要按 id 现解（付费歌的解不出也可能）。
+     * 留空正好落在既有的"直链过期"判定上，切到它时会自动解析一条新的。
+     */
+    const toMusicResult = (track: PlaylistTrack): MusicResult => ({
+        id: track.id,
+        name: track.name,
+        artist: track.artist,
+        album: track.album,
+        cover: track.cover,
+        url: '',
+        duration: track.duration,
+        pay: '',
+        resolvedAt: 0,
+    })
+
+    /**
+     * 换到某一首之前先把直链备好。
+     * 拿到就补进队列（audio 的 src 由此生效并起播）；拿不到就当这首不可播，往后跳。
+     */
+    const ensurePlayable = async (songId: string | undefined) => {
+        if (!songId) return
+        setCoverLoading(true)
+        try {
+            const fresh = await resolveSongById(songId)
+            if (fresh?.url) {
+                skipStreakRef.current = 0
+                setQueue((q) => {
+                    const at = q.songs.findIndex((song) => song.id === songId)
+                    if (at < 0 || q.songs[at].url) return q
+                    const songs = q.songs.slice()
+                    songs[at] = { ...songs[at], ...fresh }
+                    return { ...q, songs }
+                })
+                // 直链刚补上：立刻推一次播放（不能等 canplay，见 kickPlayback 的注释）
+                kickPlayback()
+                return
+            }
+        } catch {
+            /* 落到下面按"不可播"处理 */
+        } finally {
+            setCoverLoading(false)
+        }
+        skipUnplayable(songId)
+    }
+
+    /**
+     * 这首歌解不出直链（付费/版权/下架）：队列里还有别的歌就往后跳一首，并说明原因。
+     * 歌单里夹着几首 VIP 歌是常态，卡在第一首不动比跳过去更让人莫名其妙。
+     */
+    const skipUnplayable = (songId: string) => {
+        const { songs } = queueRef.current
+        const at = songs.findIndex((song) => song.id === songId)
+        const name = at >= 0 ? songs[at].name : '这首歌'
+
+        if (at < 0 || songs.length < 2 || skipStreakRef.current >= 4) {
+            setError(`「${name}」暂时无法播放，可能受版权或付费限制`)
+            skipStreakRef.current = 0
+            return
+        }
+
+        skipStreakRef.current += 1
+        const nextSong = songs[at + 1 < songs.length ? at + 1 : 0]
+        flashNotice(`「${name}」暂不可播，已跳过`)
+        shouldAutoPlayRef.current = true
+        retriedRef.current.delete(nextSong.id)
+        // 用 id 定位下一首：await 期间队列可能已经变了，下标会指错人
+        setQueue((q) => {
+            const nextIndex = q.songs.findIndex((song) => song.id === nextSong.id)
+            if (nextIndex < 0) return q
+            return { ...q, index: nextIndex }
+        })
+        void ensurePlayable(nextSong.id)
+    }
+
+    /**
+     * 从 startIndex 起找第一首**能解出直链**的曲目。
+     * 歌单里夹着几首 VIP / 下架是常态，所以遇到解不出的就往后顺，顺到能播的那首为止。
+     */
+    const resolvePlayableTrack = async (tracks: PlaylistTrack[], startIndex: number) => {
+        const maxAttempts = 5
+        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+            const at = startIndex + attempt
+            if (at >= tracks.length) break
+            const track = tracks[at]
+            let fresh: MusicResult | null = null
+            try {
+                fresh = await resolveSongById(track.id)
+            } catch {
+                fresh = null
+            }
+            if (fresh?.url) return { index: at, fresh }
+            if (at + 1 < tracks.length) flashNotice(`「${track.name}」暂不可播，已跳过`)
+        }
+        return null
+    }
+
+    /**
+     * 播放一整张歌单（从第 startIndex 首开始）。
+     *
+     * **先把直链解出来，再换队列** —— 这个顺序是这个函数的全部要点。
+     * 反过来做（先换队列、之后再补直链）时，<audio> 会先拿到一个空 src、过一会儿才被补上真实地址，
+     * 能不能自动播起来就取决于 canplay 事件或兜底轮询的时序；而 preload="metadata" 下 canplay
+     * 未必按时到，于是就成了"点了歌只在下面显示、不响，得再点一次或按播放键"。
+     * 搜索那条路一直是"先解析后换队列"，所以从来没有这个毛病 —— 这里跟它对齐。
+     */
+    const playPlaylist = async (tracks: PlaylistTrack[], startIndex = 0, showPlayer = false) => {
+        if (tracks.length === 0) return
+        const from = Math.min(Math.max(startIndex, 0), tracks.length - 1)
+        setCoverLoading(true)
+        setPlaylistBusy(true)
+        let playable: { index: number; fresh: MusicResult } | null = null
+        try {
+            playable = await resolvePlayableTrack(tracks, from)
+        } finally {
+            setCoverLoading(false)
+            setPlaylistBusy(false)
+        }
+
+        if (!playable) {
+            setError('这些歌曲暂时都无法播放，可能受版权或付费限制')
+            return
+        }
+
+        const songs = tracks.map(toMusicResult)
+        // 起始这首带上刚解析好的直链，其余留空：播到哪首解析哪首（切歌时会自动补）
+        songs[playable.index] = { ...songs[playable.index], ...playable.fresh }
+        shouldAutoPlayRef.current = true
+        userPlayRef.current = true
+        skipStreakRef.current = 0
+        resumeAtRef.current = 0
+        retriedRef.current.delete(songs[playable.index].id)
+        if (showPlayer) setView('player')
+        setQueue({ songs, index: playable.index })
+        flashNotice(`已开始播放「${songs[playable.index].name}」，共 ${songs.length} 首`)
+        // 等 React 把新的 src 提交到 DOM 之后再推一次 play()：这次的时机是确定的，不会撞上"元素还没有 src"
+        window.setTimeout(() => kickPlayback(), 0)
+    }
+
+    /** 把整张歌单追加到队列末尾；队列本来是空的就等价于播放全部 */
+    const appendPlaylist = (tracks: PlaylistTrack[]) => {
+        if (tracks.length === 0) return
+        if (queueRef.current.songs.length === 0) {
+            playPlaylist(tracks, 0)
+            return
+        }
+        const songs = tracks.map(toMusicResult)
+        setQueue((q) => ({ ...q, songs: [...q.songs, ...songs] }))
+        flashNotice(`已加入队列：${songs.length} 首`)
+    }
+
+    /** 打开某张歌单：自动开播标记只在"卡片上的播放钮"那一路为真 */
+    const openPlaylist = (id: string, autoPlay = false) => {
+        setLyricMode('list')
+        setPlaylistId(id)
+        setPlaylistAutoPlay(autoPlay)
+        setView('playlist')
+    }
+
+    /** 打开艺人页（从搜索里的艺人 chip 进来） */
+    const openArtist = (id: string, name: string) => {
+        setLyricMode('list')
+        setPanel(null)
+        setArtistId(id)
+        setArtistName(name)
+        setView('artist')
+    }
+
+    /** 打开专辑页（从艺人页的专辑网格进来）；顺带记住是哪个艺人，返回时回到艺人页 */
+    const openAlbum = (id: string) => {
+        setAlbumId(id)
+        setView('album')
+    }
+
+    /**
+     * 按名字打开艺人页。
+     * 歌曲信息里只有歌手名、没有艺人 id，所以先搜一次拿到 id 再进 —— 多一次请求，
+     * 换来的是"点歌手名就能看他的歌"这个最顺的入口（合唱曲只取第一个歌手）。
+     */
+    const openArtistByName = async (rawName: string) => {
+        const name = rawName.split(/[,，/&、]/)[0]?.trim()
+        if (!name) return
+        try {
+            const res = await fetch(`/api/wangyi-artist?type=search&limit=1&q=${encodeURIComponent(name)}`, { cache: 'no-store' })
+            const data = await res.json()
+            const first = data?.data?.artists?.[0]
+            if (first?.id) openArtist(String(first.id), String(first.name ?? name))
+            else flashNotice(`没找到艺人「${name}」`)
+        } catch {
+            flashNotice('艺人搜索失败，请稍后再试')
+        }
     }
 
     /* ==================== 播放控制 ==================== */
@@ -314,8 +710,12 @@ export default function WangyiMusicPage() {
     const seekTo = (time: number) => {
         const audio = audioRef.current
         if (!audio || !Number.isFinite(time)) return
-        audio.currentTime = Math.max(0, time)
-        setCurrentTime(Math.max(0, time))
+        const target = Math.max(0, time)
+        audio.currentTime = target
+        // 时钟立刻落到目标时刻：等浏览器把 seek 做完（网络流上可能几百毫秒）画面才会跟着走，
+        // 那段时间歌词会停在旧位置 —— 这正是"拖完进度条画面和声音对不上"的由来。
+        clockRef.current?.seek(target)
+        syncClocks(target)
     }
 
     const seekBy = (delta: number) => {
@@ -340,7 +740,9 @@ export default function WangyiMusicPage() {
         if (auto && mode === 'single') {
             const audio = audioRef.current
             if (audio) {
-                audio.currentTime = 0
+                // 走 seekTo 而不是直接写 audio.currentTime：时间轴与进度条要一起回到开头，
+                // 否则单曲循环重头播时，歌词还会从上一遍的位置继续读一小会儿。
+                seekTo(0)
                 void audio.play().catch(() => {})
             }
             return
@@ -425,6 +827,18 @@ export default function WangyiMusicPage() {
 
         setSearchLoading(true)
         setSearchError('')
+        /* 艺人搜索和歌曲搜索并行发：用户搜的是人名时，结果里先看到艺人入口才有意义。
+           艺人这条路失败不影响歌曲结果（各自 catch）。 */
+        void fetch(`/api/wangyi-artist?type=search&limit=6&q=${encodeURIComponent(query)}`, {
+            signal: controller.signal,
+            cache: 'no-store',
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data?.code === 200 && Array.isArray(data.data?.artists)) setSearchArtists(data.data.artists as SearchArtist[])
+                else setSearchArtists([])
+            })
+            .catch(() => setSearchArtists([]))
         try {
             const res = await fetch(`/api/wangyi-search?limit=30&keywords=${encodeURIComponent(query)}`, {
                 signal: controller.signal,
@@ -538,18 +952,32 @@ export default function WangyiMusicPage() {
         setBuffered(0)
         setIsPlaying(false)
         setCoverLoading(true)
+        setBuffering(true)
     }
 
     const handleTimeUpdate = (e: SyntheticEvent<HTMLAudioElement>) => {
         const audio = e.currentTarget
-        setCurrentTime(audio.currentTime)
+        // 暂停时这条是唯一会来的更新（上面那个 60ms 定时器只在播放中跑），
+        // 所以两个时刻都要在这里补上，否则暂停状态下拖进度条歌词不会跟着走。
+        syncClocks(audio.currentTime)
         if (audio.buffered.length > 0) setBuffered(audio.buffered.end(audio.buffered.length - 1))
     }
 
     const handleCanPlay = () => {
         setCoverLoading(false)
-        if (!shouldAutoPlayRef.current) return
+        setBuffering(false)
         const audio = audioRef.current
+        // 重新解析过直链：把播放位置接回原来的地方（媒体换了 src 会从头开始）
+        if (audio && resumeAtRef.current > 0) {
+            const target = resumeAtRef.current
+            resumeAtRef.current = 0
+            if (Math.abs(audio.currentTime - target) > 1) {
+                audio.currentTime = target
+                clockRef.current?.seek(target)
+                syncClocks(target)
+            }
+        }
+        if (!shouldAutoPlayRef.current) return
         if (!audio) return
         // 成功起播才清掉这个标记：清早了的话，中途失败一次就再也没人补播
         audio
@@ -570,6 +998,7 @@ export default function WangyiMusicPage() {
      */
     const handlePlayStart = () => {
         setIsPlaying(true)
+        setBuffering(false)
         if (!userPlayRef.current) return
         userPlayRef.current = false
         if (muted) {
@@ -583,13 +1012,45 @@ export default function WangyiMusicPage() {
         }
     }
 
+    /* 队列镜像：异步流程里要靠它判断"现在队列里都有什么"（见 queueRef 的注释） */
+    useEffect(() => {
+        queueRef.current = queue
+    }, [queue])
+
+    /**
+     * 直链一到位就把播放推下去，**不等 canplay**。
+     *
+     * 为什么必须这样：<audio> 上是 preload="metadata"，浏览器经常只取元数据就停住
+     * （readyState 停在 1），于是 canplay 迟迟不来、下面那个兜底轮询又卡在 readyState 门槛上，
+     * 结果直链明明已经有了却没人调 play() —— 表现就是"点了歌不响，得再按一次播放按钮"
+     * （手按播放键是直接调 play()，绕过上面两道门，所以按了就好）。
+     * play() 在 readyState 0 也能调用：它会先把数据取够再开始，这正是我们要的行为。
+     */
+    const kickPlayback = () => {
+        const audio = audioRef.current
+        if (!audio || !shouldAutoPlayRef.current) return
+        void audio.play().catch(() => {
+            /* 被浏览器拦或换源打断：交给下面的兜底轮询继续试 */
+        })
+    }
+
     /** 直链多为带签名的临时地址，失效时自动重新解析一次 */
     const handleAudioError = async () => {
         const song = currentSong
         if (!song) return
         setIsPlaying(false)
+        setBuffering(true)
+
+        // 记住当前听到哪儿：重解析后要接着这里放，而不是从头再来
+        const audio = audioRef.current
+        if (audio && audio.currentTime > 3) resumeAtRef.current = audio.currentTime
 
         if (retriedRef.current.has(song.id)) {
+            // 重试过一次还是不行：队列里还有别的歌就跳过它，别卡在一首死歌上
+            if (queueRef.current.songs.length > 1) {
+                skipUnplayable(song.id)
+                return
+            }
             setError(`「${song.name}」播放失败，直链可能已失效，换一首试试`)
             return
         }
@@ -604,6 +1065,10 @@ export default function WangyiMusicPage() {
                     if (songs[q.index]?.id === fresh.id) songs[q.index] = { ...songs[q.index], ...fresh }
                     return { ...q, songs }
                 })
+                // 直链刚补上：立刻推一次播放（不能等 canplay，见 kickPlayback 的注释）
+                kickPlayback()
+            } else if (queueRef.current.songs.length > 1) {
+                skipUnplayable(song.id)
             } else {
                 setError(`「${song.name}」暂时无法播放，可能受版权或付费限制`)
             }
@@ -624,6 +1089,13 @@ export default function WangyiMusicPage() {
                 if (typeof saved.muted === 'boolean') setMuted(saved.muted)
                 if (saved.mode === 'list' || saved.mode === 'single' || saved.mode === 'shuffle') setMode(saved.mode)
                 if (saved.lyricMode === 'list' || saved.lyricMode === 'stage') setLyricMode(saved.lyricMode)
+                if (isLyricStageStyle(saved.stageStyle)) setStageStyle(saved.stageStyle)
+                if (typeof saved.lyricOffset === 'number' && Number.isFinite(saved.lyricOffset)) {
+                    const value = clampLyricOffset(saved.lyricOffset)
+                    setLyricOffset(value)
+                    // 上次调的偏移同时也是这次启动的"设备默认"
+                    defaultOffsetRef.current = value
+                }
                 if (typeof saved.rate === 'number' && RATE_OPTIONS.includes(saved.rate)) setPlaybackRate(saved.rate)
                 if (Array.isArray(saved.songs) && saved.songs.length > 0) {
                     const songs = saved.songs.filter(
@@ -646,6 +1118,28 @@ export default function WangyiMusicPage() {
         } catch {
             /* 忽略损坏的本地数据 */
         }
+        /* 逐曲偏移的存档跟着主存档一起读（但分开存，见 utils.ts）：
+           只有"用户为这首歌单独调过"的才会在里面。 */
+        try {
+            const rawOffsets = localStorage.getItem(LYRIC_OFFSET_STORE_KEY)
+            if (rawOffsets) {
+                const parsed: unknown = JSON.parse(rawOffsets)
+                if (Array.isArray(parsed)) {
+                    songOffsetsRef.current = parsed
+                        .filter(
+                            (entry): entry is [string, number] =>
+                                Array.isArray(entry) &&
+                                entry.length === 2 &&
+                                typeof entry[0] === 'string' &&
+                                typeof entry[1] === 'number' &&
+                                Number.isFinite(entry[1])
+                        )
+                        .map(([id, offset]) => ({ id, offset: clampLyricOffset(offset) }))
+                }
+            }
+        } catch {
+            /* 忽略损坏的本地数据 */
+        }
         // 必须等读取完成后再允许回写，否则挂载瞬间会用默认值覆盖掉存档
         setHydrated(true)
     }, [])
@@ -655,20 +1149,32 @@ export default function WangyiMusicPage() {
         try {
             localStorage.setItem(
                 STORAGE_KEY,
-                JSON.stringify({ volume, muted, mode, rate: playbackRate, songs: queue.songs, index: queue.index, lyricMode })
+                JSON.stringify({
+                    volume,
+                    muted,
+                    mode,
+                    rate: playbackRate,
+                    songs: queue.songs,
+                    index: queue.index,
+                    lyricMode,
+                    stageStyle,
+                    lyricOffset,
+                })
             )
         } catch {
             /* 超出配额时忽略 */
         }
-    }, [hydrated, volume, muted, mode, playbackRate, queue, lyricMode])
+    }, [hydrated, volume, muted, mode, playbackRate, queue, lyricMode, stageStyle, lyricOffset])
 
     /* 播放中用更细的时钟刷新进度：
-       timeupdate 只有 ~250ms 精度，会让歌词高亮、滚动、进度条都慢半拍 */
+       timeupdate 只有 ~250ms 精度，会让歌词高亮、滚动、进度条都慢半拍。
+       这里读的是播放时钟（连续外推 + 按采样收敛），所以哪怕改成 60ms 轮询一次，
+       拿到的也是那一刻准确的位置，而不是浏览器上一次更新留下的台阶。 */
     useEffect(() => {
         if (!isPlaying) return
         const timer = setInterval(() => {
             const audio = audioRef.current
-            if (audio && !audio.paused) setCurrentTime(audio.currentTime)
+            if (audio && !audio.paused) syncClocks(audio.currentTime)
         }, 60)
         return () => clearInterval(timer)
     }, [isPlaying])
@@ -725,7 +1231,13 @@ export default function WangyiMusicPage() {
                 clearInterval(timer)
                 return
             }
-            if (audio.readyState < 2) return // 还在取数据，再等等
+            if (audio.ended) return
+            /*
+             * 这里**刻意不检查 readyState**。
+             * preload="metadata" 下 readyState 常常停在 1（只取了元数据），
+             * 若要求"至少 HAVE_CURRENT_DATA 才试播"，这首就永远不会被推起来 ——
+             * 恰恰是"点了歌不响、要再按一次播放"的成因。play() 从 readyState 0 调也没问题。
+             */
             if (!reloaded && ticks >= 4) {
                 // 约 1.2 秒还没动静：多半是 src 没变、浏览器根本没重新加载
                 reloaded = true
@@ -928,6 +1440,11 @@ export default function WangyiMusicPage() {
             searchAbortRef.current?.abort()
             if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
             if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current)
+            // 卸载时把还没落盘的那一次逐曲校准写完：去抖窗口里正好关页面，不该丢掉这次调整
+            if (songOffsetSaveTimerRef.current) {
+                clearTimeout(songOffsetSaveTimerRef.current)
+                persistSongOffsets()
+            }
         }
     }, [])
 
@@ -944,6 +1461,10 @@ export default function WangyiMusicPage() {
         : 'linear-gradient(158deg, #43201f 0%, #2c1a30 46%, #1d1519 100%)'
 
     const volumeLevel: 0 | 1 | 2 = muted || volume === 0 ? 0 : volume < 0.5 ? 1 : 2
+    /** 主区不在播放视图（看歌单）时，播放条上要显示"正在播放" */
+    const showNowPlaying = Boolean(currentSong) && view !== 'player'
+    /** 正在准备/缓冲：直链还没到手，或者元素正在等数据 —— 这时进度条显示等待动画 */
+    const awaitingAudio = Boolean(currentSong) && (buffering || !currentSong?.url)
     const modeIcon =
         mode === 'single' ? (
             <IconRepeatOne className="h-[17px] w-[17px]" />
@@ -965,7 +1486,9 @@ export default function WangyiMusicPage() {
 
             <div
                 className={`relative z-10 flex min-h-[calc(100vh-4rem)] w-full flex-col px-5 pt-5 sm:px-8 md:h-full md:min-h-0 md:pb-0 md:pt-3 ${
-                    currentSong ? 'pb-[96px]' : 'pb-6'
+                    // 播放条在移动端是 fixed 的：看歌单时它多出一行"正在播放"，底部留白也要跟着加，
+                    // 否则主区最后一行会被压在播放条底下
+                    !currentSong ? 'pb-6' : showNowPlaying ? 'pb-[148px] sm:pb-[96px]' : 'pb-[96px]'
                 }`}
             >
                 {/* ============ 顶部工具条：面包屑 + 输入框 + 两个按钮，始终一行 ============ */}
@@ -1002,15 +1525,32 @@ export default function WangyiMusicPage() {
                             <span className="hidden sm:inline">解析 / 搜索</span>
                         </button>
                     </div>
+                    {/* 随机：随便挑一首，和歌单无关 */}
                     <button
                         onClick={playRandom}
                         disabled={randomLoading}
-                        aria-label="每日推荐"
-                        title="每日推荐"
+                        aria-label="随机播一首"
+                        title="随机播一首"
                         className="flex h-10 w-10 shrink-0 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.07] text-[13px] font-medium text-white/85 backdrop-blur-xl transition hover:bg-white/12 active:scale-[.98] disabled:opacity-40 sm:w-auto sm:px-4"
                     >
                         {randomLoading ? <IconSpinner className="h-4 w-4" /> : <IconSparkles className="h-4 w-4" />}
-                        <span className="hidden sm:inline">每日推荐</span>
+                        <span className="hidden sm:inline">随机</span>
+                    </button>
+
+                    {/* 发现：主区切成歌单发现 / 切回播放。在详情页里再点一下就回到播放 */}
+                    <button
+                        onClick={() => setView((v) => (v === 'player' ? 'discover' : 'player'))}
+                        aria-pressed={view !== 'player'}
+                        aria-label={view === 'player' ? '打开歌单发现' : '返回播放'}
+                        title={view === 'player' ? '发现歌单' : '返回播放'}
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center gap-1.5 rounded-full border text-[13px] font-medium backdrop-blur-xl transition active:scale-[.98] sm:w-auto sm:px-4 ${
+                            view === 'player'
+                                ? 'border-white/10 bg-white/[0.07] text-white/85 hover:bg-white/12'
+                                : 'border-[#ec4141]/45 bg-[#ec4141]/18 text-white hover:bg-[#ec4141]/28'
+                        }`}
+                    >
+                        <IconCompass className="h-4 w-4" />
+                        <span className="hidden sm:inline">{view === 'player' ? '发现' : '返回播放'}</span>
                     </button>
                 </header>
 
@@ -1043,9 +1583,79 @@ export default function WangyiMusicPage() {
                     </div>
                 )}
 
-                {/* ============ 主体 ============ */}
+                {/* ============ 主体 ============
+                    三屏共用这一块：播放（黑胶+信息+歌词）/ 歌单发现 / 歌单详情。
+                    顶栏与底部播放条在它外面，所以切屏时播放不受任何影响。 */}
                 <div className="flex min-h-0 flex-1 items-center justify-center py-5 md:py-3">
-                    {currentSong ? (
+                    {view === 'discover' ? (
+                        /* 滚动容器铺满整行宽度（self-stretch 顶掉父级的居中），宽度限制交给里面那层 ——
+                           否则在宽屏上，只有中间 1200px 那一块能滚，光标落在两侧留白上滚不动。 */
+                        <section
+                            key="discover"
+                            className="scrollbar-hidden min-h-0 w-full self-stretch md:h-full md:overflow-y-auto"
+                            style={{ animation: 'wy-panel-in .32s ease-out' }}
+                        >
+                            <div className="mx-auto w-full max-w-[1200px]">
+                                <DiscoverPanel onOpenPlaylist={openPlaylist} />
+                            </div>
+                        </section>
+                    ) : view === 'playlist' && playlistId ? (
+                        <section
+                            key={`playlist-${playlistId}`}
+                            className="scrollbar-hidden min-h-0 w-full self-stretch md:h-full md:overflow-y-auto"
+                            style={{ animation: 'wy-panel-in .32s ease-out' }}
+                        >
+                            <div className="mx-auto w-full max-w-[1200px]">
+                                <PlaylistDetail
+                                    playlistId={playlistId}
+                                    autoPlay={playlistAutoPlay}
+                                    busy={playlistBusy}
+                                    onBack={() => setView('discover')}
+                                    onPlayAll={(tracks, index = 0) => void playPlaylist(tracks, index)}
+                                    onAutoPlay={(tracks) => void playPlaylist(tracks, 0, true)}
+                                    onAppend={appendPlaylist}
+                                    currentTrackId={songId}
+                                />
+                            </div>
+                        </section>
+                    ) : view === 'artist' && artistId ? (
+                        <section
+                            key={`artist-${artistId}`}
+                            className="scrollbar-hidden min-h-0 w-full self-stretch md:h-full md:overflow-y-auto"
+                            style={{ animation: 'wy-panel-in .32s ease-out' }}
+                        >
+                            <div className="mx-auto w-full max-w-[1200px]">
+                                <ArtistPanel
+                                    artistId={artistId}
+                                    fallbackName={artistName}
+                                    busy={playlistBusy}
+                                    onBack={() => setView('discover')}
+                                    onOpenAlbum={openAlbum}
+                                    onPlayTracks={(tracks, index = 0) => void playPlaylist(tracks, index)}
+                                    onAppendTracks={appendPlaylist}
+                                    currentTrackId={songId}
+                                />
+                            </div>
+                        </section>
+                    ) : view === 'album' && albumId ? (
+                        <section
+                            key={`album-${albumId}`}
+                            className="scrollbar-hidden min-h-0 w-full self-stretch md:h-full md:overflow-y-auto"
+                            style={{ animation: 'wy-panel-in .32s ease-out' }}
+                        >
+                            <div className="mx-auto w-full max-w-[1200px]">
+                                <AlbumPanel
+                                    albumId={albumId}
+                                    busy={playlistBusy}
+                                    /* 从艺人页进来的就回艺人页，否则回发现页 */
+                                    onBack={() => setView(artistId ? 'artist' : 'discover')}
+                                    onPlayAll={(tracks, index = 0) => void playPlaylist(tracks, index)}
+                                    onAppend={appendPlaylist}
+                                    currentTrackId={songId}
+                                />
+                            </div>
+                        </section>
+                    ) : currentSong ? (
                         // key 跟着歌曲走：换歌时整块重新入场（淡入 + 轻微上移），不会生硬地"啪"一下换掉
                         <section
                             key={songId ?? 'song'}
@@ -1186,7 +1796,16 @@ export default function WangyiMusicPage() {
                                         {currentSong.name}
                                     </h1>
                                     <p className="mt-2 truncate text-sm text-white/55" title={currentSong.artist}>
-                                        歌手：{currentSong.artist}
+                                        歌手：
+                                        {/* 点歌手名看他的单曲与专辑（合唱曲取第一个歌手） */}
+                                        <button
+                                            type="button"
+                                            onClick={() => void openArtistByName(currentSong.artist)}
+                                            title="查看这位艺人的单曲与专辑"
+                                            className="text-white/75 underline-offset-2 transition hover:text-white hover:underline"
+                                        >
+                                            {currentSong.artist}
+                                        </button>
                                     </p>
                                     <p className="mt-1 truncate text-[13px] text-white/35" title={currentSong.album}>
                                         所属专辑：{currentSong.album}
@@ -1262,6 +1881,14 @@ export default function WangyiMusicPage() {
                             <p className="mt-2 max-w-md text-sm text-white/40">
                                 粘贴网易云分享链接或歌曲 ID 直接播放，也可以直接输入歌名搜索
                             </p>
+                            {/* 主入口：没有歌的时候，最该先去的地方就是歌单 */}
+                            <button
+                                onClick={() => setView('discover')}
+                                className="mt-6 inline-flex h-10 items-center gap-2 rounded-full bg-[#ec4141] px-5 text-[13px] font-medium text-white shadow-[0_14px_34px_-16px_rgba(236,65,65,1)] transition hover:bg-[#d73535] active:scale-[.98]"
+                            >
+                                <IconCompass className="h-4 w-4" />
+                                去发现歌单
+                            </button>
                             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
                                 {EXAMPLE_KEYWORDS.map((keyword) => (
                                     <button
@@ -1279,9 +1906,9 @@ export default function WangyiMusicPage() {
                                 ))}
                                 <button
                                     onClick={playRandom}
-                                    className="rounded-full border border-[#ec4141]/40 bg-[#ec4141]/15 px-3.5 py-1.5 text-xs text-[#ff9d9d] transition hover:bg-[#ec4141]/25"
+                                    className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-white/60 transition hover:bg-white/12 hover:text-white"
                                 >
-                                    每日推荐
+                                    随机一首
                                 </button>
                             </div>
                         </section>
@@ -1295,18 +1922,55 @@ export default function WangyiMusicPage() {
                         style={{ animation: 'wy-rise .3s ease-out' }}
                     >
                         <div className="mx-auto flex w-full max-w-[1200px] flex-col py-2">
+                            {/* 正在播放：看歌单时主区被占满，播放条上得能看见"现在放的是哪首"。
+                                刻意排在**最上面独立一行**：播放条是从底往上长的，加一行只会往上顶，
+                                下面那排播放键（上一首/播放/下一首）的位置一动不动。
+                                点它回到播放视图；播放视图里大封面与歌名就在眼前，所以那时不显示。 */}
+                            {showNowPlaying && (
+                                <div className="mb-1 flex justify-start">
+                                    <NowPlayingStrip song={currentSong} onOpen={() => setView('player')} className="max-w-full sm:max-w-[320px]" />
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-3">
-                                <span className="w-11 shrink-0 text-right font-mono text-[11px] text-white/45">{formatTime(currentTime)}</span>
-                                <Slider
-                                    className="flex-1"
-                                    value={currentTime}
-                                    max={audioDuration || 1}
-                                    buffered={buffered}
-                                    ariaLabel="播放进度"
-                                    format={formatTime}
-                                    accent={ACCENT}
-                                    onScrub={seekTo}
-                                />
+                                <span className="w-11 shrink-0 text-right font-mono text-[11px] text-white/45">
+                                    {awaitingAudio ? '--:--' : formatTime(currentTime)}
+                                </span>
+                                {/* 正在取数据时，进度条换成一条来回扫的等待动画。
+                                    这一段里"播到哪儿"其实还没有意义（媒体每次重新取数据都会把位置归零），
+                                    原来的做法是照常画进度，于是条子在 0 与上次的位置之间来回跳 —— 看着像 bug。 */}
+                                {awaitingAudio ? (
+                                    <div
+                                        className="relative h-5 flex-1 overflow-hidden"
+                                        role="progressbar"
+                                        aria-label={currentSong.url ? '正在缓冲' : '正在准备播放'}
+                                        aria-busy="true"
+                                    >
+                                        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 overflow-hidden rounded-full bg-white/12">
+                                            <div
+                                                className="h-full w-1/3 rounded-full"
+                                                style={{
+                                                    background: `linear-gradient(90deg, transparent, ${ACCENT}, transparent)`,
+                                                    animation: 'wy-loading 1.5s ease-in-out infinite',
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] text-white/40">
+                                            {currentSong.url ? '缓冲中' : '准备中'}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <Slider
+                                        className="flex-1"
+                                        value={currentTime}
+                                        max={audioDuration || 1}
+                                        buffered={buffered}
+                                        ariaLabel="播放进度"
+                                        format={formatTime}
+                                        accent={ACCENT}
+                                        onScrub={seekTo}
+                                    />
+                                )}
                                 <span className="w-11 shrink-0 font-mono text-[11px] text-white/45">{formatTime(audioDuration)}</span>
                             </div>
 
@@ -1425,6 +2089,13 @@ export default function WangyiMusicPage() {
                     lines={stageLines}
                     playing={isPlaying}
                     getTime={getStageTime}
+                    getMediaTime={getStageMediaTime}
+                    lyricOffset={lyricOffset}
+                    onLyricOffsetChange={applyLyricOffset}
+                    songOffsetTuned={songOffsetTuned}
+                    onClearSongOffset={clearSongOffset}
+                    stageStyle={stageStyle}
+                    onStageStyleChange={setStageStyle}
                     colors={bgColors}
                     songName={currentSong.name}
                     artist={currentSong.artist}
@@ -1457,6 +2128,8 @@ export default function WangyiMusicPage() {
                         resolvingId={resolvingId}
                         currentSongId={songId}
                         onPick={(song) => void pickFromSearch(song)}
+                        artists={searchArtists}
+                        onPickArtist={(artist) => openArtist(artist.id, artist.name)}
                     />
                 </Drawer>
             )}
@@ -1498,6 +2171,12 @@ export default function WangyiMusicPage() {
                 }}
                 onCanPlay={handleCanPlay}
                 onError={handleAudioError}
+                /* 缓冲信号：waiting/stalled 表示"正在等数据"，playing 表示"又走起来了"。
+                   进度条据此切成等待动画，而不是把一个还没开始播的位置当成进度显示。 */
+                onWaiting={() => setBuffering(true)}
+                onStalled={() => setBuffering(true)}
+                onPlaying={() => setBuffering(false)}
+                onSeeked={() => setBuffering(false)}
                 preload="metadata"
                 className="hidden"
             />

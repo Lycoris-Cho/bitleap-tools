@@ -165,6 +165,49 @@ export function IconSparkles({ className }: IconProps) {
     )
 }
 
+export function IconSync({ className }: IconProps) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" {...STROKE} aria-hidden="true">
+            <path d="M4 9h13M14 6l3 3-3 3" />
+            <path d="M20 15H7M10 12l-3 3 3 3" />
+        </svg>
+    )
+}
+
+export function IconCompass({ className }: IconProps) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" {...STROKE} aria-hidden="true">
+            <circle cx="12" cy="12" r="8.6" />
+            <path d="m15.4 8.6-2 4.8-4.8 2 2-4.8z" />
+        </svg>
+    )
+}
+
+export function IconPlus({ className }: IconProps) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" {...STROKE} aria-hidden="true">
+            <path d="M12 5.5v13M5.5 12h13" />
+        </svg>
+    )
+}
+
+export function IconArrowLeft({ className }: IconProps) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" {...STROKE} aria-hidden="true">
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+    )
+}
+
+export function IconHeadphones({ className }: IconProps) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" {...STROKE} aria-hidden="true">
+            <path d="M4.5 15v-3a7.5 7.5 0 0 1 15 0v3" />
+            <path d="M4.5 14.5h1.8a1 1 0 0 1 1 1v3.2a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1zM17.7 14.5h1.8a1 1 0 0 1 1 1v3.2a1 1 0 0 1-1 1h-1.8a1 1 0 0 1-1-1z" />
+        </svg>
+    )
+}
+
 export function IconMusic({ className }: IconProps) {
     return (
         <svg className={className} viewBox="0 0 24 24" {...STROKE} aria-hidden="true">

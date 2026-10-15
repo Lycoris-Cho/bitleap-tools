@@ -15,6 +15,15 @@ export const MICRO_LINE_DURATION_THRESHOLD = 0.1
 export const SHORT_LINE_DURATION_THRESHOLD = 0.18
 export const MICRO_LINE_RENDER_FLOOR = 0.067
 
+/**
+ * 换行提前量 —— 新的一句在**开唱前**这么久就挂上场。
+ *
+ * 入场过渡（模糊淡入 + 缩放回正）要在这段时间里跑完，第一个字才会在它该唱的那一刻
+ * 已经在位；否则每句的头一个字都要等入场演完才亮起来，听感上就是"词总慢半拍"。
+ * 换行时机由 LyricsStage 用它决定，逐字的提前量（wordLookahead）与它同一套节奏。
+ */
+export const LINE_ENTER_LEAD = 0.32
+
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
 export interface LineTransitionTiming {
@@ -122,6 +131,20 @@ export interface GlowWordRenderProfile {
     wordLookahead: number
 }
 
+/*
+ * 逐词的提前量：词的状态在它"该唱"之前这么久就翻成 active。
+ *
+ * 这不是拍脑袋的提前，而是在补动画自己的延迟 —— 状态翻过去之后，弹簧要 ~0.25 秒才把
+ * 缩放停稳、正文要去掉 blur、光晕要从 0 涨到峰值。若按 startTime 那一刻才翻状态，
+ * 眼睛真正看到这个词亮起来时，人声已经唱过去了，逐字歌词就成了"追着唱"。
+ * 三档分别对上各自那套过渡的时长，所以它必须与 GlowWord 里的 transition 一起改。
+ */
+const WORD_LOOKAHEAD: Record<WordRevealMode, number> = {
+    instant: 0.04,
+    fast: 0.09,
+    normal: 0.16,
+}
+
 export const resolveGlowWordProfile = (line: StageLine | null | undefined): GlowWordRenderProfile | null => {
     if (!line) return null
     const renderHints = getLineRenderHints(line)
@@ -131,7 +154,7 @@ export const resolveGlowWordProfile = (line: StageLine | null | undefined): Glow
         lineRenderEndTime: getLineRenderEndTime(line),
         lineTransitionMode: renderHints?.lineTransitionMode ?? 'normal',
         wordRevealMode,
-        wordLookahead: wordRevealMode === 'instant' ? 0.03 : wordRevealMode === 'fast' ? 0.08 : 0.15,
+        wordLookahead: WORD_LOOKAHEAD[wordRevealMode],
     }
 }
 

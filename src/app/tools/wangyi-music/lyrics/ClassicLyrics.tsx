@@ -22,6 +22,7 @@ import {
     type WordLayoutConfig,
 } from './GlowWord'
 import { getLineContainerMotion, resolveGlowWordProfile } from './timing'
+import { measureTextWidth } from './measure'
 import {
     colorWithAlpha,
     resolveSubtitleFontSizes,
@@ -38,16 +39,6 @@ const DEFAULT_CLASSIC_TUNING = {
 }
 
 /* ── 量词宽：布局必须自己预留"放大之后"的宽度，否则当前词一弹就会压到邻居 ── */
-
-let measureCanvas: HTMLCanvasElement | null = null
-function measureWordWidth(text: string, px: number, fontStack: string, fontWeight: number): number {
-    if (typeof document === 'undefined') return text.length * px * 0.65
-    if (!measureCanvas) measureCanvas = document.createElement('canvas')
-    const ctx = measureCanvas.getContext('2d')
-    if (!ctx) return text.length * px * 0.65
-    ctx.font = `${fontWeight} ${px}px ${fontStack}`
-    return ctx.measureText(text).width
-}
 
 interface LineLayoutConfig {
     justifyContent: string
@@ -223,7 +214,7 @@ export default function ClassicLyrics({ lines, currentLineIndex, currentTime, th
         const valPx = (6 * lyricsFontScale * viewportWidth) / 100
         const maxPx = 4.5 * lyricsFontScale * rem
         const pxFontSize = Math.max(minPx, Math.min(valPx, maxPx))
-        const wordWidths = displayWords.map((w) => measureWordWidth(w.text, pxFontSize, fontStack, fontWeight))
+        const wordWidths = displayWords.map((w) => measureTextWidth(w.text, pxFontSize, fontStack, fontWeight))
 
         const baseSpread = isChaotic ? 60 : isCalm ? 0 : 20
         const baseRotate = isChaotic ? 30 : isCalm ? 0 : 5
